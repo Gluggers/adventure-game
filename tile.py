@@ -1,0 +1,105 @@
+import logging
+import pygame
+import images
+
+
+### TILE CONSTANTS ###
+TILE_SIZE = 16
+TILE_LISTING = {} # maps Tile IDs to tile objects
+TILE_CLASS = 'Tile'
+
+### TRANSPORTATION FLAGS ###
+WALKABLE_F = 0x1
+CANOEABLE_F = 0x2
+SAILABLE_F = 0x4
+FLYABLE_F = 0x8
+
+### TILE ID NUMBERS ###
+TILE_DEFAULT_ID = 0x0
+TILE_GRASS_1_ID = 0x100
+TILE_GRASS_2_ID = 0x101
+TILE_GRASS_PLAIN_ID = 0x103
+TILE_WATER_NORMAL_1_ID = 0x200
+TILE_WATER_NORMAL_2_ID = 0x201
+TILE_WATER_NORMAL_3_ID = 0x202
+TILE_WATER_NORMAL_4_ID = 0x203
+TILE_WATER_NORMAL_5_ID = 0x204
+TILE_WATER_NORMAL_6_ID = 0x205
+TILE_WATER_NORMAL_7_ID = 0x206
+TILE_WATER_NORMAL_8_ID = 0x207
+TILE_WATER_NORMAL_9_ID = 0x208
+TILE_SAND_ID = 0x300
+
+# TODO make this extend sprite?
+
+# SHOULD THIS BE IMMUTABLE?
+class Tile:
+    def __init__(self,                                                      \
+                image_path=images.TILE_DEFAULT_PATH,                        \
+                allowed_transport=(WALKABLE_F | FLYABLE_F),                 \
+                ):
+        # represents the base terrain image (e.g. grass, water)
+        self._image = pygame.image.load(image_path).convert()
+
+        # OR-ed flags that represent the allowed methods of transportation on
+        # this tile - walking, canoing, sailing, and flying.
+        self._allowed_transport = allowed_transport
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, value):
+        self._image = value
+
+    @image.deleter
+    def image(self):
+        del self._image
+
+    @property
+    def allowed_transport(self):
+        return self._allowed_transport
+
+    @allowed_transport.setter
+    def allowed_transport(self, value):
+        self._allowed_transport = value
+
+    @allowed_transport.deleter
+    def allowed_transport(self):
+        del self._allowed_transport
+
+    # blits the tile image onto the surface at the designated pixel
+    # coordinate position (x,y).
+    # Does not update the surface display - caller will have to do that.
+    def blit_onto_surface(self, surface, pixel_location_tuple):
+        if self and surface and pixel_location_tuple:
+            surface.blit(self._image, pixel_location_tuple)
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+### TILES TO USE ###
+TILE_DEFAULT = None
+TILE_GRASS_1 = None
+TILE_GRASS_2 = None
+TILE_GRASS_PLAIN = None
+TILE_WATER_NORMAL_1 = None
+TILE_SAND = None
+
+def build_tiles():
+    logger.debug("Building tiles")
+    global TILE_DEFAULT
+    global TILE_GRASS_1
+    global TILE_GRASS_2
+    global TILE_GRASS_PLAIN
+    global TILE_WATER_NORMAL_1
+    global TILE_SAND
+
+    TILE_DEFAULT = Tile()
+    TILE_GRASS_1 = Tile(image_path=images.TILE_GRASS_1_PATH)
+    TILE_GRASS_2 = Tile(image_path=images.TILE_GRASS_2_PATH)
+    TILE_GRASS_PLAIN = Tile(image_path=images.TILE_GRASS_PLAIN_PATH)
+    TILE_WATER_NORMAL_1 = Tile(image_path=images.TILE_WATER_NORMAL_1_PATH)
+    TILE_SAND = Tile(image_path=images.TILE_SAND_PATH)

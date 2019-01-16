@@ -8,6 +8,8 @@ TYPE_OBSTACLE = 0x1
 TYPE_RESOURCE = 0x2
 TYPE_ITEM = 0x3
 
+
+
 class Interactive_Object(pygame.sprite.Sprite):
     def __init__(self, object_type, image_path):
         # Call the parent class (Sprite) constructor

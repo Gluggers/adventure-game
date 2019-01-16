@@ -4,7 +4,7 @@ import random
 import sys
 import images
 import interactive_obj
-import adventure
+import tile
 from pygame.locals import *
 
 ### DIRECTION CONSTANTS ###
@@ -12,26 +12,6 @@ DIR_NORTH = 0x0
 DIR_EAST = 0x1
 DIR_SOUTH = 0x2
 DIR_WEST = 0x3
-
-### TILE CONSTANTS ###
-TILE_SIZE = 16
-TILE_LISTING = {} # maps Tile IDs to tile objects
-
-### TILE ID NUMBERS ###
-TILE_DEFAULT_ID = 0x0
-TILE_GRASS_1_ID = 0x100
-TILE_GRASS_2_ID = 0x101
-TILE_GRASS_PLAIN_ID = 0x103
-TILE_WATER_NORMAL_1_ID = 0x200
-TILE_WATER_NORMAL_2_ID = 0x201
-TILE_WATER_NORMAL_3_ID = 0x202
-TILE_WATER_NORMAL_4_ID = 0x203
-TILE_WATER_NORMAL_5_ID = 0x204
-TILE_WATER_NORMAL_6_ID = 0x205
-TILE_WATER_NORMAL_7_ID = 0x206
-TILE_WATER_NORMAL_8_ID = 0x207
-TILE_WATER_NORMAL_9_ID = 0x208
-TILE_SAND_ID = 0x300
 
 ### MAP CONSTANTS ###
 MAP_LISTING = {} # maps Map IDs to Map objects
@@ -56,58 +36,9 @@ R2_A3_ID = 0x2003
 R2_A4_ID = 0x2004
 R2_A5_ID = 0x2005
 
-### TRANSPORTATION FLAGS ###
-WALKABLE_F = 0x1
-CANOEABLE_F = 0x2
-SAILABLE_F = 0x4
-FLYABLE_F = 0x8
-
 ### CLASS NAMES ###
 MAP_CLASS = 'Map'
-TILE_CLASS = 'Tile'
 REGION_CLASS = 'Region'
-AREA_CLASS = 'Area'
-
-### LOGGER ###
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# TODO make this extend sprite?
-
-# SHOULD THIS BE IMMUTABLE?
-class Tile:
-    def __init__(self,                                          \
-                image_path=images.TILE_DEFAULT_PATH,            \
-                allowed_transport=(WALKABLE_F | FLYABLE_F),     \
-                ):
-        # represents the base terrain image (e.g. grass, water)
-        self.image = pygame.image.load(image_path).convert()
-
-        # OR-ed flags that represent the allowed methods of transportation on
-        # this tile - walking, canoing, sailing, and flying.
-        self.allowed_transport = allowed_transport
-
-    # blits the tile image onto the surface at the designated pixel
-    # coordinate position (x,y).
-    # Does not update the surface display - caller will have to do that.
-    def blit_onto_surface(self, surface, pixel_location_tuple):
-        if self and surface and pixel_location_tuple:
-            surface.blit(self.image, pixel_location_tuple)
-
-class Connector:
-    # create a Connector object. The purpose of a Connector object is to
-    # indicate where an Entity will go when reaching an area of the map
-    # linked to the Connector.
-    # x and y destination coordinates are Tile coordinates, NOT pixels
-    def __init__(self,
-                dest_region,
-                dest_area,
-                dest_x_coord,
-                dest_y_coord):
-        self.dest_region = dest_region
-        self.dest_area = dest_area
-        self.dest_x_coord = dest_x_coord
-        self.dest_y_coord = dest_y_coord
 
 class Map:
     # create a Map object. tile_grid must be a List of List objects, where
@@ -168,7 +99,7 @@ class Map:
                 for grid_row in tile_grid:
                     row_to_copy = []
                     for x in grid_row:
-                        if not (x.__class__.__name__ == TILE_CLASS):
+                        if not (x.__class__.__name__ == tile.TILE_CLASS):
                             logger.error("Tile grids can only accept Tile objects")
                             valid_grid_dimensions = False
                             sys.exit(1)
@@ -196,13 +127,8 @@ class Map:
                 for x, y in adj_map_dict.iteritems():
                     self.adj_map_dict[x] = y
 
-    # set top left location (x,y) pixel coordinate tuple
-    def set_top_left(self, top_left_position):
-        if self and top_left_position:
-            self.top_left_position = top_left_position
-
     # TODO - document
-    def set_adj_map(self, direction, dest_map_id, dest_location_coordinate):
+    def add_adj_map(self, direction, dest_map_id, dest_location_coordinate):
         # TODO - more arg checks?
         if self and dest_location_coordinate:
             self.adj_map_dict[direction] = (int(dest_map_id), \
@@ -222,44 +148,46 @@ class Map:
     #   - interactive object already exists at the location
     # Caller will need to reblit the map and update the surface to show
     # the new images
-    def set_interactive_object(self, obj_to_respawn, location):
+    def set_interactive_object(self, obj_to_respawn, tile_location):
         success = False
 
-        if self and obj_to_respawn and location:
+        if self and obj_to_respawn and tile_location:
             if self.tile_grid:
                 # make sure (x,y) location is in bounds
-                if self.width > location[0] and self.height > location[1]:
+                if self.width > tile_location[0] and self.height > tile_location[1]:
                     # check if there is already an interactive object at
                     # the (x,y) location
-                    if self.interactive_obj_dict.get(location, None):
+                    if self.interactive_obj_dict.get(tile_location, None):
                         logger.error("Obj already exists at location %s",   \
-                            str(location))
+                            str(tile_location))
                     else:
                         # set object
-                        self.interactive_obj_dict[location] = (obj_to_respawn)
+                        self.interactive_obj_dict[tile_location] = (obj_to_respawn)
                         success = True
                 else:
                     logger.error(                                           \
                         "Invalid location %s for set_interactive_object", \
-                        str(location))
+                        str(tile_location))
             else:
                 logger.error("Empty map in set_interactive_object")
 
         return success
 
     # Spawns an interactive object at the specified Tile coordinate
-    # location (x,y) tuple on the Map, and also blits and updates the surface
-    #to show the new images.
+    # location (x,y) tuple on the Map, and also blits.
+    # DOES NOT update the display - caller will have to do that
+    # TODO CHANGE ^^??
     # Returns True if spawn was successful, False otherwise. Reasons for
     # failure include:
     #   - Map is empty
     #   - location is invalid
     #   - interactive object already exists at the location
-    def spawn_interactive_object(self, game, obj_to_respawn, location):
+    def spawn_interactive_object(self, surface, obj_to_respawn, tile_location):
         # TODO
         return False
 
-    # removes an interactive object from the specified (x,) location on the Map.
+    # removes an interactive object from the specified Tile
+    # coordinate (x,y) location on the Map.
     # Returns True if removal was successful, False otherwise. Reasons for
     # failure include:
     #   - Map is empty
@@ -268,50 +196,52 @@ class Map:
     # True.
     # Caller will need to reblit the map and update the surface to show
     # the updated images
-    def unset_interactive_object(self, location):
+    def unset_interactive_object(self, tile_location):
         successful_remove = False
 
-        if self and location:
+        if self and tile_location:
             if self.tile_grid:
                 # make sure (x,y) location is in bounds
-                if self.width > location[0] and self.height > location[1]:
+                if self.width > tile_location[0] and self.height > tile_location[1]:
                     # remove object if it exists
-                    self.interactive_obj_dict.pop(location, None)
+                    self.interactive_obj_dict.pop(tile_location, None)
                     successful_remove = True
                 else:
                     logger.error(                                            \
                         "Invalid location %s for unset_interactive_object", \
-                        str(location))
+                        str(tile_location))
             else:
                 logger.error("Empty map in unset_interactive_object")
 
         return successful_remove
 
-    # removes an interactive object from the specified (x,y) location on the
-    # Map.
-    # Also blits and updates the surface to show the updated map image.
+    # removes an interactive object from the specified Tile coordinate
+    # (x,y) location on the Map.
+    # Also blits the surface.
+    # DOES NOT update the display - caller will have to do that
     # Returns True if removal was successful, False otherwise. Reasons for
     # failure include:
     #   - Map is empty
     #   - location is invalid
     # If no interactive object exists at the location, the method still returns
     # True.
-    def remove_interactive_object(self, game, location):
+    def remove_interactive_object(self, surface, tile_location):
         # # TODO
         return False
 
-    def set_respawn_timer(self, obj_to_respawn, location_tuple, num_ticks):
+    # TODO document
+    def set_respawn_timer(self, obj_to_respawn, tile_location, num_ticks):
         success = False
-        if self and obj_to_respawn and location_tuple and num_ticks >= 0:
+        if self and obj_to_respawn and tile_location and num_ticks >= 0:
             if self.tile_grid:
                 # make sure (x,y) location is in bounds
-                if self.width > location[0] and self.height > location[1]:
+                if self.width > tile_location[0] and self.height > tile_location[1]:
                     # TODO
                     pass
                 else:
                     logger.error(                                           \
                         "Invalid location %s for set_respawn_timer", \
-                        str(location))
+                        str(tile_location))
             else:
                 logger.error("Empty map in set_respawn_timer")
 
@@ -319,7 +249,7 @@ class Map:
 
     # checks for pending respawns and updates their time to respawn
     # will respawn objects that have expired respawn timers
-    def check_respawns(self, game, elapsed_ticks):
+    def check_respawns(self, surface, elapsed_ticks):
         pass
         # iterate through pending respawns
         """
@@ -331,6 +261,12 @@ class Map:
                 # item needs to respawn
                 item = obj_data[0]
                 # TODO
+
+                # check if protagonist is blocking the location - if so,
+                # set item to respawn again in a couple more ticks.
+                # if protag isnt' blocking location, then clear the tile
+                # (by reblitting the tile object at the location)
+                # and add the respawned object back in
             else:
                 obj_data[1] = remaining_ticks
                 updated_pending_respawns[location] = obj_data
@@ -340,9 +276,8 @@ class Map:
 
     # blit entire map, including tiles and spawned interactive objects
     # caller needs to update surface after method
-    def blit_onto_surface(self, game, pixel_location_tuple):
-        if self and game and pixel_location_tuple:
-            surface = game.get_main_display_surface()
+    def blit_onto_surface(self, surface, pixel_location_tuple):
+        if self and surface and pixel_location_tuple:
             start_x = pixel_location_tuple[0]
             start_y = pixel_location_tuple[1]
 
@@ -354,32 +289,34 @@ class Map:
                     for single_tile in grid_row:
                         # blit tile and move to next Tile position
                         single_tile.blit_onto_surface(surface, (curr_x, curr_y))
-                        curr_x = curr_x + TILE_SIZE
+                        curr_x = curr_x + tile.TILE_SIZE
 
                     # move to next row of Tiles to blit
-                    curr_y = curr_y + TILE_SIZE
+                    curr_y = curr_y + tile.TILE_SIZE
 
                 # blit interactive objects
                 if self.interactive_obj_dict:
                     for tile_location, obj in self.interactive_obj_dict.iteritems():
                         if tile_location and obj:
-                            pos_x = tile_location[0] * TILE_SIZE
-                            pos_y = tile_location[1] * TILE_SIZE
+                            pos_x = tile_location[0] * tile.TILE_SIZE
+                            pos_y = tile_location[1] * tile.TILE_SIZE
 
                             # blit sprite image
                             obj.blit_onto_surface(surface, (pos_x, pos_y))
 
+    """
     # set protagonist location (x,y) tile tuple, NOT pixel coordinates
     def set_protagonist_tile_location(self, tile_location_tuple):
         if self and tile_location_tuple:
             self.protagonist_location = (tile_location_tuple[0], tile_location_tuple[1])
+    """
 
-    # scroll map in the indicated direction for the indicated distance
-    # also pass in game object
+    # scroll map in the indicated direction for the indicated distancet
+    # also pass in surface object to blit on and update
     # does NOT update the main display - caller will have to do that
-    def scroll(self, game, scroll_direction, distance):
+    def scroll(self, surface, scroll_direction, distance):
         # don't bother if distance <= 0
-        if self and game and (distance > 0):
+        if self and surface and (distance > 0):
             new_pixel_location = None
             curr_top_left = self.top_left_position
 
@@ -400,48 +337,10 @@ class Map:
 
             if new_pixel_location:
                 # scroll in indicated direction
-                self.blit_onto_surface(game, new_pixel_location)
+                self.blit_onto_surface(surface, new_pixel_location)
 
                 # update map top left
-                self.set_top_left(new_pixel_location)
-
-    # scroll map one Tile distance in the indicated direction.
-    # updates main display with each new viewpoint
-    # scroll_wait_time is the time (in milliseconds)
-    # to wait in between each individual pixel scrolling
-    def scroll_single_tile(self, game, direction, scroll_wait_time):
-        if self and game and (scroll_wait_time >= 0):
-            for i in range(TILE_SIZE):
-                # scroll 1 pixel at a time
-                game.main_display_screen.fill(adventure.BLACK_COLOR)
-
-                # also updates top view
-                self.scroll(game, direction, 1)
-
-                # also blit the top view
-                game.blit_top_display()
-
-                # blit protagonist
-                # TODO - have designated spot for protagonist?
-                if game.protagonist:
-                    game.protagonist.blit_onto_surface(game.get_main_display_surface(), \
-                        game.center_ow_tile_pixel_location)
-
-                # update main display
-                pygame.display.update()
-
-                # wait till next iteration
-                pygame.time.wait(scroll_wait_time)
-
-
-
-### TILES TO USE ###
-TILE_DEFAULT = None
-TILE_GRASS_1 = None
-TILE_GRASS_2 = None
-TILE_GRASS_PLAIN = None
-TILE_WATER_NORMAL_1 = None
-TILE_SAND = None
+                self.top_left_position = new_pixel_location
 
 ### MAPS TO USE ###
 REGION_GRASSLANDS_AREA_0_MAP = None
@@ -451,42 +350,30 @@ def parse_map(map_json_data):
     # TODO
     pass
 
-def build_tiles():
-    logger.debug("Building tiles")
-    global TILE_DEFAULT
-    global TILE_GRASS_1
-    global TILE_GRASS_2
-    global TILE_GRASS_PLAIN
-    global TILE_WATER_NORMAL_1
-    global TILE_SAND
-
-    TILE_DEFAULT = Tile()
-    TILE_GRASS_1 = Tile(image_path=images.TILE_GRASS_1_PATH)
-    TILE_GRASS_2 = Tile(image_path=images.TILE_GRASS_2_PATH)
-    TILE_GRASS_PLAIN = Tile(image_path=images.TILE_GRASS_PLAIN_PATH)
-    TILE_WATER_NORMAL_1 = Tile(image_path=images.TILE_WATER_NORMAL_1_PATH)
-    TILE_SAND = Tile(image_path=images.TILE_SAND_PATH)
-
 def build_maps():
     logger.debug("Building maps")
     global REGION_GRASSLANDS_AREA_0_MAP
     grasslands_area_0_grid = []
 
     for i in range(40):
-        grasslands_area_0_grid.append([TILE_GRASS_1]*50)
+        grasslands_area_0_grid.append([tile.TILE_GRASS_1]*50)
 
-    grasslands_area_0_grid[10][15] = TILE_WATER_NORMAL_1
+    grasslands_area_0_grid[10][15] = tile.TILE_WATER_NORMAL_1
     """
     for i in range(100):
         x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
         y = random.randint(0, len(grasslands_area_0_grid) - 1)
 
         if i % 3 == 0:
-            grasslands_area_0_grid[y][x] = TILE_SAND
+            grasslands_area_0_grid[y][x] = tile.TILE_SAND
         elif i % 3 == 1:
-            grasslands_area_0_grid[y][x] = TILE_GRASS_2
+            grasslands_area_0_grid[y][x] = tile.TILE_GRASS_2
         else:
-            grasslands_area_0_grid[y][x] = TILE_WATER_NORMAL_1
+            grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
     """
 
     REGION_GRASSLANDS_AREA_0_MAP = Map(grasslands_area_0_grid)
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
