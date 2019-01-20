@@ -2,7 +2,6 @@ import logging
 import pygame
 import random
 import sys
-import images
 import interactive_obj
 import tile
 from pygame.locals import *
@@ -114,17 +113,17 @@ class Map:
 
             # get interactive objects
             if interactive_obj_dict:
-                for x, y in interactive_obj_dict.iteritems():
+                for x, y in interactive_obj_dict.items():
                     self.interactive_obj_dict[x] = y
 
             # get connector tiles
             if connector_tile_dict:
-                for x, y in connector_tile_dict.iteritems():
+                for x, y in connector_tile_dict.items():
                     self.connector_tile_dict[x] = y
 
             # get neighboring maps
             if adj_map_dict:
-                for x, y in adj_map_dict.iteritems():
+                for x, y in adj_map_dict.items():
                     self.adj_map_dict[x] = y
 
     # TODO - document
@@ -254,7 +253,7 @@ class Map:
         # iterate through pending respawns
         """
         updated_pending_respawns = {}
-        for location, obj_data in self.pending_respawns.iteritems():
+        for location, obj_data in self.pending_respawns.items():
             # get remaining number of ticks to respawn
             remaining_ticks = obj_data[1] - elapsed_ticks
             if remaining_ticks <= 0:
@@ -296,7 +295,7 @@ class Map:
 
                 # blit interactive objects
                 if self.interactive_obj_dict:
-                    for tile_location, obj in self.interactive_obj_dict.iteritems():
+                    for tile_location, obj in self.interactive_obj_dict.items():
                         if tile_location and obj:
                             pos_x = tile_location[0] * tile.TILE_SIZE
                             pos_y = tile_location[1] * tile.TILE_SIZE
@@ -342,8 +341,9 @@ class Map:
                 # update map top left
                 self.top_left_position = new_pixel_location
 
-### MAPS TO USE ###
-REGION_GRASSLANDS_AREA_0_MAP = None
+def get_map(map_id):
+    global MAP_LISTING
+    return MAP_LISTING.get(map_id, None)
 
 # TODO
 def parse_map(map_json_data):
@@ -352,13 +352,14 @@ def parse_map(map_json_data):
 
 def build_maps():
     logger.debug("Building maps")
-    global REGION_GRASSLANDS_AREA_0_MAP
+    global MAP_LISTING
+
     grasslands_area_0_grid = []
 
     for i in range(40):
-        grasslands_area_0_grid.append([tile.TILE_GRASS_1]*50)
+        grasslands_area_0_grid.append([tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
 
-    grasslands_area_0_grid[10][15] = tile.TILE_WATER_NORMAL_1
+    grasslands_area_0_grid[10][15] = tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
     """
     for i in range(100):
         x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
@@ -372,7 +373,7 @@ def build_maps():
             grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
     """
 
-    REGION_GRASSLANDS_AREA_0_MAP = Map(grasslands_area_0_grid)
+    MAP_LISTING[R0_A0_ID] = Map(grasslands_area_0_grid)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

@@ -34,10 +34,10 @@ OW_SIDE_MENU_LOCATION = (                                               \
     TOP_DISPLAY_HEIGHT + tile.TILE_SIZE                                  \
 )
 CENTER_OW_TILE_PIXEL_LOCATION = (                               \
-    int(OW_DISPLAY_NUM_TILES_HORIZONTAL / 2),                   \
-    int(OW_DISPLAY_NUM_TILES_VERTICAL / 2) +                    \
+    int(OW_DISPLAY_NUM_TILES_HORIZONTAL / 2) * tile.TILE_SIZE,  \
+    int(OW_DISPLAY_NUM_TILES_VERTICAL / 2)*tile.TILE_SIZE +     \
         TOP_DISPLAY_HEIGHT                                      \
-    )
+)
 
 ### COLOR CONSTANTS ###
 COLOR_WHITE = (255,255,255)
@@ -45,7 +45,8 @@ COLOR_BLACK = (0,0,0)
 
 ### TIME CONSTANTS ###
 NUM_MS_SECOND = 1000
-SINGLE_TILE_SCROLL_TIME = int(NUM_MS_SECOND / tile.TILE_SIZE)
+SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
+SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
 
 class Viewing():
     def __init__(self, main_display_surface, protagonist=None, curr_map=None):
@@ -82,31 +83,29 @@ class Viewing():
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
     # scroll_wait_time is the time (in milliseconds)
-    # to wait in between each individual pixel scrolling
-    def scroll_map_single_tile(self, direction, scroll_wait_time):
-        if self and (scroll_wait_time >= 0):
-            for i in range(tile.TILE_SIZE):
-                # reset the surface screen to default to black for empty map
-                # spaces
-                self.set_viewing_screen_default(default_color=COLOR_BLACK)
+    def scroll_map_single_tile(self, direction):
+        for i in range(tile.TILE_SIZE):
+            # reset the surface screen to default to black for empty map
+            # spaces
+            self.set_viewing_screen_default(default_color=COLOR_BLACK)
 
-                # scroll 1 pixel at a time
-                self.curr_map.scroll(self.main_display_surface, direction, 1)
+            # scroll 1 pixel at a time
+            self.curr_map.scroll(self.main_display_surface, direction, 1)
 
-                # also blit the top view
-                self.blit_top_display()
+            # also blit the top view
+            self.blit_top_display()
 
-                # blit protagonist
-                # TODO - have designated spot for protagonist?
-                if self.protagonist:
-                    self.protagonist.blit_onto_surface(self.main_display_surface, \
-                        CENTER_OW_TILE_PIXEL_LOCATION)
+            # blit protagonist
+            # TODO - have designated spot for protagonist?
+            if self.protagonist:
+                self.protagonist.blit_onto_surface(self.main_display_surface, \
+                    CENTER_OW_TILE_PIXEL_LOCATION)
 
-                # update main display
-                pygame.display.update()
+            # update main display
+            pygame.display.update()
 
-                # wait till next iteration
-                pygame.time.wait(scroll_wait_time)
+            # wait till next iteration
+            pygame.time.wait(SINGLE_PIXEL_SCROLL_TIME_MS)
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
@@ -127,6 +126,28 @@ class Viewing():
 
         # don't forget top display
         self.blit_top_display()
+
+    # TODO DOCUMENT
+    def blit_interactive_object(self, obj_to_blit, image_type_id, pixel_location):
+        if self and obj_to_blit and pixel_location:
+            obj_to_blit.blit_onto_surface(self.main_display_surface, image_type_id, pixel_location)
+
+    def blit_protagonist(self, protag_image):
+        if self and protag_image:
+            self.main_display_surface.blit(protag_image, CENTER_OW_TILE_PIXEL_LOCATION)
+
+# return top left pixel coordinate for the map given the protagonist's
+# tile coordinates
+def get_centered_map_top_left_pixel(protag_tile_coordinate):
+    top_left = (0,0)
+    if protag_tile_coordinate:
+        pixel_distance_horiz = CENTER_OW_TILE_PIXEL_LOCATION[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
+        pixel_distance_vert = CENTER_OW_TILE_PIXEL_LOCATION[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
+
+        top_left = (pixel_distance_horiz, pixel_distance_vert)
+
+
+    return top_left
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

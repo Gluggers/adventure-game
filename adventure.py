@@ -5,6 +5,7 @@ import tile
 import logging
 import viewing
 import language
+import interactive_obj
 import game
 
 from pygame.locals import *
@@ -35,80 +36,33 @@ def main():
     # load maps
     map.build_maps()
 
+    # load resources
+
+    # load items
+
+    # load characters
+
     # clock
     #clock = pygame.time.Clock()
 
+    # create protagonist
+    protag_tile_loc = (2,2)
+    protagonist = game_obj.build_protagonist("Bob", protag_tile_loc)
+
     # set map and blit
-    game_obj.viewing.curr_map = map.REGION_GRASSLANDS_AREA_0_MAP
-    game_obj.viewing.set_map_on_view(map_top_left=viewing.OW_VIEWING_LOCATION)
+    game_obj.set_current_game_map(map.R0_A0_ID, map_top_left=viewing.get_centered_map_top_left_pixel(protag_tile_loc))
+    #game_obj.viewing.set_map_on_view(map_top_left=viewing.OW_VIEWING_LOCATION)
+
+    # blit protagonist
+    game_obj.viewing.blit_interactive_object(protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_PIXEL_LOCATION)
 
     # update screen
     pygame.display.update()
 
-    pressed_right = False
-    pressed_left = False
-    pressed_up = False
-    pressed_down = False
+    # start looping overworld
+    game_obj.handle_overworld_loop()
 
-    # main loop for now
-    while True:
-        #clock.tick(40)
-
-        for events in pygame.event.get():
-            if events.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit(0)
-            elif events.type == pygame.KEYDOWN:
-                if events.key == pygame.K_RIGHT:
-                    pressed_right = True
-                    logger.debug("Right pressed down")
-                elif events.key == pygame.K_LEFT:
-                    pressed_left = True
-                    logger.debug("Left pressed down")
-                elif events.key == pygame.K_UP:
-                    pressed_up = True
-                    logger.debug("Up pressed down")
-                elif events.key == pygame.K_DOWN:
-                    pressed_down = True
-                    logger.debug("Down pressed down")
-            elif events.type == pygame.KEYUP:
-                if events.key == pygame.K_RIGHT:
-                    pressed_right = False
-                    logger.debug("Right released")
-                elif events.key == pygame.K_LEFT:
-                    pressed_left = False
-                    logger.debug("Left released")
-                elif events.key == pygame.K_UP:
-                    pressed_up = False
-                    logger.debug("Up released")
-                elif events.key == pygame.K_DOWN:
-                    pressed_down = False
-                    logger.debug("Down released")
-
-        if pressed_up:
-            # do character walking animation while scrolling map DOWN
-            # TODO
-            # scroll map down and update display. scroll one Tile length
-            game_obj.viewing.scroll_map_single_tile(map.DIR_SOUTH, viewing.SINGLE_TILE_SCROLL_TIME)
-            logger.debug("Moved up")
-        elif pressed_right:
-            # do character walking animation while scrolling map LEFT
-            # TODO
-            # scroll map left and update display. scroll one Tile length
-            game_obj.viewing.scroll_map_single_tile(map.DIR_WEST, viewing.SINGLE_TILE_SCROLL_TIME)
-            logger.debug("Moved right")
-        elif pressed_down:
-            # do character walking animation while scrolling map UP
-            # TODO
-            # scroll map up and update display. scroll one Tile length
-            game_obj.viewing.scroll_map_single_tile(map.DIR_NORTH, viewing.SINGLE_TILE_SCROLL_TIME)
-            logger.debug("Moved down")
-        elif pressed_left:
-            # do character walking animation while scrolling map RIGHT
-            # TODO
-            # scroll map right and update display. scroll one Tile length
-            game_obj.viewing.scroll_map_single_tile(map.DIR_EAST, viewing.SINGLE_TILE_SCROLL_TIME)
-            logger.debug("Moved left")
+    logger.debug("Should not reach here")
 
 if __name__ == '__main__':
     pygame.init()

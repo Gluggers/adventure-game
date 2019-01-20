@@ -1,6 +1,6 @@
 import logging
 import pygame
-import images
+import image_paths
 
 
 ### TILE CONSTANTS ###
@@ -35,7 +35,7 @@ TILE_SAND_ID = 0x300
 # SHOULD THIS BE IMMUTABLE?
 class Tile:
     def __init__(self,                                                      \
-                image_path=images.TILE_DEFAULT_PATH,                        \
+                image_path=image_paths.TILE_DEFAULT_PATH,                        \
                 allowed_transport=(WALKABLE_F | FLYABLE_F),                 \
                 ):
         # represents the base terrain image (e.g. grass, water)
@@ -82,24 +82,34 @@ logger = logging.getLogger(__name__)
 
 ### TILES TO USE ###
 TILE_DEFAULT = None
-TILE_GRASS_1 = None
-TILE_GRASS_2 = None
-TILE_GRASS_PLAIN = None
-TILE_WATER_NORMAL_1 = None
-TILE_SAND = None
+
+# TODO DOCUMENT
+def get_tile(tile_id):
+    global TILE_LISTING
+    global TILE_DEFAULT
+
+    return TILE_LISTING.get(tile_id, TILE_DEFAULT)
 
 def build_tiles():
     logger.debug("Building tiles")
+    global TILE_LISTING
     global TILE_DEFAULT
-    global TILE_GRASS_1
-    global TILE_GRASS_2
-    global TILE_GRASS_PLAIN
-    global TILE_WATER_NORMAL_1
-    global TILE_SAND
 
     TILE_DEFAULT = Tile()
-    TILE_GRASS_1 = Tile(image_path=images.TILE_GRASS_1_PATH)
-    TILE_GRASS_2 = Tile(image_path=images.TILE_GRASS_2_PATH)
-    TILE_GRASS_PLAIN = Tile(image_path=images.TILE_GRASS_PLAIN_PATH)
-    TILE_WATER_NORMAL_1 = Tile(image_path=images.TILE_WATER_NORMAL_1_PATH)
-    TILE_SAND = Tile(image_path=images.TILE_SAND_PATH)
+
+    TILE_LISTING[TILE_DEFAULT_ID] = TILE_DEFAULT
+    TILE_LISTING[TILE_GRASS_1_ID] = Tile(image_path=image_paths.TILE_GRASS_1_PATH)
+    TILE_LISTING[TILE_GRASS_2_ID] = Tile(image_path=image_paths.TILE_GRASS_2_PATH)
+    TILE_LISTING[TILE_GRASS_PLAIN_ID] = Tile(image_path=image_paths.TILE_GRASS_PLAIN_PATH)
+    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=image_paths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F)
+    """
+    TILE_LISTING[TILE_WATER_NORMAL_2_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_3_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_4_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_5_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_6_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_7_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_8_ID] =
+    TILE_LISTING[TILE_WATER_NORMAL_9_ID] =
+    """
+    TILE_LISTING[TILE_SAND_ID] = Tile(image_path=image_paths.TILE_SAND_PATH)
