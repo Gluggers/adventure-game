@@ -7,10 +7,10 @@ import tile
 from pygame.locals import *
 
 ### DIRECTION CONSTANTS ###
-DIR_NORTH = 0x0
-DIR_EAST = 0x1
-DIR_SOUTH = 0x2
-DIR_WEST = 0x3
+DIR_NORTH = 0x1
+DIR_EAST = 0x2
+DIR_SOUTH = 0x3
+DIR_WEST = 0x4
 
 ### MAP CONSTANTS ###
 MAP_LISTING = {} # maps Map IDs to Map objects
@@ -46,7 +46,7 @@ class Map:
     # meaning each inner List must be of the same length.
     # interactive_obj_dict must be a dict that maps a tuple of integers
     # (representing the X and Y tile coordinates of the map, NOT
-    # pixel coordinates) to an Interactive_Object, which is one of:
+    # pixel coordinates) to an Interactive_Object ID which represents one of:
     #   - Entity
     #   - Obstacle
     #   - Resource
@@ -55,22 +55,23 @@ class Map:
     # (representing the X and Y tile coordinates of the map, NOT
     # pixel coordinates) to a corresponding Connector object
     # adj_map_dict must be a dict that maps a direction ID to a tuple
-    # (Map ID, (dest location coordinates) to represent the neighboring map and
+    # (Map ID, dest location coordinate) to represent the neighboring map and
     # where the Entity will end up by walking past the map boundary.
     # top_left represents the (x,y) pixel coordinate on the display screen where the
     # top left corner of the map should start. Defaults to (0,0)
-    def __init__(self, tile_grid, interactive_obj_dict={}, connector_tile_dict={}, \
+    def __init__(self, map_id, tile_grid, interactive_obj_dict={}, connector_tile_dict={}, \
                 adj_map_dict={}, top_left=(0,0)):
         self.height = 0
         self.width = 0
+        self.map_id = map_id
         self.tile_grid = []
         self.interactive_obj_dict = {}
         self.connector_tile_dict = {}
         self.adj_map_dict = {}
-        self.top_left_position = (0,0) # (x,y) tuple of top left, default top viewing
+        self.top_left_position = top_left # (x,y) tuple of top left, default top viewing
 
         # (x,y) tuple representing location of protagonist. Default is (0,0)
-        self.protagonist_location = (0, 0)
+        #self.protagonist_location = (0, 0)
 
         # maps Tile grid location (x,y) tuple to a
         # [interactive obj, remaining ticks to respawn] list
@@ -127,16 +128,22 @@ class Map:
                     self.adj_map_dict[x] = y
 
     # TODO - document
-    def add_adj_map(self, direction, dest_map_id, dest_location_coordinate):
+    def add_adjacent_map(self, direction, dest_map_id, dest_location_coordinate):
         # TODO - more arg checks?
         if self and dest_location_coordinate:
             self.adj_map_dict[direction] = (int(dest_map_id), \
                     (dest_location_coordinate[0], dest_location_coordinate[1]))
 
     # removes map that is adjacent according to direction
-    def remove_adj_map(self, direction):
+    def remove_adjacent_map(self, direction):
         if self:
             self.adj_map_dict.pop(direction, None)
+
+    # get (Map ID, destination tile coordinate) tuple for the map
+    # that is adjacent to this map in the given direction.
+    # None if no such neighboring map exists
+    def get_adjacent_map_info(self, direction):
+        return self.adj_map_dict.get(direction, None)
 
     # Sets an interactive object at the specified Tile coordinate
     # location (x, y) tuple on the Map.
@@ -273,6 +280,22 @@ class Map:
         self.pending_respawns = updated_pending_respawns
         """
 
+    # returns True if the tile position to check is within current map
+    # boundaries
+    def location_within_bounds(self, tile_pos_to_check):
+        x_pos = tile_pos_to_check[0]
+        y_pos = tile_pos_to_check[1]
+
+        return  (x_pos >= 0) and            \
+                (y_pos >= 0) and            \
+                (x_pos < self.width) and    \
+                (y_pos < self.height)
+
+    def valid_transportation(self, dest_tile_pos, transport_flag):
+        # y, x
+        dest_tile = self.tile_grid[dest_tile_pos[1]][dest_tile_pos[0]]
+        return dest_tile.valid_transportation(transport_flag)
+
     # blit entire map, including tiles and spawned interactive objects
     # caller needs to update surface after method
     def blit_onto_surface(self, surface, pixel_location_tuple):
@@ -294,6 +317,8 @@ class Map:
                     curr_y = curr_y + tile.TILE_SIZE
 
                 # blit interactive objects
+                # TODO - should interactive obj dict map tile location to obj
+                # ID?
                 if self.interactive_obj_dict:
                     for tile_location, obj in self.interactive_obj_dict.items():
                         if tile_location and obj:
@@ -302,13 +327,6 @@ class Map:
 
                             # blit sprite image
                             obj.blit_onto_surface(surface, (pos_x, pos_y))
-
-    """
-    # set protagonist location (x,y) tile tuple, NOT pixel coordinates
-    def set_protagonist_tile_location(self, tile_location_tuple):
-        if self and tile_location_tuple:
-            self.protagonist_location = (tile_location_tuple[0], tile_location_tuple[1])
-    """
 
     # scroll map in the indicated direction for the indicated distancet
     # also pass in surface object to blit on and update
@@ -373,7 +391,7 @@ def build_maps():
             grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
     """
 
-    MAP_LISTING[R0_A0_ID] = Map(grasslands_area_0_grid)
+    MAP_LISTING[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

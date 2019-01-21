@@ -63,19 +63,20 @@ class Interactive_Object(pygame.sprite.Sprite):
                     object_id,              \
                     name,                   \
                     image_path_dict,        \
-                    tile_position=(0,0)     \
+                    #tile_position=(0,0)     \
                 ):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
         self.object_id = object_id
         self.name = name
-        self.tile_position = tile_position
+        #self.tile_position = tile_position
 
         # load images
         self.image_dict = {}
         for image_type_id, image_path in image_path_dict.items():
-            self.image_dict[image_type_id] = pygame.image.load(image_path).convert()
+            # convert alpha for transparency
+            self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
 
     # blits the interactive object sprite image onto surface at the
     # designated pixel coordinate position.

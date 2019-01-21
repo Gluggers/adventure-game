@@ -35,11 +35,12 @@ class Entity(interactive_obj.Interactive_Object):
             name,                                       \
             id,                                         \
             image_path_dict,                            \
-            tile_position                               \
+            #tile_position                               \
         )
 
         self.gender = gender
         self.race = race
+        self.tile_position = tile_position
 
         # set up skills
         self.skills_dict = {}

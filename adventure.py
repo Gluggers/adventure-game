@@ -50,8 +50,8 @@ def main():
     protagonist = game_obj.build_protagonist("Bob", protag_tile_loc)
 
     # set map and blit
-    game_obj.set_current_game_map(map.R0_A0_ID, map_top_left=viewing.get_centered_map_top_left_pixel(protag_tile_loc))
-    #game_obj.viewing.set_map_on_view(map_top_left=viewing.OW_VIEWING_LOCATION)
+    #game_obj.set_current_game_map(map.R0_A0_ID, map_top_left=viewing.get_centered_map_top_left_pixel(protag_tile_loc))
+    game_obj.set_and_blit_current_game_map(map.R0_A0_ID, protag_tile_loc)
 
     # blit protagonist
     game_obj.viewing.blit_interactive_object(protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_PIXEL_LOCATION)

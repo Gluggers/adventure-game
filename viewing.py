@@ -2,6 +2,7 @@ import pygame
 import logging
 import map
 import tile
+import interactive_obj
 
 # overworld display constants
 OW_DISPLAY_NUM_TILES_HORIZONTAL = 31
@@ -98,8 +99,35 @@ class Viewing():
             # blit protagonist
             # TODO - have designated spot for protagonist?
             if self.protagonist:
-                self.protagonist.blit_onto_surface(self.main_display_surface, \
-                    CENTER_OW_TILE_PIXEL_LOCATION)
+                # get image type ID for protagonist:
+                image_type_id = interactive_obj.OW_IMAGE_ID_DEFAULT
+
+                if direction == map.DIR_NORTH:
+                    if (i % 8) < 4:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_NORTH
+                    else:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
+                elif direction == map.DIR_EAST:
+                    if (i % 8) < 4:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_EAST
+                    else:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
+                elif direction == map.DIR_SOUTH:
+                    if (i % 8) < 4:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_SOUTH
+                    else:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
+                elif direction == map.DIR_WEST:
+                    if (i % 8) < 4:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_WEST
+                    else:
+                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
+
+                self.protagonist.blit_onto_surface(         \
+                    self.main_display_surface,              \
+                    image_type_id,                          \
+                    CENTER_OW_TILE_PIXEL_LOCATION           \
+                )
 
             # update main display
             pygame.display.update()
@@ -114,7 +142,7 @@ class Viewing():
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
-    def set_map_on_view(self, map_top_left=OW_VIEWING_LOCATION, default_color=COLOR_BLACK):
+    def set_and_blit_map_on_view(self, map_top_left=OW_VIEWING_LOCATION, default_color=COLOR_BLACK):
         self.set_viewing_screen_default(default_color)
 
         # set current map's top left position on display screen

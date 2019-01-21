@@ -69,6 +69,13 @@ class Tile:
     def allowed_transport(self):
         del self._allowed_transport
 
+    def valid_transportation(self, transportation_flag):
+        # and the flags
+        if transportation_flag & self._allowed_transport:
+            return True
+        else:
+            return False
+
     # blits the tile image onto the surface at the designated pixel
     # coordinate position (x,y).
     # Does not update the surface display - caller will have to do that.
@@ -101,7 +108,7 @@ def build_tiles():
     TILE_LISTING[TILE_GRASS_1_ID] = Tile(image_path=image_paths.TILE_GRASS_1_PATH)
     TILE_LISTING[TILE_GRASS_2_ID] = Tile(image_path=image_paths.TILE_GRASS_2_PATH)
     TILE_LISTING[TILE_GRASS_PLAIN_ID] = Tile(image_path=image_paths.TILE_GRASS_PLAIN_PATH)
-    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=image_paths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F)
+    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=image_paths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
     """
     TILE_LISTING[TILE_WATER_NORMAL_2_ID] =
     TILE_LISTING[TILE_WATER_NORMAL_3_ID] =
