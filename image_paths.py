@@ -1,3 +1,8 @@
+### CREDITS ###
+# Lanea Zimmerman - https://sharm.itch.io/
+#      https://sharm.itch.io/tiny16
+
+
 ### IMAGE CONSTANTS ###
 IMAGE_HOME_PATH = "images/"
 TILE_IMAGE_PATH = IMAGE_HOME_PATH + "tiles/"

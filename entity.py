@@ -34,13 +34,16 @@ class Entity(interactive_obj.Interactive_Object):
             interactive_obj.TYPE_ENTITY,                \
             name,                                       \
             id,                                         \
-            image_path_dict,                            \
+            image_path_dict                             \
             #tile_position                               \
         )
 
         self.gender = gender
         self.race = race
         self.tile_position = tile_position
+
+        # by default, face south
+        self.facing_direction = map.DIR_SOUTH
 
         # set up skills
         self.skills_dict = {}
@@ -57,6 +60,46 @@ class Entity(interactive_obj.Interactive_Object):
         self.equipment_dict = {}
         for equipment_slot_id, item_id in equipment_dict.items():
             self.equipment_dict[equipment_slot_id] = item_id
+
+    # reblit the entity to face the specified direction.
+    # DOES NOT update surface - caller will have to do that
+    def face_direction(self, surface, direction, pixel_location_tuple):
+        image_id = None
+
+        if self and surface and pixel_location_tuple:
+            if direction == map.DIR_NORTH:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
+            elif direction == map.DIR_EAST:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
+            elif direction == map.DIR_SOUTH:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
+            elif direction == map.DIR_WEST:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
+
+            if image_id is not None:
+                # change direction variable and blit
+                self.facing_direction = direction
+                self.blit_onto_surface(surface, image_id, pixel_location_tuple)
+
+    # reblit the entity to face the specified direction.
+    # DOES NOT update surface - caller will have to do that
+    def face_direction_bottom_left(self, surface, direction, bottom_left_pixel_location):
+        image_id = None
+
+        if self and surface and bottom_left_pixel_location:
+            if direction == map.DIR_NORTH:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
+            elif direction == map.DIR_EAST:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
+            elif direction == map.DIR_SOUTH:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
+            elif direction == map.DIR_WEST:
+                image_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
+
+            if image_id is not None:
+                # change direction variable and blit
+                self.facing_direction = direction
+                self.blit_onto_surface_bottom_left(surface, image_id, bottom_left_pixel_location)
 
 # extend Entity class
 class Character(Entity):
@@ -87,11 +130,6 @@ class Character(Entity):
 
         # TODO Fill in rest
 
-        """
-        def blit_onto_surface(self, surface, pixel_location_tuple):
-            if self and surface:
-                surface.blit(self.curr_image, pixel_location_tuple)
-        """
 
 # image_path contains the default sprite image for the character
 # images_path_dict must map character image scenarios to the
@@ -134,6 +172,9 @@ class Protagonist(Character):
             gender,                 \
             race                    \
         )
+
+        self.quest_journal = {}
+        self.inventory = []
 
         # TODO FILL IN REST
 

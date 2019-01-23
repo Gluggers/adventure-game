@@ -326,7 +326,8 @@ class Map:
                             pos_y = tile_location[1] * tile.TILE_SIZE
 
                             # blit sprite image
-                            obj.blit_onto_surface(surface, (pos_x, pos_y))
+                            #obj.blit_onto_surface(surface, (pos_x, pos_y))
+                            obj.blit_onto_surface_bottom_left(surface, (pos_x, pos_y + tile.TILE_SIZE))
 
     # scroll map in the indicated direction for the indicated distancet
     # also pass in surface object to blit on and update

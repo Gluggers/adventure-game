@@ -40,6 +40,11 @@ CENTER_OW_TILE_PIXEL_LOCATION = (                               \
         TOP_DISPLAY_HEIGHT                                      \
 )
 
+CENTER_OW_TILE_BOTTOM_LEFT = (
+    CENTER_OW_TILE_PIXEL_LOCATION[0], \
+    CENTER_OW_TILE_PIXEL_LOCATION[1] + tile.TILE_SIZE   \
+)
+
 ### COLOR CONSTANTS ###
 COLOR_WHITE = (255,255,255)
 COLOR_BLACK = (0,0,0)
@@ -123,10 +128,17 @@ class Viewing():
                     else:
                         image_type_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
 
+                """
                 self.protagonist.blit_onto_surface(         \
                     self.main_display_surface,              \
                     image_type_id,                          \
                     CENTER_OW_TILE_PIXEL_LOCATION           \
+                )
+                """
+                self.protagonist.blit_onto_surface_bottom_left(         \
+                    self.main_display_surface,                          \
+                    image_type_id,                                      \
+                    CENTER_OW_TILE_BOTTOM_LEFT                          \
                 )
 
             # update main display
@@ -160,9 +172,9 @@ class Viewing():
         if self and obj_to_blit and pixel_location:
             obj_to_blit.blit_onto_surface(self.main_display_surface, image_type_id, pixel_location)
 
-    def blit_protagonist(self, protag_image):
-        if self and protag_image:
-            self.main_display_surface.blit(protag_image, CENTER_OW_TILE_PIXEL_LOCATION)
+    def blit_interactive_object_bottom_left(self, obj_to_blit, image_type_id, bottom_left_pixel_location):
+        if self and obj_to_blit and bottom_left_pixel_location:
+            obj_to_blit.blit_onto_surface_bottom_left(self.main_display_surface, image_type_id, bottom_left_pixel_location)
 
 # return top left pixel coordinate for the map given the protagonist's
 # tile coordinates

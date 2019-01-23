@@ -54,15 +54,13 @@ def main():
     game_obj.set_and_blit_current_game_map(map.R0_A0_ID, protag_tile_loc)
 
     # blit protagonist
-    game_obj.viewing.blit_interactive_object(protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_PIXEL_LOCATION)
+    game_obj.viewing.blit_interactive_object_bottom_left(protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
 
     # update screen
     pygame.display.update()
 
     # start looping overworld
     game_obj.handle_overworld_loop()
-
-    logger.debug("Should not reach here")
 
 if __name__ == '__main__':
     pygame.init()

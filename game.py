@@ -109,7 +109,7 @@ class Game():
             self.protagonist.tile_position = protag_dest_tile_pos
 
             # blit protagonist
-            self.viewing.blit_interactive_object(self.protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_PIXEL_LOCATION)
+            self.viewing.blit_interactive_object_bottom_left(self.protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
 
             # update screen
             pygame.display.update()
@@ -246,48 +246,33 @@ class Game():
 
             if pressed_up:
                 protag_move_dir = map.DIR_NORTH
-                #map_scroll_dir = map.DIR_SOUTH
-
-                # do character walking animation while scrolling map DOWN
-                # TODO
-                # scroll map down and update display. scroll one Tile length
-                #self.viewing.scroll_map_single_tile(map.DIR_SOUTH)
                 logger.debug("Moved up")
-                #logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
             elif pressed_right:
                 protag_move_dir = map.DIR_EAST
-                #map_scroll_dir = map.DIR_WEST
-
-                # do character walking animation while scrolling map LEFT
-                # TODO
-                # scroll map left and update display. scroll one Tile length
-                #self.viewing.scroll_map_single_tile(map.DIR_WEST)
                 logger.debug("Moved right")
-                #logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
             elif pressed_down:
                 protag_move_dir = map.DIR_SOUTH
-                #map_scroll_dir = map.DIR_NORTH
-
-                # do character walking animation while scrolling map UP
-                # TODO
-                # scroll map up and update display. scroll one Tile length
-                #self.viewing.scroll_map_single_tile(map.DIR_NORTH)
                 logger.debug("Moved down")
-                #logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
             elif pressed_left:
                 protag_move_dir = map.DIR_WEST
-                #map_scroll_dir = map.DIR_EAST
-
-                # do character walking animation while scrolling map RIGHT
-                # TODO
-                # scroll map right and update display. scroll one Tile length
-                #self.viewing.scroll_map_single_tile(map.DIR_EAST)
                 logger.debug("Moved left")
-                #logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
 
             if move_protag:
                 # TODO for now, just stick with walking
                 transport_type = tile.WALKABLE_F
+
+                # make protagonist face the direction
+                self.protagonist.face_direction_bottom_left(    \
+                    self.viewing.main_display_surface,          \
+                    protag_move_dir,                            \
+                    viewing.CENTER_OW_TILE_BOTTOM_LEFT          \
+                )
+
+                self.viewing.blit_top_display()
+
+                # update display
+                pygame.display.update()
+
                 self.move_protagonist(protag_move_dir, transport_type)
                 logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
 

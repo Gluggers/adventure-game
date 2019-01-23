@@ -62,7 +62,7 @@ class Interactive_Object(pygame.sprite.Sprite):
                     object_type,            \
                     object_id,              \
                     name,                   \
-                    image_path_dict,        \
+                    image_path_dict         \
                     #tile_position=(0,0)     \
                 ):
         # Call the parent class (Sprite) constructor
@@ -87,3 +87,19 @@ class Interactive_Object(pygame.sprite.Sprite):
 
             if image_to_blit:
                 surface.blit(image_to_blit, pixel_location_tuple)
+
+    # blits the interactive object sprite image onto surface at the
+    # with the image's bottom left pixel set by bottom_left_pixel_loc
+    # Does not update the surface display - caller will have to do that.
+    def blit_onto_surface_bottom_left(self, surface, image_type_id, bottom_left_pixel_loc):
+        if self and surface:
+            image_to_blit = self.image_dict.get(image_type_id, None)
+
+            # get image dimensions
+            width, height = image_to_blit.get_size()
+
+            # offset
+            top_left = (bottom_left_pixel_loc[0], bottom_left_pixel_loc[1] - height)
+
+            if image_to_blit:
+                surface.blit(image_to_blit, top_left)
