@@ -199,7 +199,10 @@ class Game():
         pressed_up = False
         pressed_down = False
 
-        move_protag = False
+        move_up = False
+        move_down = False
+        move_right = False
+        move_left = False
         protag_move_dir = None
 
         while continue_playing:
@@ -212,38 +215,43 @@ class Game():
                 elif events.type == pygame.KEYDOWN:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = True
-                        move_protag = True
+                        protag_move_dir = map.DIR_EAST
+                        #move_right = True
                         logger.debug("Right pressed down")
                     elif events.key == pygame.K_LEFT:
                         pressed_left = True
-                        move_protag = True
+                        protag_move_dir = map.DIR_WEST
+                        #move_left = True
                         logger.debug("Left pressed down")
                     elif events.key == pygame.K_UP:
                         pressed_up = True
-                        move_protag = True
+                        protag_move_dir = map.DIR_NORTH
+                        #move_up = True
                         logger.debug("Up pressed down")
                     elif events.key == pygame.K_DOWN:
                         pressed_down = True
-                        move_protag = True
+                        protag_move_dir = map.DIR_SOUTH
+                        #move_down = True
                         logger.debug("Down pressed down")
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
-                        move_protag = False
+                        #move_right = False
                         logger.debug("Right released")
                     elif events.key == pygame.K_LEFT:
                         pressed_left = False
-                        move_protag = False
+                        #move_left = False
                         logger.debug("Left released")
                     elif events.key == pygame.K_UP:
                         pressed_up = False
-                        move_protag = False
+                        #move_up = False
                         logger.debug("Up released")
                     elif events.key == pygame.K_DOWN:
                         pressed_down = False
-                        move_protag = False
+                        #move_down = False
                         logger.debug("Down released")
 
+            """
             if pressed_up:
                 protag_move_dir = map.DIR_NORTH
                 logger.debug("Moved up")
@@ -256,8 +264,9 @@ class Game():
             elif pressed_left:
                 protag_move_dir = map.DIR_WEST
                 logger.debug("Moved left")
+            """
 
-            if move_protag:
+            if pressed_up or pressed_down or pressed_right or pressed_left:
                 # TODO for now, just stick with walking
                 transport_type = tile.WALKABLE_F
 
