@@ -5,7 +5,7 @@ import viewing
 import entity
 import map
 import tile
-import interactive_obj
+import interactiveobj
 import sys
 
 logger = None
@@ -71,10 +71,10 @@ class Game():
         protagonist = None
 
         # build fields
-        protag_id = interactive_obj.PROTAGONIST_ID
+        protag_id = interactiveobj.PROTAGONIST_ID
         protag_name = name
         protag_tile_pos = tile_pos
-        protag_image_path_dict = interactive_obj.IMAGE_PATH_DICT_PROTAG
+        protag_image_path_dict = interactiveobj.IMAGE_PATH_DICT_PROTAG
 
         protagonist = entity.Protagonist(                       \
             protag_id,  \
@@ -109,7 +109,7 @@ class Game():
             self.protagonist.tile_position = protag_dest_tile_pos
 
             # blit protagonist
-            self.viewing.blit_interactive_object_bottom_left(self.protagonist, interactive_obj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
+            self.viewing.blit_interactive_object_bottom_left(self.protagonist, interactiveobj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
 
             # update screen
             pygame.display.update()
@@ -250,21 +250,6 @@ class Game():
                         pressed_down = False
                         #move_down = False
                         logger.debug("Down released")
-
-            """
-            if pressed_up:
-                protag_move_dir = map.DIR_NORTH
-                logger.debug("Moved up")
-            elif pressed_right:
-                protag_move_dir = map.DIR_EAST
-                logger.debug("Moved right")
-            elif pressed_down:
-                protag_move_dir = map.DIR_SOUTH
-                logger.debug("Moved down")
-            elif pressed_left:
-                protag_move_dir = map.DIR_WEST
-                logger.debug("Moved left")
-            """
 
             if pressed_up or pressed_down or pressed_right or pressed_left:
                 # TODO for now, just stick with walking

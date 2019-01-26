@@ -35,7 +35,7 @@ TILE_SAND_ID = 0x300
 # SHOULD THIS BE IMMUTABLE?
 class Tile:
     def __init__(self,                                                      \
-                image_path=image_paths.TILE_DEFAULT_PATH,                        \
+                image_path=imagepaths.TILE_DEFAULT_PATH,                        \
                 allowed_transport=(WALKABLE_F | FLYABLE_F),                 \
                 ):
         # represents the base terrain image (e.g. grass, water)
@@ -79,9 +79,9 @@ class Tile:
     # blits the tile image onto the surface at the designated pixel
     # coordinate position (x,y).
     # Does not update the surface display - caller will have to do that.
-    def blit_onto_surface(self, surface, pixel_location_tuple):
-        if self and surface and pixel_location_tuple:
-            surface.blit(self._image, pixel_location_tuple)
+    def blit_onto_surface(self, surface, top_left_pixel_tuple):
+        if self and surface and top_left_pixel_tuple:
+            surface.blit(self._image, top_left_pixel_tuple)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
@@ -105,10 +105,10 @@ def build_tiles():
     TILE_DEFAULT = Tile()
 
     TILE_LISTING[TILE_DEFAULT_ID] = TILE_DEFAULT
-    TILE_LISTING[TILE_GRASS_1_ID] = Tile(image_path=image_paths.TILE_GRASS_1_PATH)
-    TILE_LISTING[TILE_GRASS_2_ID] = Tile(image_path=image_paths.TILE_GRASS_2_PATH)
-    TILE_LISTING[TILE_GRASS_PLAIN_ID] = Tile(image_path=image_paths.TILE_GRASS_PLAIN_PATH)
-    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=image_paths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
+    TILE_LISTING[TILE_GRASS_1_ID] = Tile(image_path=imagepaths.TILE_GRASS_1_PATH)
+    TILE_LISTING[TILE_GRASS_2_ID] = Tile(image_path=imagepaths.TILE_GRASS_2_PATH)
+    TILE_LISTING[TILE_GRASS_PLAIN_ID] = Tile(image_path=imagepaths.TILE_GRASS_PLAIN_PATH)
+    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=imagepaths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
     """
     TILE_LISTING[TILE_WATER_NORMAL_2_ID] =
     TILE_LISTING[TILE_WATER_NORMAL_3_ID] =
@@ -119,4 +119,4 @@ def build_tiles():
     TILE_LISTING[TILE_WATER_NORMAL_8_ID] =
     TILE_LISTING[TILE_WATER_NORMAL_9_ID] =
     """
-    TILE_LISTING[TILE_SAND_ID] = Tile(image_path=image_paths.TILE_SAND_PATH)
+    TILE_LISTING[TILE_SAND_ID] = Tile(image_path=imagepaths.TILE_SAND_PATH)

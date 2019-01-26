@@ -2,7 +2,7 @@ import logging
 import pygame
 import random
 import sys
-import interactive_obj
+import interactiveobj
 import tile
 from pygame.locals import *
 
@@ -298,10 +298,10 @@ class Map:
 
     # blit entire map, including tiles and spawned interactive objects
     # caller needs to update surface after method
-    def blit_onto_surface(self, surface, pixel_location_tuple):
-        if self and surface and pixel_location_tuple:
-            start_x = pixel_location_tuple[0]
-            start_y = pixel_location_tuple[1]
+    def blit_onto_surface(self, surface, top_left_pixel_tuple):
+        if self and surface and top_left_pixel_tuple:
+            start_x = top_left_pixel_tuple[0]
+            start_y = top_left_pixel_tuple[1]
 
             # blit tiles
             if self.tile_grid and surface:
@@ -326,8 +326,8 @@ class Map:
                             pos_y = tile_location[1] * tile.TILE_SIZE
 
                             # blit sprite image
-                            #obj.blit_onto_surface(surface, (pos_x, pos_y))
-                            obj.blit_onto_surface_bottom_left(surface, (pos_x, pos_y + tile.TILE_SIZE))
+                            # TODO
+                            #obj.blit_onto_surface(surface, (pos_x, pos_y + tile.TILE_SIZE))
 
     # scroll map in the indicated direction for the indicated distancet
     # also pass in surface object to blit on and update

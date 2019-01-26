@@ -1,5 +1,3 @@
-import pygame
-
 ### SKILLS CONSTANTS ###
 SKILL_ID_ATTACK = 0x1
 SKILL_ID_STRENGTH = 0x2

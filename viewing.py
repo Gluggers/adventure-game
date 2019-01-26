@@ -2,7 +2,7 @@ import pygame
 import logging
 import map
 import tile
-import interactive_obj
+import interactiveobj
 
 # overworld display constants
 OW_DISPLAY_NUM_TILES_HORIZONTAL = 31
@@ -105,28 +105,28 @@ class Viewing():
             # TODO - have designated spot for protagonist?
             if self.protagonist:
                 # get image type ID for protagonist:
-                image_type_id = interactive_obj.OW_IMAGE_ID_DEFAULT
+                image_type_id = interactiveobj.OW_IMAGE_ID_DEFAULT
 
                 if direction == map.DIR_NORTH:
                     if (i % 8) < 4:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_NORTH
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_NORTH
                     else:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
+                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_NORTH
                 elif direction == map.DIR_EAST:
                     if (i % 8) < 4:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_EAST
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_EAST
                     else:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
+                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_EAST
                 elif direction == map.DIR_SOUTH:
                     if (i % 8) < 4:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_SOUTH
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_SOUTH
                     else:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
+                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_SOUTH
                 elif direction == map.DIR_WEST:
                     if (i % 8) < 4:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_WALK_WEST
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_WEST
                     else:
-                        image_type_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
+                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_WEST
 
                 """
                 self.protagonist.blit_onto_surface(         \
@@ -167,14 +167,28 @@ class Viewing():
         # don't forget top display
         self.blit_top_display()
 
-    # TODO DOCUMENT
-    def blit_interactive_object(self, obj_to_blit, image_type_id, pixel_location):
-        if self and obj_to_blit and pixel_location:
-            obj_to_blit.blit_onto_surface(self.main_display_surface, image_type_id, pixel_location)
-
-    def blit_interactive_object_bottom_left(self, obj_to_blit, image_type_id, bottom_left_pixel_location):
-        if self and obj_to_blit and bottom_left_pixel_location:
-            obj_to_blit.blit_onto_surface_bottom_left(self.main_display_surface, image_type_id, bottom_left_pixel_location)
+    # blits the obj_to_blit sprite image corresponding to image_type_id
+    # onto the designated surface. Can specify either top_left_pixel or
+    # bottom_left_pixel as the reference point for blitting the image.
+    # bottom_left_pixel is recommended for images that are larger than
+    # a single Tile image. If both top_left_pixel and bottom_left_pixel are
+    # specified, the method will use bottom_left_pixel as an override.
+    # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
+    # Does not update the surface display - caller will have to do that.
+    def blit_interactive_object(                \
+                self,                           \
+                obj_to_blit,                    \
+                image_type_id,                  \
+                bottom_left_pixel=None,         \
+                top_left_pixel=None             \
+            ):
+        if self and obj_to_blit and image_type_id and (bottom_left_pixel or top_left_pixel):
+            obj_to_blit.blit_onto_surface(              \
+                self.main_display_surface,              \
+                image_type_id,                          \
+                bottom_left_pixel=bottom_left_pixel,    \
+                top_left_pixel=top_left_pixel           \
+            )
 
 # return top left pixel coordinate for the map given the protagonist's
 # tile coordinates

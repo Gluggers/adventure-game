@@ -1,5 +1,5 @@
 import pygame
-import interactive_obj
+import interactiveobj
 import adventure
 import map
 
@@ -11,10 +11,10 @@ GENDER_FEMALE = 0x2
 RACE_DEFAULT = 0x0
 RACE_HUMAN = 0x1
 
-class Character(interactive_obj.Interactive_Object):
+class Character(interactiveobj.Interactive_Object):
     def __init__(self, image_path, id, name, \
                 gender=GENDER_NEUTRAL, race=RACE_HUMAN):
-        interactive_obj.Interactive_Object.__init__(self)
+        interactiveobj.Interactive_Object.__init__(self)
         # TODO Fill in rest
         self.map_position = (0,0) # default
 
@@ -28,4 +28,4 @@ class Protagonist(Character):
 
         # protagonist pixel location MUST be as close to center tile
         # as possible
-        self.pixel_location = 
+        self.pixel_location =

@@ -1,5 +1,5 @@
 import pygame
-import interactive_obj
+import interactiveobj
 import adventure
 import map
 import skills
@@ -17,7 +17,7 @@ RACE_HUMAN = 0x1
 # equipment_dict maps the equipment slot ID to the corresponding item ID
 # that the Entity is wielding
 # TODO - set up item class and have it map IDs to item objects (build_item method)
-class Entity(interactive_obj.Interactive_Object):
+class Entity(interactiveobj.Interactive_Object):
     def __init__(                           \
                     self,                   \
                     id,                     \
@@ -29,9 +29,9 @@ class Entity(interactive_obj.Interactive_Object):
                     gender=GENDER_NEUTRAL,  \
                     race=RACE_HUMAN         \
                 ):
-        interactive_obj.Interactive_Object.__init__(    \
+        interactiveobj.Interactive_Object.__init__(    \
             self,                                       \
-            interactive_obj.TYPE_ENTITY,                \
+            interactiveobj.TYPE_ENTITY,                \
             name,                                       \
             id,                                         \
             image_path_dict                             \
@@ -62,44 +62,35 @@ class Entity(interactive_obj.Interactive_Object):
             self.equipment_dict[equipment_slot_id] = item_id
 
     # reblit the entity to face the specified direction.
+    # Can specify either top_left_pixel or
+    # bottom_left_pixel as the reference point for blitting the image.
+    # bottom_left_pixel is recommended for images that are larger than
+    # a single Tile image. If both top_left_pixel and bottom_left_pixel are
+    # specified, the method will use bottom_left_pixel as an override.
+    # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # DOES NOT update surface - caller will have to do that
-    def face_direction(self, surface, direction, pixel_location_tuple):
+    def face_direction(self, surface, direction, bottom_left_pixel, top_left_pixel):
         image_id = None
 
-        if self and surface and pixel_location_tuple:
+        if self and surface and (bottom_left_pixel or top_left_pixel):
             if direction == map.DIR_NORTH:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
+                image_id = interactiveobj.OW_IMAGE_ID_FACE_NORTH
             elif direction == map.DIR_EAST:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
+                image_id = interactiveobj.OW_IMAGE_ID_FACE_EAST
             elif direction == map.DIR_SOUTH:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
+                image_id = interactiveobj.OW_IMAGE_ID_FACE_SOUTH
             elif direction == map.DIR_WEST:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
+                image_id = interactiveobj.OW_IMAGE_ID_FACE_WEST
 
             if image_id is not None:
                 # change direction variable and blit
                 self.facing_direction = direction
-                self.blit_onto_surface(surface, image_id, pixel_location_tuple)
-
-    # reblit the entity to face the specified direction.
-    # DOES NOT update surface - caller will have to do that
-    def face_direction_bottom_left(self, surface, direction, bottom_left_pixel_location):
-        image_id = None
-
-        if self and surface and bottom_left_pixel_location:
-            if direction == map.DIR_NORTH:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_NORTH
-            elif direction == map.DIR_EAST:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_EAST
-            elif direction == map.DIR_SOUTH:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_SOUTH
-            elif direction == map.DIR_WEST:
-                image_id = interactive_obj.OW_IMAGE_ID_FACE_WEST
-
-            if image_id is not None:
-                # change direction variable and blit
-                self.facing_direction = direction
-                self.blit_onto_surface_bottom_left(surface, image_id, bottom_left_pixel_location)
+                self.blit_onto_surface(                     \
+                    surface,                                \
+                    image_id,                               \
+                    bottom_left_pixel=bottom_left_pixel,    \
+                    top_left_pixel=top_left_pixel           \
+                )
 
 # extend Entity class
 class Character(Entity):
