@@ -47,7 +47,7 @@ class Game():
 
     """
     def set_current_game_map(self, curr_map_id, map_top_left=viewing.OW_VIEWING_LOCATION, default_color=viewing.COLOR_BLACK):
-        curr_map = map.get_map(curr_map_id)
+        curr_map = map.Map.get_map(curr_map_id)
 
         if curr_map:
             self.curr_map = curr_map
@@ -59,7 +59,7 @@ class Game():
     # centers map automatically depending on where protagonist is
     # DOES NOT UPDATE SURFACE
     def set_and_blit_current_game_map(self, curr_map_id, protag_tile_location=(0,0), default_color=viewing.COLOR_BLACK):
-        curr_map = map.get_map(curr_map_id)
+        curr_map = map.Map.get_map(curr_map_id)
 
         if curr_map and protag_tile_location:
             self.curr_map = curr_map
@@ -163,7 +163,7 @@ class Game():
             if adj_map_info:
                 # get destination map and tile position
                 dest_map_id = adj_map_info[0]
-                dest_map = map.get_map(dest_map_id)
+                dest_map = map.Map.get_map(dest_map_id)
                 real_dest_tile_loc = adj_map_info[1]
 
                 # make sure dest tile is reachable
@@ -189,6 +189,22 @@ class Game():
             else:
                 # same map, just scroll
                 self.viewing.scroll_map_single_tile(map_scroll_dir)
+
+    # does not update surface - caller will have to do that
+    def turn_protagonist(self, direction_to_face):
+        # reblit tile that the protagonist is on
+        self.curr_map.blit_tile(                \
+            self.viewing.main_display_surface,  \
+            self.protagonist.tile_position,     \
+            viewing.CENTER_OW_TILE_TOP_LEFT     \
+        )
+
+        # make protagonist face the direction
+        self.protagonist.face_direction(                            \
+            self.viewing.main_display_surface,                      \
+            direction_to_face,                                      \
+            bottom_left_pixel=viewing.CENTER_OW_TILE_BOTTOM_LEFT    \
+        )
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -255,14 +271,14 @@ class Game():
                 # TODO for now, just stick with walking
                 transport_type = tile.WALKABLE_F
 
-                # make protagonist face the direction
-                self.protagonist.face_direction_bottom_left(    \
-                    self.viewing.main_display_surface,          \
-                    protag_move_dir,                            \
-                    viewing.CENTER_OW_TILE_BOTTOM_LEFT          \
-                )
+                # make protagonist face the direction and update tile
+                # that protagonist is on to clear the previous protagonist
+                # sprite image
+                self.turn_protagonist(protag_move_dir)
 
                 self.viewing.blit_top_display()
+
+                # TODO - reblit the current square where the protag is when turning
 
                 # update display
                 pygame.display.update()

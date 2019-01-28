@@ -69,7 +69,7 @@ class Entity(interactiveobj.Interactive_Object):
     # specified, the method will use bottom_left_pixel as an override.
     # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # DOES NOT update surface - caller will have to do that
-    def face_direction(self, surface, direction, bottom_left_pixel, top_left_pixel):
+    def face_direction(self, surface, direction, bottom_left_pixel=None, top_left_pixel=None):
         image_id = None
 
         if self and surface and (bottom_left_pixel or top_left_pixel):

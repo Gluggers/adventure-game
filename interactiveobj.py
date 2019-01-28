@@ -1,5 +1,6 @@
-imagepaths.import pygame
+import pygame
 import imagepaths
+import logging
 
 #INTERACTIVE_OBJ_LISTING = {} # maps interactive object IDs to objects
 
@@ -27,33 +28,41 @@ OW_IMAGE_ID_FACE_NORTH = 0x1
 OW_IMAGE_ID_FACE_EAST = 0x2
 OW_IMAGE_ID_FACE_SOUTH = 0x3
 OW_IMAGE_ID_FACE_WEST = 0x4
-OW_IMAGE_ID_WALK_NORTH = 0x5
-OW_IMAGE_ID_WALK_EAST = 0x6
-OW_IMAGE_ID_WALK_SOUTH = 0x7
-OW_IMAGE_ID_WALK_WEST = 0x8
+OW_IMAGE_ID_WALK1_NORTH = 0x5
+OW_IMAGE_ID_WALK1_EAST = 0x6
+OW_IMAGE_ID_WALK1_SOUTH = 0x7
+OW_IMAGE_ID_WALK1_WEST = 0x8
+OW_IMAGE_ID_WALK2_NORTH = 0x9
+OW_IMAGE_ID_WALK2_EAST = 0xa
+OW_IMAGE_ID_WALK2_SOUTH = 0xb
+OW_IMAGE_ID_WALK2_WEST = 0xc
 
 ### BATTLE MODE IMAGE TYPE ID NUMBERS ###
-BATTLE_IMAGE_ID_DEFAULT = 0x9
-BATTLE_IMAGE_ID_STAND = 0xa
-BATTLE_IMAGE_ID_ATTACK = 0xb
-BATTLE_IMAGE_ID_FAINTED = 0xc
+BATTLE_IMAGE_ID_DEFAULT = 0xd
+BATTLE_IMAGE_ID_STAND = 0xe
+BATTLE_IMAGE_ID_ATTACK = 0xf
+BATTLE_IMAGE_ID_FAINTED = 0x10
 
 
 ## TESTING PROTAG IMAGE PATH DICT
 IMAGE_PATH_DICT_PROTAG = {
-    OW_IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_FACE_NORTH: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_FACE_EAST: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_FACE_SOUTH: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_FACE_WEST: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_WALK_NORTH: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_WALK_EAST: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_WALK_SOUTH: imagepaths.TREE_BASIC_PATH,
-    OW_IMAGE_ID_WALK_WEST: imagepaths.TREE_BASIC_PATH,
-    BATTLE_IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
-    BATTLE_IMAGE_ID_STAND: imagepaths.TREE_BASIC_PATH,
-    BATTLE_IMAGE_ID_ATTACK: imagepaths.TREE_BASIC_PATH,
-    BATTLE_IMAGE_ID_FAINTED: imagepaths.TREE_BASIC_PATH
+    OW_IMAGE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    OW_IMAGE_ID_FACE_NORTH: imagepaths.PROT_RANGER_F_OW_FACE_NORTH,
+    OW_IMAGE_ID_FACE_EAST: imagepaths.PROT_RANGER_F_OW_FACE_EAST,
+    OW_IMAGE_ID_FACE_SOUTH: imagepaths.PROT_RANGER_F_OW_FACE_SOUTH,
+    OW_IMAGE_ID_FACE_WEST: imagepaths.PROT_RANGER_F_OW_FACE_WEST,
+    OW_IMAGE_ID_WALK1_NORTH: imagepaths.PROT_RANGER_F_OW_WALK1_NORTH,
+    OW_IMAGE_ID_WALK1_EAST: imagepaths.PROT_RANGER_F_OW_WALK1_EAST,
+    OW_IMAGE_ID_WALK1_SOUTH: imagepaths.PROT_RANGER_F_OW_WALK1_SOUTH,
+    OW_IMAGE_ID_WALK1_WEST: imagepaths.PROT_RANGER_F_OW_WALK1_WEST,
+    OW_IMAGE_ID_WALK2_NORTH: imagepaths.PROT_RANGER_F_OW_WALK2_NORTH,
+    OW_IMAGE_ID_WALK2_EAST: imagepaths.PROT_RANGER_F_OW_WALK2_EAST,
+    OW_IMAGE_ID_WALK2_SOUTH: imagepaths.PROT_RANGER_F_OW_WALK2_SOUTH,
+    OW_IMAGE_ID_WALK2_WEST: imagepaths.PROT_RANGER_F_OW_WALK2_WEST,
+    BATTLE_IMAGE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    BATTLE_IMAGE_ID_STAND: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    BATTLE_IMAGE_ID_ATTACK: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    BATTLE_IMAGE_ID_FAINTED: imagepaths.PROT_RANGER_F_OW_DEFAULT
 }
 
 class Interactive_Object(pygame.sprite.Sprite):
@@ -87,7 +96,7 @@ class Interactive_Object(pygame.sprite.Sprite):
     # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # Does not update the surface display - caller will have to do that.
     def blit_onto_surface(self, surface, image_type_id, bottom_left_pixel=None, top_left_pixel=None):
-        if self and surface:
+        if self and surface and (bottom_left_pixel or top_left_pixel):
             image_to_blit = self.image_dict.get(image_type_id, None)
             top_left = None
 
@@ -96,9 +105,14 @@ class Interactive_Object(pygame.sprite.Sprite):
                     # get image dimensions
                     width, height = image_to_blit.get_size()
 
+                    # get top left pixel based on bottom left pixel
                     top_left = (bottom_left_pixel[0], bottom_left_pixel[1] - height)
                 elif top_left_pixel:
                     top_left = top_left_pixel
 
                 if top_left:
-                    surface.blit(image_to_blit, top_left_pixel)
+                    surface.blit(image_to_blit, top_left)
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)

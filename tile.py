@@ -1,11 +1,10 @@
 import logging
 import pygame
-import image_paths
+import imagepaths
 
 
 ### TILE CONSTANTS ###
-TILE_SIZE = 16
-TILE_LISTING = {} # maps Tile IDs to tile objects
+TILE_SIZE = 32
 TILE_CLASS = 'Tile'
 
 ### TRANSPORTATION FLAGS ###
@@ -34,6 +33,8 @@ TILE_SAND_ID = 0x300
 
 # SHOULD THIS BE IMMUTABLE?
 class Tile:
+    tile_listing = {} # maps tile IDs to tile objects
+
     def __init__(self,                                                      \
                 image_path=imagepaths.TILE_DEFAULT_PATH,                        \
                 allowed_transport=(WALKABLE_F | FLYABLE_F),                 \
@@ -83,40 +84,21 @@ class Tile:
         if self and surface and top_left_pixel_tuple:
             surface.blit(self._image, top_left_pixel_tuple)
 
+    @classmethod
+    def get_tile(cls, tile_id):
+        return Tile.tile_listing.get(tile_id, None)
+
+    @classmethod
+    def build_tiles(cls):
+        logger.debug("Building tiles")
+
+        Tile.tile_listing[TILE_DEFAULT_ID] = Tile()
+        Tile.tile_listing[TILE_GRASS_1_ID] = Tile(image_path=imagepaths.TILE_GRASS_1_PATH)
+        Tile.tile_listing[TILE_GRASS_2_ID] = Tile(image_path=imagepaths.TILE_GRASS_2_PATH)
+        Tile.tile_listing[TILE_GRASS_PLAIN_ID] = Tile(image_path=imagepaths.TILE_GRASS_PLAIN_PATH)
+        Tile.tile_listing[TILE_WATER_NORMAL_1_ID] = Tile(image_path=imagepaths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
+        Tile.tile_listing[TILE_SAND_ID] = Tile(image_path=imagepaths.TILE_SAND_PATH)
+
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-### TILES TO USE ###
-TILE_DEFAULT = None
-
-# TODO DOCUMENT
-def get_tile(tile_id):
-    global TILE_LISTING
-    global TILE_DEFAULT
-
-    return TILE_LISTING.get(tile_id, TILE_DEFAULT)
-
-def build_tiles():
-    logger.debug("Building tiles")
-    global TILE_LISTING
-    global TILE_DEFAULT
-
-    TILE_DEFAULT = Tile()
-
-    TILE_LISTING[TILE_DEFAULT_ID] = TILE_DEFAULT
-    TILE_LISTING[TILE_GRASS_1_ID] = Tile(image_path=imagepaths.TILE_GRASS_1_PATH)
-    TILE_LISTING[TILE_GRASS_2_ID] = Tile(image_path=imagepaths.TILE_GRASS_2_PATH)
-    TILE_LISTING[TILE_GRASS_PLAIN_ID] = Tile(image_path=imagepaths.TILE_GRASS_PLAIN_PATH)
-    TILE_LISTING[TILE_WATER_NORMAL_1_ID] = Tile(image_path=imagepaths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
-    """
-    TILE_LISTING[TILE_WATER_NORMAL_2_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_3_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_4_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_5_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_6_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_7_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_8_ID] =
-    TILE_LISTING[TILE_WATER_NORMAL_9_ID] =
-    """
-    TILE_LISTING[TILE_SAND_ID] = Tile(image_path=imagepaths.TILE_SAND_PATH)

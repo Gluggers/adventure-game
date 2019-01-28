@@ -5,8 +5,8 @@ import tile
 import interactiveobj
 
 # overworld display constants
-OW_DISPLAY_NUM_TILES_HORIZONTAL = 31
-OW_DISPLAY_NUM_TILES_VERTICAL = 21
+OW_DISPLAY_NUM_TILES_HORIZONTAL = 21
+OW_DISPLAY_NUM_TILES_VERTICAL = 15
 
 OW_VIEWING_WIDTH = tile.TILE_SIZE * OW_DISPLAY_NUM_TILES_HORIZONTAL
 OW_VIEWING_HEIGHT = tile.TILE_SIZE * OW_DISPLAY_NUM_TILES_VERTICAL
@@ -34,16 +34,21 @@ OW_SIDE_MENU_LOCATION = (                                               \
     MAIN_DISPLAY_WIDTH - OW_SIDE_MENU_WIDTH,                            \
     TOP_DISPLAY_HEIGHT + tile.TILE_SIZE                                  \
 )
-CENTER_OW_TILE_PIXEL_LOCATION = (                               \
+CENTER_OW_TILE_TOP_LEFT = (                                     \
     int(OW_DISPLAY_NUM_TILES_HORIZONTAL / 2) * tile.TILE_SIZE,  \
     int(OW_DISPLAY_NUM_TILES_VERTICAL / 2)*tile.TILE_SIZE +     \
         TOP_DISPLAY_HEIGHT                                      \
 )
 
-CENTER_OW_TILE_BOTTOM_LEFT = (
-    CENTER_OW_TILE_PIXEL_LOCATION[0], \
-    CENTER_OW_TILE_PIXEL_LOCATION[1] + tile.TILE_SIZE   \
+CENTER_OW_TILE_BOTTOM_LEFT = (                      \
+    CENTER_OW_TILE_TOP_LEFT[0],                     \
+    CENTER_OW_TILE_TOP_LEFT[1] + tile.TILE_SIZE     \
 )
+
+### WALKING CONSTANTS ###
+WALK1_FRAME_END = (tile.TILE_SIZE / 4)
+WALK2_FRAME_END = 3*(tile.TILE_SIZE / 4)
+STAND_FRAME_END = 2*(tile.TILE_SIZE / 4)
 
 ### COLOR CONSTANTS ###
 COLOR_WHITE = (255,255,255)
@@ -90,6 +95,10 @@ class Viewing():
     # updates main display with each new viewpoint
     # scroll_wait_time is the time (in milliseconds)
     def scroll_map_single_tile(self, direction):
+        # walk1 for TILE_SIZE/4 duration, stand for TILE_SIZE/4,
+        # walk2 for TILE_SIZE/4, stand for TILE_SIZE/4
+        # walk1 for 0 to 7, stand for 8 to 15,
+        # walk2 for 16 to 23, stand for 24 to 31
         for i in range(tile.TILE_SIZE):
             # reset the surface screen to default to black for empty map
             # spaces
@@ -106,39 +115,42 @@ class Viewing():
             if self.protagonist:
                 # get image type ID for protagonist:
                 image_type_id = interactiveobj.OW_IMAGE_ID_DEFAULT
+                offset = i % tile.TILE_SIZE
 
-                if direction == map.DIR_NORTH:
-                    if (i % 8) < 4:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_NORTH
+                if direction == map.DIR_SOUTH:
+                    # map scrolls south, character walks north
+                    if offset < WALK1_FRAME_END:
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_NORTH
+                    elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_NORTH
                     else:
                         image_type_id = interactiveobj.OW_IMAGE_ID_FACE_NORTH
-                elif direction == map.DIR_EAST:
-                    if (i % 8) < 4:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_EAST
+                elif direction == map.DIR_WEST:
+                    if offset < WALK1_FRAME_END:
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_EAST
+                    elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_EAST
                     else:
                         image_type_id = interactiveobj.OW_IMAGE_ID_FACE_EAST
-                elif direction == map.DIR_SOUTH:
-                    if (i % 8) < 4:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_SOUTH
+                elif direction == map.DIR_NORTH:
+                    if offset < WALK1_FRAME_END:
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_SOUTH
+                    elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_SOUTH
                     else:
                         image_type_id = interactiveobj.OW_IMAGE_ID_FACE_SOUTH
-                elif direction == map.DIR_WEST:
-                    if (i % 8) < 4:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK_WEST
+                elif direction == map.DIR_EAST:
+                    if offset < WALK1_FRAME_END:
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_WEST
+                    elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
+                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_WEST
                     else:
                         image_type_id = interactiveobj.OW_IMAGE_ID_FACE_WEST
 
-                """
-                self.protagonist.blit_onto_surface(         \
-                    self.main_display_surface,              \
-                    image_type_id,                          \
-                    CENTER_OW_TILE_PIXEL_LOCATION           \
-                )
-                """
-                self.protagonist.blit_onto_surface_bottom_left(         \
-                    self.main_display_surface,                          \
-                    image_type_id,                                      \
-                    CENTER_OW_TILE_BOTTOM_LEFT                          \
+                self.protagonist.blit_onto_surface(                 \
+                    self.main_display_surface,                      \
+                    image_type_id,                                  \
+                    bottom_left_pixel=CENTER_OW_TILE_BOTTOM_LEFT    \
                 )
 
             # update main display
@@ -182,7 +194,7 @@ class Viewing():
                 bottom_left_pixel=None,         \
                 top_left_pixel=None             \
             ):
-        if self and obj_to_blit and image_type_id and (bottom_left_pixel or top_left_pixel):
+        if self and obj_to_blit and (bottom_left_pixel or top_left_pixel):
             obj_to_blit.blit_onto_surface(              \
                 self.main_display_surface,              \
                 image_type_id,                          \
@@ -195,8 +207,8 @@ class Viewing():
 def get_centered_map_top_left_pixel(protag_tile_coordinate):
     top_left = (0,0)
     if protag_tile_coordinate:
-        pixel_distance_horiz = CENTER_OW_TILE_PIXEL_LOCATION[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
-        pixel_distance_vert = CENTER_OW_TILE_PIXEL_LOCATION[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
+        pixel_distance_horiz = CENTER_OW_TILE_TOP_LEFT[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
+        pixel_distance_vert = CENTER_OW_TILE_TOP_LEFT[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
 
         top_left = (pixel_distance_horiz, pixel_distance_vert)
 

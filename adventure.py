@@ -31,10 +31,10 @@ def main():
     game_obj = game.Game(game.GAME_TITLE, language.DEFAULT_LANGUAGE)
 
     # load tiles
-    tile.build_tiles()
+    tile.Tile.build_tiles()
 
     # load maps
-    map.build_maps()
+    map.Map.build_maps()
 
     # load resources
 
@@ -50,11 +50,14 @@ def main():
     protagonist = game_obj.build_protagonist("Bob", protag_tile_loc)
 
     # set map and blit
-    #game_obj.set_current_game_map(map.R0_A0_ID, map_top_left=viewing.get_centered_map_top_left_pixel(protag_tile_loc))
     game_obj.set_and_blit_current_game_map(map.R0_A0_ID, protag_tile_loc)
 
     # blit protagonist
-    game_obj.viewing.blit_interactive_object_bottom_left(protagonist, interactiveobj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
+    game_obj.viewing.blit_interactive_object(                   \
+        protagonist,                                            \
+        interactiveobj.OW_IMAGE_ID_DEFAULT,                     \
+        bottom_left_pixel=viewing.CENTER_OW_TILE_BOTTOM_LEFT    \
+    )
 
     # update screen
     pygame.display.update()

@@ -12,9 +12,6 @@ DIR_EAST = 0x2
 DIR_SOUTH = 0x3
 DIR_WEST = 0x4
 
-### MAP CONSTANTS ###
-MAP_LISTING = {} # maps Map IDs to Map objects
-
 ### MAP ID CONSTANTS ###
 R0_A0_ID = 0x0
 R0_A1_ID = 0x1
@@ -40,6 +37,8 @@ MAP_CLASS = 'Map'
 REGION_CLASS = 'Region'
 
 class Map:
+    map_listing = {} # maps map IDs to map objects
+
     # create a Map object. tile_grid must be a List of List objects, where
     # the inner List object must contain Tile objects, tile_grid will
     # effectively define the tiles for the map.  The grid must be rectangular,
@@ -99,7 +98,7 @@ class Map:
                 for grid_row in tile_grid:
                     row_to_copy = []
                     for x in grid_row:
-                        if not (x.__class__.__name__ == tile.TILE_CLASS):
+                        if not (x and (x.__class__.__name__ == tile.TILE_CLASS)):
                             logger.error("Tile grids can only accept Tile objects")
                             valid_grid_dimensions = False
                             sys.exit(1)
@@ -291,10 +290,32 @@ class Map:
                 (x_pos < self.width) and    \
                 (y_pos < self.height)
 
+    def get_tile_from_pos(self, tile_pos):
+        ret_tile = None
+
+        if self.location_within_bounds(tile_pos):
+            # y,x
+            ret_tile = self.tile_grid[tile_pos[1]][tile_pos[0]]
+
+        return ret_tile
+
     def valid_transportation(self, dest_tile_pos, transport_flag):
-        # y, x
-        dest_tile = self.tile_grid[dest_tile_pos[1]][dest_tile_pos[0]]
-        return dest_tile.valid_transportation(transport_flag)
+        ret_val = 0x0
+        dest_tile = self.get_tile_from_pos(dest_tile_pos)
+
+        if dest_tile:
+            ret_val = dest_tile.valid_transportation(transport_flag)
+
+        return ret_val
+
+    def blit_tile(self, surface, tile_coordinate, dest_top_left):
+        if surface and tile_coordinate and dest_top_left and self.location_within_bounds(tile_coordinate):
+            # y, x
+            tile_obj = self.get_tile_from_pos(tile_coordinate)
+
+            if tile_obj:
+                tile_obj.blit_onto_surface(surface, dest_top_left)
+
 
     # blit entire map, including tiles and spawned interactive objects
     # caller needs to update surface after method
@@ -360,39 +381,40 @@ class Map:
                 # update map top left
                 self.top_left_position = new_pixel_location
 
-def get_map(map_id):
-    global MAP_LISTING
-    return MAP_LISTING.get(map_id, None)
+    @classmethod
+    def get_map(cls, map_id):
+        return Map.map_listing.get(map_id, None)
 
-# TODO
-def parse_map(map_json_data):
     # TODO
-    pass
+    @classmethod
+    def parse_map(cls, map_json_data):
+        # TODO
+        pass
 
-def build_maps():
-    logger.debug("Building maps")
-    global MAP_LISTING
+    @classmethod
+    def build_maps(cls):
+        logger.debug("Building maps")
 
-    grasslands_area_0_grid = []
+        grasslands_area_0_grid = []
 
-    for i in range(40):
-        grasslands_area_0_grid.append([tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
+        for i in range(40):
+            grasslands_area_0_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
 
-    grasslands_area_0_grid[10][15] = tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
-    """
-    for i in range(100):
-        x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
-        y = random.randint(0, len(grasslands_area_0_grid) - 1)
+        grasslands_area_0_grid[10][15] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
+        """
+        for i in range(100):
+            x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
+            y = random.randint(0, len(grasslands_area_0_grid) - 1)
 
-        if i % 3 == 0:
-            grasslands_area_0_grid[y][x] = tile.TILE_SAND
-        elif i % 3 == 1:
-            grasslands_area_0_grid[y][x] = tile.TILE_GRASS_2
-        else:
-            grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
-    """
+            if i % 3 == 0:
+                grasslands_area_0_grid[y][x] = tile.TILE_SAND
+            elif i % 3 == 1:
+                grasslands_area_0_grid[y][x] = tile.TILE_GRASS_2
+            else:
+                grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
+        """
 
-    MAP_LISTING[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
+        Map.map_listing[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
