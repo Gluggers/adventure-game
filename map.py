@@ -396,25 +396,33 @@ class Map:
         logger.debug("Building maps")
 
         grasslands_area_0_grid = []
+        grasslands_area_1_grid = []
 
-        for i in range(40):
-            grasslands_area_0_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
+        # R0_A0
+        for i in range(15):
+            grasslands_area_0_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_PLAIN_ID)]*15)
 
-        grasslands_area_0_grid[10][15] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
-        """
         for i in range(100):
             x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
             y = random.randint(0, len(grasslands_area_0_grid) - 1)
 
-            if i % 3 == 0:
-                grasslands_area_0_grid[y][x] = tile.TILE_SAND
-            elif i % 3 == 1:
-                grasslands_area_0_grid[y][x] = tile.TILE_GRASS_2
+            if i % 4 == 0:
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_FLOWERS_ID)
+            elif i % 4 == 1:
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_2_ID)
+            elif i % 4 == 2:
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_1_ID)
             else:
-                grasslands_area_0_grid[y][x] = tile.TILE_WATER_NORMAL_1
-        """
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
+
+        # R0_A1
+        for i in range(30):
+            grasslands_area_1_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
+
+        grasslands_area_1_grid[10][15] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
 
         Map.map_listing[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
+        Map.map_listing[R0_A1_ID] = Map(R0_A1_ID, grasslands_area_1_grid)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

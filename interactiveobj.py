@@ -66,6 +66,9 @@ IMAGE_PATH_DICT_PROTAG = {
 }
 
 class Interactive_Object(pygame.sprite.Sprite):
+    # maps interactive obj ID to interactive obj
+    interactive_obj_listing = {}
+
     def __init__(                           \
                     self,                   \
                     object_type,            \

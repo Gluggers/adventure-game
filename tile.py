@@ -8,16 +8,18 @@ TILE_SIZE = 32
 TILE_CLASS = 'Tile'
 
 ### TRANSPORTATION FLAGS ###
+NO_TRANSPORT_F = 0x0
 WALKABLE_F = 0x1
 CANOEABLE_F = 0x2
 SAILABLE_F = 0x4
 FLYABLE_F = 0x8
 
 ### TILE ID NUMBERS ###
-TILE_DEFAULT_ID = 0x0
+TILE_DEFAULT_ID = 0x1
 TILE_GRASS_1_ID = 0x100
 TILE_GRASS_2_ID = 0x101
-TILE_GRASS_PLAIN_ID = 0x103
+TILE_GRASS_PLAIN_ID = 0x102
+TILE_GRASS_FLOWERS_ID = 0x103
 TILE_WATER_NORMAL_1_ID = 0x200
 TILE_WATER_NORMAL_2_ID = 0x201
 TILE_WATER_NORMAL_3_ID = 0x202
@@ -92,10 +94,11 @@ class Tile:
     def build_tiles(cls):
         logger.debug("Building tiles")
 
-        Tile.tile_listing[TILE_DEFAULT_ID] = Tile()
+        Tile.tile_listing[TILE_DEFAULT_ID] = Tile(allowed_transport=NO_TRANSPORT_F)
         Tile.tile_listing[TILE_GRASS_1_ID] = Tile(image_path=imagepaths.TILE_GRASS_1_PATH)
         Tile.tile_listing[TILE_GRASS_2_ID] = Tile(image_path=imagepaths.TILE_GRASS_2_PATH)
         Tile.tile_listing[TILE_GRASS_PLAIN_ID] = Tile(image_path=imagepaths.TILE_GRASS_PLAIN_PATH)
+        Tile.tile_listing[TILE_GRASS_FLOWERS_ID] = Tile(image_path=imagepaths.TILE_GRASS_FLOWERS_PATH)
         Tile.tile_listing[TILE_WATER_NORMAL_1_ID] = Tile(image_path=imagepaths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
         Tile.tile_listing[TILE_SAND_ID] = Tile(image_path=imagepaths.TILE_SAND_PATH)
 
