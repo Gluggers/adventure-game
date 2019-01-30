@@ -4,4 +4,4 @@ import pygame
 import entity
 
 class Monster(entity.Entity):
-    
+    pass
