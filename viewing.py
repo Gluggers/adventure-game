@@ -1,8 +1,9 @@
 import pygame
 import logging
 import map
+import mapdata
 import tile
-import interactiveobj
+import objdata
 
 # overworld display constants
 OW_DISPLAY_NUM_TILES_HORIZONTAL = 21
@@ -114,38 +115,38 @@ class Viewing():
             # TODO - have designated spot for protagonist?
             if self.protagonist:
                 # get image type ID for protagonist:
-                image_type_id = interactiveobj.OW_IMAGE_ID_DEFAULT
+                image_type_id = objdata.OW_IMAGE_ID_DEFAULT
                 offset = i % tile.TILE_SIZE
 
-                if direction == map.DIR_SOUTH:
+                if direction == mapdata.DIR_SOUTH:
                     # map scrolls south, character walks north
                     if offset < WALK1_FRAME_END:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_NORTH
+                        image_type_id = objdata.OW_IMAGE_ID_WALK1_NORTH
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_NORTH
+                        image_type_id = objdata.OW_IMAGE_ID_WALK2_NORTH
                     else:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_NORTH
-                elif direction == map.DIR_WEST:
+                        image_type_id = objdata.OW_IMAGE_ID_FACE_NORTH
+                elif direction == mapdata.DIR_WEST:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_EAST
+                        image_type_id = objdata.OW_IMAGE_ID_WALK1_EAST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_EAST
+                        image_type_id = objdata.OW_IMAGE_ID_WALK2_EAST
                     else:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_EAST
-                elif direction == map.DIR_NORTH:
+                        image_type_id = objdata.OW_IMAGE_ID_FACE_EAST
+                elif direction == mapdata.DIR_NORTH:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_SOUTH
+                        image_type_id = objdata.OW_IMAGE_ID_WALK1_SOUTH
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_SOUTH
+                        image_type_id = objdata.OW_IMAGE_ID_WALK2_SOUTH
                     else:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_SOUTH
-                elif direction == map.DIR_EAST:
+                        image_type_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+                elif direction == mapdata.DIR_EAST:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK1_WEST
+                        image_type_id = objdata.OW_IMAGE_ID_WALK1_WEST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = interactiveobj.OW_IMAGE_ID_WALK2_WEST
+                        image_type_id = objdata.OW_IMAGE_ID_WALK2_WEST
                     else:
-                        image_type_id = interactiveobj.OW_IMAGE_ID_FACE_WEST
+                        image_type_id = objdata.OW_IMAGE_ID_FACE_WEST
 
                 self.protagonist.blit_onto_surface(                 \
                     self.main_display_surface,                      \

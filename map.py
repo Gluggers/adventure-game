@@ -4,33 +4,9 @@ import random
 import sys
 import interactiveobj
 import tile
+import tiledata
+import mapdata
 from pygame.locals import *
-
-### DIRECTION CONSTANTS ###
-DIR_NORTH = 0x1
-DIR_EAST = 0x2
-DIR_SOUTH = 0x3
-DIR_WEST = 0x4
-
-### MAP ID CONSTANTS ###
-R0_A0_ID = 0x0
-R0_A1_ID = 0x1
-R0_A2_ID = 0x2
-R0_A3_ID = 0x3
-R0_A4_ID = 0x4
-R0_A5_ID = 0x5
-R1_A0_ID = 0x1000
-R1_A1_ID = 0x1001
-R1_A2_ID = 0x1002
-R1_A3_ID = 0x1003
-R1_A4_ID = 0x1004
-R1_A5_ID = 0x1005
-R2_A0_ID = 0x2000
-R2_A1_ID = 0x2001
-R2_A2_ID = 0x2002
-R2_A3_ID = 0x2003
-R2_A4_ID = 0x2004
-R2_A5_ID = 0x2005
 
 ### CLASS NAMES ###
 MAP_CLASS = 'Map'
@@ -359,15 +335,15 @@ class Map:
             new_pixel_location = None
             curr_top_left = self.top_left_position
 
-            if scroll_direction == DIR_NORTH:
+            if scroll_direction == mapdata.DIR_NORTH:
                 # scroll up
                 new_pixel_location = (curr_top_left[0], curr_top_left[1] - distance)
-            elif scroll_direction == DIR_EAST:
+            elif scroll_direction == mapdata.DIR_EAST:
                 # scroll right
                 new_pixel_location = (curr_top_left[0] + distance, curr_top_left[1])
-            elif scroll_direction == DIR_SOUTH:
+            elif scroll_direction == mapdata.DIR_SOUTH:
                 new_pixel_location = (curr_top_left[0], curr_top_left[1] + distance)
-            elif scroll_direction == DIR_WEST:
+            elif scroll_direction == mapdata.DIR_WEST:
                 # scroll left
                 new_pixel_location = (curr_top_left[0] - distance, curr_top_left[1])
             else:
@@ -381,9 +357,99 @@ class Map:
                 # update map top left
                 self.top_left_position = new_pixel_location
 
+    # builds map based on given map ID. Returns map if valid map ID.
+    # Adds the map to the class map_listing variable if a new
+    # map was created
+    # if the corresponding map already exists, the method will
+    # return that map rather than making a new one
+    @classmethod
+    def map_factory(cls, map_id):
+        ret_map = None
+
+        # check if we already have the map
+        map_from_listing = Map.map_listing.get(map_id, None)
+
+        if map_from_listing:
+            ret_map = map_from_listing
+        else:
+            # need to make map
+            ret_map_data = mapdata.MAP_DATA.get(map_id, None)
+            if (ret_map_data):
+                logger.debug("Parsing map data")
+                tile_grid_str_list = ret_map_data.get(mapdata.MAP_TILE_GRID_FIELD, None)
+                tile_grid_legend = ret_map_data.get(mapdata.MAP_TILE_GRID_KEY_FIELD, None)
+
+                map_tile_grid = Map.parse_tile_grid(tile_grid_str_list, tile_grid_legend)
+
+                if map_tile_grid:
+                    logger.debug("making map")
+                    ret_map = Map(                                          \
+                        map_id,                                             \
+                        map_tile_grid,                                      \
+                        interactive_obj_dict=ret_map_data.get(              \
+                            mapdata.MAP_INTER_OBJ_DICT_FIELD, {}            \
+                        ),                                                  \
+                        connector_tile_dict=ret_map_data.get(               \
+                            mapdata.MAP_CONNECTOR_TILE_DICT_FIELD, {}       \
+                        ),                                                  \
+                        adj_map_dict=ret_map_data.get(                      \
+                            mapdata.MAP_ADJ_MAP_DICT_FIELD, {}              \
+                        )                                                   \
+                    )
+
+                    if ret_map:
+                        # add map to listing
+                        Map.map_listing[map_id] = ret_map
+                    else:
+                        logger.warn("failed to make map with id {0}".format(map_id))
+
+        return ret_map
+
+    # TODO document
+    @classmethod
+    def parse_tile_grid(cls, tile_grid_str_list, legend):
+        ret_grid = None
+        failed = False
+
+        if tile_grid_str_list and legend:
+            curr_grid = []
+
+            for row_str in tile_grid_str_list:
+                curr_row = []
+                if not failed:
+                    for tile_char in row_str:
+                        curr_id = legend.get(tile_char, None)
+                        if curr_id:
+                            curr_tile = tile.Tile.get_tile(curr_id)
+                            if curr_tile:
+                                curr_row.append(curr_tile)
+                            else:
+                                logger.warn("No tile found for tile id {0}".format(curr_id))
+                                failed = True
+                                break
+                        else:
+                            logger.warn("No tile id found for tile char {0}".format(tile_char))
+                            failed = True
+                            break
+                    if curr_row:
+                        curr_grid.append(curr_row)
+                    else:
+                        logger.warn("No tiles added to row")
+                        failed = True
+                        break
+            if not failed:
+                ret_grid = curr_grid
+
+        return ret_grid
+
     @classmethod
     def get_map(cls, map_id):
-        return Map.map_listing.get(map_id, None)
+        ret_map = Map.map_listing.get(map_id, None)
+
+        if not ret_map:
+            logger.warn("Get_map: No map found for map id {0}".format(map_id))
+
+        return ret_map
 
     # TODO
     @classmethod
@@ -394,35 +460,38 @@ class Map:
     @classmethod
     def build_maps(cls):
         logger.debug("Building maps")
-
+        """
         grasslands_area_0_grid = []
         grasslands_area_1_grid = []
 
         # R0_A0
         for i in range(15):
-            grasslands_area_0_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_PLAIN_ID)]*15)
+            grasslands_area_0_grid.append([tile.Tile.get_tile(tiledata.TILE_GRASS_PLAIN_ID)]*15)
 
         for i in range(100):
             x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
             y = random.randint(0, len(grasslands_area_0_grid) - 1)
 
             if i % 4 == 0:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_FLOWERS_ID)
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_FLOWERS_ID)
             elif i % 4 == 1:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_2_ID)
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_2_ID)
             elif i % 4 == 2:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_GRASS_1_ID)
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_1_ID)
             else:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
+                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_WATER_NORMAL_1_ID)
 
         # R0_A1
         for i in range(30):
-            grasslands_area_1_grid.append([tile.Tile.get_tile(tile.TILE_GRASS_1_ID)]*50)
+            grasslands_area_1_grid.append([tile.Tile.get_tile(tiledata.TILE_GRASS_1_ID)]*50)
 
-        grasslands_area_1_grid[10][15] = tile.Tile.get_tile(tile.TILE_WATER_NORMAL_1_ID)
+        grasslands_area_1_grid[10][15] = tile.Tile.get_tile(tiledata.TILE_WATER_NORMAL_1_ID)
 
         Map.map_listing[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
         Map.map_listing[R0_A1_ID] = Map(R0_A1_ID, grasslands_area_1_grid)
+        """
+        for map_id in mapdata.MAP_DATA:
+            Map.map_factory(map_id)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

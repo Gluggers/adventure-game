@@ -1,35 +1,11 @@
 import logging
 import pygame
 import imagepaths
-
+import tiledata
 
 ### TILE CONSTANTS ###
 TILE_SIZE = 32
 TILE_CLASS = 'Tile'
-
-### TRANSPORTATION FLAGS ###
-NO_TRANSPORT_F = 0x0
-WALKABLE_F = 0x1
-CANOEABLE_F = 0x2
-SAILABLE_F = 0x4
-FLYABLE_F = 0x8
-
-### TILE ID NUMBERS ###
-TILE_DEFAULT_ID = 0x1
-TILE_GRASS_1_ID = 0x100
-TILE_GRASS_2_ID = 0x101
-TILE_GRASS_PLAIN_ID = 0x102
-TILE_GRASS_FLOWERS_ID = 0x103
-TILE_WATER_NORMAL_1_ID = 0x200
-TILE_WATER_NORMAL_2_ID = 0x201
-TILE_WATER_NORMAL_3_ID = 0x202
-TILE_WATER_NORMAL_4_ID = 0x203
-TILE_WATER_NORMAL_5_ID = 0x204
-TILE_WATER_NORMAL_6_ID = 0x205
-TILE_WATER_NORMAL_7_ID = 0x206
-TILE_WATER_NORMAL_8_ID = 0x207
-TILE_WATER_NORMAL_9_ID = 0x208
-TILE_SAND_ID = 0x300
 
 # TODO make this extend sprite?
 
@@ -37,10 +13,14 @@ TILE_SAND_ID = 0x300
 class Tile:
     tile_listing = {} # maps tile IDs to tile objects
 
-    def __init__(self,                                                      \
-                image_path=imagepaths.TILE_DEFAULT_PATH,                        \
-                allowed_transport=(WALKABLE_F | FLYABLE_F),                 \
+    def __init__(self,                                          \
+                tile_id,                                        \
+                image_path=imagepaths.TILE_DEFAULT_PATH,        \
+                allowed_transport=(                             \
+                    tiledata.WALKABLE_F | tiledata.FLYABLE_F)   \
                 ):
+        self.tile_id = tile_id
+
         # represents the base terrain image (e.g. grass, water)
         self._image = pygame.image.load(image_path).convert()
 
@@ -86,21 +66,55 @@ class Tile:
         if self and surface and top_left_pixel_tuple:
             surface.blit(self._image, top_left_pixel_tuple)
 
+    # builds Tile. Adds Tile to tile listing if a new tile was created
+    # if the corresponding tile already exists, the method
+    # will simply return the Tile rather than creating a new one.
+    @classmethod
+    def tile_factory(cls, tile_id):
+        ret_tile = None
+        # check if we already have the tile made
+        tile_from_listing = Tile.tile_listing.get(tile_id, None)
+
+        if tile_from_listing:
+            ret_tile = tile_from_listing
+        else:
+            # need to make tile. grab tile data
+            ret_tile_data = tiledata.TILE_DATA.get(tile_id, None)
+            if (ret_tile_data):
+                tile_image_path = ret_tile_data.get(                    \
+                    tiledata.TILE_IMAGE_PATH_FIELD,                     \
+                    imagepaths.TILE_DEFAULT_PATH                        \
+                )
+                tile_transport_flag = ret_tile_data.get(                \
+                    tiledata.TILE_ALLOWED_TRANSPORT_FIELD,              \
+                    (tiledata.WALKABLE_F | tiledata.FLYABLE_F)          \
+                )
+
+                ret_tile = Tile(                                        \
+                    tile_id,                                            \
+                    image_path=tile_image_path,                         \
+                    allowed_transport=tile_transport_flag               \
+                )
+
+                # add tile to listing
+                if ret_tile:
+                    Tile.tile_listing[tile_id] = ret_tile
+                else:
+                    logger.warn("Could not make tile for id {0}".format(tile_id))
+
+        return ret_tile
+
     @classmethod
     def get_tile(cls, tile_id):
         return Tile.tile_listing.get(tile_id, None)
 
+    # builds all set tiles and adds them to the tile listing
     @classmethod
     def build_tiles(cls):
         logger.debug("Building tiles")
 
-        Tile.tile_listing[TILE_DEFAULT_ID] = Tile(allowed_transport=NO_TRANSPORT_F)
-        Tile.tile_listing[TILE_GRASS_1_ID] = Tile(image_path=imagepaths.TILE_GRASS_1_PATH)
-        Tile.tile_listing[TILE_GRASS_2_ID] = Tile(image_path=imagepaths.TILE_GRASS_2_PATH)
-        Tile.tile_listing[TILE_GRASS_PLAIN_ID] = Tile(image_path=imagepaths.TILE_GRASS_PLAIN_PATH)
-        Tile.tile_listing[TILE_GRASS_FLOWERS_ID] = Tile(image_path=imagepaths.TILE_GRASS_FLOWERS_PATH)
-        Tile.tile_listing[TILE_WATER_NORMAL_1_ID] = Tile(image_path=imagepaths.TILE_WATER_NORMAL_1_PATH, allowed_transport=FLYABLE_F | CANOEABLE_F)
-        Tile.tile_listing[TILE_SAND_ID] = Tile(image_path=imagepaths.TILE_SAND_PATH)
+        for tile_id in tiledata.TILE_DATA:
+            new_tile = Tile.tile_factory(tile_id)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

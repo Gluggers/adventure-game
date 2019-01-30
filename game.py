@@ -4,8 +4,10 @@ import logging
 import viewing
 import entity
 import map
+import mapdata
 import tile
-import interactiveobj
+import tiledata
+import objdata
 import sys
 
 logger = None
@@ -71,10 +73,10 @@ class Game():
         protagonist = None
 
         # build fields
-        protag_id = interactiveobj.PROTAGONIST_ID
+        protag_id = objdata.PROTAGONIST_ID
         protag_name = name
         protag_tile_pos = tile_pos
-        protag_image_path_dict = interactiveobj.IMAGE_PATH_DICT_PROTAG
+        protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
 
         protagonist = entity.Protagonist(                       \
             protag_id,  \
@@ -109,7 +111,7 @@ class Game():
             self.protagonist.tile_position = protag_dest_tile_pos
 
             # blit protagonist
-            self.viewing.blit_interactive_object_bottom_left(self.protagonist, interactiveobj.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
+            self.viewing.blit_interactive_object_bottom_left(self.protagonist, objdata.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
 
             # update screen
             pygame.display.update()
@@ -132,18 +134,18 @@ class Game():
         intended_dest_tile_loc = None
         real_dest_tile_loc = None
 
-        if protag_move_dir == map.DIR_NORTH:
+        if protag_move_dir == mapdata.DIR_NORTH:
             intended_dest_tile_loc = (curr_tile_loc[0], curr_tile_loc[1]-1)
-            map_scroll_dir = map.DIR_SOUTH
-        elif protag_move_dir == map.DIR_SOUTH:
+            map_scroll_dir = mapdata.DIR_SOUTH
+        elif protag_move_dir == mapdata.DIR_SOUTH:
             intended_dest_tile_loc = (curr_tile_loc[0], curr_tile_loc[1]+1)
-            map_scroll_dir = map.DIR_NORTH
-        elif protag_move_dir == map.DIR_EAST:
+            map_scroll_dir = mapdata.DIR_NORTH
+        elif protag_move_dir == mapdata.DIR_EAST:
             intended_dest_tile_loc = (curr_tile_loc[0]+1, curr_tile_loc[1])
-            map_scroll_dir = map.DIR_WEST
-        elif protag_move_dir == map.DIR_WEST:
+            map_scroll_dir = mapdata.DIR_WEST
+        elif protag_move_dir == mapdata.DIR_WEST:
             intended_dest_tile_loc = (curr_tile_loc[0]-1, curr_tile_loc[1])
-            map_scroll_dir = map.DIR_EAST
+            map_scroll_dir = mapdata.DIR_EAST
 
         # check for out of bounds destination
         if self.curr_map.location_within_bounds(intended_dest_tile_loc):
@@ -231,22 +233,22 @@ class Game():
                 elif events.type == pygame.KEYDOWN:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = True
-                        protag_move_dir = map.DIR_EAST
+                        protag_move_dir = mapdata.DIR_EAST
                         #move_right = True
                         logger.debug("Right pressed down")
                     elif events.key == pygame.K_LEFT:
                         pressed_left = True
-                        protag_move_dir = map.DIR_WEST
+                        protag_move_dir = mapdata.DIR_WEST
                         #move_left = True
                         logger.debug("Left pressed down")
                     elif events.key == pygame.K_UP:
                         pressed_up = True
-                        protag_move_dir = map.DIR_NORTH
+                        protag_move_dir = mapdata.DIR_NORTH
                         #move_up = True
                         logger.debug("Up pressed down")
                     elif events.key == pygame.K_DOWN:
                         pressed_down = True
-                        protag_move_dir = map.DIR_SOUTH
+                        protag_move_dir = mapdata.DIR_SOUTH
                         #move_down = True
                         logger.debug("Down pressed down")
                 elif events.type == pygame.KEYUP:
@@ -269,7 +271,7 @@ class Game():
 
             if pressed_up or pressed_down or pressed_right or pressed_left:
                 # TODO for now, just stick with walking
-                transport_type = tile.WALKABLE_F
+                transport_type = tiledata.WALKABLE_F
 
                 # make protagonist face the direction and update tile
                 # that protagonist is on to clear the previous protagonist

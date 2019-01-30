@@ -1,8 +1,10 @@
 import pygame
-import interactiveobj
-import adventure
+import tiledata
 import map
+import mapdata
 import skills
+import interactiveobj
+import objdata
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -31,7 +33,7 @@ class Entity(interactiveobj.Interactive_Object):
                 ):
         interactiveobj.Interactive_Object.__init__(    \
             self,                                       \
-            interactiveobj.TYPE_ENTITY,                \
+            objdata.TYPE_CHARACTER,                \
             name,                                       \
             id,                                         \
             image_path_dict                             \
@@ -43,7 +45,7 @@ class Entity(interactiveobj.Interactive_Object):
         self.tile_position = tile_position
 
         # by default, face south
-        self.facing_direction = map.DIR_SOUTH
+        self.facing_direction = mapdata.DIR_SOUTH
 
         # set up skills
         self.skills_dict = {}
@@ -73,14 +75,14 @@ class Entity(interactiveobj.Interactive_Object):
         image_id = None
 
         if self and surface and (bottom_left_pixel or top_left_pixel):
-            if direction == map.DIR_NORTH:
-                image_id = interactiveobj.OW_IMAGE_ID_FACE_NORTH
-            elif direction == map.DIR_EAST:
-                image_id = interactiveobj.OW_IMAGE_ID_FACE_EAST
-            elif direction == map.DIR_SOUTH:
-                image_id = interactiveobj.OW_IMAGE_ID_FACE_SOUTH
-            elif direction == map.DIR_WEST:
-                image_id = interactiveobj.OW_IMAGE_ID_FACE_WEST
+            if direction == mapdata.DIR_NORTH:
+                image_id = objdata.OW_IMAGE_ID_FACE_NORTH
+            elif direction == mapdata.DIR_EAST:
+                image_id = objdata.OW_IMAGE_ID_FACE_EAST
+            elif direction == mapdata.DIR_SOUTH:
+                image_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+            elif direction == mapdata.DIR_WEST:
+                image_id = objdata.OW_IMAGE_ID_FACE_WEST
 
             if image_id is not None:
                 # change direction variable and blit
@@ -94,6 +96,9 @@ class Entity(interactiveobj.Interactive_Object):
 
 # extend Entity class
 class Character(Entity):
+    # maps character-related object IDs to character objects
+    character_listing = {}
+
     def __init__(                           \
                     self,                   \
                     id,                     \
@@ -121,6 +126,29 @@ class Character(Entity):
 
         # TODO Fill in rest
 
+    # given object id, returns character if it pertains to object ID
+    # do not use this to build protagonist
+    @classmethod
+    def character_factory(cls, object_id):
+        ret_character = None
+
+        # reject if object ID is for protagonist
+        if (object_id == objdata.PROTAGONIST_ID):
+            logger.warn("Cannot use character_factory to build protagonist.")
+        else:
+            # check if we already have this object
+            char_from_listing = Character.character_listing.get(object_id, None)
+
+            if char_from_listing:
+                ret_character = char_from_listing
+            else:
+                # we need to make character ourselves
+                # TODO
+                pass
+
+                # check if object id pertains to a character
+
+        return ret_character
 
 # image_path contains the default sprite image for the character
 # images_path_dict must map character image scenarios to the
@@ -171,19 +199,4 @@ class Protagonist(Character):
 
 def build_characters():
     # TODO - build monsters and NPCs
-    """
-    protag_image_dict = {
-        OW_STAND_NORTH_ID:images.HERB_BASIC_PATH,
-        OW_STAND_EAST_ID:images.HERB_BASIC_PATH,
-        OW_STAND_SOUTH_ID:images.HERB_BASIC_PATH,
-        OW_STAND_WEST_ID:images.HERB_BASIC_PATH,
-        OW_WALK_NORTH_ID:images.HERB_BASIC_PATH,
-        OW_WALK_EAST_ID:images.HERB_BASIC_PATH,
-        OW_WALK_SOUTH_ID:images.HERB_BASIC_PATH,
-        OW_WALK_WEST_ID:images.HERB_BASIC_PATH,
-        BATTLE_STAND_ID:images.HERB_BASIC_PATH,
-        BATTLE_ATTACK_ID:images.HERB_BASIC_PATH
-    }
-    """
-
     pass
