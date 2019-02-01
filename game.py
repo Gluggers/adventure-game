@@ -47,26 +47,26 @@ class Game():
             self.clock = pygame.time.Clock()
             self.clock.tick(40)
 
-    """
-    def set_current_game_map(self, curr_map_id, map_top_left=viewing.OW_VIEWING_LOCATION, default_color=viewing.COLOR_BLACK):
-        curr_map = map.Map.get_map(curr_map_id)
-
-        if curr_map:
-            self.curr_map = curr_map
-            self.viewing.curr_map = curr_map
-            self.viewing.set_map_on_view(map_top_left, default_color)
-    """
-
     # TODO document
     # centers map automatically depending on where protagonist is
     # DOES NOT UPDATE SURFACE
-    def set_and_blit_current_game_map(self, curr_map_id, protag_tile_location=(0,0), default_color=viewing.COLOR_BLACK):
+    def set_and_blit_current_game_map(                                      \
+                self,                                                       \
+                curr_map_id,                                                \
+                protag_tile_location=(0,0),                                 \
+                default_color=viewing.COLOR_BLACK                           \
+            ):
         curr_map = map.Map.get_map(curr_map_id)
 
         if curr_map and protag_tile_location:
             self.curr_map = curr_map
             self.viewing.curr_map = curr_map
-            self.viewing.set_and_blit_map_on_view(viewing.get_centered_map_top_left_pixel(protag_tile_location), default_color)
+            self.viewing.set_and_blit_map_on_view(                          \
+                viewing.Viewing.get_centered_map_top_left_pixel(            \
+                    protag_tile_location                                    \
+                ),                                                          \
+                default_color                                               \
+            )
 
     # TODO
     def build_protagonist(self, name, tile_pos):

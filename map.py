@@ -295,8 +295,43 @@ class Map:
 
     # blit entire map, including tiles and spawned interactive objects
     # caller needs to update surface after method
-    def blit_onto_surface(self, surface, top_left_pixel_tuple):
-        if self and surface and top_left_pixel_tuple:
+    # tile_subset_rect is rect of tile coordinates that indicates which
+    # tiles to blit, rather than blitting the whole map. Setting to None
+    # will blit the whole map
+    def blit_onto_surface(self, surface, top_left_pixel_tuple, tile_subset_rect=None):
+        if self and surface and top_left_pixel_tuple and self.tile_grid:
+            tile_subset = (0, 0, self.width, self.height)
+
+            if tile_subset_rect:
+                tile_subset = tile_subset_rect
+
+            start_tile_x = tile_subset[0]
+            start_tile_y = tile_subset[1]
+            end_tile_x = start_tile_x + tile_subset[2] - 1
+            end_tile_y = start_tile_y + tile_subset[3] - 1
+
+            if (start_tile_x >= 0)                          \
+                    and (start_tile_y >= 0)                 \
+                    and (end_tile_x <= self.width)          \
+                    and (end_tile_y <= self.height)         \
+                    and (end_tile_x >= start_tile_x)        \
+                    and (end_tile_y >= start_tile_y):
+                start_pixel_x = top_left_pixel_tuple[0] + (start_tile_x*tile.TILE_SIZE)
+                start_pixel_y = top_left_pixel_tuple[1] + (start_tile_y*tile.TILE_SIZE)
+
+                # blit tiles
+                curr_pixel_y = start_pixel_y
+                for grid_row in range(start_tile_y, end_tile_y + 1):
+                    curr_pixel_x = start_pixel_x
+                    for tile_index in range(start_tile_x, end_tile_x + 1):
+                        single_tile = self.tile_grid[grid_row][tile_index]
+                        single_tile.blit_onto_surface(surface, (curr_pixel_x, curr_pixel_y))
+                        curr_pixel_x = curr_pixel_x + tile.TILE_SIZE
+                    curr_pixel_y = curr_pixel_y + tile.TILE_SIZE
+
+
+
+            """
             start_x = top_left_pixel_tuple[0]
             start_y = top_left_pixel_tuple[1]
 
@@ -325,11 +360,12 @@ class Map:
                             # blit sprite image
                             # TODO
                             #obj.blit_onto_surface(surface, (pos_x, pos_y + tile.TILE_SIZE))
+            """
 
     # scroll map in the indicated direction for the indicated distancet
     # also pass in surface object to blit on and update
     # does NOT update the main display - caller will have to do that
-    def scroll(self, surface, scroll_direction, distance):
+    def scroll(self, surface, scroll_direction, distance, tile_subset_rect=None):
         # don't bother if distance <= 0
         if self and surface and (distance > 0):
             new_pixel_location = None
@@ -351,8 +387,13 @@ class Map:
                 logger.error("Invalid scroll direction {0}".format(scroll_direction))
 
             if new_pixel_location:
+                #logger.debug("Scrolling. tile subset rect: {0}".format(tile_subset_rect))
                 # scroll in indicated direction
-                self.blit_onto_surface(surface, new_pixel_location)
+                self.blit_onto_surface(                                 \
+                    surface,                                            \
+                    new_pixel_location,                                 \
+                    tile_subset_rect=tile_subset_rect                   \
+                )
 
                 # update map top left
                 self.top_left_position = new_pixel_location
