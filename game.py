@@ -182,6 +182,7 @@ class Game():
                 logger.debug("No adjacent map found in this direction. Can't move out of map boundary")
 
         if can_move:
+            # TODO check if collision between protag and dest map/tile
             # change protagonist tile location
             self.protagonist.tile_position = real_dest_tile_loc
             logger.debug("Moving to destination tile: {0}".format(real_dest_tile_loc))
