@@ -14,6 +14,7 @@ logger = None
 
 ### GAME CONSTANTS ###
 GAME_TITLE = "Adventure Game v0.1"
+CLOCK_TICK = 30
 
 ### DIFFICULTY CONSTANTS ###
 DIFFICULTY_NORMAL = 0x0
@@ -45,7 +46,7 @@ class Game():
 
             # set clock
             self.clock = pygame.time.Clock()
-            self.clock.tick(40)
+            self.clock.tick(CLOCK_TICK)
 
     # TODO document
     # centers map automatically depending on where protagonist is
@@ -82,9 +83,9 @@ class Game():
             protag_id,  \
             protag_name,    \
             protag_image_path_dict,  \
-            protag_tile_pos,    \
             gender=entity.GENDER_MALE, \
-            race=entity.RACE_HUMAN   \
+            race=entity.RACE_HUMAN,
+            tile_position=protag_tile_pos,
         )
 
         logger.debug("Protagonist ID: {0}".format(protagonist.object_id))

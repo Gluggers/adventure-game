@@ -5,6 +5,7 @@ import mapdata
 import skills
 import interactiveobj
 import objdata
+import logging
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -20,29 +21,30 @@ RACE_HUMAN = 0x1
 # that the Entity is wielding
 # TODO - set up item class and have it map IDs to item objects (build_item method)
 class Entity(interactiveobj.Interactive_Object):
-    def __init__(                           \
-                    self,                   \
-                    id,                     \
-                    name,                   \
-                    image_path_dict,        \
-                    tile_position=(0,0),    \
-                    skills_dict={},         \
-                    equipment_dict={},      \
-                    gender=GENDER_NEUTRAL,  \
-                    race=RACE_HUMAN         \
+    def __init__(
+                    self,
+                    id,
+                    name,
+                    image_path_dict,
+                    collision_width=1,
+                    collision_height=1,
+                    skills_dict={},
+                    equipment_dict={},
+                    gender=GENDER_NEUTRAL,
+                    race=RACE_HUMAN,
                 ):
-        interactiveobj.Interactive_Object.__init__(    \
-            self,                                       \
-            objdata.TYPE_CHARACTER,                \
-            name,                                       \
-            id,                                         \
-            image_path_dict                             \
-            #tile_position                               \
+        interactiveobj.Interactive_Object.__init__(
+            self,
+            objdata.TYPE_CHARACTER,
+            name,
+            id,
+            image_path_dict,
+            collision_width=collision_width,
+            collision_height=collision_height
         )
 
         self.gender = gender
         self.race = race
-        self.tile_position = tile_position
 
         # by default, face south
         self.facing_direction = mapdata.DIR_SOUTH
@@ -77,12 +79,16 @@ class Entity(interactiveobj.Interactive_Object):
         if self and surface and (bottom_left_pixel or top_left_pixel):
             if direction == mapdata.DIR_NORTH:
                 image_id = objdata.OW_IMAGE_ID_FACE_NORTH
+                logger.debug("Facing NORTH")
             elif direction == mapdata.DIR_EAST:
                 image_id = objdata.OW_IMAGE_ID_FACE_EAST
+                logger.debug("Facing EAST")
             elif direction == mapdata.DIR_SOUTH:
                 image_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+                logger.debug("Facing SOUTH")
             elif direction == mapdata.DIR_WEST:
                 image_id = objdata.OW_IMAGE_ID_FACE_WEST
+                logger.debug("Facing WEST")
 
             if image_id is not None:
                 # change direction variable and blit
@@ -99,29 +105,31 @@ class Character(Entity):
     # maps character-related object IDs to character objects
     character_listing = {}
 
-    def __init__(                           \
-                    self,                   \
-                    id,                     \
-                    name,                   \
-                    image_path_dict,        \
-                    tile_position=(0,0),    \
-                    skills_dict={},         \
-                    equipment_dict={},      \
-                    gender=GENDER_NEUTRAL,  \
-                    race=RACE_HUMAN         \
+    def __init__(
+                    self,
+                    id,
+                    name,
+                    image_path_dict,
+                    collision_width=1,
+                    collision_height=1,
+                    skills_dict={},
+                    equipment_dict={},
+                    gender=GENDER_NEUTRAL,
+                    race=RACE_HUMAN
                 ):
 
         # a Character is an Entity type of interactive object
-        Entity.__init__(        \
-            self,               \
-            id,                 \
-            name,               \
-            image_path_dict,    \
-            tile_position,      \
-            skills_dict,        \
-            equipment_dict,     \
-            gender,             \
-            race                \
+        Entity.__init__(
+            self,
+            id,
+            name,
+            image_path_dict,
+            collision_width=collision_width,
+            collision_height=collision_height,
+            skills_dict=skills_dict,
+            equipment_dict=equipment_dict,
+            gender=gender,
+            race=race
         )
 
         # TODO Fill in rest
@@ -168,30 +176,31 @@ class Character(Entity):
 # BATTLE_IMAGE_ID_ATTACK
 # BATTLE_IMAGE_ID_FAINTED
 class Protagonist(Character):
-    def __init__(                           \
-                    self,                   \
-                    id,                     \
-                    name,                   \
-                    image_path_dict,        \
-                    tile_position=(0,0),    \
-                    skills_dict={},         \
-                    equipment_dict={},      \
-                    gender=GENDER_NEUTRAL,  \
-                    race=RACE_HUMAN         \
+    def __init__(
+                    self,
+                    id,
+                    name,
+                    image_path_dict,
+                    skills_dict={},
+                    equipment_dict={},
+                    gender=GENDER_NEUTRAL,
+                    race=RACE_HUMAN,
+                    tile_position=(0,0)
                 ):
 
-        Character.__init__(         \
-            self,                   \
-            id,                     \
-            name,                   \
-            image_path_dict,        \
-            tile_position,          \
-            skills_dict,            \
-            equipment_dict,         \
-            gender,                 \
-            race                    \
+        Character.__init__(
+            self,
+            id,
+            name,
+            image_path_dict,
+            collision_width=1, # protagonist is always 1x1 tile
+            collision_height=1,
+            skills_dict=skills_dict,
+            equipment_dict=equipment_dict,
+            gender=gender,
+            race=race,
         )
-
+        self.tile_position = tile_position
         self.quest_journal = {}
         self.inventory = []
 
@@ -200,3 +209,7 @@ class Protagonist(Character):
 def build_characters():
     # TODO - build monsters and NPCs
     pass
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)

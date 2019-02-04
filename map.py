@@ -8,42 +8,50 @@ import tiledata
 import mapdata
 from pygame.locals import *
 
-### CLASS NAMES ###
+### CLASS NAME ###
 MAP_CLASS = 'Map'
-REGION_CLASS = 'Region'
 
 class Map:
-    map_listing = {} # maps map IDs to map objects
+    # maps map IDs to map objects
+    map_listing = {}
 
-    # create a Map object. tile_grid must be a List of List objects, where
-    # the inner List object must contain Tile objects, tile_grid will
-    # effectively define the tiles for the map.  The grid must be rectangular,
-    # meaning each inner List must be of the same length.
-    # interactive_obj_dict must be a dict that maps a tuple of integers
-    # (representing the X and Y tile coordinates of the map, NOT
-    # pixel coordinates) to an Interactive_Object ID which represents one of:
-    #   - Entity
-    #   - Obstacle
-    #   - Resource
-    #   - Item
+    # Create a Map object.
+    # tile_grid must be a List of List of Tiles that contains the tiles for
+    # the map. tile_grid must have a valid rectangular dimension, meaning
+    # each inner List must be of the same size.  tile_grid can contain
+    # None in the inner List to represent missing Tiles.
+    #
     # connector_tile_dict must be a dict that maps a tuple of integers
     # (representing the X and Y tile coordinates of the map, NOT
-    # pixel coordinates) to a corresponding Connector object
+    # pixel coordinates) to a corresponding Connector object.
+    #
     # adj_map_dict must be a dict that maps a direction ID to a tuple
     # (Map ID, dest location coordinate) to represent the neighboring map and
     # where the Entity will end up by walking past the map boundary.
+    #
     # top_left represents the (x,y) pixel coordinate on the display screen where the
-    # top left corner of the map should start. Defaults to (0,0)
-    def __init__(self, map_id, tile_grid, interactive_obj_dict={}, connector_tile_dict={}, \
+    # top left corner of the map should start.
+    def __init__(self, map_id, tile_grid, connector_tile_dict={}, \
                 adj_map_dict={}, top_left=(0,0)):
         self.height = 0
         self.width = 0
         self.map_id = map_id
         self.tile_grid = []
-        self.interactive_obj_dict = {}
         self.connector_tile_dict = {}
         self.adj_map_dict = {}
-        self.top_left_position = top_left # (x,y) tuple of top left, default top viewing
+        self.top_left_position = top_left
+
+        # maps bottom left tile coordinate tuple to
+        # a tuple of (object ID, collision tile rect),
+        # where collision tile rect is measured in Tile coordinates
+        # rather than pixel coordinates
+        self.bottom_left_tile_obj_mapping = {}
+
+        # grid of tile coordinates that represents whether or not
+        # a tile houses part of an interactive object
+        # (None if no object, bottom_left_tile coord tuple if the
+        # tile has an object)
+        self.occupied_tile_grid = []
 
         # (x,y) tuple representing location of protagonist. Default is (0,0)
         #self.protagonist_location = (0, 0)
@@ -68,14 +76,15 @@ class Map:
                     sys.exit(1)
 
             if valid_grid_dimensions:
+                # build tile grid
                 grid_to_copy = []
 
                 # get the Tile objects and make sure they're all Tiles
                 for grid_row in tile_grid:
                     row_to_copy = []
                     for x in grid_row:
-                        if not (x and (x.__class__.__name__ == tile.TILE_CLASS)):
-                            logger.error("Tile grids can only accept Tile objects")
+                        if (x is not None) and (x.__class__.__name__ != tile.TILE_CLASS):
+                            logger.error("Tile grids can only accept None or Tile objects")
                             valid_grid_dimensions = False
                             sys.exit(1)
 
@@ -87,20 +96,44 @@ class Map:
                 self.height = grid_height
                 self.width = grid_width
 
-            # get interactive objects
-            if interactive_obj_dict:
-                for x, y in interactive_obj_dict.items():
-                    self.interactive_obj_dict[x] = y
+                # build initial occupied tile grid
+                for row_index in range(self.height):
+                    occupied_row = []
+                    for col_index in range(self.width):
+                        occupied_row.append(None)
+                    self.occupied_tile_grid.append(occupied_row)
 
-            # get connector tiles
-            if connector_tile_dict:
-                for x, y in connector_tile_dict.items():
-                    self.connector_tile_dict[x] = y
+                # get connector tiles
+                if connector_tile_dict:
+                    for x, y in connector_tile_dict.items():
+                        self.connector_tile_dict[x] = y
 
-            # get neighboring maps
-            if adj_map_dict:
-                for x, y in adj_map_dict.items():
-                    self.adj_map_dict[x] = y
+                # get neighboring maps
+                if adj_map_dict:
+                    for x, y in adj_map_dict.items():
+                        self.adj_map_dict[x] = y
+
+    # interactive_obj_dict must be a dict that maps a tuple of integers
+    # (representing the X and Y tile coordinates of the map, NOT
+    # pixel coordinates), representing the bottom left tiles of interactive
+    # objects, to the interactive object ID.
+    # The caller must take care to ensure that the objects do not collide
+    # with each other when all fully placed on the map - otherwise, the method
+    # will not fully place all the objects
+    # This method must only be called during the map factory method
+    # Returns True if all items set successfully, false otherwise
+    def init_interactive_obj_dict(self, interactive_obj_dict):
+        successful = True
+        # set up initial interactive objects for map
+        for bottom_left_tile_loc, object_id in interactive_obj_dict:
+            # get object from object ID
+            inter_obj = \
+                interactiveobj.Interactive_Object.get_interactive_object(object_id)
+            if inter_obj and bottom_left_tile_loc:
+                if not self.set_interactive_object(inter_obj, bottom_left_tile_loc):
+                    successful = False
+                    logger.warn("Could not place object {0} at {1}".format(inter_obj.object_id, bottom_left_tile_loc))
+        return successful
 
     # TODO - document
     def add_adjacent_map(self, direction, dest_map_id, dest_location_coordinate):
@@ -120,7 +153,8 @@ class Map:
     def get_adjacent_map_info(self, direction):
         return self.adj_map_dict.get(direction, None)
 
-    # Sets an interactive object at the specified Tile coordinate
+    # Sets an interactive object such that the bottom left tile of the
+    # object is at the at the specified Tile coordinate
     # location (x, y) tuple on the Map.
     # Returns True if successful, False otherwise. Reasons for
     # failure include:
@@ -129,28 +163,43 @@ class Map:
     #   - interactive object already exists at the location
     # Caller will need to reblit the map and update the surface to show
     # the new images
-    def set_interactive_object(self, obj_to_respawn, tile_location):
+    def set_interactive_object(self, obj_to_set, bottom_left_tile_loc):
         success = False
+        can_set = True
 
-        if self and obj_to_respawn and tile_location:
-            if self.tile_grid:
-                # make sure (x,y) location is in bounds
-                if self.width > tile_location[0] and self.height > tile_location[1]:
-                    # check if there is already an interactive object at
-                    # the (x,y) location
-                    if self.interactive_obj_dict.get(tile_location, None):
-                        logger.error("Obj already exists at location %s",   \
-                            str(tile_location))
-                    else:
-                        # set object
-                        self.interactive_obj_dict[tile_location] = (obj_to_respawn)
-                        success = True
+        if self and obj_to_set and bottom_left_tile_loc and self.tile_grid:
+            # Check that each tile in the colliion rect is within map
+            # bounds and is not already occupied by another interactive
+            # object.
+            collision_tile_set = obj_to_set.get_collision_tile_set(bottom_left_tile_loc)
+            for tile_loc in collision_tile_set:
+                curr_tile_x = tile_loc[0]
+                curr_tile_y = tile_loc[1]
+
+                if self.location_within_bounds(tile_loc):
+                    # We are within map bounds. Check for occupied tiles.
+                    if self.tile_occupied(tile_loc):
+                        can_set = False
+                        # tile is occupied
+                        logger.error(                               \
+                            "Obj already exists at location %s",    \
+                            str(tile_loc)                           \
+                        )
                 else:
+                    can_set = False
                     logger.error(                                           \
-                        "Invalid location %s for set_interactive_object", \
-                        str(tile_location))
-            else:
-                logger.error("Empty map in set_interactive_object")
+                        "Out of bounds location at: {0} ".format(tile_loc)  \
+                    )
+            # Set if we can
+            if can_set:
+                # Associate object with the bottom left tile coordinate.
+                self.bottom_left_tile_obj_mapping[bottom_left_tile_loc] = obj_to_set
+                lgoger.debug("Setting obj ID {0} to bottom left tile {1}".format(obj_to_set.object_id, bottom_left_tile_loc))
+
+                # Mark all tiles within object's collision rect as occupied
+                for tile_loc in collision_tile_set:
+                    self.occupied_tile_grid[tile_loc[1]][tile_loc[0]] = bottom_left_tile_loc
+                    logger.debug("Marking {0} as occupied".format(tile_loc))
 
         return success
 
@@ -167,32 +216,52 @@ class Map:
         # TODO
         return False
 
-    # removes an interactive object from the specified Tile
-    # coordinate (x,y) location on the Map.
+    # Removes an interactive object that occupies the tile_location
+    # coordinate (x,y) on the Map. Note that for interactive objects
+    # that take up more than one tile, passing in just one of the tiles
+    # will remove the object.
     # Returns True if removal was successful, False otherwise. Reasons for
     # failure include:
     #   - Map is empty
     #   - location is invalid
-    # If no interactive object exists at the location, the method still returns
-    # True.
+    #   - invalid or no tile location specified
+    # If no interactive object has a bottom left tile at the location,
+    # the method still returns True.
     # Caller will need to reblit the map and update the surface to show
     # the updated images
     def unset_interactive_object(self, tile_location):
         successful_remove = False
 
-        if self and tile_location:
-            if self.tile_grid:
-                # make sure (x,y) location is in bounds
-                if self.width > tile_location[0] and self.height > tile_location[1]:
-                    # remove object if it exists
-                    self.interactive_obj_dict.pop(tile_location, None)
-                    successful_remove = True
-                else:
-                    logger.error(                                            \
-                        "Invalid location %s for unset_interactive_object", \
-                        str(tile_location))
+        if self and tile_location and self.tile_grid:
+            # make sure (x,y) location is in bounds
+            if self.location_within_bounds(tile_location):
+                # Check if the tile location maps to an object's
+                # bottom left tile location.
+                successful_remove = True
+                bottom_left_tile_loc = self.occupied_tile_grid[tile_location[1]][tile_location[0]]
+
+                if bottom_left_tile_loc:
+                    # Get object to remove and remove from map
+                    obj_to_remove =                                 \
+                        self.bottom_left_tile_obj_mapping.pop(      \
+                            bottom_left_tile_loc,                   \
+                            None                                    \
+                        )
+                    if obj_to_remove:
+                        logger.debug("Removed object {0} from {1}".format(obj_to_remove.object_id, bottom_left_tile_loc))
+
+                        # Clear object's collision tiles on map
+                        collision_set = obj_to_remove.get_collision_tile_set(bottom_left_tile_loc)
+
+                        for tile_loc in collision_set:
+                            self.occupied_tile_grid[tile_loc[1]][tile_loc[0]] = None
+                            logger.debug("Freed tile {0}".format(tile_loc))
+
             else:
-                logger.error("Empty map in unset_interactive_object")
+                logger.error(                                            \
+                    "Invalid location %s for unset_interactive_object", \
+                    str(tile_location))
+
 
         return successful_remove
 
@@ -427,9 +496,6 @@ class Map:
                     ret_map = Map(                                          \
                         map_id,                                             \
                         map_tile_grid,                                      \
-                        interactive_obj_dict=ret_map_data.get(              \
-                            mapdata.MAP_INTER_OBJ_DICT_FIELD, {}            \
-                        ),                                                  \
                         connector_tile_dict=ret_map_data.get(               \
                             mapdata.MAP_CONNECTOR_TILE_DICT_FIELD, {}       \
                         ),                                                  \
@@ -439,8 +505,15 @@ class Map:
                     )
 
                     if ret_map:
-                        # add map to listing
-                        Map.map_listing[map_id] = ret_map
+                        # set up initial interactive objects for map
+                        if ret_map.init_interactive_obj_dict(               \
+                                    ret_map_data.get(                       \
+                                        mapdata.MAP_INTER_OBJ_DICT_FIELD,   \
+                                        {}                                  \
+                                    )                                       \
+                                ):
+                            # add map to listing
+                            Map.map_listing[map_id] = ret_map
                     else:
                         logger.warn("failed to make map with id {0}".format(map_id))
 
@@ -482,6 +555,14 @@ class Map:
                 ret_grid = curr_grid
 
         return ret_grid
+
+    def tile_occupied(self, tile_loc):
+        occupied = False
+
+        if tile_loc and self.occupied_tile_grid[tile_loc[1]][tile_loc[0]]:
+            occupied = True
+
+        return occupied
 
     @classmethod
     def get_map(cls, map_id):

@@ -7,11 +7,9 @@ import tiledata
 TILE_SIZE = 32
 TILE_CLASS = 'Tile'
 
-# TODO make this extend sprite?
-
-# SHOULD THIS BE IMMUTABLE?
 class Tile:
-    tile_listing = {} # maps tile IDs to tile objects
+    # maps tile IDs to tile objects
+    tile_listing = {}
 
     def __init__(self,                                          \
                 tile_id,                                        \
@@ -19,9 +17,12 @@ class Tile:
                 allowed_transport=(                             \
                     tiledata.WALKABLE_F | tiledata.FLYABLE_F)   \
                 ):
+        """Create and return a Tile object."""
+
+        # Each tile_id should map to a distinct Tile
         self.tile_id = tile_id
 
-        # represents the base terrain image (e.g. grass, water)
+        # Represents the base terrain image (e.g. grass, water)
         self._image = pygame.image.load(image_path).convert()
 
         # OR-ed flags that represent the allowed methods of transportation on
@@ -30,61 +31,75 @@ class Tile:
 
     @property
     def image(self):
+        """Return Tile image."""
         return self._image
 
     @image.setter
     def image(self, value):
+        """Set Tile image."""
         self._image = value
 
     @image.deleter
     def image(self):
+        """Delete Tile image."""
         del self._image
 
     @property
     def allowed_transport(self):
+        """Return the allowed transportation for the Tile."""
         return self._allowed_transport
 
     @allowed_transport.setter
     def allowed_transport(self, value):
+        """Set the allowed transportation for the Tile."""
         self._allowed_transport = value
 
     @allowed_transport.deleter
     def allowed_transport(self):
+        """Delete the allowed transportation for the Tile."""
         del self._allowed_transport
 
     def valid_transportation(self, transportation_flag):
-        # and the flags
+        """Checks if the transportation method is allowed."""
+
         if transportation_flag & self._allowed_transport:
             return True
         else:
             return False
 
-    # blits the tile image onto the surface at the designated pixel
+    # Blits the tile image onto the surface at the designated pixel
     # coordinate position (x,y).
     # Does not update the surface display - caller will have to do that.
     def blit_onto_surface(self, surface, top_left_pixel_tuple):
+        """Blit Tile object onto surface at the provided top left pixel."""
         if self and surface and top_left_pixel_tuple:
             surface.blit(self._image, top_left_pixel_tuple)
 
-    # builds Tile. Adds Tile to tile listing if a new tile was created
-    # if the corresponding tile already exists, the method
-    # will simply return the Tile rather than creating a new one.
+    # Builds Tile based on the given Tile ID.
+    # Adds Tile to tile listing if a new tile was created.
+    # If the corresponding tile already exists, the method
+    # will simply return the original Tile rather than creating a new one.
     @classmethod
     def tile_factory(cls, tile_id):
+        """Returns a Tile object corresponding to the given Tile ID."""
+
         ret_tile = None
-        # check if we already have the tile made
+
+        # Check if the corresponding Tile has already been made.
         tile_from_listing = Tile.tile_listing.get(tile_id, None)
 
         if tile_from_listing:
             ret_tile = tile_from_listing
         else:
-            # need to make tile. grab tile data
+            # We need to make Tile. Grab tile data.
             ret_tile_data = tiledata.TILE_DATA.get(tile_id, None)
             if (ret_tile_data):
                 tile_image_path = ret_tile_data.get(                    \
                     tiledata.TILE_IMAGE_PATH_FIELD,                     \
                     imagepaths.TILE_DEFAULT_PATH                        \
                 )
+
+                # Default allowed transportation is walking and flying.
                 tile_transport_flag = ret_tile_data.get(                \
                     tiledata.TILE_ALLOWED_TRANSPORT_FIELD,              \
                     (tiledata.WALKABLE_F | tiledata.FLYABLE_F)          \
@@ -96,19 +111,22 @@ class Tile:
                     allowed_transport=tile_transport_flag               \
                 )
 
-                # add tile to listing
+                # Add tile to the class' tile listing.
                 if ret_tile:
                     Tile.tile_listing[tile_id] = ret_tile
                 else:
-                    logger.warn("Could not make tile for id {0}".format(tile_id))
+                    logger.warn("Could not get tile for id {0}".format(tile_id))
 
         return ret_tile
 
+    # Get the Tile corresponding to the given ID. Returns None if such
+    # a Tile does not exist.
+    # Does not create a new Tile. Use tile_factory to create a Tile.
     @classmethod
     def get_tile(cls, tile_id):
         return Tile.tile_listing.get(tile_id, None)
 
-    # builds all set tiles and adds them to the tile listing
+    # Builds all configured Tiles and adds them to the tile listing.
     @classmethod
     def build_tiles(cls):
         logger.debug("Building tiles")
@@ -116,6 +134,6 @@ class Tile:
         for tile_id in tiledata.TILE_DATA:
             new_tile = Tile.tile_factory(tile_id)
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

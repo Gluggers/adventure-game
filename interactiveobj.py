@@ -11,20 +11,22 @@ class Interactive_Object(pygame.sprite.Sprite):
     # maps interactive obj ID to interactive obj
     interactive_obj_listing = {}
 
-    def __init__(                           \
-                    self,                   \
-                    object_type,            \
-                    object_id,              \
-                    name,                   \
-                    image_path_dict         \
-                    #tile_position=(0,0)     \
+    def __init__(
+                    self,
+                    object_type,
+                    object_id,
+                    name,
+                    image_path_dict,
+                    collision_width=1,
+                    collision_height=1
                 ):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
         self.object_id = object_id
         self.name = name
-        #self.tile_position = tile_position
+        self.collision_width = collision_width
+        self.collision_height = collision_height
 
         # load images
         self.image_dict = {}
@@ -63,6 +65,44 @@ class Interactive_Object(pygame.sprite.Sprite):
 
                 if top_left:
                     surface.blit(image_to_blit, top_left)
+
+    @classmethod
+    def get_interactive_object(cls, obj_id):
+        return Interactive_Object.interactive_obj_listing.get(obj_id, None)
+
+
+    # Returns tile collision rect in the tuple form
+    # (top left tile x, top left tile y, width, height)
+    def get_collision_tile_rect(self, bottom_left_tile_loc):
+        ret_rect = None
+
+        if self and bottom_left_tile_loc:
+            ret_rect = (                                                \
+                bottom_left_tile_loc[0],                                \
+                bottom_left_tile_loc[1] - obj_to_set.collision_height,  \
+                obj_to_set.collision_width,                             \
+                obj_to_set.collision_height                             \
+            )
+
+        return ret_rect
+
+    # Returns set of tile coordinate tuples that make up the
+    # object's collision rectangle given the object's bottom left tile
+    # location
+    def get_collision_tile_set(self, bottom_left_tile_loc):
+        collision_set = set()
+
+        if self and bottom_left_tile_loc:
+            collision_rect = self.get_collision_tile_rect(bottom_left_tile_loc)
+
+            if collision_rect:
+                start_x = collision_rect[0]
+                start_y = collision_rect[1]
+                for y in range(collision_rect[3]):
+                    for x in range(collision_rect[2]):
+                        collision_set.add((start_x + x, start_y + y))
+
+        return collision_set
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
