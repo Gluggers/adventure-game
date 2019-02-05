@@ -1,5 +1,6 @@
 import tile
 import tiledata
+import objdata
 
 ### DIRECTION CONSTANTS ###
 DIR_NORTH = 0x1
@@ -61,7 +62,14 @@ MAP_DATA = {
             '3': tiledata.TILE_GRASS_FLOWERS_ID,
             '4': tiledata.TILE_WATER_NORMAL_1_ID
         },
-        MAP_INTER_OBJ_DICT_FIELD: {},
+        MAP_INTER_OBJ_DICT_FIELD: {
+            (0,0):  objdata.HERB_BASIC_ID,
+            (12,9): objdata.HERB_BASIC_ID,
+            (3,7):  objdata.ORE_EMPTY_BASIC_ID,
+            (5,3):  objdata.ORE_EMPTY_BASIC_ID,
+            (7,9):  objdata.TREE_BASIC_ID,
+            (1,4):  objdata.TREE_OAK_ID,
+        },
         MAP_CONNECTOR_TILE_DICT_FIELD: {},
         MAP_ADJ_MAP_DICT_FIELD: {}
     },

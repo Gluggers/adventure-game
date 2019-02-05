@@ -1,5 +1,6 @@
 import pygame
 import imagepaths
+import objdata
 import logging
 
 ### IMAGE FLAGS ###
@@ -20,7 +21,7 @@ class Interactive_Object(pygame.sprite.Sprite):
                     collision_width=1,
                     collision_height=1
                 ):
-        # Call the parent class (Sprite) constructor
+        # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
         self.object_id = object_id
@@ -70,6 +71,16 @@ class Interactive_Object(pygame.sprite.Sprite):
     def get_interactive_object(cls, obj_id):
         return Interactive_Object.interactive_obj_listing.get(obj_id, None)
 
+    # Adds/updates the interactive object listing for the given object ID.
+    # Returns True upon success, false otherwise
+    @classmethod
+    def add_interactive_obj_to_listing(cls, obj_id, inter_obj):
+        if inter_obj and (obj_id is not None):
+            cls.interactive_obj_listing[obj_id] = inter_obj
+            logger.debug("Added object ID {0} to inter obj listing.".format(obj_id))
+            return True
+        else:
+            return False
 
     # Returns tile collision rect in the tuple form
     # (top left tile x, top left tile y, width, height)
@@ -79,9 +90,9 @@ class Interactive_Object(pygame.sprite.Sprite):
         if self and bottom_left_tile_loc:
             ret_rect = (                                                \
                 bottom_left_tile_loc[0],                                \
-                bottom_left_tile_loc[1] - obj_to_set.collision_height,  \
-                obj_to_set.collision_width,                             \
-                obj_to_set.collision_height                             \
+                bottom_left_tile_loc[1] - self.collision_height + 1,    \
+                self.collision_width,                                   \
+                self.collision_height                                   \
             )
 
         return ret_rect
@@ -98,11 +109,18 @@ class Interactive_Object(pygame.sprite.Sprite):
             if collision_rect:
                 start_x = collision_rect[0]
                 start_y = collision_rect[1]
+                collision_set.add((start_x, start_y))
                 for y in range(collision_rect[3]):
                     for x in range(collision_rect[2]):
                         collision_set.add((start_x + x, start_y + y))
-
+        logger.debug("Collision set: {0}".format(collision_set))
         return collision_set
+
+    @classmethod
+    def is_resource_id(cls, object_id):
+        return (object_id is not None)                  \
+            and (object_id >= objdata.MIN_RESOURCE_ID)  \
+            and (object_id <= objdata.MAX_RESOURCE_ID)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

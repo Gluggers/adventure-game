@@ -7,11 +7,17 @@ import logging
 import viewing
 import language
 import objdata
+import resources
 import game
 
 from pygame.locals import *
 
 logger = None
+
+# Loads tiles, maps, and objects
+def setup():
+    pass
+    # TODO?
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -24,17 +30,17 @@ def main():
     # load tiles
     tile.Tile.build_tiles()
 
-    # load maps
-    map.Map.build_maps()
+    logger.debug("Adventure: about to load resources")
 
     # load resources
+    resources.Resource.build_resources()
 
     # load items
 
     # load characters
 
-    # clock
-    #clock = pygame.time.Clock()
+    # load maps
+    map.Map.build_maps()
 
     # create protagonist
     protag_tile_loc = (2,2)

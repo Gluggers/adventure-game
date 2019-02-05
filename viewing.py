@@ -218,6 +218,7 @@ class Viewing():
                 coord_y = -1 * int((map_top_left_pixel_pos[1] - TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
 
             ret_coord = (coord_x, coord_y)
+            logger.debug("Top left ow viewing tile: {0}, map top left {1}".format(ret_coord, map_top_left_pixel_pos))
 
         return ret_coord
 
@@ -233,7 +234,7 @@ class Viewing():
             # see if we can get 1 column of tiles to the left of the screen
             # and 1 row of columns above the screen
             start_tile_x = max(0, top_left_viewing_tile[0] - 1)
-            start_tile_y = max(0, top_left_viewing_tile[0] - 1)
+            start_tile_y = max(0, top_left_viewing_tile[1] - 1)
             end_tile_x = start_tile_x
             end_tile_y = start_tile_y
 
@@ -340,7 +341,6 @@ class Viewing():
             # blit map
             self.curr_map.blit_onto_surface(                                \
                 self.main_display_surface,                                  \
-                map_top_left,                                               \
                 tile_subset_rect=tile_subset_rect                           \
             )
         else:

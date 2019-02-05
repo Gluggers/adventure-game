@@ -206,9 +206,6 @@ class Protagonist(Character):
 
         # TODO FILL IN REST
 
-def build_characters():
-    # TODO - build monsters and NPCs
-    pass
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

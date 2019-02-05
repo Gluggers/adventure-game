@@ -148,32 +148,43 @@ class Game():
             intended_dest_tile_loc = (curr_tile_loc[0]-1, curr_tile_loc[1])
             map_scroll_dir = mapdata.DIR_EAST
 
-        # check for out of bounds destination
+        # Check for out of bounds destination.
         if self.curr_map.location_within_bounds(intended_dest_tile_loc):
-            # check if the destination tile is reachable with given
-            # transportation type
+            # Check if the destination tile is reachable with given
+            # transportation type.
             if self.curr_map.valid_transportation(intended_dest_tile_loc, transportation_type):
-                # we can move here
-                real_dest_tile_loc = intended_dest_tile_loc
-                can_move = True
+                # Check if the intended dest tile is occupied by
+                # an interactive object.
+                if self.curr_map.tile_occupied(intended_dest_tile_loc):
+                    # Object is in the way.
+                    logger.debug("Cannot move to occupied dest tile {0}".format(intended_dest_tile_loc))
+                else:
+                    # We can move here.
+                    real_dest_tile_loc = intended_dest_tile_loc
+                    can_move = True
             else:
-                logger.debug("Cannot move to destination tile {0} \
-                    with transportation type {1}".format(real_dest_tile_loc, transportation_type))
+                logger.debug("Cannot move to destination tile {0} " + \
+                    "with transportation type {1}".format(intended_dest_tile_loc, transportation_type))
         else:
-            # check if map has neighbor in the intended direction
+            # Check if map has neighbor in the intended direction.
             adj_map_info = self.curr_map.get_adjacent_map_info(protag_move_dir)
 
             if adj_map_info:
-                # get destination map and tile position
+                # Get destination map and tile position.
                 dest_map_id = adj_map_info[0]
                 dest_map = map.Map.get_map(dest_map_id)
                 real_dest_tile_loc = adj_map_info[1]
 
-                # make sure dest tile is reachable
+                # Make sure dest tile is reachable with given transportation method.
                 if dest_map and dest_map.valid_transportation(real_dest_tile_loc, transportation_type):
-                    # we can move here
-                    can_move = True
-                    changing_maps = True
+                    # Check if the tile is occupied by an interactive object.
+                    if dest_map.tile_occupied(real_dest_tile_loc):
+                        # Object is in the way.
+                        logger.debug("Cannot move to occupied dest tile {0}".format(real_dest_tile_loc))
+                    else:
+                        # We can move here.
+                        can_move = True
+                        changing_maps = True
                 else:
                     logger.debug("Cannot reach tile position {0} on map {1} with \
                         transportation type {2}".format(real_dest_tile_loc, dest_map_id, transportation_type))
@@ -289,6 +300,7 @@ class Game():
 
                 self.move_protagonist(protag_move_dir, transport_type)
                 logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
+                logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

@@ -132,7 +132,8 @@ class Tile:
         logger.debug("Building tiles")
 
         for tile_id in tiledata.TILE_DATA:
-            new_tile = Tile.tile_factory(tile_id)
+            if not Tile.tile_factory(tile_id):
+                logger.error("Could not construct tile with ID {0}".format(tile_id))
 
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)
