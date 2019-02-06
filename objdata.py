@@ -1,5 +1,6 @@
 import imagepaths
 import skills
+import language
 
 ### INTERACTIVE OBJECT TYPE ID CONSTANTS ###
 TYPE_CHARACTER = 0x1
@@ -109,7 +110,10 @@ RESPAWN_TIME_S_FIELD = 0x305
 ### RESOURCE DATA ###
 RESOURCE_DATA = {
     HERB_BASIC_ID: {
-        OBJECT_NAME_FIELD: "BASIC HERB",
+        OBJECT_NAME_FIELD: {
+            language.LANG_ENGLISH: "BASIC HERB",
+            language.LANG_ESPANOL: "HIERBA BASICA",
+        },
         IMAGE_PATH_DICT_FIELD: {
             IMAGE_ID_DEFAULT: imagepaths.HERB_BASIC_PATH,
             OW_IMAGE_ID_DEFAULT: imagepaths.HERB_BASIC_PATH,
@@ -123,7 +127,10 @@ RESOURCE_DATA = {
         RESPAWN_TIME_S_FIELD:  1,
     },
     ORE_EMPTY_BASIC_ID: { # TODO make this a generic interactive object?
-        OBJECT_NAME_FIELD: "EMPTY ORE",
+        OBJECT_NAME_FIELD: {
+            language.LANG_ENGLISH: "EMPTY ORE",
+            language.LANG_ESPANOL: "VENA AGOTADA",
+        },
         IMAGE_PATH_DICT_FIELD: {
             IMAGE_ID_DEFAULT: imagepaths.ORE_EMPTY_BASIC_PATH,
             OW_IMAGE_ID_DEFAULT: imagepaths.ORE_EMPTY_BASIC_PATH,
@@ -137,7 +144,10 @@ RESOURCE_DATA = {
         RESPAWN_TIME_S_FIELD:  None,
     },
     TREE_BASIC_ID: {
-        OBJECT_NAME_FIELD: "TREE",
+        OBJECT_NAME_FIELD: {
+            language.LANG_ENGLISH: "TREE",
+            language.LANG_ESPANOL: "ARBOL",
+        },
         IMAGE_PATH_DICT_FIELD: {
             IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
             OW_IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
@@ -151,13 +161,16 @@ RESOURCE_DATA = {
         RESPAWN_TIME_S_FIELD:  1,
     },
     TREE_OAK_ID: {
-        OBJECT_NAME_FIELD: "OAK TREE",
+        OBJECT_NAME_FIELD: {
+            language.LANG_ENGLISH: "OAK TREE",
+            language.LANG_ESPANOL: "ROBLE",
+        },
         IMAGE_PATH_DICT_FIELD: {
             IMAGE_ID_DEFAULT: imagepaths.TREE_OAK_PATH,
             OW_IMAGE_ID_DEFAULT: imagepaths.TREE_OAK_PATH,
         },
-        COLLISION_WIDTH_FIELD: 1,
-        COLLISION_HEIGHT_FIELD: 1,
+        COLLISION_WIDTH_FIELD: 2,
+        COLLISION_HEIGHT_FIELD: 2,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 10,
         GAINED_XP_FIELD: 50,

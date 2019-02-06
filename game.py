@@ -2,12 +2,14 @@ import pygame
 import language
 import logging
 import viewing
+import viewingdata
 import entity
 import map
 import mapdata
 import tile
 import tiledata
 import objdata
+import interactiveobj
 import sys
 
 logger = None
@@ -30,7 +32,7 @@ class Game():
 
             # create main display screen
             self.main_display_screen = pygame.display.set_mode(             \
-                (viewing.MAIN_DISPLAY_WIDTH, viewing.MAIN_DISPLAY_HEIGHT)   \
+                (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)   \
             )
 
             pygame.display.set_caption(game_name)
@@ -62,6 +64,8 @@ class Game():
         if curr_map and protag_tile_location:
             self.curr_map = curr_map
             self.viewing.curr_map = curr_map
+            self.curr_map.protagonist_location = protag_tile_location
+
             self.viewing.set_and_blit_map_on_view(                          \
                 viewing.Viewing.get_centered_map_top_left_pixel(            \
                     protag_tile_location                                    \
@@ -70,13 +74,12 @@ class Game():
             )
 
     # TODO
-    def build_protagonist(self, name, tile_pos):
+    def build_protagonist(self, name):
         protagonist = None
 
         # build fields
         protag_id = objdata.PROTAGONIST_ID
         protag_name = name
-        protag_tile_pos = tile_pos
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
 
         protagonist = entity.Protagonist(                       \
@@ -85,7 +88,6 @@ class Game():
             protag_image_path_dict,  \
             gender=entity.GENDER_MALE, \
             race=entity.RACE_HUMAN,
-            tile_position=protag_tile_pos,
         )
 
         logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
@@ -93,13 +95,19 @@ class Game():
         logger.debug("Protagonist name: {0}".format(protagonist.name))
         logger.debug("Protagonist gender: {0}".format(protagonist.gender))
         logger.debug("Protagonist race: {0}".format(protagonist.race))
-        logger.debug("Protagonist tile_pos: {0}".format(protagonist.tile_position))
 
-        # associate protag with game
+        # associate protag with game and viewing
         self.protagonist = protagonist
         self.viewing.protagonist = protagonist
 
+        # Add protagonist to object listing
+        interactiveobj.Interactive_Object.interactive_obj_listing[objdata.PROTAGONIST_ID] = protagonist
+
         return protagonist
+
+    def set_protagonist_tile_position(self, new_position):
+        if new_position and self.protagonist and self.curr_map:
+            self.curr_map.protagonist_location = new_position
 
     # change and transition to new map
     # updates display screen
@@ -109,10 +117,10 @@ class Game():
             # set and blit map
             self.set_and_blit_current_game_map(dest_map, protag_dest_tile_loc)
 
-            self.protagonist.tile_position = protag_dest_tile_pos
+            self.set_protagonist_tile_position(protag_dest_tile_loc)
 
             # blit protagonist
-            self.viewing.blit_interactive_object_bottom_left(self.protagonist, objdata.OW_IMAGE_ID_DEFAULT, viewing.CENTER_OW_TILE_BOTTOM_LEFT)
+            self.viewing.blit_interactive_object_bottom_left(self.protagonist, objdata.OW_IMAGE_ID_DEFAULT, viewingdata.CENTER_OW_TILE_BOTTOM_LEFT)
 
             # update screen
             pygame.display.update()
@@ -131,7 +139,7 @@ class Game():
 
         # get intended destination tile and check if protagonist is
         # trying to go out of bounds
-        curr_tile_loc = self.protagonist.tile_position
+        curr_tile_loc = self.curr_map.protagonist_location
         intended_dest_tile_loc = None
         real_dest_tile_loc = None
 
@@ -195,7 +203,7 @@ class Game():
         if can_move:
             # TODO check if collision between protag and dest map/tile
             # change protagonist tile location
-            self.protagonist.tile_position = real_dest_tile_loc
+            self.set_protagonist_tile_position(real_dest_tile_loc)
             logger.debug("Moving to destination tile: {0}".format(real_dest_tile_loc))
 
             if changing_maps:
@@ -210,16 +218,21 @@ class Game():
         # reblit tile that the protagonist is on
         self.curr_map.blit_tile(                \
             self.viewing.main_display_surface,  \
-            self.protagonist.tile_position,     \
-            viewing.CENTER_OW_TILE_TOP_LEFT     \
+            self.curr_map.protagonist_location,     \
+            viewingdata.CENTER_OW_TILE_TOP_LEFT     \
         )
 
         # make protagonist face the direction
         self.protagonist.face_direction(                            \
             self.viewing.main_display_surface,                      \
             direction_to_face,                                      \
-            bottom_left_pixel=viewing.CENTER_OW_TILE_BOTTOM_LEFT    \
+            bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
         )
+
+    def get_tile_front_of_protagonist(self):
+        front_tile = None
+
+        return front_tile
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -236,8 +249,12 @@ class Game():
         move_left = False
         protag_move_dir = None
 
+        interact_in_front = False
+
         while continue_playing:
             # TODO: update map
+
+            interact_in_front = False
 
             for events in pygame.event.get():
                 if events.type == pygame.QUIT:
@@ -264,6 +281,9 @@ class Game():
                         protag_move_dir = mapdata.DIR_SOUTH
                         #move_down = True
                         logger.debug("Down pressed down")
+                    elif events.key == pygame.K_SPACE:
+                        interact_in_front = True
+                        logger.debug("Space pressed down")
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -286,21 +306,26 @@ class Game():
                 # TODO for now, just stick with walking
                 transport_type = tiledata.WALKABLE_F
 
-                # make protagonist face the direction and update tile
+                # Make protagonist face the direction and update tile
                 # that protagonist is on to clear the previous protagonist
-                # sprite image
+                # sprite image.
                 self.turn_protagonist(protag_move_dir)
 
+                # Blit top display on top of the current viewing.
                 self.viewing.blit_top_display()
 
-                # TODO - reblit the current square where the protag is when turning
-
-                # update display
+                # Update display to reflect blit changes.
                 pygame.display.update()
 
+                # Attempt to move the protagonist.
                 self.move_protagonist(protag_move_dir, transport_type)
-                logger.debug("Protagonist tile_pos: {0}".format(self.protagonist.tile_position))
+                logger.debug("Protagonist tile_pos: {0}".format(self.curr_map.protagonist_location))
                 logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
+            elif interact_in_front:
+                logger.debug("Trying to interact in front")
+
+                # Get tile coordinate in front of protagonist
+
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

@@ -57,7 +57,7 @@ class Resource(interactiveobj.Interactive_Object):
                 if resource_data:
                     # Get the resource fields
                     # TODO - change default values?
-                    name = resource_data.get(objdata.OBJECT_NAME_FIELD, None)
+                    name = resource_data.get(objdata.OBJECT_NAME_FIELD, {})
                     image_path_dict = resource_data.get(objdata.IMAGE_PATH_DICT_FIELD, {})
                     collision_width = resource_data.get(objdata.COLLISION_WIDTH_FIELD, 1)
                     collision_height = resource_data.get(objdata.COLLISION_HEIGHT_FIELD, 1)

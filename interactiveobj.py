@@ -35,6 +35,8 @@ class Interactive_Object(pygame.sprite.Sprite):
             # convert alpha for transparency
             self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
 
+        self.curr_image_id = objdata.OW_IMAGE_ID_DEFAULT
+
     # blits the interactive object sprite image corresponding to image_type_id
     # onto the designated surface. Can specify either top_left_pixel or
     # bottom_left_pixel as the reference point for blitting the image.
@@ -46,12 +48,19 @@ class Interactive_Object(pygame.sprite.Sprite):
     def blit_onto_surface(                                                  \
             self,                                                           \
             surface,                                                        \
-            image_type_id,                                                  \
+            image_type_id=None,                                             \
             bottom_left_pixel=None,                                         \
             top_left_pixel=None                                             \
         ):
         if self and surface and (bottom_left_pixel or top_left_pixel):
-            image_to_blit = self.image_dict.get(image_type_id, None)
+            id_to_use = None
+
+            if image_type_id:
+                id_to_use = image_type_id
+            else:
+                id_to_use = self.curr_image_id
+
+            image_to_blit = self.image_dict.get(id_to_use, None)
             top_left = None
 
             if image_to_blit:

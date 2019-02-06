@@ -4,47 +4,8 @@ import map
 import mapdata
 import tile
 import objdata
-
-# overworld display constants
-OW_DISPLAY_NUM_TILES_HORIZONTAL = 21
-OW_DISPLAY_NUM_TILES_VERTICAL = 15
-
-OW_VIEWING_WIDTH = tile.TILE_SIZE * OW_DISPLAY_NUM_TILES_HORIZONTAL
-OW_VIEWING_HEIGHT = tile.TILE_SIZE * OW_DISPLAY_NUM_TILES_VERTICAL
-
-# viewing space at top of game display. This display will
-# show things like current health, money, level, et
-TOP_DISPLAY_HEIGHT = tile.TILE_SIZE
-TOP_DISPLAY_WIDTH = OW_VIEWING_WIDTH
-
-# main display width is same as overworld viewing width
-# main display height is overworld viewing height + space for
-# the top display
-MAIN_DISPLAY_WIDTH = OW_VIEWING_WIDTH
-MAIN_DISPLAY_HEIGHT = OW_VIEWING_HEIGHT + TOP_DISPLAY_HEIGHT
-
-# dimensions for side menu to launch during overworld
-OW_SIDE_MENU_WIDTH = 150
-OW_SIDE_MENU_HEIGHT = OW_VIEWING_HEIGHT - (tile.TILE_SIZE*2)
-
-# location constants
-MAIN_DISPLAY_LOCATION = (0,0)
-TOP_DISPLAY_LOCATION = (0,0)
-OW_VIEWING_LOCATION = (0, TOP_DISPLAY_HEIGHT)
-OW_SIDE_MENU_LOCATION = (                                               \
-    MAIN_DISPLAY_WIDTH - OW_SIDE_MENU_WIDTH,                            \
-    TOP_DISPLAY_HEIGHT + tile.TILE_SIZE                                  \
-)
-CENTER_OW_TILE_TOP_LEFT = (                                     \
-    int(OW_DISPLAY_NUM_TILES_HORIZONTAL / 2) * tile.TILE_SIZE,  \
-    int(OW_DISPLAY_NUM_TILES_VERTICAL / 2)*tile.TILE_SIZE +     \
-        TOP_DISPLAY_HEIGHT                                      \
-)
-
-CENTER_OW_TILE_BOTTOM_LEFT = (                      \
-    CENTER_OW_TILE_TOP_LEFT[0],                     \
-    CENTER_OW_TILE_TOP_LEFT[1] + tile.TILE_SIZE     \
-)
+import language
+import viewingdata
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -60,37 +21,60 @@ NUM_MS_SECOND = 1000
 SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
 SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
 
+### FONTS AND TEXT ###
+DEFAULT_FONT = None
+TOP_DISPLAY_TEXT = None
+
+class Top_Display():
+    def __init__(
+                self,
+                main_display_surface,
+                pixel_width=viewingdata.TOP_DISPLAY_WIDTH,
+                pixel_height=viewingdata.TOP_DISPLAY_HEIGHT,
+                protagonist=None,
+                curr_map=None):
+        pass
+
 class Viewing():
-    def __init__(self, main_display_surface, protagonist=None, curr_map=None):
+    def __init__(
+                self,
+                main_display_surface,
+                protagonist=None,
+                curr_map=None
+            ):
         self.main_display_surface = main_display_surface
         self.protagonist = protagonist
         self.curr_map = curr_map
 
         # create Rect objects for main display
         self.top_display_rect = pygame.Rect(                            \
-            TOP_DISPLAY_LOCATION,                                       \
-            (TOP_DISPLAY_WIDTH, TOP_DISPLAY_HEIGHT)                     \
+            viewingdata.TOP_DISPLAY_LOCATION,                         \
+            (viewingdata.TOP_DISPLAY_WIDTH, viewingdata.TOP_DISPLAY_HEIGHT)     \
         )
         self.ow_viewing_rect = pygame.Rect(                             \
-            OW_VIEWING_LOCATION,                                        \
-            (OW_VIEWING_WIDTH, OW_VIEWING_HEIGHT)                       \
+            viewingdata.OW_VIEWING_LOCATION,                           \
+            (viewingdata.OW_VIEWING_WIDTH, viewingdata.OW_VIEWING_HEIGHT)   \
         )
         self.ow_side_menu_rect = pygame.Rect(                           \
-            OW_SIDE_MENU_LOCATION,                                      \
-            (OW_SIDE_MENU_WIDTH, OW_SIDE_MENU_HEIGHT)                   \
+            viewingdata.OW_SIDE_MENU_LOCATION,                                      \
+            (viewingdata.OW_SIDE_MENU_WIDTH, viewingdata.OW_SIDE_MENU_HEIGHT)                   \
         )
         self.main_display_rect = pygame.Rect(                           \
-            MAIN_DISPLAY_LOCATION,                                      \
-            (MAIN_DISPLAY_WIDTH, MAIN_DISPLAY_HEIGHT)                     \
+            viewingdata.MAIN_DISPLAY_LOCATION,                                      \
+            (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)                     \
         )
 
     # blits the top display view onto the main display screen
     # does not update the main display - caller will have to do that
     def blit_top_display(self):
         if self.main_display_surface:
-            # TODO - add to this as we get more top display details
+            # Add background for top display.
             pygame.draw.rect(self.main_display_surface, COLOR_WHITE, \
                 self.top_display_rect)
+
+            # Blit protagonist details if needed.
+            if self.protagonist:
+                self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
 
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
@@ -115,17 +99,6 @@ class Viewing():
             # reset the surface screen to default to black for empty map
             # spaces
             self.set_viewing_screen_default(default_color=COLOR_BLACK)
-
-            # scroll 1 pixel at a time
-            self.curr_map.scroll(
-                self.main_display_surface,
-                direction,
-                1,
-                tile_subset_rect=tile_subset_rect
-            )
-
-            # also blit the top view
-            self.blit_top_display()
 
             # blit protagonist
             # TODO - have designated spot for protagonist?
@@ -164,13 +137,26 @@ class Viewing():
                     else:
                         image_type_id = objdata.OW_IMAGE_ID_FACE_WEST
 
-                self.protagonist.blit_onto_surface(                 \
-                    self.main_display_surface,                      \
-                    image_type_id,                                  \
-                    bottom_left_pixel=CENTER_OW_TILE_BOTTOM_LEFT    \
+                # Set new protagonist image id
+                self.protagonist.curr_image_id = image_type_id
+
+                # scroll 1 pixel at a time
+                self.curr_map.scroll(
+                    self.main_display_surface,
+                    direction,
+                    1,
+                    tile_subset_rect=tile_subset_rect
                 )
 
-            # update main display
+                # Also blit the top view on top.
+                self.blit_top_display()
+
+                self.protagonist.blit_onto_surface(                 \
+                    self.main_display_surface,                      \
+                    bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
+                )
+
+            # Update main display
             pygame.display.update()
 
             # wait till next iteration
@@ -210,12 +196,12 @@ class Viewing():
             if map_top_left_pixel_pos[0] < 0:
                 # map top left is behind the left side of viewing
                 coord_x = -1 * int(map_top_left_pixel_pos / tile.TILE_SIZE)
-            if map_top_left_pixel_pos[1] >= TOP_DISPLAY_HEIGHT:
+            if map_top_left_pixel_pos[1] >= viewingdata.TOP_DISPLAY_HEIGHT:
                 # map top left is aligned with or below top of overworld viewing
                 coord_y = 0
             else:
                 # map top left is above top of overworld viewing
-                coord_y = -1 * int((map_top_left_pixel_pos[1] - TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
+                coord_y = -1 * int((map_top_left_pixel_pos[1] - viewingdata.TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
 
             ret_coord = (coord_x, coord_y)
             logger.debug("Top left ow viewing tile: {0}, map top left {1}".format(ret_coord, map_top_left_pixel_pos))
@@ -244,12 +230,12 @@ class Viewing():
             map_bottom_edge = map_object.top_left_position[1] \
                             + (map_object.height * tile.TILE_SIZE)
 
-            if map_right_edge > MAIN_DISPLAY_WIDTH:
+            if map_right_edge > viewingdata.MAIN_DISPLAY_WIDTH:
                 # map right edge is past the main display right edge
                 end_tile_x = min(                                           \
                     map_object.width                                        \
                         - int(                                              \
-                            (map_right_edge - MAIN_DISPLAY_WIDTH)           \
+                            (map_right_edge - viewingdata.MAIN_DISPLAY_WIDTH)           \
                             / tile.TILE_SIZE                                \
                         ),                                                  \
                     map_object.width - 1                                    \
@@ -257,12 +243,12 @@ class Viewing():
             else:
                 end_tile_x = map_object.width - 1
 
-            if map_bottom_edge > MAIN_DISPLAY_HEIGHT:
+            if map_bottom_edge > viewingdata.MAIN_DISPLAY_HEIGHT:
                 # map bottom edge is past the main display bottom edge
                 end_tile_y = min(                                           \
                     map_object.height                                       \
                     - int(                                                  \
-                        (map_bottom_edge - MAIN_DISPLAY_HEIGHT)             \
+                        (map_bottom_edge - viewingdata.MAIN_DISPLAY_HEIGHT)             \
                         / tile.TILE_SIZE                                    \
                     ),                                                      \
                     map_object.height - 1
@@ -317,7 +303,11 @@ class Viewing():
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
-    def set_and_blit_map_on_view(self, map_top_left=OW_VIEWING_LOCATION, default_color=COLOR_BLACK):
+    def set_and_blit_map_on_view(
+                self,
+                map_top_left=viewingdata.OW_VIEWING_LOCATION,
+                default_color=COLOR_BLACK
+            ):
         self.set_viewing_screen_default(default_color)
 
         # set current map's top left position on display screen
@@ -341,7 +331,7 @@ class Viewing():
             # blit map
             self.curr_map.blit_onto_surface(                                \
                 self.main_display_surface,                                  \
-                tile_subset_rect=tile_subset_rect                           \
+                tile_subset_rect=tile_subset_rect,                          \
             )
         else:
             logger.error("No map set for current viewing.")
@@ -378,13 +368,20 @@ class Viewing():
     def get_centered_map_top_left_pixel(cls, protag_tile_coordinate):
         top_left = (0,0)
         if protag_tile_coordinate:
-            pixel_distance_horiz = CENTER_OW_TILE_TOP_LEFT[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
-            pixel_distance_vert = CENTER_OW_TILE_TOP_LEFT[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
+            pixel_distance_horiz = viewingdata.CENTER_OW_TILE_TOP_LEFT[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
+            pixel_distance_vert = viewingdata.CENTER_OW_TILE_TOP_LEFT[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
 
             top_left = (pixel_distance_horiz, pixel_distance_vert)
 
 
         return top_left
+
+    @classmethod
+    def init_text_surfaces(cls):
+        global DEFAULT_FONT
+        global TOP_DISPLAY_TEXT
+        DEFAULT_FONT = pygame.font.SysFont('Comic Sans MS', 30)
+        TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, COLOR_BLACK)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

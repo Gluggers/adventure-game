@@ -30,7 +30,7 @@ TILE_WATER_NORMAL_4_PATH = TILE_IMAGE_PATH + "tile_water_normal_4.png"
 HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32.png"
 ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32.png"
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_32x32.png"
-TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_32x32.png"
+TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64.png"
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south.png"

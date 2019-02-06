@@ -5,6 +5,7 @@ import mapdata
 import tile
 import logging
 import viewing
+import viewingdata
 import language
 import objdata
 import resources
@@ -27,6 +28,9 @@ def main():
     # create game
     game_obj = game.Game(game.GAME_TITLE, language.DEFAULT_LANGUAGE)
 
+    # load fonts
+    viewing.Viewing.init_text_surfaces()
+
     # load tiles
     tile.Tile.build_tiles()
 
@@ -44,7 +48,7 @@ def main():
 
     # create protagonist
     protag_tile_loc = (2,2)
-    protagonist = game_obj.build_protagonist("Bob", protag_tile_loc)
+    protagonist = game_obj.build_protagonist("Bob")
 
     # set map and blit
     game_obj.set_and_blit_current_game_map(mapdata.R0_A0_ID, protag_tile_loc)
@@ -53,7 +57,7 @@ def main():
     game_obj.viewing.blit_interactive_object(                   \
         protagonist,                                            \
         objdata.OW_IMAGE_ID_DEFAULT,                     \
-        bottom_left_pixel=viewing.CENTER_OW_TILE_BOTTOM_LEFT    \
+        bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
     )
 
     # update screen

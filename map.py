@@ -7,6 +7,7 @@ import objdata
 import tile
 import tiledata
 import mapdata
+import viewingdata
 from pygame.locals import *
 
 ### CLASS NAME ###
@@ -54,8 +55,8 @@ class Map:
         # should not have an entry for that Tile location.
         self.occupied_tile_dict = {}
 
-        # (x,y) tuple representing location of protagonist. Default is (0,0)
-        #self.protagonist_location = (0, 0)
+        # (x,y) tuple representing location of protagonist.
+        self._protagonist_location = None
 
         # maps Tile grid location (x,y) tuple to a
         # [interactive obj, remaining ticks to respawn] list
@@ -277,6 +278,48 @@ class Map:
         # # TODO
         return False
 
+    @property
+    def protagonist_location(self):
+        """Return the protagonist location on map."""
+        return self._protagonist_location
+
+    @protagonist_location.setter
+    def protagonist_location(self, new_location):
+        """Set the protagonist location on map."""
+        if new_location:
+            if self._protagonist_location:
+                # Clear old tile location
+                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
+                self.occupied_tile_dict.pop(self._protagonist_location, None)
+
+            # Check if new location is occupied
+            if self.bottom_left_tile_obj_mapping.get(new_location, None) \
+                    or self.occupied_tile_dict.get(new_location, None):
+                logger.error("Cannot move protag from {0} to {1}".format(self._protagonist_location, new_location))
+            else:
+                # Mark new location as occupied
+                self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
+                self.occupied_tile_dict[new_location] = new_location
+
+                logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
+
+                self._protagonist_location = new_location
+
+    def change_protagonist_location(self, new_location):
+        if new_location:
+            if self._protagonist_location:
+                # Clear old tile location
+                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
+                self.occupied_tile_dict.pop(self._protagonist_location, None)
+
+            # Mark new location as occupied
+            self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
+            self.occupied_tile_dict[new_location] = new_location
+
+            logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
+
+            self._protagonist_location = new_location
+
     # TODO document
     def set_respawn_timer(self, obj_to_respawn, tile_location, num_ticks):
         success = False
@@ -396,7 +439,7 @@ class Map:
                     curr_pixel_y = curr_pixel_y + tile.TILE_SIZE
 
     # Blits spawned interactive objects starting at current
-    # top left position of map.
+    # top left position of map
     # Caller needs to update surface after method
     # tile_subset_rect is rect of tile coordinates that indicates which
     # tiles to include for blitting, rather than blitting the whole map.
@@ -433,22 +476,31 @@ class Map:
                                 interactiveobj.Interactive_Object.get_interactive_object(obj_info[0])
 
                             if obj_to_blit:
-                                # Blit the object.
-                                bottom_left_pixel = (                           \
-                                    self.top_left_position[0]                   \
-                                        + (tile_loc[0] * tile.TILE_SIZE),       \
-                                    self.top_left_position[1]                   \
-                                        + ((tile_loc[1] + 1) * tile.TILE_SIZE)  \
-                                )
+                                bottom_left_pixel = None
 
-                                # Use default image ID for overworld.
-                                # TODO - change this image ID depending
-                                # on object type?
-                                obj_to_blit.blit_onto_surface(
-                                    surface,
-                                    objdata.OW_IMAGE_ID_DEFAULT,
-                                    bottom_left_pixel=bottom_left_pixel
-                                )
+                                if (obj_info[0] == objdata.PROTAGONIST_ID):
+                                    bottom_left_pixel = viewingdata.CENTER_OW_TILE_BOTTOM_LEFT
+                                    obj_to_blit.blit_onto_surface(
+                                        surface,
+                                        bottom_left_pixel=bottom_left_pixel
+                                    )
+                                else:
+                                    bottom_left_pixel = (                           \
+                                        self.top_left_position[0]                   \
+                                            + (tile_loc[0] * tile.TILE_SIZE),       \
+                                        self.top_left_position[1]                   \
+                                            + ((tile_loc[1] + 1) * tile.TILE_SIZE)  \
+                                    )
+
+                                    # Blit the object.
+                                    # Use default image ID for overworld.
+                                    # TODO - change this image ID depending
+                                    # on object type?
+                                    obj_to_blit.blit_onto_surface(
+                                        surface,
+                                        image_type_id=objdata.OW_IMAGE_ID_DEFAULT,
+                                        bottom_left_pixel=bottom_left_pixel
+                                    )
 
 
     # blit entire map, including tiles and spawned interactive objects
@@ -462,8 +514,11 @@ class Map:
             # Blit the tiles.
             self.blit_tiles(surface, tile_subset_rect=tile_subset_rect)
 
-            # Next, blit the objects.
-            self.blit_interactive_objects(surface, tile_subset_rect=tile_subset_rect)
+            # Next, blit the objects
+            self.blit_interactive_objects(
+                surface,
+                tile_subset_rect=tile_subset_rect
+            )
 
 
             """

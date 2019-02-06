@@ -185,7 +185,6 @@ class Protagonist(Character):
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
                     race=RACE_HUMAN,
-                    tile_position=(0,0)
                 ):
 
         Character.__init__(
@@ -200,7 +199,6 @@ class Protagonist(Character):
             gender=gender,
             race=race,
         )
-        self.tile_position = tile_position
         self.quest_journal = {}
         self.inventory = []
 
