@@ -9,6 +9,7 @@ import viewingdata
 import language
 import objdata
 import resources
+import display
 import game
 
 from pygame.locals import *
@@ -25,11 +26,12 @@ def main():
     global logger
     logger = logging.getLogger(__name__)
 
+    # load fonts
+    display.Display.init_fonts()
+
     # create game
     game_obj = game.Game(game.GAME_TITLE, language.DEFAULT_LANGUAGE)
 
-    # load fonts
-    viewing.Viewing.init_text_surfaces()
 
     # load tiles
     tile.Tile.build_tiles()

@@ -5,7 +5,6 @@
 # Antifarea, opengameart - https://opengameart.org/content/twelve-16x18-rpg-sprites-plus-base
 # https://opengameart.org/content/antifareas-rpg-sprite-set-1-enlarged-w-transparent-background
 
-
 ### IMAGE CONSTANTS ###
 IMAGE_HOME_PATH = "images/"
 TILE_IMAGE_PATH = IMAGE_HOME_PATH + "tiles/"

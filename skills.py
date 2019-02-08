@@ -1,3 +1,5 @@
+import logging
+
 ### SKILLS CONSTANTS ###
 SKILL_ID_ATTACK = 0x1
 SKILL_ID_STRENGTH = 0x2
@@ -46,6 +48,7 @@ SKILL_ID_LIST = [
 ]
 
 ### LEVEL AND EXPERIENCE CONSTANTS ###
+DEFAULT_HITPOINTS = 10
 DEFAULT_LEVEL = 1
 DEFAULT_EXP = 0
 MIN_LEVEL = 1
@@ -72,3 +75,26 @@ def get_experience_from_level(level):
     if level and level <= len(EXP_LADDER):
         ret_exp = EXP_LADDER[level - 1]
     return ret_exp
+
+def calculate_combat_level(skill_dict):
+    ret_level = 1
+
+    if skill_dict:
+        ret_level = int((                                         \
+            skill_dict.get(SKILL_ID_ATTACK, [1])[0]              \
+            + skill_dict.get(SKILL_ID_STRENGTH, [1])[0]          \
+            + skill_dict.get(SKILL_ID_DEFENSE, [1])[0]           \
+            + skill_dict.get(SKILL_ID_HITPOINTS, [1])[0]         \
+            + max(                                               \
+                skill_dict.get(SKILL_ID_ARCHERY, [1])[0],        \
+                skill_dict.get(SKILL_ID_BLACK_MAGIC, [1])[0],    \
+                skill_dict.get(SKILL_ID_WHITE_MAGIC, [1])[0],    \
+            )
+        )  / 3)
+        logger.debug("Combat level: {0}".format(ret_level))
+
+    return ret_level
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)

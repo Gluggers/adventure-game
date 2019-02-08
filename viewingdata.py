@@ -40,3 +40,7 @@ CENTER_OW_TILE_BOTTOM_LEFT = (                      \
     CENTER_OW_TILE_TOP_LEFT[0],                     \
     CENTER_OW_TILE_TOP_LEFT[1] + tile.TILE_SIZE     \
 )
+
+### COLOR CONSTANTS ###
+COLOR_WHITE = (255,255,255)
+COLOR_BLACK = (0,0,0)

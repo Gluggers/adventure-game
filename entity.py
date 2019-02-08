@@ -16,7 +16,7 @@ RACE_DEFAULT = 0x0
 RACE_HUMAN = 0x1
 
 # skils_dict maps the skill ID to the corresponding levels
-# for the entity. Not passing one in sets default values
+# for the entity (ID -> [level, xp]). Not passing one in sets default values
 # equipment_dict maps the equipment slot ID to the corresponding item ID
 # that the Entity is wielding
 # TODO - set up item class and have it map IDs to item objects (build_item method)
@@ -59,6 +59,10 @@ class Entity(interactiveobj.Interactive_Object):
             else:
                 # default values
                 self.skills_dict[skill_id] = [skills.DEFAULT_LEVEL, skills.DEFAULT_EXP]
+
+        # Set up health - use hitpoint stat if possible, otherwise default hitpoints value.
+        self.max_health = self.skills_dict.get(skills.SKILL_ID_HITPOINTS, [skills.DEFAULT_HITPOINTS])[0]
+        self.curr_health = self.max_health
 
         # set up equipment
         self.equipment_dict = {}

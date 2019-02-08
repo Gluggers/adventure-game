@@ -38,7 +38,11 @@ class Game():
             pygame.display.set_caption(game_name)
 
             # create initial viewing object
-            self.viewing = viewing.Viewing(self.main_display_screen)
+            self.viewing = viewing.Viewing.create_viewing(self.main_display_screen)
+            if not self.viewing:
+                logger.error("Failed to create viewing object.")
+            else:
+                logger.debug("Created viewing object.")
 
             # set default difficulty to normal.
             self.difficulty = DIFFICULTY_NORMAL
@@ -57,7 +61,7 @@ class Game():
                 self,                                                       \
                 curr_map_id,                                                \
                 protag_tile_location=(0,0),                                 \
-                default_color=viewing.COLOR_BLACK                           \
+                default_color=viewingdata.COLOR_BLACK                           \
             ):
         curr_map = map.Map.get_map(curr_map_id)
 
@@ -112,7 +116,7 @@ class Game():
     # change and transition to new map
     # updates display screen
     # TODO document
-    def change_current_map(self, dest_map, protag_dest_tile_pos, default_color=viewing.COLOR_BLACK):
+    def change_current_map(self, dest_map, protag_dest_tile_pos, default_color=viewingdata.COLOR_BLACK):
         if dest_map and protag_dest_tile_pos:
             # set and blit map
             self.set_and_blit_current_game_map(dest_map, protag_dest_tile_loc)

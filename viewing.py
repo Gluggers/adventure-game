@@ -3,6 +3,7 @@ import logging
 import map
 import mapdata
 import tile
+import display
 import objdata
 import language
 import viewingdata
@@ -12,28 +13,10 @@ WALK1_FRAME_END = (tile.TILE_SIZE / 4)
 WALK2_FRAME_END = 3*(tile.TILE_SIZE / 4)
 STAND_FRAME_END = 2*(tile.TILE_SIZE / 4)
 
-### COLOR CONSTANTS ###
-COLOR_WHITE = (255,255,255)
-COLOR_BLACK = (0,0,0)
-
 ### TIME CONSTANTS ###
 NUM_MS_SECOND = 1000
 SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
 SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
-
-### FONTS AND TEXT ###
-DEFAULT_FONT = None
-TOP_DISPLAY_TEXT = None
-
-class Top_Display():
-    def __init__(
-                self,
-                main_display_surface,
-                pixel_width=viewingdata.TOP_DISPLAY_WIDTH,
-                pixel_height=viewingdata.TOP_DISPLAY_HEIGHT,
-                protagonist=None,
-                curr_map=None):
-        pass
 
 class Viewing():
     def __init__(
@@ -43,7 +26,7 @@ class Viewing():
                 curr_map=None
             ):
         self.main_display_surface = main_display_surface
-        self.protagonist = protagonist
+        self._protagonist = protagonist
         self.curr_map = curr_map
 
         # create Rect objects for main display
@@ -64,17 +47,42 @@ class Viewing():
             (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)                     \
         )
 
+        self.top_display = None
+
+    @classmethod
+    def create_viewing(
+                cls,
+                main_display_surface,
+                protagonist=None,
+                curr_map=None,
+            ):
+        ret_viewing = None
+
+        if main_display_surface:
+            ret_viewing = Viewing(
+                main_display_surface,
+                protagonist=protagonist,
+                curr_map=curr_map,
+            )
+
+            # Create displays for viewing.
+            ret_viewing.create_displays()
+
+        return ret_viewing
+
     # blits the top display view onto the main display screen
     # does not update the main display - caller will have to do that
     def blit_top_display(self):
-        if self.main_display_surface:
-            # Add background for top display.
-            pygame.draw.rect(self.main_display_surface, COLOR_WHITE, \
-                self.top_display_rect)
+        if self.main_display_surface and self.top_display:
+            self.top_display.blit_onto_surface(self.main_display_surface)
 
-            # Blit protagonist details if needed.
-            if self.protagonist:
-                self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
+            # Add background for top display.
+            #pygame.draw.rect(self.main_display_surface, viewingdata.COLOR_WHITE, \
+                #self.top_display_rect)
+
+            # Blit the top display details
+            #if self._protagonist:
+                #self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
 
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
@@ -98,11 +106,11 @@ class Viewing():
         for i in range(tile.TILE_SIZE):
             # reset the surface screen to default to black for empty map
             # spaces
-            self.set_viewing_screen_default(default_color=COLOR_BLACK)
+            self.set_viewing_screen_default(fill_color=viewingdata.COLOR_BLACK)
 
             # blit protagonist
             # TODO - have designated spot for protagonist?
-            if self.protagonist:
+            if self._protagonist:
                 # get image type ID for protagonist:
                 image_type_id = objdata.OW_IMAGE_ID_DEFAULT
                 offset = i % tile.TILE_SIZE
@@ -138,7 +146,7 @@ class Viewing():
                         image_type_id = objdata.OW_IMAGE_ID_FACE_WEST
 
                 # Set new protagonist image id
-                self.protagonist.curr_image_id = image_type_id
+                self._protagonist.curr_image_id = image_type_id
 
                 # scroll 1 pixel at a time
                 self.curr_map.scroll(
@@ -151,7 +159,7 @@ class Viewing():
                 # Also blit the top view on top.
                 self.blit_top_display()
 
-                self.protagonist.blit_onto_surface(                 \
+                self._protagonist.blit_onto_surface(                 \
                     self.main_display_surface,                      \
                     bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
                 )
@@ -182,8 +190,8 @@ class Viewing():
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
-    def set_viewing_screen_default(self, default_color=COLOR_BLACK):
-        self.main_display_surface.fill(COLOR_BLACK)
+    def set_viewing_screen_default(self, fill_color=viewingdata.COLOR_BLACK):
+        self.main_display_surface.fill(fill_color)
 
     # assumes map_top_left_pixel_pos has coordinates equally divisible
     # by tile.TILE_SIZE
@@ -306,9 +314,9 @@ class Viewing():
     def set_and_blit_map_on_view(
                 self,
                 map_top_left=viewingdata.OW_VIEWING_LOCATION,
-                default_color=COLOR_BLACK
+                fill_color=viewingdata.COLOR_BLACK
             ):
-        self.set_viewing_screen_default(default_color)
+        self.set_viewing_screen_default(fill_color)
 
         # set current map's top left position on display screen
         if self.curr_map:
@@ -376,12 +384,45 @@ class Viewing():
 
         return top_left
 
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_top_display(self):
+        if display.Display.top_display_font:
+            self.top_display = display.Top_Display(
+                self.main_display_surface,
+                viewingdata.TOP_DISPLAY_LOCATION,
+                display.Display.top_display_font,
+                background_color=viewingdata.COLOR_WHITE,
+                protagonist=self._protagonist
+            )
+        else:
+            logger.error("Top display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_displays(self):
+        self.create_top_display()
+
+    @property
+    def protagonist(self):
+        """Return protagonist."""
+        return self._protagonist
+
+    @protagonist.setter
+    def protagonist(self, value):
+        """Set protagonist for viewing."""
+        if value:
+            self._protagonist = value
+
+            # Assign protagonist to top display, as well, which should update
+            # the top display
+            self.top_display.protagonist = value
+
     @classmethod
     def init_text_surfaces(cls):
         global DEFAULT_FONT
         global TOP_DISPLAY_TEXT
         DEFAULT_FONT = pygame.font.SysFont('Comic Sans MS', 30)
-        TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, COLOR_BLACK)
+        TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, viewingdata.COLOR_BLACK)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
