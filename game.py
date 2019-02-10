@@ -8,15 +8,16 @@ import map
 import mapdata
 import tile
 import tiledata
+import timekeeper
 import objdata
 import interactiveobj
 import sys
+import skills
 
 logger = None
 
 ### GAME CONSTANTS ###
 GAME_TITLE = "Adventure Game v0.1"
-CLOCK_TICK = 30
 
 ### DIFFICULTY CONSTANTS ###
 DIFFICULTY_NORMAL = 0x0
@@ -24,11 +25,12 @@ DIFFICULTY_HARD = 0x1
 
 
 class Game():
-    def __init__(self, game_name, language=language.DEFAULT_LANGUAGE):
+    def __init__(self, game_name, game_language=language.DEFAULT_LANGUAGE):
         if game_name and game_name:
             # will change as game progresses
             self.protagonist = None
             self.curr_map = None
+            self.game_language = game_language
 
             # create main display screen
             self.main_display_screen = pygame.display.set_mode(             \
@@ -38,7 +40,11 @@ class Game():
             pygame.display.set_caption(game_name)
 
             # create initial viewing object
-            self.viewing = viewing.Viewing.create_viewing(self.main_display_screen)
+            self.viewing = viewing.Viewing.create_viewing(
+                self.main_display_screen,
+                display_language=self.game_language,
+            )
+
             if not self.viewing:
                 logger.error("Failed to create viewing object.")
             else:
@@ -46,13 +52,6 @@ class Game():
 
             # set default difficulty to normal.
             self.difficulty = DIFFICULTY_NORMAL
-
-            # set game language to default
-            self.language = language
-
-            # set clock
-            self.clock = pygame.time.Clock()
-            self.clock.tick(CLOCK_TICK)
 
     # TODO document
     # centers map automatically depending on where protagonist is
@@ -85,11 +84,15 @@ class Game():
         protag_id = objdata.PROTAGONIST_ID
         protag_name = name
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
+        protag_skills_dict = {
+            skills.SKILL_ID_HITPOINTS: 10,
+        }
 
         protagonist = entity.Protagonist(                       \
             protag_id,  \
             protag_name,    \
             protag_image_path_dict,  \
+            skills_dict=protag_skills_dict,
             gender=entity.GENDER_MALE, \
             race=entity.RACE_HUMAN,
         )
@@ -233,10 +236,18 @@ class Game():
             bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
         )
 
-    def get_tile_front_of_protagonist(self):
-        front_tile = None
+    # Returns the tile location tuple for the tile that the protagonist
+    # is facing.
+    def get_protagonist_facing_tile_location(self):
+        front_tile_pos = None
 
-        return front_tile
+        if self.protagonist and (self.protagonist.facing_direction is not None):
+            front_tile_pos = self.curr_map.get_adjacent_tile_position(
+                self.curr_map.protagonist_location,
+                self.protagonist.facing_direction
+            )
+
+        return front_tile_pos
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -254,11 +265,16 @@ class Game():
         protag_move_dir = None
 
         interact_in_front = False
+        examine_in_front = False
 
         while continue_playing:
+            # Tick clock.
+            timekeeper.Timekeeper.tick()
+
             # TODO: update map
 
             interact_in_front = False
+            examine_in_front = False
 
             for events in pygame.event.get():
                 if events.type == pygame.QUIT:
@@ -288,6 +304,12 @@ class Game():
                     elif events.key == pygame.K_SPACE:
                         interact_in_front = True
                         logger.debug("Space pressed down")
+                    elif events.key == pygame.K_e:
+                        examine_in_front = True
+                        logger.debug("Examine key E pressed down")
+                    elif events.key == pygame.K_RETURN:
+                        examine_in_front = True
+                        logger.debug("Examine key Return (Enter) pressed down")
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -325,11 +347,34 @@ class Game():
                 self.move_protagonist(protag_move_dir, transport_type)
                 logger.debug("Protagonist tile_pos: {0}".format(self.curr_map.protagonist_location))
                 logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
-            elif interact_in_front:
-                logger.debug("Trying to interact in front")
+            elif interact_in_front or examine_in_front:
+                logger.debug("Trying to interact/examine in front")
 
                 # Get tile coordinate in front of protagonist
+                front_tile_pos = self.get_protagonist_facing_tile_location()
 
+                logger.debug("Facing tile loc: {0}".format(front_tile_pos))
+
+                # See if the map has an interactive object whose collision
+                # space takes up the facing tile.
+                inter_obj = self.curr_map.get_object_occupying_tile(front_tile_pos)
+
+                if inter_obj:
+                    logger.debug("Facing object {0}".format(inter_obj.object_id))
+
+                    if interact_in_front:
+                        # Interact with object.
+                        pass
+                    elif examine_in_front:
+                        # Examine object.
+
+                        # Display examine text at bottom of screen.
+                        self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))
+
+                        # TODO update map
+                        #self.viewing.set_and_blit_current_game_map
+
+                        #logger.debug("EXAMINE INFO: {0}".format(inter_obj.get_examine_info(self.game_language)))
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

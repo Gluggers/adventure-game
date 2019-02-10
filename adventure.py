@@ -10,6 +10,7 @@ import language
 import objdata
 import resources
 import display
+import timekeeper
 import game
 
 from pygame.locals import *
@@ -26,11 +27,14 @@ def main():
     global logger
     logger = logging.getLogger(__name__)
 
+    # init clock
+    timekeeper.Timekeeper.init_clock()
+
     # load fonts
     display.Display.init_fonts()
 
     # create game
-    game_obj = game.Game(game.GAME_TITLE, language.DEFAULT_LANGUAGE)
+    game_obj = game.Game(game.GAME_TITLE, language.LANG_ESPANOL)
 
 
     # load tiles

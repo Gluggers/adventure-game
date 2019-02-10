@@ -32,6 +32,7 @@ class Entity(interactiveobj.Interactive_Object):
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
                     race=RACE_HUMAN,
+                    examine_info=None,
                 ):
         interactiveobj.Interactive_Object.__init__(
             self,
@@ -40,7 +41,8 @@ class Entity(interactiveobj.Interactive_Object):
             id,
             image_path_dict,
             collision_width=collision_width,
-            collision_height=collision_height
+            collision_height=collision_height,
+            examine_info=examine_info,
         )
 
         self.gender = gender
@@ -55,7 +57,8 @@ class Entity(interactiveobj.Interactive_Object):
             skill_level = skills_dict.get(skill_id, None)
             if skill_level:
                 exp = skills.get_experience_from_level(skill_level)
-                self.skills_dict[skill_id] = [skill_value, exp]
+                logger.debug("Setting skill level {0}, exp {1}".format(skill_level, exp))
+                self.skills_dict[skill_id] = [skill_level, exp]
             else:
                 # default values
                 self.skills_dict[skill_id] = [skills.DEFAULT_LEVEL, skills.DEFAULT_EXP]
@@ -119,7 +122,8 @@ class Character(Entity):
                     skills_dict={},
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
-                    race=RACE_HUMAN
+                    race=RACE_HUMAN,
+                    examine_info=None
                 ):
 
         # a Character is an Entity type of interactive object
@@ -133,7 +137,8 @@ class Character(Entity):
             skills_dict=skills_dict,
             equipment_dict=equipment_dict,
             gender=gender,
-            race=race
+            race=race,
+            examine_info=examine_info,
         )
 
         # TODO Fill in rest

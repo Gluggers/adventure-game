@@ -183,6 +183,7 @@ class Map:
                             "Obj already exists at location %s",    \
                             str(tile_loc)                           \
                         )
+                    # TODO check if the tile is walkable before putting an object on it?
                 else:
                     can_set = False
                     logger.error(                                           \
@@ -198,6 +199,8 @@ class Map:
                 for tile_loc in collision_tile_set:
                     self.occupied_tile_dict[tile_loc] = bottom_left_tile_loc
                     logger.debug("Marking {0} as occupied".format(tile_loc))
+
+                success = True
 
         return success
 
@@ -278,6 +281,68 @@ class Map:
         # # TODO
         return False
 
+    # Returns None if invalid direction, invalid initial tile position,
+    # or adjacent tile is out of bounds (does not look for adjacent maps).
+    def get_adjacent_tile_position(self, tile_position, adjacent_direction):
+        ret_tile_pos = None
+
+        if tile_position and (adjacent_direction is not None):
+            # Only proceed if we're within bounds.
+            if self.location_within_bounds(tile_position):
+                adj_tile_pos = None
+
+                if adjacent_direction == mapdata.DIR_NORTH:
+                    # Adjacent tile position is above.
+                    adj_tile_pos = (tile_position[0], tile_position[1] - 1)
+                elif adjacent_direction == mapdata.DIR_SOUTH:
+                    # Adjacent tile position is below.
+                    adj_tile_pos = (tile_position[0], tile_position[1] + 1)
+                elif adjacent_direction == mapdata.DIR_EAST:
+                    # Adjacent tile position is to the right.
+                    adj_tile_pos = (tile_position[0] + 1, tile_position[1])
+                elif adjacent_direction == mapdata.DIR_WEST:
+                    # Adjacent tile position is to the left.
+                    adj_tile_pos = (tile_position[0] - 1, tile_position[1])
+
+                if adj_tile_pos and self.location_within_bounds(adj_tile_pos):
+                    ret_tile_pos = adj_tile_pos
+
+        return ret_tile_pos
+
+    # Returns None if invalid direction, invalid initial tile position,
+    # or adjacent tile is out of bounds (does not look for adjacent maps).
+    def get_adjacent_tile(self, tile_position, adjacent_direction):
+        ret_tile = None
+
+        if tile_position and (adjacent_direction is not None):
+            # Get adjacent tile position, and then get tile from there.
+            adj_tile_pos = self.get_adjacent_tile_position(
+                tile_position,
+                adjacent_direction
+            )
+
+            if adj_tile_pos:
+                ret_tile = self.get_tile_from_pos(adj_tile_pos)
+
+        return ret_tile
+
+    def get_object_occupying_tile(self, tile_position):
+        occupying_object = None
+
+        if tile_position and self.location_within_bounds(tile_position):
+            # Check if the tile is part of an object's collision space.
+            bottom_left_tile_pos = self.occupied_tile_dict.get(tile_position, None)
+
+            if bottom_left_tile_pos:
+                # Get ID of object occupying the space.
+                obj_id = self.bottom_left_tile_obj_mapping.get(bottom_left_tile_pos, [None])[0]
+
+                if obj_id:
+                    # Get object.
+                    occupying_object = interactiveobj.Interactive_Object.get_interactive_object(obj_id)
+
+        return occupying_object
+
     @property
     def protagonist_location(self):
         """Return the protagonist location on map."""
@@ -326,7 +391,7 @@ class Map:
         if self and obj_to_respawn and tile_location and num_ticks >= 0:
             if self.tile_grid:
                 # make sure (x,y) location is in bounds
-                if self.width > tile_location[0] and self.height > tile_location[1]:
+                if self.location_within_bounds(tile_location):
                     # TODO
                     pass
                 else:
@@ -520,38 +585,6 @@ class Map:
                 tile_subset_rect=tile_subset_rect
             )
 
-
-            """
-            start_x = top_left_pixel_tuple[0]
-            start_y = top_left_pixel_tuple[1]
-
-            # blit tiles
-            if self.tile_grid and surface:
-                curr_y = start_y
-                for grid_row in self.tile_grid:
-                    curr_x = start_x
-                    for single_tile in grid_row:
-                        # blit tile and move to next Tile position
-                        single_tile.blit_onto_surface(surface, (curr_x, curr_y))
-                        curr_x = curr_x + tile.TILE_SIZE
-
-                    # move to next row of Tiles to blit
-                    curr_y = curr_y + tile.TILE_SIZE
-
-                # blit interactive objects
-                # TODO - should interactive obj dict map tile location to obj
-                # ID?
-                if self.interactive_obj_dict:
-                    for tile_location, obj in self.interactive_obj_dict.items():
-                        if tile_location and obj:
-                            pos_x = tile_location[0] * tile.TILE_SIZE
-                            pos_y = tile_location[1] * tile.TILE_SIZE
-
-                            # blit sprite image
-                            # TODO
-                            #obj.blit_onto_surface(surface, (pos_x, pos_y + tile.TILE_SIZE))
-            """
-
     # scroll map in the indicated direction for the indicated distancet
     # also pass in surface object to blit on and update
     # does NOT update the main display - caller will have to do that
@@ -705,36 +738,7 @@ class Map:
     @classmethod
     def build_maps(cls):
         logger.debug("Building maps")
-        """
-        grasslands_area_0_grid = []
-        grasslands_area_1_grid = []
 
-        # R0_A0
-        for i in range(15):
-            grasslands_area_0_grid.append([tile.Tile.get_tile(tiledata.TILE_GRASS_PLAIN_ID)]*15)
-
-        for i in range(100):
-            x = random.randint(0, len(grasslands_area_0_grid[0]) - 1)
-            y = random.randint(0, len(grasslands_area_0_grid) - 1)
-
-            if i % 4 == 0:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_FLOWERS_ID)
-            elif i % 4 == 1:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_2_ID)
-            elif i % 4 == 2:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_GRASS_1_ID)
-            else:
-                grasslands_area_0_grid[y][x] = tile.Tile.get_tile(tiledata.TILE_WATER_NORMAL_1_ID)
-
-        # R0_A1
-        for i in range(30):
-            grasslands_area_1_grid.append([tile.Tile.get_tile(tiledata.TILE_GRASS_1_ID)]*50)
-
-        grasslands_area_1_grid[10][15] = tile.Tile.get_tile(tiledata.TILE_WATER_NORMAL_1_ID)
-
-        Map.map_listing[R0_A0_ID] = Map(R0_A0_ID, grasslands_area_0_grid)
-        Map.map_listing[R0_A1_ID] = Map(R0_A1_ID, grasslands_area_1_grid)
-        """
         for map_id in mapdata.MAP_DATA:
             if not Map.map_factory(map_id):
                 logger.error("Could not construct map with ID {0}".format(map_id))

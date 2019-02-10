@@ -64,7 +64,7 @@ MAP_DATA = {
         },
         MAP_INTER_OBJ_DICT_FIELD: {
             (0,0):  objdata.HERB_BASIC_ID,
-            (12,9): objdata.HERB_BASIC_ID,
+            (9,12): objdata.HERB_BASIC_ID,
             (3,7):  objdata.ORE_EMPTY_BASIC_ID,
             (5,3):  objdata.ORE_EMPTY_BASIC_ID,
             (7,9):  objdata.TREE_BASIC_ID,

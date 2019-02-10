@@ -99,6 +99,7 @@ OBJECT_NAME_FIELD = 0x1
 IMAGE_PATH_DICT_FIELD = 0x2
 COLLISION_WIDTH_FIELD = 0x3
 COLLISION_HEIGHT_FIELD = 0x4
+EXAMINE_INFO_FIELD = 0x5
 
 ### RESOURCE DATA FIELDS ###
 RELATED_SKILL_ID_FIELD = 0x301
@@ -125,6 +126,10 @@ RESOURCE_DATA = {
         GAINED_XP_FIELD: 20,
         RESOURCE_ITEM_FIELD: None,
         RESPAWN_TIME_S_FIELD:  1,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "Maybe I can pick this herb.",
+            language.LANG_ESPANOL: "Tal vez pueda cosechar esta hierba.",
+        },
     },
     ORE_EMPTY_BASIC_ID: { # TODO make this a generic interactive object?
         OBJECT_NAME_FIELD: {
@@ -142,6 +147,10 @@ RESOURCE_DATA = {
         GAINED_XP_FIELD: 20,
         RESOURCE_ITEM_FIELD: None,
         RESPAWN_TIME_S_FIELD:  None,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "This ore is empty",
+            language.LANG_ESPANOL: "Esta vena esta agotada",
+        },
     },
     TREE_BASIC_ID: {
         OBJECT_NAME_FIELD: {
@@ -159,6 +168,10 @@ RESOURCE_DATA = {
         GAINED_XP_FIELD: 20,
         RESOURCE_ITEM_FIELD: None,
         RESPAWN_TIME_S_FIELD:  1,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "It's just a tree. Maybe I can cut it down.",
+            language.LANG_ESPANOL: "Es solo un arbol. Tal vez pueda talarlo.",
+        },
     },
     TREE_OAK_ID: {
         OBJECT_NAME_FIELD: {
@@ -176,5 +189,9 @@ RESOURCE_DATA = {
         GAINED_XP_FIELD: 50,
         RESOURCE_ITEM_FIELD: None,
         RESPAWN_TIME_S_FIELD:  10,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "What a magnificent oak. Maybe I can cut it down.",
+            language.LANG_ESPANOL: "Que roble tan maravilloso! Tal vez pueda talarlo.",
+        },
     },
 }

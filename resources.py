@@ -18,6 +18,7 @@ class Resource(interactiveobj.Interactive_Object):
                 gained_xp=0,
                 resource_item=None,
                 respawn_time_s=1,
+                examine_info=None,
             ):
         # Call the parent class init
         interactiveobj.Interactive_Object.__init__(
@@ -28,6 +29,7 @@ class Resource(interactiveobj.Interactive_Object):
             image_path_dict,
             collision_width=collision_width,
             collision_height=collision_height,
+            examine_info=examine_info,
         )
 
         self.related_skill_id = related_skill_id
@@ -66,6 +68,7 @@ class Resource(interactiveobj.Interactive_Object):
                     gained_xp = resource_data.get(objdata.GAINED_XP_FIELD, 0)
                     resource_item = resource_data.get(objdata.RESOURCE_ITEM_FIELD, None)
                     respawn_time_s = resource_data.get(objdata.RESPAWN_TIME_S_FIELD, 1)
+                    examine_info = resource_data.get(objdata.EXAMINE_INFO_FIELD, None)
 
                     # Ensure we have the required fields.
                     if name and image_path_dict:
@@ -81,6 +84,7 @@ class Resource(interactiveobj.Interactive_Object):
                             gained_xp=gained_xp,
                             resource_item=resource_item,
                             respawn_time_s=respawn_time_s,
+                            examine_info=examine_info,
                         )
 
                         logger.debug("Made resource with ID {0}".format(resource_id))

@@ -12,6 +12,7 @@ class Interactive_Object(pygame.sprite.Sprite):
     # maps interactive obj ID to interactive obj
     interactive_obj_listing = {}
 
+    # examine_info maps language IDs to an examine string.
     def __init__(
                     self,
                     object_type,
@@ -19,7 +20,8 @@ class Interactive_Object(pygame.sprite.Sprite):
                     name,
                     image_path_dict,
                     collision_width=1,
-                    collision_height=1
+                    collision_height=1,
+                    examine_info=None,
                 ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
@@ -28,6 +30,12 @@ class Interactive_Object(pygame.sprite.Sprite):
         self.name = name
         self.collision_width = collision_width
         self.collision_height = collision_height
+
+        # get examine info
+        self.examine_info = {}
+        if examine_info:
+            for x, y in examine_info.items():
+                self.examine_info[x] = y
 
         # load images
         self.image_dict = {}
@@ -130,6 +138,23 @@ class Interactive_Object(pygame.sprite.Sprite):
         return (object_id is not None)                  \
             and (object_id >= objdata.MIN_RESOURCE_ID)  \
             and (object_id <= objdata.MAX_RESOURCE_ID)
+
+    # Returns a String containing the text to display when the protagonist
+    # examines an object.
+    def get_examine_info(self, language_id):
+        ret_str = "?????"
+        if self.name:
+            ret_str = "It's a {0}".format(self.name)
+
+        if (language_id is not None) and self.examine_info:
+            info = self.examine_info.get(language_id, None)
+            if info:
+                ret_str = info
+        elif self.name:
+            ret_str = "It's a {0}".format(self.name)
+
+        return ret_str
+
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

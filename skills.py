@@ -54,11 +54,18 @@ DEFAULT_EXP = 0
 MIN_LEVEL = 1
 MIN_EXP = 0
 EXP_LADDER = [
+    3000,
+    2500,
+    2000,
+    1500,
+    1100,
+    800, # level 5
     500, # level 4
     300, # level 3
     100, # level 2
     0 # level 1
 ]
+
 MAX_LEVEL = len(EXP_LADDER)
 MAX_EXP = 1000000
 
@@ -73,7 +80,9 @@ def get_level_from_experience(experience):
 def get_experience_from_level(level):
     ret_exp = DEFAULT_EXP
     if level and level <= len(EXP_LADDER):
-        ret_exp = EXP_LADDER[level - 1]
+        ret_exp = EXP_LADDER[len(EXP_LADDER) - level]
+
+    logger.debug("Exp for level {0} is {1}".format(level, ret_exp))
     return ret_exp
 
 def calculate_combat_level(skill_dict):

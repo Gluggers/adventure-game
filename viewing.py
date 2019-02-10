@@ -23,11 +23,13 @@ class Viewing():
                 self,
                 main_display_surface,
                 protagonist=None,
-                curr_map=None
+                curr_map=None,
+                display_language=language.DEFAULT_LANGUAGE,
             ):
         self.main_display_surface = main_display_surface
         self._protagonist = protagonist
         self.curr_map = curr_map
+        self.display_language=display_language
 
         # create Rect objects for main display
         self.top_display_rect = pygame.Rect(                            \
@@ -47,7 +49,15 @@ class Viewing():
             (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)                     \
         )
 
+        self.bottom_text_display_rect = pygame.Rect(
+            viewingdata.BOTTOM_TEXT_DISPLAY_TOP_LEFT[0],
+            viewingdata.BOTTOM_TEXT_DISPLAY_TOP_LEFT[1],
+            viewingdata.BOTTOM_TEXT_DISPLAY_WIDTH,
+            viewingdata.BOTTOM_TEXT_DISPLAY_HEIGHT
+        )
+
         self.top_display = None
+        self.bottom_text_display = None
 
     @classmethod
     def create_viewing(
@@ -55,6 +65,7 @@ class Viewing():
                 main_display_surface,
                 protagonist=None,
                 curr_map=None,
+                display_language=language.DEFAULT_LANGUAGE,
             ):
         ret_viewing = None
 
@@ -63,6 +74,7 @@ class Viewing():
                 main_display_surface,
                 protagonist=protagonist,
                 curr_map=curr_map,
+                display_language=display_language,
             )
 
             # Create displays for viewing.
@@ -83,6 +95,13 @@ class Viewing():
             # Blit the top display details
             #if self._protagonist:
                 #self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
+
+    def display_bottom_text(self, text):
+        if text and self.main_display_surface and self.bottom_text_display:
+            self.bottom_text_display.display_text(
+                self.main_display_surface,
+                text
+            )
 
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
@@ -389,18 +408,32 @@ class Viewing():
         if display.Display.top_display_font:
             self.top_display = display.Top_Display(
                 self.main_display_surface,
-                viewingdata.TOP_DISPLAY_LOCATION,
+                self.top_display_rect,
                 display.Display.top_display_font,
                 background_color=viewingdata.COLOR_WHITE,
-                protagonist=self._protagonist
+                protagonist=self._protagonist,
+                display_language=self.display_language,
             )
         else:
             logger.error("Top display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
+    def create_bottom_text_display(self):
+        if display.Display.bottom_text_display_font:
+            self.bottom_text_display = display.Text_Display(
+                self.main_display_surface,
+                self.bottom_text_display_rect,
+                display.Display.bottom_text_display_font,
+                display_language=self.display_language,
+            )
+        else:
+            logger.error("Bottom text display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
         self.create_top_display()
+        self.create_bottom_text_display()
 
     @property
     def protagonist(self):

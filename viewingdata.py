@@ -12,6 +12,10 @@ OW_VIEWING_HEIGHT = tile.TILE_SIZE * OW_DISPLAY_NUM_TILES_VERTICAL
 TOP_DISPLAY_HEIGHT = tile.TILE_SIZE
 TOP_DISPLAY_WIDTH = OW_VIEWING_WIDTH
 
+# Viewing space for bottom text box.
+BOTTOM_TEXT_DISPLAY_WIDTH = tile.TILE_SIZE * (OW_DISPLAY_NUM_TILES_HORIZONTAL - 2)
+BOTTOM_TEXT_DISPLAY_HEIGHT = tile.TILE_SIZE * int(OW_DISPLAY_NUM_TILES_VERTICAL / 4)
+
 # main display width is same as overworld viewing width
 # main display height is overworld viewing height + space for
 # the top display
@@ -30,6 +34,7 @@ OW_SIDE_MENU_LOCATION = (                                               \
     MAIN_DISPLAY_WIDTH - OW_SIDE_MENU_WIDTH,                            \
     TOP_DISPLAY_HEIGHT + tile.TILE_SIZE                                  \
 )
+
 CENTER_OW_TILE_TOP_LEFT = (                                     \
     int(OW_DISPLAY_NUM_TILES_HORIZONTAL / 2) * tile.TILE_SIZE,  \
     int(OW_DISPLAY_NUM_TILES_VERTICAL / 2)*tile.TILE_SIZE +     \
@@ -39,6 +44,11 @@ CENTER_OW_TILE_TOP_LEFT = (                                     \
 CENTER_OW_TILE_BOTTOM_LEFT = (                      \
     CENTER_OW_TILE_TOP_LEFT[0],                     \
     CENTER_OW_TILE_TOP_LEFT[1] + tile.TILE_SIZE     \
+)
+
+BOTTOM_TEXT_DISPLAY_TOP_LEFT = (
+    int(OW_VIEWING_WIDTH / 2) - int(BOTTOM_TEXT_DISPLAY_WIDTH / 2),
+    MAIN_DISPLAY_HEIGHT - BOTTOM_TEXT_DISPLAY_HEIGHT
 )
 
 ### COLOR CONSTANTS ###
