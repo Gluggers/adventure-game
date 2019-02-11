@@ -6,6 +6,7 @@ import skills
 import interactiveobj
 import objdata
 import logging
+import interactiondata
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -15,56 +16,91 @@ GENDER_FEMALE = 0x2
 RACE_DEFAULT = 0x0
 RACE_HUMAN = 0x1
 
-# skils_dict maps the skill ID to the corresponding levels
-# for the entity (ID -> [level, xp]). Not passing one in sets default values
-# equipment_dict maps the equipment slot ID to the corresponding item ID
-# that the Entity is wielding
-# TODO - set up item class and have it map IDs to item objects (build_item method)
 class Entity(interactiveobj.Interactive_Object):
+    # id represents the object ID.
+    # name_info maps language ID to entity name.
+    # image_path_dict maps image type IDs to the file paths for the image.
+    # collision_width and collision_height define the tile dimensions
+    # for the object's collision space. Must be integers greater than or equal
+    # to 1?
+    # skill_levels maps the skill ID to the corresponding level
+    # for the entity (skill ID -> level). The method will automatically
+    # calculate the experience required for the level and set it accordingly
+    # for the entity.  Excluding the skill_levels dict or excluding individual
+    # skill IDs will set default values.
+    # equipment_dict maps the equipment slot ID to the corresponding item ID
+    # that the Entity is wielding.
     def __init__(
                     self,
                     id,
-                    name,
+                    name_info,
                     image_path_dict,
                     collision_width=1,
                     collision_height=1,
-                    skills_dict={},
+                    skill_levels={},
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
                     race=RACE_HUMAN,
                     examine_info=None,
+                    interaction_id=interactiondata.DEFAULT_ID,
                 ):
         interactiveobj.Interactive_Object.__init__(
             self,
             objdata.TYPE_CHARACTER,
-            name,
+            name_info,
             id,
             image_path_dict,
             collision_width=collision_width,
             collision_height=collision_height,
             examine_info=examine_info,
+            interaction_id=interaction_id,
         )
 
         self.gender = gender
         self.race = race
 
-        # by default, face south
+        # By default, face south.
         self.facing_direction = mapdata.DIR_SOUTH
+        self.curr_image_id = objdata.OW_IMAGE_ID_FACE_SOUTH
 
-        # set up skills
-        self.skills_dict = {}
+        # Set up skills. self.skill_info_mapping maps skill IDs to
+        # a length-3 list
+        # [skill level, current experience, experience to next level]
+        self.skill_info_mapping = {}
+
         for skill_id in skills.SKILL_ID_LIST:
-            skill_level = skills_dict.get(skill_id, None)
-            if skill_level:
-                exp = skills.get_experience_from_level(skill_level)
-                logger.debug("Setting skill level {0}, exp {1}".format(skill_level, exp))
-                self.skills_dict[skill_id] = [skill_level, exp]
-            else:
-                # default values
-                self.skills_dict[skill_id] = [skills.DEFAULT_LEVEL, skills.DEFAULT_EXP]
+            # See if caller passed in a custom level for the skill.
+            skill_level = skill_levels.get(skill_id, None)
+
+            # Default hitpoints level is different.
+            if not skill_level:
+                if skill_id == skills.SKILL_ID_HITPOINTS:
+                    skill_level = skills.DEFAULT_LEVEL_HITPOINTS
+                else:
+                    skill_level = skills.DEFAULT_LEVEL
+
+            # Get the required experience for the level.
+            exp = skills.get_experience_from_level(skill_level)
+
+            # Get remaining experience for next level.
+            remaining_exp = skills.get_experience_to_next_level(skill_level, exp)
+
+            logger.debug(
+                "Setting skill level {0}, exp {1}. exp to next level {2}".format(
+                    skill_level,
+                    exp,
+                    remaining_exp
+                )
+            )
+
+            # Record skill information.
+            self.skill_info_mapping[skill_id] = [skill_level, exp, remaining_exp]
 
         # Set up health - use hitpoint stat if possible, otherwise default hitpoints value.
-        self.max_health = self.skills_dict.get(skills.SKILL_ID_HITPOINTS, [skills.DEFAULT_HITPOINTS])[0]
+        self.max_health = self.skill_info_mapping.get(
+            skills.SKILL_ID_HITPOINTS, [skills.DEFAULT_LEVEL_HITPOINTS]
+        )[0]
+
         self.curr_health = self.max_health
 
         # set up equipment
@@ -106,6 +142,7 @@ class Entity(interactiveobj.Interactive_Object):
                     bottom_left_pixel=bottom_left_pixel,    \
                     top_left_pixel=top_left_pixel           \
                 )
+                self.curr_image_id = image_id
 
 # extend Entity class
 class Character(Entity):
@@ -115,30 +152,32 @@ class Character(Entity):
     def __init__(
                     self,
                     id,
-                    name,
+                    name_info,
                     image_path_dict,
                     collision_width=1,
                     collision_height=1,
-                    skills_dict={},
+                    skill_levels={},
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
                     race=RACE_HUMAN,
-                    examine_info=None
+                    examine_info=None,
+                    interaction_id=interactiondata.DEFAULT_ID,
                 ):
 
         # a Character is an Entity type of interactive object
         Entity.__init__(
             self,
             id,
-            name,
+            name_info,
             image_path_dict,
             collision_width=collision_width,
             collision_height=collision_height,
-            skills_dict=skills_dict,
+            skill_levels=skill_levels,
             equipment_dict=equipment_dict,
             gender=gender,
             race=race,
             examine_info=examine_info,
+            interaction_id=interaction_id,
         )
 
         # TODO Fill in rest
@@ -167,30 +206,13 @@ class Character(Entity):
 
         return ret_character
 
-# image_path contains the default sprite image for the character
-# images_path_dict must map character image scenarios to the
-# file path containing the appropriate sprite image.
-# must contain the following keys:
-# OW_IMAGE_ID_DEFAULT
-# OW_IMAGE_ID_FACE_NORTH
-# OW_IMAGE_ID_FACE_EAST
-# OW_IMAGE_ID_FACE_SOUTH
-# OW_IMAGE_ID_FACE_WEST
-# OW_IMAGE_ID_WALK_NORTH
-# OW_IMAGE_ID_WALK_EAST
-# OW_IMAGE_ID_WALK_SOUTH
-# OW_IMAGE_ID_WALK_WEST
-# BATTLE_IMAGE_ID_DEFAULT
-# BATTLE_IMAGE_ID_STAND
-# BATTLE_IMAGE_ID_ATTACK
-# BATTLE_IMAGE_ID_FAINTED
 class Protagonist(Character):
     def __init__(
                     self,
                     id,
-                    name,
+                    name_info,
                     image_path_dict,
-                    skills_dict={},
+                    skill_levels={},
                     equipment_dict={},
                     gender=GENDER_NEUTRAL,
                     race=RACE_HUMAN,
@@ -199,11 +221,11 @@ class Protagonist(Character):
         Character.__init__(
             self,
             id,
-            name,
+            name_info,
             image_path_dict,
             collision_width=1, # protagonist is always 1x1 tile
             collision_height=1,
-            skills_dict=skills_dict,
+            skill_levels=skill_levels,
             equipment_dict=equipment_dict,
             gender=gender,
             race=race,

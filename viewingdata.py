@@ -46,9 +46,11 @@ CENTER_OW_TILE_BOTTOM_LEFT = (                      \
     CENTER_OW_TILE_TOP_LEFT[1] + tile.TILE_SIZE     \
 )
 
+# Have the bottom text display bottom edge be a little above the
+# bottom edge of the display.
 BOTTOM_TEXT_DISPLAY_TOP_LEFT = (
     int(OW_VIEWING_WIDTH / 2) - int(BOTTOM_TEXT_DISPLAY_WIDTH / 2),
-    MAIN_DISPLAY_HEIGHT - BOTTOM_TEXT_DISPLAY_HEIGHT
+    MAIN_DISPLAY_HEIGHT - tile.TILE_SIZE - BOTTOM_TEXT_DISPLAY_HEIGHT
 )
 
 ### COLOR CONSTANTS ###

@@ -11,6 +11,7 @@ import objdata
 import resources
 import display
 import timekeeper
+import interaction
 import game
 
 from pygame.locals import *
@@ -29,6 +30,9 @@ def main():
 
     # init clock
     timekeeper.Timekeeper.init_clock()
+
+    # init interactions
+    interaction.Interaction.init_interactions()
 
     # load fonts
     display.Display.init_fonts()

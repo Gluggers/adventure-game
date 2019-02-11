@@ -1,6 +1,7 @@
 import imagepaths
 import skills
 import language
+import interactiondata
 
 ### INTERACTIVE OBJECT TYPE ID CONSTANTS ###
 TYPE_CHARACTER = 0x1
@@ -95,11 +96,12 @@ IMAGE_PATH_DICT_PROTAG = {
 }
 
 ### OBJECT DATA FIELDS ###
-OBJECT_NAME_FIELD = 0x1
+OBJECT_NAME_INFO_FIELD = 0x1
 IMAGE_PATH_DICT_FIELD = 0x2
 COLLISION_WIDTH_FIELD = 0x3
 COLLISION_HEIGHT_FIELD = 0x4
 EXAMINE_INFO_FIELD = 0x5
+INTERACTION_ID_FIELD = 0x6
 
 ### RESOURCE DATA FIELDS ###
 RELATED_SKILL_ID_FIELD = 0x301
@@ -111,7 +113,7 @@ RESPAWN_TIME_S_FIELD = 0x305
 ### RESOURCE DATA ###
 RESOURCE_DATA = {
     HERB_BASIC_ID: {
-        OBJECT_NAME_FIELD: {
+        OBJECT_NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "BASIC HERB",
             language.LANG_ESPANOL: "HIERBA BASICA",
         },
@@ -130,9 +132,10 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "Maybe I can pick this herb.",
             language.LANG_ESPANOL: "Tal vez pueda cosechar esta hierba.",
         },
+        INTERACTION_ID_FIELD: interactiondata.HERBLORE_GATHER_ID,
     },
     ORE_EMPTY_BASIC_ID: { # TODO make this a generic interactive object?
-        OBJECT_NAME_FIELD: {
+        OBJECT_NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "EMPTY ORE",
             language.LANG_ESPANOL: "VENA AGOTADA",
         },
@@ -151,9 +154,10 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "This ore is empty",
             language.LANG_ESPANOL: "Esta vena esta agotada",
         },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
     },
     TREE_BASIC_ID: {
-        OBJECT_NAME_FIELD: {
+        OBJECT_NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "TREE",
             language.LANG_ESPANOL: "ARBOL",
         },
@@ -161,7 +165,7 @@ RESOURCE_DATA = {
             IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
             OW_IMAGE_ID_DEFAULT: imagepaths.TREE_BASIC_PATH,
         },
-        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 1,
@@ -172,9 +176,10 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "It's just a tree. Maybe I can cut it down.",
             language.LANG_ESPANOL: "Es solo un arbol. Tal vez pueda talarlo.",
         },
+        INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
     },
     TREE_OAK_ID: {
-        OBJECT_NAME_FIELD: {
+        OBJECT_NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "OAK TREE",
             language.LANG_ESPANOL: "ROBLE",
         },
@@ -183,7 +188,7 @@ RESOURCE_DATA = {
             OW_IMAGE_ID_DEFAULT: imagepaths.TREE_OAK_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
-        COLLISION_HEIGHT_FIELD: 2,
+        COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 10,
         GAINED_XP_FIELD: 50,
@@ -193,5 +198,6 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "What a magnificent oak. Maybe I can cut it down.",
             language.LANG_ESPANOL: "Que roble tan maravilloso! Tal vez pueda talarlo.",
         },
+        INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
     },
 }

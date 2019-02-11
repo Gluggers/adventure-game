@@ -48,7 +48,7 @@ SKILL_ID_LIST = [
 ]
 
 ### LEVEL AND EXPERIENCE CONSTANTS ###
-DEFAULT_HITPOINTS = 10
+DEFAULT_LEVEL_HITPOINTS = 10
 DEFAULT_LEVEL = 1
 DEFAULT_EXP = 0
 MIN_LEVEL = 1
@@ -85,21 +85,33 @@ def get_experience_from_level(level):
     logger.debug("Exp for level {0} is {1}".format(level, ret_exp))
     return ret_exp
 
-def calculate_combat_level(skill_dict):
+# Assumes exp is a valid experience value for the level.
+def get_experience_to_next_level(level, curr_exp):
+    ret_exp = 0
+
+    if (curr_exp is not None) and level and (level < MAX_LEVEL):
+        next_level = level + 1
+        next_level_exp = get_experience_from_level(next_level)
+        if next_level_exp:
+            ret_exp = max(0, next_level_exp - curr_exp)
+
+    return ret_exp
+
+def calculate_combat_level(skill_info_dict):
     ret_level = 1
 
-    if skill_dict:
-        ret_level = int((                                         \
-            skill_dict.get(SKILL_ID_ATTACK, [1])[0]              \
-            + skill_dict.get(SKILL_ID_STRENGTH, [1])[0]          \
-            + skill_dict.get(SKILL_ID_DEFENSE, [1])[0]           \
-            + skill_dict.get(SKILL_ID_HITPOINTS, [1])[0]         \
-            + max(                                               \
-                skill_dict.get(SKILL_ID_ARCHERY, [1])[0],        \
-                skill_dict.get(SKILL_ID_BLACK_MAGIC, [1])[0],    \
-                skill_dict.get(SKILL_ID_WHITE_MAGIC, [1])[0],    \
+    if skill_info_dict:
+        ret_level = int((                                           \
+            skill_info_dict.get(SKILL_ID_ATTACK, [1])[0]            \
+            + skill_info_dict.get(SKILL_ID_STRENGTH, [1])[0]        \
+            + skill_info_dict.get(SKILL_ID_DEFENSE, [1])[0]         \
+            + skill_info_dict.get(SKILL_ID_HITPOINTS, [1])[0]       \
+            + max(                                                  \
+                skill_info_dict.get(SKILL_ID_ARCHERY, [1])[0],      \
+                skill_info_dict.get(SKILL_ID_BLACK_MAGIC, [1])[0],  \
+                skill_info_dict.get(SKILL_ID_WHITE_MAGIC, [1])[0],  \
             )
-        )  / 3)
+        ) / 3)
         logger.debug("Combat level: {0}".format(ret_level))
 
     return ret_level

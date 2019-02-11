@@ -2,6 +2,7 @@ import pygame
 import imagepaths
 import objdata
 import logging
+import interactiondata
 
 ### IMAGE FLAGS ###
 #IMAGE_F_OVERWORLD = 0x1 # sets overworld images
@@ -17,19 +18,25 @@ class Interactive_Object(pygame.sprite.Sprite):
                     self,
                     object_type,
                     object_id,
-                    name,
+                    name_info, # maps language id to name
                     image_path_dict,
                     collision_width=1,
                     collision_height=1,
                     examine_info=None,
+                    interaction_id=interactiondata.DEFAULT_ID,
                 ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
         self.object_id = object_id
-        self.name = name
+        self.name_info = name_info
         self.collision_width = collision_width
         self.collision_height = collision_height
+
+        # Set interaction ID.
+        self.interaction_id = interactiondata.DEFAULT_ID
+        if interaction_id is not None:
+            self.interaction_id = interaction_id
 
         # get examine info
         self.examine_info = {}
@@ -44,6 +51,14 @@ class Interactive_Object(pygame.sprite.Sprite):
             self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
 
         self.curr_image_id = objdata.OW_IMAGE_ID_DEFAULT
+
+    def get_name(self, language_id):
+        ret_name = ""
+        if language_id is not None:
+            ret_name = self.name_info.get(language_id, "")
+
+        return ret_name
+
 
     # blits the interactive object sprite image corresponding to image_type_id
     # onto the designated surface. Can specify either top_left_pixel or
@@ -143,15 +158,15 @@ class Interactive_Object(pygame.sprite.Sprite):
     # examines an object.
     def get_examine_info(self, language_id):
         ret_str = "?????"
-        if self.name:
-            ret_str = "It's a {0}".format(self.name)
+        if self.name_info:
+            ret_str = "It's a {0}".format(self.get_name(language_id))
 
         if (language_id is not None) and self.examine_info:
             info = self.examine_info.get(language_id, None)
             if info:
                 ret_str = info
-        elif self.name:
-            ret_str = "It's a {0}".format(self.name)
+        elif self.name_info:
+            ret_str = "It's a {0}".format(self.get_name(language_id))
 
         return ret_str
 

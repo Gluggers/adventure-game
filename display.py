@@ -5,6 +5,7 @@ import language
 import timekeeper
 import logging
 import sys
+import math
 
 ### FONTS AND TEXT ###
 DEFAULT_FONT = None
@@ -60,6 +61,8 @@ TEXT_ADVANCE_KEYS = set([
     pygame.K_BACKSPACE,
     pygame.K_TAB,
     pygame.K_ESCAPE,
+    pygame.K_e,
+    pygame.K_RIGHT,
 ])
 
 class Text_Page():
@@ -227,7 +230,7 @@ class Top_Display(Display):
     def update_self(self):
         if self._protagonist:
             # Get protagonist level.
-            protag_level = skills.calculate_combat_level(self._protagonist.skills_dict)
+            protag_level = skills.calculate_combat_level(self._protagonist.skill_info_mapping)
             self.level_text_str = LEVEL_TEXT_PREFIX_INFO.get(           \
                                     self.display_language,              \
                                     ""                                  \
@@ -353,6 +356,8 @@ class Text_Display(Display):
             self.font_object
         )
 
+        logger.debug("Char per line {0}, line per page {1}".format(self.char_per_line, self.lines_per_page))
+
         # Define background image if possible.
         self.background_image = None
 
@@ -363,20 +368,28 @@ class Text_Display(Display):
                                     ).convert_alpha()
 
     @classmethod
-    def get_char_per_line(cls, horizontal_pixel_height, font_object):
+    def get_char_per_line(cls, horizontal_pixels, font_object):
         num_char = 0
 
-        if horizontal_pixel_height and (horizontal_pixel_height > 0) and font_object:
-            max_width = 0
+        if horizontal_pixels and (horizontal_pixels > 0) and font_object:
+            avg_char_width = 0
 
-            for char in SIZE_TEST_STRING:
-                size_info = font_object.size(char)
+            ####for char in SIZE_TEST_STRING:
+            str_size_info = font_object.size(SIZE_TEST_STRING)
 
-                if size_info:
-                    max_width = max(max_width, size_info[0])
+            if str_size_info:
+                avg_char_width = int(
+                    max(
+                        avg_char_width,
+                        math.ceil(
+                            str_size_info[0] / (1.0 * len(SIZE_TEST_STRING))
+                        )
+                    )
+                )
 
-            if max_width > 0:
-                num_char = int(horizontal_pixel_height / max_width)
+            if avg_char_width > 0:
+                # Allow for some extra space?
+                num_char = int(horizontal_pixels / avg_char_width)
 
         return num_char
 
@@ -434,34 +447,112 @@ class Text_Display(Display):
             curr_length = 0
             start_index = 0
 
+            num_words = len(word_list)
+
             logger.debug("Max char in line: {0}".format(self.char_per_line))
 
-            for index in range(len(word_list)):
+            for index in range(num_words):
+                sub_list = None
+                str_to_add = None
+
                 word_length = len(word_list[index])
 
-                #logger.debug("Word length for {0} is {1}".format(word_list[index], word_length))
+                logger.debug("Word length for {0} is {1}".format(word_list[index], word_length))
 
                 # Check if we can add this word or not.
                 if (curr_length + word_length) > self.char_per_line:
                     # Adding this word would bring us over the limit.
                     # Collect all the words from the last end point up
                     # to the word before.
-                    sub_list = word_list[start_index:index]
+                    if start_index < index:
+                        sub_list = word_list[start_index:index]
+                    else:
+                        sub_list = [word_list[index]]
+
+                    start_index = index
+
+                    # Reset counter, and throw in the length of the
+                    # overflow word.
+                    curr_length = word_length
+                else:
+                    if (index == (num_words - 1)):
+                        # We reached the end of the word list and
+                        # did not overpass to the next line.
+                        sub_list = word_list[start_index:]
+                    else:
+                        curr_length = curr_length + word_length
+
+                # Create line.
+                if sub_list:
+                    str_to_add = ''.join(sub_list)
+
+                    if str_to_add:
+                        text_lines.append(str_to_add)
+                        logger.debug("Adding string {0} to text lines".format(str_to_add))
+
+            if text_lines:
+                ret_lines = text_lines
+            else:
+                # Entire string fits on one line.
+                ret_lines = [''.join(word_list)]
+
+        logger.debug("Converted text \n{0}\nto lines\n{1}\n".format(text_string, ret_lines))
+
+        return ret_lines
+
+    @classmethod
+    def get_text_lines_test(text_string):
+        # List of strings
+        ret_lines = []
+
+        # Convert string to list of words to print.
+        if text_string:
+            word_list = Text_Display.convert_to_word_list(text_string)
+
+            text_lines = []
+
+            curr_length = 0
+            start_index = 0
+
+            num_words = len(word_list)
+
+            for index in range(num_words):
+                sub_list = None
+                str_to_add = None
+
+                word_length = len(word_list[index])
+
+                logger.debug("Word length for {0} is {1}".format(word_list[index], word_length))
+
+                # Check if we can add this word or not.
+                if (curr_length + word_length) > 52:
+                    # Adding this word would bring us over the limit.
+                    # Collect all the words from the last end point up
+                    # to the word before.
+                    if start_index < index:
+                        sub_list = word_list[start_index:index]
+                    else:
+                        sub_list = [word_list[index]]
+
                     start_index = index
 
                     # Reset length counter.
                     curr_length = 0
-
-                    # Create line.
-                    if sub_list:
-                        text_lines.append(''.join(sub_list))
-                    else:
-                        # Word was too long
-                        text_lines.append([word_list[index]])
                 else:
-                    curr_length = curr_length + word_length
+                    if (index == (num_words - 1)):
+                        # We reached the end of the word list and
+                        # did not overpass to the next line.
+                        sub_list = word_list[start_index:]
+                    else:
+                        curr_length = curr_length + word_length
 
-                    #logger.debug("Adding {0} gets us to {1}".format(word_list[index], curr_length))
+                # Create line.
+                if sub_list:
+                    str_to_add = ''.join(sub_list)
+
+                    if str_to_add:
+                        text_lines.append(str_to_add)
+                        logger.debug("Adding string {0} to text lines".format(str_to_add))
 
             if text_lines:
                 ret_lines = text_lines
@@ -587,8 +678,6 @@ class Text_Display(Display):
                                 if events.key in TEXT_ADVANCE_KEYS:
                                     logger.debug("Advancing to next page")
                                     next_page = True
-
-                    pygame.event.clear()
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

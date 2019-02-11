@@ -19,6 +19,8 @@ SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
 SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
 
 class Viewing():
+    ### INITIALIZER METHODS ###
+
     def __init__(
                 self,
                 main_display_surface,
@@ -59,28 +61,66 @@ class Viewing():
         self.top_display = None
         self.bottom_text_display = None
 
-    @classmethod
-    def create_viewing(
-                cls,
-                main_display_surface,
-                protagonist=None,
-                curr_map=None,
-                display_language=language.DEFAULT_LANGUAGE,
-            ):
-        ret_viewing = None
-
-        if main_display_surface:
-            ret_viewing = Viewing(
-                main_display_surface,
-                protagonist=protagonist,
-                curr_map=curr_map,
-                display_language=display_language,
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_top_display(self):
+        if display.Display.top_display_font:
+            self.top_display = display.Top_Display(
+                self.main_display_surface,
+                self.top_display_rect,
+                display.Display.top_display_font,
+                background_color=viewingdata.COLOR_WHITE,
+                protagonist=self._protagonist,
+                display_language=self.display_language,
             )
+        else:
+            logger.error("Top display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
 
-            # Create displays for viewing.
-            ret_viewing.create_displays()
+    def create_bottom_text_display(self):
+        if display.Display.bottom_text_display_font:
+            self.bottom_text_display = display.Text_Display(
+                self.main_display_surface,
+                self.bottom_text_display_rect,
+                display.Display.bottom_text_display_font,
+                display_language=self.display_language,
+            )
+        else:
+            logger.error("Bottom text display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
 
-        return ret_viewing
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_displays(self):
+        self.create_top_display()
+        self.create_bottom_text_display()
+
+
+    ### GETTERS AND SETTERS ###
+
+    @property
+    def protagonist(self):
+        """Return protagonist."""
+        return self._protagonist
+
+    @protagonist.setter
+    def protagonist(self, value):
+        """Set protagonist for viewing."""
+        if value:
+            self._protagonist = value
+
+            # Assign protagonist to top display, as well, which should update
+            # the top display
+            self.top_display.protagonist = value
+
+    def change_language(self, new_language):
+        if new_language is not None:
+            # Need to change language for Top Display.
+            if self.top_display:
+                self.top_display.display_language = new_language
+
+                # Update self.
+                self.update_ow_viewing()
+
+    ### DISPLAY HANDLING METHODS ###
 
     # blits the top display view onto the main display screen
     # does not update the main display - caller will have to do that
@@ -101,6 +141,90 @@ class Viewing():
             self.bottom_text_display.display_text(
                 self.main_display_surface,
                 text
+            )
+
+            # Wait a little after finishing pages.
+            pygame.time.wait(display.BOTTOM_TEXT_DELAY_MS)
+            pygame.event.clear()
+
+    ### MAP HANDLING METHODS ###
+
+    # TODO document
+    # DOES NOT update viewing - caller needs to do that by updating surface
+    def set_and_blit_map_on_view(
+                self,
+                protag_tile_location,
+                fill_color=viewingdata.COLOR_BLACK
+            ):
+        # set current map's top left position on display screen
+        if self.curr_map and protag_tile_location:
+            # Calculate map top left position based on protag location.
+            map_top_left = Viewing.get_centered_map_top_left_pixel(
+                protag_tile_location
+            )
+
+            if map_top_left:
+                self.curr_map.top_left_position = map_top_left
+            else:
+                self.curr_map.top_left_position = viewingdata.OW_VIEWING_LOCATION
+
+            # Refresh and blit viewing.
+            self.refresh_ow_viewing()
+        else:
+            logger.error("Missing parameters for setting and blitting map.")
+
+    # Refresh and blit current overworld viewing.
+    # Does not update the top display information. TODO - fix?
+    # Does not update display - caller must do that.
+    def refresh_ow_viewing(self):
+        # Blit background.
+        self.set_viewing_screen_default()
+
+        # Refresh map.
+        self.refresh_map()
+
+        # Update top display.
+        self.blit_top_display()
+
+    # Updates and blit current overworld viewing.
+    # Does not update display - caller must do that.
+    def update_ow_viewing(self):
+        # Blit background.
+        self.set_viewing_screen_default()
+
+        # Refresh map.
+        self.refresh_map()
+
+        # Update top display
+        self.top_display.update_self()
+
+        # Update top display.
+        self.blit_top_display()
+
+    # Refreshes map and blits it. Does not update display - caller must
+    # do that.
+    def refresh_map(self):
+        if self.curr_map:
+            # Set top left viewing tile to define what portions of map to blit
+            top_left_viewing_tile_coord =                           \
+                Viewing.calculate_top_left_ow_viewing_tile(
+                    self.curr_map.top_left_position
+                )
+
+            logger.debug("Top left viewing tile for map at {0}".format(top_left_viewing_tile_coord))
+
+            # get subset of tiles to blit
+            tile_subset_rect = Viewing.calculate_tile_viewing_rect(
+                self.curr_map,
+                top_left_viewing_tile_coord
+            )
+
+            logger.debug("Tile subset viewing rect for map at {0}".format(tile_subset_rect))
+
+            # Refresh map to update and blit it.
+            self.curr_map.refresh_self(
+                self.main_display_surface,
+                tile_subset_rect=tile_subset_rect,
             )
 
     # scroll map one Tile distance in the indicated direction.
@@ -178,39 +302,43 @@ class Viewing():
                 # Also blit the top view on top.
                 self.blit_top_display()
 
-                self._protagonist.blit_onto_surface(                 \
-                    self.main_display_surface,                      \
-                    bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
-                )
-
             # Update main display
             pygame.display.update()
 
             # wait till next iteration
             pygame.time.wait(SINGLE_PIXEL_SCROLL_TIME_MS)
 
-        # finished scrolling, adjust top left viewing tile accordingly
-        """
-        new_top_left_viewing_tile_x = self.top_left_viewing_tile_coord[0]
-        new_top_left_viewing_tile_y = self.top_left_viewing_tile_coord[1]
-        if direction == mapdata.DIR_SOUTH:
-            new_top_left_viewing_tile_y = new_top_left_viewing_tile_y - 1
-        elif direction == mapdata.DIR_NORTH:
-            new_top_left_viewing_tile_y = new_top_left_viewing_tile_y + 1
-        elif direction == mapdata.DIR_EAST:
-            new_top_left_viewing_tile_x = new_top_left_viewing_tile_x + 1
-        elif direction == mapdata.DIR_WEST:
-            new_top_left_viewing_tile_x = new_top_left_viewing_tile_x - 1
-        self.top_left_viewing_tile_coord = (                                \
-            new_top_left_viewing_tile_x,                                    \
-            new_top_left_viewing_tile_y                                     \
-        )
-        """
+    ### SELF BLIT METHODS ###
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
     def set_viewing_screen_default(self, fill_color=viewingdata.COLOR_BLACK):
         self.main_display_surface.fill(fill_color)
+
+    # blits the obj_to_blit sprite image corresponding to image_type_id
+    # onto the designated surface. Can specify either top_left_pixel or
+    # bottom_left_pixel as the reference point for blitting the image.
+    # bottom_left_pixel is recommended for images that are larger than
+    # a single Tile image. If both top_left_pixel and bottom_left_pixel are
+    # specified, the method will use bottom_left_pixel as an override.
+    # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
+    # Does not update the surface display - caller will have to do that.
+    def blit_interactive_object(                \
+                self,                           \
+                obj_to_blit,                    \
+                image_type_id,                  \
+                bottom_left_pixel=None,         \
+                top_left_pixel=None             \
+            ):
+        if self and obj_to_blit and (bottom_left_pixel or top_left_pixel):
+            obj_to_blit.blit_onto_surface(              \
+                self.main_display_surface,              \
+                image_type_id,                          \
+                bottom_left_pixel=bottom_left_pixel,    \
+                top_left_pixel=top_left_pixel           \
+            )
+
+    ### CLASS METHODS ###
 
     # assumes map_top_left_pixel_pos has coordinates equally divisible
     # by tile.TILE_SIZE
@@ -222,7 +350,7 @@ class Viewing():
             coord_y = 0
             if map_top_left_pixel_pos[0] < 0:
                 # map top left is behind the left side of viewing
-                coord_x = -1 * int(map_top_left_pixel_pos / tile.TILE_SIZE)
+                coord_x = -1 * int(map_top_left_pixel_pos[0] / tile.TILE_SIZE)
             if map_top_left_pixel_pos[1] >= viewingdata.TOP_DISPLAY_HEIGHT:
                 # map top left is aligned with or below top of overworld viewing
                 coord_y = 0
@@ -234,6 +362,20 @@ class Viewing():
             logger.debug("Top left ow viewing tile: {0}, map top left {1}".format(ret_coord, map_top_left_pixel_pos))
 
         return ret_coord
+
+    # return top left pixel coordinate for the map given the protagonist's
+    # tile coordinates
+    @classmethod
+    def get_centered_map_top_left_pixel(cls, protag_tile_coordinate):
+        top_left = (0,0)
+        if protag_tile_coordinate:
+            pixel_distance_horiz = viewingdata.CENTER_OW_TILE_TOP_LEFT[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
+            pixel_distance_vert = viewingdata.CENTER_OW_TILE_TOP_LEFT[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
+
+            top_left = (pixel_distance_horiz, pixel_distance_vert)
+
+
+        return top_left
 
     # returns rect in tile coordinates that defines the tiles that
     # are in the current viewing window or may enter in the viewing window
@@ -292,170 +434,35 @@ class Viewing():
 
         return ret_rect
 
-            #num_tile_horiz = 0
-            #num_tile_vert = 0
-
-            # calculate tile coordinate offset for when the map
-            # top left tile is within the overworld display (but not at the top left of
-            # the screen)
-        """
-        offset_x = int(map_object.top_left_position[0] / tile.TILE_SIZE)
-        offset_y = int(map_object.top_left_position[0] / tile.TILE_SIZE)
-
-        if offset_x > 0:
-            # map top left tile is past the left screen edge.
-            # we can blit as far as 1 tile past the right screen edge or
-            # to end of map width, whichever comes first
-            num_tile_horiz = min(map_object.width - start_tile_x, OW_DISPLAY_NUM_TILES_HORIZONTAL - offset_x + 1)
-        else:
-            # map top left tile is aligned with left screen edge or behind it.
-            # we can blit as far as 1 tile past the right screen edge or
-            # to end of map width, whichever comes first
-            num_tile_horiz = min(map_object.width - start_tile_x, OW_DISPLAY_NUM_TILES_HORIZONTAL + 2)
-        if offset_y > 0:
-            num_tile_vert = min(map_object.height - start_tile_y,
-                OW_DISPLAY_NUM_TILES_VERTICAL + 3)
-        else:
-            num_tile_vert = min(map_object.height - start_tile_y,
-                OW_DISPLAY_NUM_TILES_VERTICAL + 3)
-        """
-
-            #num_tile_horiz = min(map_object.width - start_tile_x, OW_DISPLAY_NUM_TILES_HORIZONTAL + 2)
-            #num_tile_vert = min(map_object.height - start_tile_y, OW_DISPLAY_NUM_TILES_VERTICAL + 3)
-
-            #ret_rect = (start_tile_x, start_tile_y, num_tile_horiz, num_tile_vert)
-
-        #return ret_rect
-
-
-    # TODO document
-    # DOES NOT update viewing - caller needs to do that by updating surface
-    def set_and_blit_map_on_view(
-                self,
-                map_top_left=viewingdata.OW_VIEWING_LOCATION,
-                fill_color=viewingdata.COLOR_BLACK
-            ):
-        self.set_viewing_screen_default(fill_color)
-
-        # set current map's top left position on display screen
-        if self.curr_map:
-            self.curr_map.top_left_position = map_top_left
-
-            # set top left viewing tile to define what portions of map to blit
-            top_left_viewing_tile_coord =                           \
-                Viewing.calculate_top_left_ow_viewing_tile(map_top_left)
-
-            logger.debug("Top left viewing tile for map at {0}".format(top_left_viewing_tile_coord))
-
-            # get subset of tiles to blit
-            tile_subset_rect = Viewing.calculate_tile_viewing_rect(         \
-                self.curr_map,                                              \
-                top_left_viewing_tile_coord                             \
-            )
-
-            logger.debug("Tile subset viewing rect for map at {0}".format(tile_subset_rect))
-
-            # blit map
-            self.curr_map.blit_onto_surface(                                \
-                self.main_display_surface,                                  \
-                tile_subset_rect=tile_subset_rect,                          \
-            )
-        else:
-            logger.error("No map set for current viewing.")
-
-        # don't forget top display
-        self.blit_top_display()
-
-    # blits the obj_to_blit sprite image corresponding to image_type_id
-    # onto the designated surface. Can specify either top_left_pixel or
-    # bottom_left_pixel as the reference point for blitting the image.
-    # bottom_left_pixel is recommended for images that are larger than
-    # a single Tile image. If both top_left_pixel and bottom_left_pixel are
-    # specified, the method will use bottom_left_pixel as an override.
-    # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
-    # Does not update the surface display - caller will have to do that.
-    def blit_interactive_object(                \
-                self,                           \
-                obj_to_blit,                    \
-                image_type_id,                  \
-                bottom_left_pixel=None,         \
-                top_left_pixel=None             \
-            ):
-        if self and obj_to_blit and (bottom_left_pixel or top_left_pixel):
-            obj_to_blit.blit_onto_surface(              \
-                self.main_display_surface,              \
-                image_type_id,                          \
-                bottom_left_pixel=bottom_left_pixel,    \
-                top_left_pixel=top_left_pixel           \
-            )
-
-    # return top left pixel coordinate for the map given the protagonist's
-    # tile coordinates
-    @classmethod
-    def get_centered_map_top_left_pixel(cls, protag_tile_coordinate):
-        top_left = (0,0)
-        if protag_tile_coordinate:
-            pixel_distance_horiz = viewingdata.CENTER_OW_TILE_TOP_LEFT[0] - (protag_tile_coordinate[0] * tile.TILE_SIZE)
-            pixel_distance_vert = viewingdata.CENTER_OW_TILE_TOP_LEFT[1] - (protag_tile_coordinate[1] * tile.TILE_SIZE)
-
-            top_left = (pixel_distance_horiz, pixel_distance_vert)
-
-
-        return top_left
-
-    # Requires fonts to be loaded. see display.Display.init_fonts()
-    def create_top_display(self):
-        if display.Display.top_display_font:
-            self.top_display = display.Top_Display(
-                self.main_display_surface,
-                self.top_display_rect,
-                display.Display.top_display_font,
-                background_color=viewingdata.COLOR_WHITE,
-                protagonist=self._protagonist,
-                display_language=self.display_language,
-            )
-        else:
-            logger.error("Top display font not found.")
-            logger.error("Must init fonts through display.Display.init_fonts.")
-
-    def create_bottom_text_display(self):
-        if display.Display.bottom_text_display_font:
-            self.bottom_text_display = display.Text_Display(
-                self.main_display_surface,
-                self.bottom_text_display_rect,
-                display.Display.bottom_text_display_font,
-                display_language=self.display_language,
-            )
-        else:
-            logger.error("Bottom text display font not found.")
-            logger.error("Must init fonts through display.Display.init_fonts.")
-
-    # Requires fonts to be loaded. see display.Display.init_fonts()
-    def create_displays(self):
-        self.create_top_display()
-        self.create_bottom_text_display()
-
-    @property
-    def protagonist(self):
-        """Return protagonist."""
-        return self._protagonist
-
-    @protagonist.setter
-    def protagonist(self, value):
-        """Set protagonist for viewing."""
-        if value:
-            self._protagonist = value
-
-            # Assign protagonist to top display, as well, which should update
-            # the top display
-            self.top_display.protagonist = value
-
     @classmethod
     def init_text_surfaces(cls):
         global DEFAULT_FONT
         global TOP_DISPLAY_TEXT
         DEFAULT_FONT = pygame.font.SysFont('Comic Sans MS', 30)
         TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, viewingdata.COLOR_BLACK)
+
+    @classmethod
+    def create_viewing(
+                cls,
+                main_display_surface,
+                protagonist=None,
+                curr_map=None,
+                display_language=language.DEFAULT_LANGUAGE,
+            ):
+        ret_viewing = None
+
+        if main_display_surface:
+            ret_viewing = Viewing(
+                main_display_surface,
+                protagonist=protagonist,
+                curr_map=curr_map,
+                display_language=display_language,
+            )
+
+            # Create displays for viewing.
+            ret_viewing.create_displays()
+
+        return ret_viewing
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

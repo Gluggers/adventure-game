@@ -11,6 +11,7 @@ import tiledata
 import timekeeper
 import objdata
 import interactiveobj
+import interaction
 import sys
 import skills
 
@@ -69,11 +70,11 @@ class Game():
             self.viewing.curr_map = curr_map
             self.curr_map.protagonist_location = protag_tile_location
 
-            self.viewing.set_and_blit_map_on_view(                          \
-                viewing.Viewing.get_centered_map_top_left_pixel(            \
-                    protag_tile_location                                    \
-                ),                                                          \
-                default_color                                               \
+            # TODO - check if protag tile location is not collision-bound?
+
+            self.viewing.set_and_blit_map_on_view(
+                protag_tile_location,
+                default_color
             )
 
     # TODO
@@ -82,24 +83,27 @@ class Game():
 
         # build fields
         protag_id = objdata.PROTAGONIST_ID
-        protag_name = name
+        protag_name_info = {
+            language.LANG_ENGLISH: name,
+            language.LANG_ESPANOL: name,
+        }
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
-        protag_skills_dict = {
+        protag_skill_levels = {
             skills.SKILL_ID_HITPOINTS: 10,
         }
 
         protagonist = entity.Protagonist(                       \
             protag_id,  \
-            protag_name,    \
+            protag_name_info,    \
             protag_image_path_dict,  \
-            skills_dict=protag_skills_dict,
+            skill_levels=protag_skill_levels,
             gender=entity.GENDER_MALE, \
             race=entity.RACE_HUMAN,
         )
 
         logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
         logger.debug("Protagonist obj type: {0}".format(protagonist.object_type))
-        logger.debug("Protagonist name: {0}".format(protagonist.name))
+        logger.debug("Protagonist name: {0}".format(protagonist.name_info))
         logger.debug("Protagonist gender: {0}".format(protagonist.gender))
         logger.debug("Protagonist race: {0}".format(protagonist.race))
 
@@ -118,7 +122,8 @@ class Game():
 
     # change and transition to new map
     # updates display screen
-    # TODO document
+    # TODO document and change
+    """
     def change_current_map(self, dest_map, protag_dest_tile_pos, default_color=viewingdata.COLOR_BLACK):
         if dest_map and protag_dest_tile_pos:
             # set and blit map
@@ -131,6 +136,7 @@ class Game():
 
             # update screen
             pygame.display.update()
+    """
 
     # moves protagonist in the direction specified,
     # using the specified transportation type
@@ -236,6 +242,9 @@ class Game():
             bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
         )
 
+        # refresh viewing
+        self.viewing.refresh_ow_viewing()
+
     # Returns the tile location tuple for the tile that the protagonist
     # is facing.
     def get_protagonist_facing_tile_location(self):
@@ -248,6 +257,48 @@ class Game():
             )
 
         return front_tile_pos
+
+    def toggle_language(self):
+        # For now, just switch to other language
+        if self.game_language == language.LANG_ENGLISH:
+            self.change_language(language.LANG_ESPANOL)
+        elif self.game_language == language.LANG_ESPANOL:
+            self.change_language(language.LANG_ENGLISH)
+
+        # Update display.
+        pygame.display.update()
+
+    def change_language(self, new_language):
+        if new_language is not None:
+            self.game_language = new_language
+            self.viewing.change_language(new_language)
+
+    # Blits text in bottom text box. Refreshes map and updates display.
+    def display_bottom_text(self, text):
+        if text and self.viewing:
+            # Display text at bottom of screen.
+            self.viewing.display_bottom_text(text)
+
+            # Refresh map
+            self.viewing.refresh_ow_viewing()
+
+            pygame.display.update()
+
+    # Have protagonist interact with object.
+    def protag_interact(self, target_object):
+        if target_object and self.protagonist:
+            # Call appropriate interaction method.
+            interaction_id = target_object.interaction_id
+            interact_method = interaction.Interaction.get_interaction_method(
+                interaction_id
+            )
+
+            if interact_method:
+                interact_method(
+                    self,
+                    self.protagonist,
+                    target_object
+                )
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -310,6 +361,10 @@ class Game():
                     elif events.key == pygame.K_RETURN:
                         examine_in_front = True
                         logger.debug("Examine key Return (Enter) pressed down")
+                    elif events.key == pygame.K_l:
+                        # Language switch initiated.
+                        logger.debug("Language change toggled.")
+                        self.toggle_language()
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -364,15 +419,18 @@ class Game():
 
                     if interact_in_front:
                         # Interact with object.
-                        pass
+                        self.protag_interact(inter_obj)
                     elif examine_in_front:
-                        # Examine object.
-
                         # Display examine text at bottom of screen.
-                        self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))
+                        self.display_bottom_text(
+                            inter_obj.get_examine_info(self.game_language)
+                        )
+                        #self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))
 
-                        # TODO update map
-                        #self.viewing.set_and_blit_current_game_map
+                        # Refresh map
+                        #self.viewing.refresh_ow_viewing()
+
+                        #pygame.display.update()
 
                         #logger.debug("EXAMINE INFO: {0}".format(inter_obj.get_examine_info(self.game_language)))
 

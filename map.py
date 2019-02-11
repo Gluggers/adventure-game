@@ -17,6 +17,8 @@ class Map:
     # maps map IDs to map objects
     map_listing = {}
 
+    ### INITIALIZER METHODS ###
+
     # Create a Map object.
     # tile_grid must be a List of List of Tiles that contains the tiles for
     # the map. tile_grid must have a valid rectangular dimension, meaning
@@ -128,6 +130,37 @@ class Map:
                     logger.warn("Could not place object {0} at {1}".format(object_id, bottom_left_tile_loc))
         return successful
 
+    ### GETTERS AND SETTERS ###
+
+    @property
+    def protagonist_location(self):
+        """Return the protagonist location on map."""
+        return self._protagonist_location
+
+    @protagonist_location.setter
+    def protagonist_location(self, new_location):
+        """Set the protagonist location on map."""
+        if new_location:
+            if self._protagonist_location:
+                # Clear old tile location
+                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
+                self.occupied_tile_dict.pop(self._protagonist_location, None)
+
+            # Check if new location is occupied
+            if self.bottom_left_tile_obj_mapping.get(new_location, None) \
+                    or self.occupied_tile_dict.get(new_location, None):
+                logger.error("Cannot move protag from {0} to {1}".format(self._protagonist_location, new_location))
+            else:
+                # Mark new location as occupied
+                self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
+                self.occupied_tile_dict[new_location] = new_location
+
+                logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
+
+                self._protagonist_location = new_location
+
+    ### ADJACENT MAP METHODS ###
+
     # TODO - document
     def add_adjacent_map(self, direction, dest_map_id, dest_location_coordinate):
         # TODO - more arg checks?
@@ -145,6 +178,9 @@ class Map:
     # None if no such neighboring map exists
     def get_adjacent_map_info(self, direction):
         return self.adj_map_dict.get(direction, None)
+
+
+    ### OBJECT SETTING/REMOVING METHODS ###
 
     # Sets an interactive object corresponding to obj_id
     # such that the bottom left tile of the
@@ -281,6 +317,8 @@ class Map:
         # # TODO
         return False
 
+    ### OBJECT SEARCH METHODS ###
+
     # Returns None if invalid direction, invalid initial tile position,
     # or adjacent tile is out of bounds (does not look for adjacent maps).
     def get_adjacent_tile_position(self, tile_position, adjacent_direction):
@@ -343,33 +381,9 @@ class Map:
 
         return occupying_object
 
-    @property
-    def protagonist_location(self):
-        """Return the protagonist location on map."""
-        return self._protagonist_location
 
-    @protagonist_location.setter
-    def protagonist_location(self, new_location):
-        """Set the protagonist location on map."""
-        if new_location:
-            if self._protagonist_location:
-                # Clear old tile location
-                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
-                self.occupied_tile_dict.pop(self._protagonist_location, None)
 
-            # Check if new location is occupied
-            if self.bottom_left_tile_obj_mapping.get(new_location, None) \
-                    or self.occupied_tile_dict.get(new_location, None):
-                logger.error("Cannot move protag from {0} to {1}".format(self._protagonist_location, new_location))
-            else:
-                # Mark new location as occupied
-                self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
-                self.occupied_tile_dict[new_location] = new_location
-
-                logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
-
-                self._protagonist_location = new_location
-
+    """
     def change_protagonist_location(self, new_location):
         if new_location:
             if self._protagonist_location:
@@ -384,6 +398,9 @@ class Map:
             logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
 
             self._protagonist_location = new_location
+    """
+
+    ### OBJECT RESPAWNING METHODS ###
 
     # TODO document
     def set_respawn_timer(self, obj_to_respawn, tile_location, num_ticks):
@@ -430,6 +447,16 @@ class Map:
         self.pending_respawns = updated_pending_respawns
         """
 
+    ### TILE-RELATED METHODS ###
+
+    def tile_occupied(self, tile_loc):
+        occupied = False
+
+        if tile_loc and self.occupied_tile_dict.get(tile_loc, None):
+            occupied = True
+
+        return occupied
+
     # returns True if the tile position to check is within current map
     # boundaries
     def location_within_bounds(self, tile_pos_to_check):
@@ -458,6 +485,8 @@ class Map:
             ret_val = dest_tile.valid_transportation(transport_flag)
 
         return ret_val
+
+    ### BLIT METHODS ###
 
     def blit_tile(self, surface, tile_coordinate, dest_top_left):
         if surface and tile_coordinate and dest_top_left and self.location_within_bounds(tile_coordinate):
@@ -617,6 +646,19 @@ class Map:
                     tile_subset_rect=tile_subset_rect                   \
                 )
 
+    # Check for respawns, blit self.
+    def refresh_self(self, surface, tile_subset_rect=None):
+        # TODO - check for respawns
+
+        # Blit self if possible.
+        if surface:
+            self.blit_onto_surface(                                 \
+                surface,                                            \
+                tile_subset_rect=tile_subset_rect                   \
+            )
+
+    ### CLASS METHODS ###
+
     # builds map based on given map ID. Returns map if valid map ID.
     # Adds the map to the class map_listing variable if a new
     # map was created
@@ -712,14 +754,6 @@ class Map:
 
         return ret_grid
 
-    def tile_occupied(self, tile_loc):
-        occupied = False
-
-        if tile_loc and self.occupied_tile_dict.get(tile_loc, None):
-            occupied = True
-
-        return occupied
-
     @classmethod
     def get_map(cls, map_id):
         ret_map = Map.map_listing.get(map_id, None)
@@ -728,12 +762,6 @@ class Map:
             logger.warn("Get_map: No map found for map id {0}".format(map_id))
 
         return ret_map
-
-    # TODO
-    @classmethod
-    def parse_map(cls, map_json_data):
-        # TODO
-        pass
 
     @classmethod
     def build_maps(cls):
