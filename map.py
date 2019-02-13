@@ -646,16 +646,22 @@ class Map:
                     tile_subset_rect=tile_subset_rect                   \
                 )
 
-    # Check for respawns, blit self.
-    def refresh_self(self, surface, tile_subset_rect=None):
+    # Refreshes map. Check for respawns.
+    # Does not reblit map - caller will have to do that.
+    def refresh_self(
+                self,
+                #surface,
+                #tile_subset_rect=None,
+            ):
         # TODO - check for respawns
-
-        # Blit self if possible.
+        pass
+        """
         if surface:
             self.blit_onto_surface(                                 \
                 surface,                                            \
                 tile_subset_rect=tile_subset_rect                   \
             )
+        """
 
     ### CLASS METHODS ###
 

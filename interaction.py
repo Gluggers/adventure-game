@@ -4,6 +4,7 @@ import interactiveobj
 import resource
 import entity
 import language
+import display
 
 class Interaction():
     # Maps interaction IDs to methods
@@ -22,10 +23,38 @@ class Interaction():
                     target_object.name
                 )
 
-            game_object.display_bottom_text(display_text)
+            game_object.display_bottom_text_and_refresh(display_text)
 
+    # Main skilling text must be 1 page or less.
     @classmethod
-    def chop_tree_interaction(cls, game_object, acting_object, target_object):
+    def gathering_interaction(
+                cls,
+                game_object,
+                acting_object,
+                target_object,
+                interaction_id,
+                main_skilling_text,
+                resource_exhaust_text=None,
+                intro_skilling_text=None,
+            ):
+        if game_object \
+                and game_object.viewing \
+                and acting_object \
+                and target_object   \
+                and (interaction_id is not None)    \
+                and main_skilling_text:
+            if intro_skilling_text:
+                game_object.viewing.display_text(intro_skilling_text, )
+
+    # TODO - pass in interaction ID?
+    @classmethod
+    def chop_tree_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object,
+            ):
         if game_object and acting_object and target_object:
             # TODO - language functionality
             display_text = ""
@@ -40,27 +69,51 @@ class Interaction():
                     obj_name
                 )
 
-            game_object.display_bottom_text(display_text)
+            game_object.display_bottom_text_and_refresh(display_text)
 
             # TODO - chopping tree logic
 
     @classmethod
-    def mine_rock_interaction(cls, game_object, acting_object, target_object):
+    def mine_rock_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object,
+            ):
         if game_object and acting_object and target_object:
             pass
 
     @classmethod
-    def fishing_interaction(cls, game_object, acting_object, target_object):
+    def fishing_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object,
+            ):
         if game_object and acting_object and target_object:
             pass
 
     @classmethod
-    def cooking_interaction(cls, game_object, acting_object, target_object):
+    def cooking_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object,
+            ):
         if game_object and acting_object and target_object:
             pass
 
     @classmethod
-    def herblore_gather_interaction(cls, game_object, acting_object, target_object):
+    def herblore_gather_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object,
+            ):
         if game_object and acting_object and target_object:
             pass
 

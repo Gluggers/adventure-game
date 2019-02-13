@@ -57,7 +57,7 @@ def main():
     map.Map.build_maps()
 
     # create protagonist
-    protag_tile_loc = (2,2)
+    protag_tile_loc = (12,12)
     protagonist = game_obj.build_protagonist("Bob")
 
     # set map and blit

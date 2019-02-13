@@ -109,6 +109,7 @@ REQUIRED_LEVEL_FIELD = 0x302
 GAINED_XP_FIELD = 0x303
 RESOURCE_ITEM_FIELD = 0x304
 RESPAWN_TIME_S_FIELD = 0x305
+EXHAUSTION_PROBABILITY_FIELD = 0x306 # Values must be between 0.0 and 1.0
 
 ### RESOURCE DATA ###
 RESOURCE_DATA = {
@@ -133,6 +134,7 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "Tal vez pueda cosechar esta hierba.",
         },
         INTERACTION_ID_FIELD: interactiondata.HERBLORE_GATHER_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 0.3,
     },
     ORE_EMPTY_BASIC_ID: { # TODO make this a generic interactive object?
         OBJECT_NAME_INFO_FIELD: {
@@ -177,6 +179,7 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "Es solo un arbol. Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
     },
     TREE_OAK_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -199,5 +202,6 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "Que roble tan maravilloso! Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 0.2,
     },
 }

@@ -13,5 +13,5 @@ class Timekeeper():
         Timekeeper.clock = pygame.time.Clock()
 
     @classmethod
-    def tick(cls):
-        Timekeeper.clock.tick(CLOCK_TICK)
+    def tick(cls, tick_amount=CLOCK_TICK):
+        Timekeeper.clock.tick(tick_amount)

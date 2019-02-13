@@ -19,6 +19,7 @@ class Resource(interactiveobj.Interactive_Object):
                 gained_xp=0,
                 resource_item=None,
                 respawn_time_s=1,
+                exhaustion_probability=1,
                 examine_info=None,
                 interaction_id=interactiondata.DEFAULT_ID,
             ):
@@ -40,6 +41,7 @@ class Resource(interactiveobj.Interactive_Object):
         self.gained_xp = gained_xp
         self.resource_item = resource_item
         self.respawn_time_s = respawn_time_s
+        self.exhaustion_probability = float(exhaustion_probability)
 
     # Factory method to create a resource
     @classmethod
@@ -71,6 +73,7 @@ class Resource(interactiveobj.Interactive_Object):
                     gained_xp = resource_data.get(objdata.GAINED_XP_FIELD, 0)
                     resource_item = resource_data.get(objdata.RESOURCE_ITEM_FIELD, None)
                     respawn_time_s = resource_data.get(objdata.RESPAWN_TIME_S_FIELD, 1)
+                    exhaustion_probability = resource_data.get(objdata.EXHAUSTION_PROBABILITY_FIELD, 1)
                     examine_info = resource_data.get(objdata.EXAMINE_INFO_FIELD, None)
                     interaction_id = resource_data.get(
                         objdata.INTERACTION_ID_FIELD,
@@ -91,6 +94,7 @@ class Resource(interactiveobj.Interactive_Object):
                             gained_xp=gained_xp,
                             resource_item=resource_item,
                             respawn_time_s=respawn_time_s,
+                            exhaustion_probability=exhaustion_probability,
                             examine_info=examine_info,
                             interaction_id=interaction_id,
                         )

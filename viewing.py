@@ -118,7 +118,7 @@ class Viewing():
                 self.top_display.display_language = new_language
 
                 # Update self.
-                self.update_ow_viewing()
+                self.refresh_and_blit_overworld()
 
     ### DISPLAY HANDLING METHODS ###
 
@@ -136,6 +136,7 @@ class Viewing():
             #if self._protagonist:
                 #self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
 
+    """
     def display_bottom_text(self, text):
         if text and self.main_display_surface and self.bottom_text_display:
             self.bottom_text_display.display_text(
@@ -146,6 +147,28 @@ class Viewing():
             # Wait a little after finishing pages.
             pygame.time.wait(display.BOTTOM_TEXT_DELAY_MS)
             pygame.event.clear()
+    """
+
+    def display_bottom_text(
+                self,
+                text,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+            ):
+        if text and self.main_display_surface and self.bottom_text_display:
+            self.bottom_text_display.display_text(
+                self.main_display_surface,
+                text,
+                advance_delay_ms=advance_delay_ms,
+                auto_advance=auto_advance,
+            )
+
+    def display_first_text_page(self, text):
+        if text and self.main_display_surface and self.bottom_text_display:
+            self.bottom_text_display.display_first_text_page(
+                self.main_display_surface,
+                text,
+            )
 
     ### MAP HANDLING METHODS ###
 
@@ -169,41 +192,23 @@ class Viewing():
                 self.curr_map.top_left_position = viewingdata.OW_VIEWING_LOCATION
 
             # Refresh and blit viewing.
-            self.refresh_ow_viewing()
+            self.refresh_and_blit_overworld()
         else:
             logger.error("Missing parameters for setting and blitting map.")
 
-    # Refresh and blit current overworld viewing.
-    # Does not update the top display information. TODO - fix?
-    # Does not update display - caller must do that.
-    def refresh_ow_viewing(self):
-        # Blit background.
-        self.set_viewing_screen_default()
-
-        # Refresh map.
+    # Refreshes the data for the overworld, including the map
+    # and top display.
+    # Does not reblit map or top display - caller will have
+    # to do that.
+    def refresh_overworld(self):
+        # Update map.
         self.refresh_map()
 
         # Update top display.
-        self.blit_top_display()
+        self.refresh_top_display()
 
-    # Updates and blit current overworld viewing.
-    # Does not update display - caller must do that.
-    def update_ow_viewing(self):
-        # Blit background.
-        self.set_viewing_screen_default()
-
-        # Refresh map.
-        self.refresh_map()
-
-        # Update top display
-        self.top_display.update_self()
-
-        # Update top display.
-        self.blit_top_display()
-
-    # Refreshes map and blits it. Does not update display - caller must
-    # do that.
-    def refresh_map(self):
+    # Does not update map or display.
+    def blit_map(self):
         if self.curr_map:
             # Set top left viewing tile to define what portions of map to blit
             top_left_viewing_tile_coord =                           \
@@ -211,7 +216,7 @@ class Viewing():
                     self.curr_map.top_left_position
                 )
 
-            logger.debug("Top left viewing tile for map at {0}".format(top_left_viewing_tile_coord))
+            #logger.debug("Top left viewing tile for map at {0}".format(top_left_viewing_tile_coord))
 
             # get subset of tiles to blit
             tile_subset_rect = Viewing.calculate_tile_viewing_rect(
@@ -219,13 +224,56 @@ class Viewing():
                 top_left_viewing_tile_coord
             )
 
-            logger.debug("Tile subset viewing rect for map at {0}".format(tile_subset_rect))
+            #logger.debug("Tile subset viewing rect for map at {0}".format(tile_subset_rect))
 
-            # Refresh map to update and blit it.
-            self.curr_map.refresh_self(
+            self.curr_map.blit_onto_surface(
                 self.main_display_surface,
-                tile_subset_rect=tile_subset_rect,
+                tile_subset_rect=tile_subset_rect
             )
+
+    # Blits overworld viewing as is, without updating.
+    # Does not update display.
+    def blit_overworld_viewing(self):
+        # Blit background.
+        self.set_viewing_screen_default()
+
+        # Blit map and top display.
+        self.blit_map()
+
+        self.blit_top_display()
+
+    # Updates and blit current overworld viewing.
+    # Does not update display - caller must do that.
+    def refresh_and_blit_overworld(self):
+        # Blit background.
+        self.set_viewing_screen_default()
+
+        # Refresh and blit map.
+        self.refresh_and_blit_map()
+
+        # Update top display and blit.
+        self.refresh_and_blit_top_display()
+
+    def refresh_top_display(self):
+        if self.top_display:
+            self.top_display.update_self()
+
+    def refresh_and_blit_top_display(self):
+        if self.top_display:
+            self.refresh_top_display()
+            self.blit_top_display()
+
+    # Refreshes map.
+    # Does not blit map or update display - caller must
+    # do that.
+    def refresh_map(self):
+        if self.curr_map:
+            # Refresh map to update it.
+            self.curr_map.refresh_self()
+
+    def refresh_and_blit_map(self):
+        self.refresh_map()
+        self.blit_map()
 
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
@@ -377,10 +425,9 @@ class Viewing():
 
         return top_left
 
-    # returns rect in tile coordinates that defines the tiles that
+    # Returns rect in tile coordinates that defines the tiles that
     # are in the current viewing window or may enter in the viewing window
     # upon a single tile move
-    # TODO FIGURE OUT
     @classmethod
     def calculate_tile_viewing_rect(cls, map_object, top_left_viewing_tile):
         ret_rect = None

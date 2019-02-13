@@ -13,6 +13,7 @@ import objdata
 import interactiveobj
 import interaction
 import sys
+import display
 import skills
 
 logger = None
@@ -243,7 +244,7 @@ class Game():
         )
 
         # refresh viewing
-        self.viewing.refresh_ow_viewing()
+        self.viewing.refresh_and_blit_overworld()
 
     # Returns the tile location tuple for the tile that the protagonist
     # is facing.
@@ -273,16 +274,31 @@ class Game():
             self.game_language = new_language
             self.viewing.change_language(new_language)
 
-    # Blits text in bottom text box. Refreshes map and updates display.
-    def display_bottom_text(self, text):
+    # Blits text in bottom text box. Refreshes overworld viewing
+    # and updates display.
+    def display_bottom_text_and_refresh(
+                self,
+                text,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False):
+        if text and self.viewing:
+            # Display text at bottom of screen.
+            self.viewing.display_bottom_text(
+                text,
+                advance_delay_ms=advance_delay_ms,
+                auto_advance=auto_advance,
+            )
+
+            # Refresh map
+            self.viewing.refresh_and_blit_overworld()
+
+            pygame.display.update()
+
+    # Blits text in bottom text box. Does not refresh overworld.
+    def display_bottom_text_no_refresh(self, text):
         if text and self.viewing:
             # Display text at bottom of screen.
             self.viewing.display_bottom_text(text)
-
-            # Refresh map
-            self.viewing.refresh_ow_viewing()
-
-            pygame.display.update()
 
     # Have protagonist interact with object.
     def protag_interact(self, target_object):
@@ -295,6 +311,7 @@ class Game():
 
             if interact_method:
                 interact_method(
+                    interaction_id,
                     self,
                     self.protagonist,
                     target_object
@@ -422,7 +439,7 @@ class Game():
                         self.protag_interact(inter_obj)
                     elif examine_in_front:
                         # Display examine text at bottom of screen.
-                        self.display_bottom_text(
+                        self.display_bottom_text_and_refresh(
                             inter_obj.get_examine_info(self.game_language)
                         )
                         #self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))

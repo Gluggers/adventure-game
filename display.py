@@ -40,6 +40,7 @@ SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
 # Number of milliseconds to wait in between each
 # text display.
 BOTTOM_TEXT_DELAY_MS = 500
+DEFAULT_ADVANCE_DELAY_MS = 500
 
 LEVEL_TEXT_PREFIX_INFO = {
     language.LANG_ENGLISH: "LEVEL: ",
@@ -643,7 +644,92 @@ class Text_Display(Display):
                 # Move to spot for next line.
                 vertical_offset = vertical_offset + (2 * self.text_height)
 
-    def display_text(self, surface, text_to_display):
+    # advance_delay_ms is time in milliseconds to pause before allowing
+    # manual advance.
+    # if auto_advance is True, the method will wait for advance_delay_ms
+    # milliseconds before returning execution to caller.
+    # If False, the method will wait for the same amount of time before
+    # waiting for the user to continue.
+    def display_single_page(
+                self,
+                surface,
+                page,
+                advance_delay_ms=DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+            ):
+        if surface and page:
+            self.blit_page(surface, page)
+            pygame.display.update()
+
+            if advance_delay_ms:
+                pygame.time.wait(advance_delay_ms)
+
+            if not auto_advance:
+                # Clear event queue to prevent premature advancement.
+                pygame.event.clear()
+
+                # Wait for user to advance.
+                advance = False
+
+                logger.debug("Waiting to advance...")
+
+                while not advance:
+                    timekeeper.Timekeeper.tick()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key in TEXT_ADVANCE_KEYS:
+                                logger.debug("Advancing to next page")
+                                advance = True
+
+    def display_text(
+                self,
+                surface,
+                text_to_display,
+                advance_delay_ms=DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+            ):
+        if surface and text_to_display:
+            # Get the pages.
+            page_list = self.get_text_pages(text_to_display)
+
+            logger.debug("Blitting {0} page(s)".format(len(page_list)))
+
+            if page_list:
+                for page in page_list:
+                    self.display_single_page(
+                        surface,
+                        page,
+                        advance_delay_ms=advance_delay_ms,
+                        auto_advance=auto_advance,
+                    )
+
+            pygame.event.clear()
+
+    def display_first_text_page(self, surface, text_to_display):
+        if surface and text_to_display:
+            # Get the pages.
+            page_list = self.get_text_pages(text_to_display)
+            num_pages = len(page_list)
+
+            logger.debug("Blitting {0} page(s)".format(num_pages))
+
+            if num_pages > 1:
+                logger.warn("Display_first_text_page only blits first page.")
+                logger.warn("Submitted text is {0} pages.".format(num_pages))
+
+            if page_list:
+                self.display_single_page(
+                    surface,
+                    page_list[0],
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                )
+
+    def display_text2(self, surface, text_to_display):
         if surface and text_to_display:
             # Get the pages.
             page_list = self.get_text_pages(text_to_display)
