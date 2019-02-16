@@ -148,12 +148,14 @@ class Viewing():
             pygame.time.wait(display.BOTTOM_TEXT_DELAY_MS)
             pygame.event.clear()
     """
-
+    # If refresh_after is True, refreshes
+    # overworld and blits and updates display
     def display_bottom_text(
                 self,
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
+                refresh_after=False,
             ):
         if text and self.main_display_surface and self.bottom_text_display:
             self.bottom_text_display.display_text(
@@ -163,12 +165,34 @@ class Viewing():
                 auto_advance=auto_advance,
             )
 
-    def display_first_text_page(self, text):
+            # pygame.event.clear()
+
+            if refresh_after:
+                self.refresh_and_blit_overworld()
+                pygame.display.update()
+
+    # If refresh_after is True, refreshes
+    # overworld and blits and updates display
+    def display_bottom_first_text_page(
+                self,
+                text,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+                refresh_after=False,
+            ):
         if text and self.main_display_surface and self.bottom_text_display:
             self.bottom_text_display.display_first_text_page(
                 self.main_display_surface,
                 text,
+                advance_delay_ms=advance_delay_ms,
+                auto_advance=auto_advance,
             )
+
+            # pygame.event.clear()
+
+            if refresh_after:
+                self.refresh_and_blit_overworld()
+                pygame.display.update()
 
     ### MAP HANDLING METHODS ###
 

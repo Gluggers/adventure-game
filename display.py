@@ -491,6 +491,12 @@ class Text_Display(Display):
                         text_lines.append(str_to_add)
                         logger.debug("Adding string {0} to text lines".format(str_to_add))
 
+            if start_index == (num_words - 1):
+                # We still need to add the last word.
+                str_to_add = word_list[start_index]
+                text_lines.append(str_to_add)
+                logger.debug("Adding string {0} to text lines".format(str_to_add))
+
             if text_lines:
                 ret_lines = text_lines
             else:
@@ -502,7 +508,7 @@ class Text_Display(Display):
         return ret_lines
 
     @classmethod
-    def get_text_lines_test(text_string):
+    def get_text_lines_test(cls, text_string):
         # List of strings
         ret_lines = []
 
@@ -543,7 +549,12 @@ class Text_Display(Display):
                     if (index == (num_words - 1)):
                         # We reached the end of the word list and
                         # did not overpass to the next line.
-                        sub_list = word_list[start_index:]
+                        if start_index < index:
+                            sub_list = word_list[start_index:]
+                        else:
+                            sub_list = [word_list[index]]
+
+                        logger.debug("Adding single word to list: {0}".format(sub_list))
                     else:
                         curr_length = curr_length + word_length
 
@@ -554,6 +565,12 @@ class Text_Display(Display):
                     if str_to_add:
                         text_lines.append(str_to_add)
                         logger.debug("Adding string {0} to text lines".format(str_to_add))
+
+            if start_index == (num_words - 1):
+                # We still need to add the last word.
+                str_to_add = word_list[start_index]
+                text_lines.append(str_to_add)
+                logger.debug("Adding string {0} to text lines".format(str_to_add))
 
             if text_lines:
                 ret_lines = text_lines
@@ -658,9 +675,11 @@ class Text_Display(Display):
                 auto_advance=False,
             ):
         if surface and page:
+            # Blit single page and update display.
             self.blit_page(surface, page)
             pygame.display.update()
 
+            # Pause if needed.
             if advance_delay_ms:
                 pygame.time.wait(advance_delay_ms)
 
@@ -699,6 +718,7 @@ class Text_Display(Display):
             logger.debug("Blitting {0} page(s)".format(len(page_list)))
 
             if page_list:
+                # Display each text page.
                 for page in page_list:
                     self.display_single_page(
                         surface,
@@ -707,9 +727,15 @@ class Text_Display(Display):
                         auto_advance=auto_advance,
                     )
 
-            pygame.event.clear()
+            # pygame.event.clear()
 
-    def display_first_text_page(self, surface, text_to_display):
+    def display_first_text_page(
+                self,
+                surface,
+                text_to_display,
+                advance_delay_ms=DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+            ):
         if surface and text_to_display:
             # Get the pages.
             page_list = self.get_text_pages(text_to_display)
@@ -722,49 +748,14 @@ class Text_Display(Display):
                 logger.warn("Submitted text is {0} pages.".format(num_pages))
 
             if page_list:
+                # Display just the first page.
                 self.display_single_page(
                     surface,
                     page_list[0],
-                    advance_delay_ms=0,
-                    auto_advance=True,
+                    advance_delay_ms=advance_delay_ms,
+                    auto_advance=auto_advance,
                 )
 
-    def display_text2(self, surface, text_to_display):
-        if surface and text_to_display:
-            # Get the pages.
-            page_list = self.get_text_pages(text_to_display)
-
-            logger.debug("Blitting {0} page(s)".format(len(page_list)))
-
-            if page_list:
-                for page in page_list:
-                    self.blit_page(surface, page)
-                    pygame.display.update()
-
-                    # Clear event queue to prevent premature advancement.
-                    pygame.event.clear()
-
-                    # Pause for a moment.
-                    pygame.time.wait(BOTTOM_TEXT_DELAY_MS)
-
-                    # Pause until user presses a valid key to advance
-                    # to next page or finish.
-                    next_page = False
-
-                    logger.debug("Waiting to advance to next page...")
-
-                    while not next_page:
-                        timekeeper.Timekeeper.tick()
-
-                        for events in pygame.event.get():
-                            if events.type == pygame.QUIT:
-                                pygame.quit()
-                                sys.exit(0)
-                            elif events.type == pygame.KEYDOWN:
-                                if events.key in TEXT_ADVANCE_KEYS:
-                                    logger.debug("Advancing to next page")
-                                    next_page = True
-
 # set up logger
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

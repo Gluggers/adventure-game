@@ -1,6 +1,7 @@
 import pygame
 
 CLOCK_TICK = 30
+NUM_MS_SECOND = 1000
 
 class Timekeeper():
     clock = None

@@ -1,4 +1,5 @@
 import logging
+import language
 
 ### SKILLS CONSTANTS ###
 SKILL_ID_ATTACK = 0x1
@@ -23,29 +24,93 @@ SKILL_ID_FISHING = 0x13
 SKILL_ID_WOODCUTTING = 0x14
 SKILL_ID_HUSBANDRY = 0x15
 
-SKILL_ID_LIST = [
-    SKILL_ID_ATTACK,
-    SKILL_ID_STRENGTH,
-    SKILL_ID_DEFENSE,
-    SKILL_ID_HITPOINTS,
-    SKILL_ID_ARCHERY,
-    SKILL_ID_WHITE_MAGIC,
-    SKILL_ID_BLACK_MAGIC,
-    SKILL_ID_SMITHING,
-    SKILL_ID_HERBLORE,
-    SKILL_ID_CRAFTING,
-    SKILL_ID_COOKING,
-    SKILL_ID_FIREMAKING,
-    SKILL_ID_CONSTRUCTION,
-    SKILL_ID_INTELLIGENCE,
-    SKILL_ID_CHARISMA,
-    SKILL_ID_AGILITY,
-    SKILL_ID_MINING,
-    SKILL_ID_FARMING,
-    SKILL_ID_FISHING,
-    SKILL_ID_WOODCUTTING,
-    SKILL_ID_HUSBANDRY
-]
+# Maps skill IDs to their names in the various languages.
+SKILL_ID_NAME_MAPPING = {
+    SKILL_ID_ATTACK: {
+        language.LANG_ENGLISH: "ATTACK",
+        language.LANG_ESPANOL: "ATAQUE",
+    },
+    SKILL_ID_STRENGTH: {
+          language.LANG_ENGLISH: "STRENGTH",
+          language.LANG_ESPANOL: "FUERZA",
+    },
+    SKILL_ID_DEFENSE: {
+          language.LANG_ENGLISH: "DEFENSE",
+          language.LANG_ESPANOL: "DEFENSA",
+    },
+    SKILL_ID_HITPOINTS: {
+          language.LANG_ENGLISH: "HITPOINTS",
+          language.LANG_ESPANOL: "SALUD",
+    },
+    SKILL_ID_ARCHERY: {
+          language.LANG_ENGLISH: "ARCHERY",
+          language.LANG_ESPANOL: "ARQUERIA",
+    },
+    SKILL_ID_WHITE_MAGIC: {
+          language.LANG_ENGLISH: "WHITE MAGIC",
+          language.LANG_ESPANOL: "MAGIA BLANCA",
+    },
+    SKILL_ID_BLACK_MAGIC: {
+          language.LANG_ENGLISH: "BLACK MAGIC",
+          language.LANG_ESPANOL: "MAGIA NEGRA",
+    },
+    SKILL_ID_SMITHING: {
+          language.LANG_ENGLISH: "SMITHING",
+          language.LANG_ESPANOL: "HERRERO",
+    },
+    SKILL_ID_HERBLORE: {
+          language.LANG_ENGLISH: "HERBLORE",
+          language.LANG_ESPANOL: "HERBOLARIA",
+    },
+    SKILL_ID_CRAFTING: {
+          language.LANG_ENGLISH: "CRAFTING",
+          language.LANG_ESPANOL: "ARTESANIA",
+    },
+    SKILL_ID_COOKING: {
+          language.LANG_ENGLISH: "COOKING",
+          language.LANG_ESPANOL: "COCINA",
+    },
+    SKILL_ID_FIREMAKING: {
+          language.LANG_ENGLISH: "FIREMAKING",
+          language.LANG_ESPANOL: "DOMINIO DEL FUEGO",
+    },
+    SKILL_ID_CONSTRUCTION: {
+          language.LANG_ENGLISH: "CONSTRUCTION",
+          language.LANG_ESPANOL: "CONSTRUCCION",
+    },
+    SKILL_ID_INTELLIGENCE: {
+          language.LANG_ENGLISH: "INTELLIGENCE",
+          language.LANG_ESPANOL: "INTELIGENCIA",
+    },
+    SKILL_ID_CHARISMA: {
+          language.LANG_ENGLISH: "CHARISMA",
+          language.LANG_ESPANOL: "CARISMA",
+    },
+    SKILL_ID_AGILITY: {
+          language.LANG_ENGLISH: "AGILITY",
+          language.LANG_ESPANOL: "AGILIDAD",
+    },
+    SKILL_ID_MINING: {
+          language.LANG_ENGLISH: "MINING",
+          language.LANG_ESPANOL: "MINERIA",
+    },
+    SKILL_ID_FARMING: {
+          language.LANG_ENGLISH: "FARMING",
+          language.LANG_ESPANOL: "AGRICULTURA",
+    },
+    SKILL_ID_FISHING: {
+          language.LANG_ENGLISH: "FISHING",
+          language.LANG_ESPANOL: "PESCA",
+    },
+    SKILL_ID_WOODCUTTING: {
+          language.LANG_ENGLISH: "WOODCUTTING",
+          language.LANG_ESPANOL: "TALA DE ARBOLES",
+    },
+    SKILL_ID_HUSBANDRY: {
+          language.LANG_ENGLISH: "HUSBANDRY",
+          language.LANG_ESPANOL: "CRIA DE ANIMALES",
+    },
+}
 
 ### LEVEL AND EXPERIENCE CONSTANTS ###
 DEFAULT_LEVEL_HITPOINTS = 10
@@ -115,6 +180,17 @@ def calculate_combat_level(skill_info_dict):
         logger.debug("Combat level: {0}".format(ret_level))
 
     return ret_level
+
+def get_skill_name(skill_id, language_id):
+    ret_name = ""
+
+    if (skill_id is not None) and (language_id is not None):
+        ret_name = SKILL_ID_NAME_MAPPING.get(
+                skill_id,
+                {}
+            ).get(language_id, "")
+
+    return ret_name
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

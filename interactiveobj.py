@@ -104,7 +104,7 @@ class Interactive_Object(pygame.sprite.Sprite):
         return Interactive_Object.interactive_obj_listing.get(obj_id, None)
 
     # Adds/updates the interactive object listing for the given object ID.
-    # Returns True upon success, false otherwise
+    # Returns True upon success, false otherwise.
     @classmethod
     def add_interactive_obj_to_listing(cls, obj_id, inter_obj):
         if inter_obj and (obj_id is not None):

@@ -80,33 +80,7 @@ class Game():
 
     # TODO
     def build_protagonist(self, name):
-        protagonist = None
-
-        # build fields
-        protag_id = objdata.PROTAGONIST_ID
-        protag_name_info = {
-            language.LANG_ENGLISH: name,
-            language.LANG_ESPANOL: name,
-        }
-        protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
-        protag_skill_levels = {
-            skills.SKILL_ID_HITPOINTS: 10,
-        }
-
-        protagonist = entity.Protagonist(                       \
-            protag_id,  \
-            protag_name_info,    \
-            protag_image_path_dict,  \
-            skill_levels=protag_skill_levels,
-            gender=entity.GENDER_MALE, \
-            race=entity.RACE_HUMAN,
-        )
-
-        logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
-        logger.debug("Protagonist obj type: {0}".format(protagonist.object_type))
-        logger.debug("Protagonist name: {0}".format(protagonist.name_info))
-        logger.debug("Protagonist gender: {0}".format(protagonist.gender))
-        logger.debug("Protagonist race: {0}".format(protagonist.race))
+        protagonist = entity.Protagonist.protagonist_factory(name)
 
         # associate protag with game and viewing
         self.protagonist = protagonist
@@ -114,8 +88,6 @@ class Game():
 
         # Add protagonist to object listing
         interactiveobj.Interactive_Object.interactive_obj_listing[objdata.PROTAGONIST_ID] = protagonist
-
-        return protagonist
 
     def set_protagonist_tile_position(self, new_position):
         if new_position and self.protagonist and self.curr_map:
@@ -274,31 +246,44 @@ class Game():
             self.game_language = new_language
             self.viewing.change_language(new_language)
 
-    # Blits text in bottom text box. Refreshes overworld viewing
-    # and updates display.
-    def display_bottom_text_and_refresh(
+    # Does not update display.
+    def refresh_and_blit_overworld(self):
+        self.viewing.refresh_and_blit_overworld()
+
+    # Blits text in bottom text box.
+    # If refresh_after is True, refreshes
+    # overworld and blits and updates display
+    def display_bottom_text(
                 self,
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False):
+                auto_advance=False,
+                refresh_after=False
+            ):
         if text and self.viewing:
             # Display text at bottom of screen.
             self.viewing.display_bottom_text(
                 text,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
+                refresh_after=refresh_after,
             )
-
-            # Refresh map
-            self.viewing.refresh_and_blit_overworld()
-
-            pygame.display.update()
-
-    # Blits text in bottom text box. Does not refresh overworld.
-    def display_bottom_text_no_refresh(self, text):
+    # If refresh_after is True, refreshes
+    # overworld and blits and updates display
+    def display_bottom_first_text_page(
+                self,
+                text,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+                refresh_after=False,
+            ):
         if text and self.viewing:
-            # Display text at bottom of screen.
-            self.viewing.display_bottom_text(text)
+            self.viewing.display_bottom_first_text_page(
+                text,
+                advance_delay_ms=advance_delay_ms,
+                auto_advance=auto_advance,
+                refresh_after=refresh_after,
+            )
 
     # Have protagonist interact with object.
     def protag_interact(self, target_object):
@@ -439,8 +424,9 @@ class Game():
                         self.protag_interact(inter_obj)
                     elif examine_in_front:
                         # Display examine text at bottom of screen.
-                        self.display_bottom_text_and_refresh(
-                            inter_obj.get_examine_info(self.game_language)
+                        self.display_bottom_text(
+                            inter_obj.get_examine_info(self.game_language),
+                            refresh_after=True,
                         )
                         #self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))
 

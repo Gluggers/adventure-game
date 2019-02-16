@@ -58,16 +58,16 @@ def main():
 
     # create protagonist
     protag_tile_loc = (12,12)
-    protagonist = game_obj.build_protagonist("Bob")
+    game_obj.build_protagonist("Bob")
 
     # set map and blit
     game_obj.set_and_blit_current_game_map(mapdata.R0_A0_ID, protag_tile_loc)
 
     # blit protagonist
-    game_obj.viewing.blit_interactive_object(                   \
-        protagonist,                                            \
-        objdata.OW_IMAGE_ID_DEFAULT,                     \
-        bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
+    game_obj.viewing.blit_interactive_object(
+        game_obj.protagonist,
+        objdata.OW_IMAGE_ID_DEFAULT,
+        bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT,
     )
 
     # update screen

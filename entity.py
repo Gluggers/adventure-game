@@ -7,6 +7,7 @@ import interactiveobj
 import objdata
 import logging
 import interactiondata
+import language
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -68,7 +69,7 @@ class Entity(interactiveobj.Interactive_Object):
         # [skill level, current experience, experience to next level]
         self.skill_info_mapping = {}
 
-        for skill_id in skills.SKILL_ID_LIST:
+        for skill_id in skills.SKILL_ID_NAME_MAPPING:
             # See if caller passed in a custom level for the skill.
             skill_level = skill_levels.get(skill_id, None)
 
@@ -107,6 +108,28 @@ class Entity(interactiveobj.Interactive_Object):
         self.equipment_dict = {}
         for equipment_slot_id, item_id in equipment_dict.items():
             self.equipment_dict[equipment_slot_id] = item_id
+
+    def get_skill_level(self, skill_id):
+        ret_level = None
+
+        if skill_id is not None:
+            skill_info = self.skill_info_mapping.get(skill_id, None)
+
+            if skill_info:
+                ret_level = skill_info[0]
+
+        return ret_level
+
+    def get_skill_experience(self, skill_id):
+        ret_exp = None
+
+        if skill_id is not None:
+            skill_info = self.skill_info_mapping.get(skill_id, None)
+
+            if skill_info:
+                ret_exp = skill_info[1]
+
+        return ret_exp
 
     # reblit the entity to face the specified direction.
     # Can specify either top_left_pixel or
@@ -231,10 +254,60 @@ class Protagonist(Character):
             race=race,
         )
         self.quest_journal = {}
-        self.inventory = []
+
+        # Maps Item IDs to the number of items held.
+        self.inventory = {}
 
         # TODO FILL IN REST
 
+    # Returns True if inventory is full, false otherwise.
+    def inventory_full(self):
+        return False
+
+    @classmethod
+    def protagonist_factory(
+                cls,
+                name
+            ):
+        protagonist = None
+
+        # TODO check if we already have protagonist?
+
+        # Build fields.
+        protag_id = objdata.PROTAGONIST_ID
+        protag_name_info = {
+            language.LANG_ENGLISH: name,
+            language.LANG_ESPANOL: name,
+        }
+        protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
+        protag_skill_levels = {
+            skills.SKILL_ID_HITPOINTS: 10,
+        }
+
+        protagonist = Protagonist(
+            protag_id,
+            protag_name_info,
+            protag_image_path_dict,
+            skill_levels=protag_skill_levels,
+            gender=GENDER_MALE,
+            race=RACE_HUMAN,
+        )
+
+        logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
+        logger.debug("Protagonist obj type: {0}".format(protagonist.object_type))
+        logger.debug("Protagonist name: {0}".format(protagonist.name_info))
+        logger.debug("Protagonist gender: {0}".format(protagonist.gender))
+        logger.debug("Protagonist race: {0}".format(protagonist.race))
+
+        # TODO rest of setup
+
+        # Add protagonist to object listing
+        interactiveobj.Interactive_Object.add_interactive_obj_to_listing(
+            objdata.PROTAGONIST_ID,
+            protagonist
+        )
+
+        return protagonist
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

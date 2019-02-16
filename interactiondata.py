@@ -1,3 +1,5 @@
+import language
+
 ### INTERACTION ID NUMBERS ###
 
 # SPECIAL INTERACTION ID NUMBERS ARE 0X000001 TO 0X0FFFFF
@@ -33,3 +35,28 @@ MAX_OBSTACLE_ID = 0x5FFFFF
 # CHEST INTERACTION IDS ARE 0X600000 TO 0X6FFFFF
 MIN_CHEST_ID = 0x600000
 MAX_CHEST_ID = 0x6FFFFF
+
+### RESOURCE GATHERING MESSAGES ###
+# Maps interaction IDs to dicts that map language IDs to strings.
+GATHERING_MAIN_MESSAGES = {
+    CHOP_TREE_ID: {
+        language.LANG_ENGLISH: "Attempting to chop down {0}...",
+        language.LANG_ESPANOL: "Tratando de cortar el/la {0}...",
+    },
+}
+
+# Maps interaction IDs to dicts that map language IDs to strings.
+GATHERING_RESOURCE_EXHAUST_MESSAGES = {
+    CHOP_TREE_ID: {
+        language.LANG_ENGLISH: "You cut down the {0}.",
+        language.LANG_ESPANOL: "Has talado el/la {0}",
+    },
+}
+
+# Maps interaction IDs to dicts that map language IDs to strings.
+GATHERING_RESOURCE_GAIN_MESSAGES = {
+    CHOP_TREE_ID: {
+        language.LANG_ENGLISH: "You obtain a(n) {0} and earned {1} experience!",
+        language.LANG_ESPANOL: "Has conseguido un(a) {0}, y has ganado {1} puntos de experiencia!",
+    },
+}
