@@ -8,6 +8,8 @@ import objdata
 import logging
 import interactiondata
 import language
+import imageids
+import currency
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -16,6 +18,8 @@ GENDER_FEMALE = 0x2
 
 RACE_DEFAULT = 0x0
 RACE_HUMAN = 0x1
+
+START_NUM_GOLD_COINS = 100
 
 class Entity(interactiveobj.Interactive_Object):
     # id represents the object ID.
@@ -62,7 +66,7 @@ class Entity(interactiveobj.Interactive_Object):
 
         # By default, face south.
         self.facing_direction = mapdata.DIR_SOUTH
-        self.curr_image_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+        self.curr_image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
 
         # Set up skills. self.skill_info_mapping maps skill IDs to
         # a length-3 list
@@ -144,16 +148,16 @@ class Entity(interactiveobj.Interactive_Object):
 
         if self and surface and (bottom_left_pixel or top_left_pixel):
             if direction == mapdata.DIR_NORTH:
-                image_id = objdata.OW_IMAGE_ID_FACE_NORTH
+                image_id = imageids.OW_IMAGE_ID_FACE_NORTH
                 logger.debug("Facing NORTH")
             elif direction == mapdata.DIR_EAST:
-                image_id = objdata.OW_IMAGE_ID_FACE_EAST
+                image_id = imageids.OW_IMAGE_ID_FACE_EAST
                 logger.debug("Facing EAST")
             elif direction == mapdata.DIR_SOUTH:
-                image_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+                image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
                 logger.debug("Facing SOUTH")
             elif direction == mapdata.DIR_WEST:
-                image_id = objdata.OW_IMAGE_ID_FACE_WEST
+                image_id = imageids.OW_IMAGE_ID_FACE_WEST
                 logger.debug("Facing WEST")
 
             if image_id is not None:
@@ -258,7 +262,19 @@ class Protagonist(Character):
         # Maps Item IDs to the number of items held.
         self.inventory = {}
 
+        # Maps currency IDs to the number of units of currency.
+        self.money_pouch = {}
+
         # TODO FILL IN REST
+
+    def init_money_pouch(self):
+        self.money_pouch = {}
+
+        for currency_id in currency.CURRENCY_VALUE_MAPPING:
+            self.money_pouch[currency_id] = 0
+
+        # Set default gold value.
+        self.money_pouch[currency.CURRENCY_GOLD_COIN] = START_NUM_GOLD_COINS
 
     # Returns True if inventory is full, false otherwise.
     def inventory_full(self):
@@ -299,6 +315,9 @@ class Protagonist(Character):
         logger.debug("Protagonist gender: {0}".format(protagonist.gender))
         logger.debug("Protagonist race: {0}".format(protagonist.race))
 
+        # Set money pouch.
+        protagonist.init_money_pouch()
+
         # TODO rest of setup
 
         # Add protagonist to object listing
@@ -312,3 +331,4 @@ class Protagonist(Character):
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

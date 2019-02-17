@@ -29,6 +29,7 @@ HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32.png" # [1]
 ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32.png" # [1]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64.png" # [1]
 TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64.png" # [1]
+TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64.png" # [1] modified by DK
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south.png" # [3]

@@ -195,3 +195,4 @@ def get_skill_name(skill_id, language_id):
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

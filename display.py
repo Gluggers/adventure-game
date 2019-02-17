@@ -759,3 +759,4 @@ class Text_Display(Display):
 # set up logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

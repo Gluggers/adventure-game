@@ -23,6 +23,7 @@ class Tile:
         self.tile_id = tile_id
 
         # Represents the base terrain image (e.g. grass, water)
+        logger.debug("Loading tile image from path {0}".format(image_path))
         self._image = pygame.image.load(image_path).convert()
 
         # OR-ed flags that represent the allowed methods of transportation on
@@ -138,3 +139,4 @@ class Tile:
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)

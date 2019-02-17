@@ -59,12 +59,18 @@ class Interaction():
     interaction_mapping = {}
 
     @classmethod
-    def default_interaction(cls, game_object, acting_object, target_object):
+    def default_interaction(
+                cls,
+                interaction_id,
+                game_object,
+                acting_object,
+                target_object
+            ):
         if game_object and acting_object and target_object:
             display_text = DEFAULT_INTERACTION_MESSAGE_INFO.get(
                     game_object.game_language,
                     ""
-                ).format(target_object.name)
+                ).format(target_object.get_name(game_object.game_language))
 
             game_object.display_bottom_text(
                 display_text,
@@ -167,6 +173,8 @@ class Interaction():
                     refresh_after=False,
                 )
 
+                logger.info("Beginning gathering.")
+
                 # Start skilling.
                 skilling = True
                 num_skill_ticks = 0
@@ -186,7 +194,7 @@ class Interaction():
 
                     # TODO set next character image ID for skilling.
                     if num_skill_ticks % GATHERING_IMAGE_INTERVAL_NUM_TICKS == 0:
-                        logger.info("Switch image IDs here.")
+                        logger.debug("Switch image IDs here.")
 
                     # Refresh and reblit overworld and gathering message.
                     game_object.refresh_and_blit_overworld()
@@ -244,7 +252,7 @@ class Interaction():
                                     game_object.display_bottom_first_text_page(
                                         resource_gather_text,
                                         auto_advance=False,
-                                        refresh_after=False,
+                                        refresh_after=True,
                                     )
 
                                 # Check if resource has been exhausted.
@@ -272,6 +280,12 @@ class Interaction():
                                     cls.display_inventory_full_message()
 
                     countdown_resource_message = countdown_resource_message - 1
+
+        pygame.event.clear()
+
+        # Update overworld and display.
+        game_object.refresh_and_blit_overworld()
+        pygame.display.update()
 
     # TODO - pass in interaction ID?
     @classmethod
@@ -371,7 +385,7 @@ class Interaction():
                 target_object,
             ):
         if game_object and acting_object and target_object:
-            pass
+            logger.info("Place herb gather interaction here.")
 
     @classmethod
     def get_interaction_method(cls, interaction_id):
@@ -401,3 +415,4 @@ ID_TO_METHOD_MAPPING = {
 # set up logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

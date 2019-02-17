@@ -15,6 +15,9 @@ import interaction
 import sys
 import display
 import skills
+import json
+import savefiledata
+import pprint
 
 logger = None
 
@@ -24,6 +27,8 @@ GAME_TITLE = "Adventure Game v0.1"
 ### DIFFICULTY CONSTANTS ###
 DIFFICULTY_NORMAL = 0x0
 DIFFICULTY_HARD = 0x1
+
+DEFAULT_SAVE_FILE_NAME = "savegame.pkl"
 
 
 class Game():
@@ -92,6 +97,12 @@ class Game():
     def set_protagonist_tile_position(self, new_position):
         if new_position and self.protagonist and self.curr_map:
             self.curr_map.protagonist_location = new_position
+
+    def get_protagonist_tile_position(self):
+        position = None
+        if self.curr_map:
+            position = self.curr_map.protagonist_location
+        return position
 
     # change and transition to new map
     # updates display screen
@@ -290,9 +301,14 @@ class Game():
         if target_object and self.protagonist:
             # Call appropriate interaction method.
             interaction_id = target_object.interaction_id
-            interact_method = interaction.Interaction.get_interaction_method(
-                interaction_id
-            )
+            interact_method = None
+
+            if interaction_id is not None:
+                interact_method = interaction.Interaction.get_interaction_method(
+                    interaction_id
+                )
+            else:
+                logger.info("No interaction ID set for the object.")
 
             if interact_method:
                 interact_method(
@@ -301,6 +317,52 @@ class Game():
                     self.protagonist,
                     target_object
                 )
+
+    def get_save_data(self):
+        save_data = {}
+
+        save_data[savefiledata.CURRENT_MAP_ID] = self.curr_map.map_id
+        save_data[savefiledata.CURRENT_PROTAG_TILE_LOCATION] = self.get_protagonist_tile_position()
+        save_data[savefiledata.GAME_LANGUAGE] = self.game_language
+
+        # TODO implement further
+
+        return save_data
+
+    def write_data_to_save_file(self, save_file_name):
+        if save_file_name:
+            # Obtain save data.
+            save_data = self.get_save_data()
+
+            # Write save data.
+            with open(save_file_name, "w") as save_file:
+                json.dump(save_data, save_file)
+                #pickle.dump(save_data, save_file, pickle.HIGHEST_PROTOCOL)
+
+    def save_game(self):
+        self.write_data_to_save_file(DEFAULT_SAVE_FILE_NAME)
+        logger.info("Saved game.")
+
+    def load_data_from_save_file(self, save_file_name):
+        if save_file_name:
+            # Obtain save data.
+            save_data = {}
+
+            with open(save_file_name, "r") as save_file:
+                #loaded_game = pickle.load(save_file)
+                save_data = json.load(save_file)
+
+            if save_data:
+                # Update game information.
+                pprint.pprint(save_data)
+
+    def load_game(self):
+        self.load_data_from_save_file(DEFAULT_SAVE_FILE_NAME)
+        logger.info("Loaded game.")
+
+        # Debugging
+        logger.debug("Curr game language: {0}".format(self.game_language))
+        logger.debug("Protag location: {0}".format(self.get_protagonist_tile_position()))
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -363,10 +425,18 @@ class Game():
                     elif events.key == pygame.K_RETURN:
                         examine_in_front = True
                         logger.debug("Examine key Return (Enter) pressed down")
-                    elif events.key == pygame.K_l:
+                    elif events.key == pygame.K_i:
                         # Language switch initiated.
-                        logger.debug("Language change toggled.")
+                        logger.info("Language change toggled.")
                         self.toggle_language()
+                    elif events.key == pygame.K_s:
+                        # Save game.
+                        logger.info("Save game initiated.")
+                        self.save_game()
+                    elif events.key == pygame.K_l:
+                        # Load game.
+                        logger.info("Loading game initiated.")
+                        self.load_game()
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -440,3 +510,4 @@ class Game():
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

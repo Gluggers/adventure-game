@@ -22,6 +22,7 @@ class Resource(interactiveobj.Interactive_Object):
                 exhaustion_probability=1,
                 examine_info=None,
                 interaction_id=interactiondata.DEFAULT_ID,
+                replacement_object_id=None,
             ):
         # Call the parent class init
         interactiveobj.Interactive_Object.__init__(
@@ -33,7 +34,8 @@ class Resource(interactiveobj.Interactive_Object):
             collision_width=collision_width,
             collision_height=collision_height,
             examine_info=examine_info,
-            interaction_id=interaction_id
+            interaction_id=interaction_id,
+            respawn_time_s=respawn_time_s,
         )
 
         self.related_skill_id = related_skill_id
@@ -72,12 +74,16 @@ class Resource(interactiveobj.Interactive_Object):
                     required_level = resource_data.get(objdata.REQUIRED_LEVEL_FIELD, 0)
                     gained_xp = resource_data.get(objdata.GAINED_XP_FIELD, 0)
                     resource_item = resource_data.get(objdata.RESOURCE_ITEM_FIELD, None)
-                    respawn_time_s = resource_data.get(objdata.RESPAWN_TIME_S_FIELD, 1)
+                    respawn_time_s = resource_data.get(objdata.RESPAWN_TIME_S_FIELD, None)
                     exhaustion_probability = resource_data.get(objdata.EXHAUSTION_PROBABILITY_FIELD, 1)
                     examine_info = resource_data.get(objdata.EXAMINE_INFO_FIELD, None)
                     interaction_id = resource_data.get(
                         objdata.INTERACTION_ID_FIELD,
                         interactiondata.DEFAULT_ID
+                    )
+                    replacement_object_id = resource_data.get(
+                        objdata.REPLACEMENT_OBJECT_ID_FIELD,
+                        None
                     )
 
                     # Ensure we have the required fields.
@@ -97,6 +103,7 @@ class Resource(interactiveobj.Interactive_Object):
                             exhaustion_probability=exhaustion_probability,
                             examine_info=examine_info,
                             interaction_id=interaction_id,
+                            replacement_object_id=replacement_object_id,
                         )
 
                         logger.debug("Made resource with ID {0}".format(resource_id))
@@ -110,9 +117,9 @@ class Resource(interactiveobj.Interactive_Object):
                         if result:
                             ret_resource = new_resource
                     else:
-                        logger.warn("Required fields not found in resource data for ID {0}".format(resource_id))
+                        logger.error("Required fields not found in resource data for ID {0}".format(resource_id))
                 else:
-                    logger.warn("Resource data not found for resource ID {0}".format(resource_id))
+                    logger.error("Resource data not found for resource ID {0}".format(resource_id))
 
         return ret_resource
 
@@ -129,7 +136,7 @@ class Resource(interactiveobj.Interactive_Object):
 
     @classmethod
     def build_resources(cls):
-        logger.debug("Building resources")
+        logger.info("Building resources")
 
         for resource_id in objdata.RESOURCE_DATA:
             if not Resource.resource_factory(resource_id):
@@ -138,3 +145,4 @@ class Resource(interactiveobj.Interactive_Object):
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

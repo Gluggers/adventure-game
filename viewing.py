@@ -6,6 +6,7 @@ import tile
 import display
 import objdata
 import language
+import imageids
 import viewingdata
 
 ### WALKING CONSTANTS ###
@@ -17,6 +18,8 @@ STAND_FRAME_END = 2*(tile.TILE_SIZE / 4)
 NUM_MS_SECOND = 1000
 SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
 SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+
+VIEWING_TILE_PADDING = 2
 
 class Viewing():
     ### INITIALIZER METHODS ###
@@ -327,38 +330,38 @@ class Viewing():
             # TODO - have designated spot for protagonist?
             if self._protagonist:
                 # get image type ID for protagonist:
-                image_type_id = objdata.OW_IMAGE_ID_DEFAULT
+                image_type_id = imageids.OW_IMAGE_ID_DEFAULT
                 offset = i % tile.TILE_SIZE
 
                 if direction == mapdata.DIR_SOUTH:
                     # map scrolls south, character walks north
                     if offset < WALK1_FRAME_END:
-                        image_type_id = objdata.OW_IMAGE_ID_WALK1_NORTH
+                        image_type_id = imageids.OW_IMAGE_ID_WALK1_NORTH
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = objdata.OW_IMAGE_ID_WALK2_NORTH
+                        image_type_id = imageids.OW_IMAGE_ID_WALK2_NORTH
                     else:
-                        image_type_id = objdata.OW_IMAGE_ID_FACE_NORTH
+                        image_type_id = imageids.OW_IMAGE_ID_FACE_NORTH
                 elif direction == mapdata.DIR_WEST:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = objdata.OW_IMAGE_ID_WALK1_EAST
+                        image_type_id = imageids.OW_IMAGE_ID_WALK1_EAST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = objdata.OW_IMAGE_ID_WALK2_EAST
+                        image_type_id = imageids.OW_IMAGE_ID_WALK2_EAST
                     else:
-                        image_type_id = objdata.OW_IMAGE_ID_FACE_EAST
+                        image_type_id = imageids.OW_IMAGE_ID_FACE_EAST
                 elif direction == mapdata.DIR_NORTH:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = objdata.OW_IMAGE_ID_WALK1_SOUTH
+                        image_type_id = imageids.OW_IMAGE_ID_WALK1_SOUTH
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = objdata.OW_IMAGE_ID_WALK2_SOUTH
+                        image_type_id = imageids.OW_IMAGE_ID_WALK2_SOUTH
                     else:
-                        image_type_id = objdata.OW_IMAGE_ID_FACE_SOUTH
+                        image_type_id = imageids.OW_IMAGE_ID_FACE_SOUTH
                 elif direction == mapdata.DIR_EAST:
                     if offset < WALK1_FRAME_END:
-                        image_type_id = objdata.OW_IMAGE_ID_WALK1_WEST
+                        image_type_id = imageids.OW_IMAGE_ID_WALK1_WEST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = objdata.OW_IMAGE_ID_WALK2_WEST
+                        image_type_id = imageids.OW_IMAGE_ID_WALK2_WEST
                     else:
-                        image_type_id = objdata.OW_IMAGE_ID_FACE_WEST
+                        image_type_id = imageids.OW_IMAGE_ID_FACE_WEST
 
                 # Set new protagonist image id
                 self._protagonist.curr_image_id = image_type_id
@@ -450,17 +453,17 @@ class Viewing():
         return top_left
 
     # Returns rect in tile coordinates that defines the tiles that
-    # are in the current viewing window or may enter in the viewing window
-    # upon a single tile move
+    # are in the current viewing window with at most a 2-Tile-wide padding
+    # for smoother scrolling and map loading.
     @classmethod
     def calculate_tile_viewing_rect(cls, map_object, top_left_viewing_tile):
         ret_rect = None
 
         if map_object and top_left_viewing_tile:
-            # see if we can get 1 column of tiles to the left of the screen
-            # and 1 row of columns above the screen
-            start_tile_x = max(0, top_left_viewing_tile[0] - 1)
-            start_tile_y = max(0, top_left_viewing_tile[1] - 1)
+            # see if we can get the Tile padding to the left of the screen
+            # and Tile padding above above the screen
+            start_tile_x = max(0, top_left_viewing_tile[0] - VIEWING_TILE_PADDING)
+            start_tile_y = max(0, top_left_viewing_tile[1] - VIEWING_TILE_PADDING)
             end_tile_x = start_tile_x
             end_tile_y = start_tile_y
 
@@ -474,10 +477,12 @@ class Viewing():
                 # map right edge is past the main display right edge
                 end_tile_x = min(                                           \
                     map_object.width                                        \
+                        - 1                                                 \
                         - int(                                              \
-                            (map_right_edge - viewingdata.MAIN_DISPLAY_WIDTH)           \
-                            / tile.TILE_SIZE                                \
-                        ),                                                  \
+                                (map_right_edge - viewingdata.MAIN_DISPLAY_WIDTH)   \
+                                / tile.TILE_SIZE                                    \
+                            )                                               \
+                        + VIEWING_TILE_PADDING,                             \
                     map_object.width - 1                                    \
                 )
             else:
@@ -487,10 +492,12 @@ class Viewing():
                 # map bottom edge is past the main display bottom edge
                 end_tile_y = min(                                           \
                     map_object.height                                       \
-                    - int(                                                  \
-                        (map_bottom_edge - viewingdata.MAIN_DISPLAY_HEIGHT)             \
-                        / tile.TILE_SIZE                                    \
-                    ),                                                      \
+                        - 1                                                 \
+                        - int(                                              \
+                                (map_bottom_edge - viewingdata.MAIN_DISPLAY_HEIGHT) \
+                                / tile.TILE_SIZE                                    \
+                            )                                               \
+                        + VIEWING_TILE_PADDING,                             \
                     map_object.height - 1
                 )
             else:
@@ -538,3 +545,4 @@ class Viewing():
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

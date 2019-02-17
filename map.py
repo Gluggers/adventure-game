@@ -7,6 +7,7 @@ import objdata
 import tile
 import tiledata
 import mapdata
+import imageids
 import viewingdata
 from pygame.locals import *
 
@@ -592,7 +593,7 @@ class Map:
                                     # on object type?
                                     obj_to_blit.blit_onto_surface(
                                         surface,
-                                        image_type_id=objdata.OW_IMAGE_ID_DEFAULT,
+                                        image_type_id=imageids.OW_IMAGE_ID_DEFAULT,
                                         bottom_left_pixel=bottom_left_pixel
                                     )
 
@@ -780,3 +781,4 @@ class Map:
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

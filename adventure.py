@@ -9,10 +9,13 @@ import viewingdata
 import language
 import objdata
 import resources
+import interactiveobj
 import display
 import timekeeper
 import interaction
+import imageids
 import game
+import items
 
 from pygame.locals import *
 
@@ -40,16 +43,17 @@ def main():
     # create game
     game_obj = game.Game(game.GAME_TITLE, language.LANG_ESPANOL)
 
-
     # load tiles
     tile.Tile.build_tiles()
 
-    logger.debug("Adventure: about to load resources")
+    # Load miscellaneous objects.
+    interactiveobj.Interactive_Object.build_misc_objects()
 
-    # load resources
+    # Load resources.
     resources.Resource.build_resources()
 
-    # load items
+    # Load items.
+    items.Item.build_standard_items()
 
     # load characters
 
@@ -66,7 +70,7 @@ def main():
     # blit protagonist
     game_obj.viewing.blit_interactive_object(
         game_obj.protagonist,
-        objdata.OW_IMAGE_ID_DEFAULT,
+        imageids.OW_IMAGE_ID_DEFAULT,
         bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT,
     )
 

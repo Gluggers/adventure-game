@@ -3,11 +3,11 @@ import imagepaths
 import objdata
 import logging
 import interactiondata
+import imageids
 
 ### IMAGE FLAGS ###
 #IMAGE_F_OVERWORLD = 0x1 # sets overworld images
 #IMAGE_F_BATTLE = 0x2 # sets battle images
-
 
 class Interactive_Object(pygame.sprite.Sprite):
     # maps interactive obj ID to interactive obj
@@ -15,16 +15,18 @@ class Interactive_Object(pygame.sprite.Sprite):
 
     # examine_info maps language IDs to an examine string.
     def __init__(
-                    self,
-                    object_type,
-                    object_id,
-                    name_info, # maps language id to name
-                    image_path_dict,
-                    collision_width=1,
-                    collision_height=1,
-                    examine_info=None,
-                    interaction_id=interactiondata.DEFAULT_ID,
-                ):
+                self,
+                object_type,
+                object_id,
+                name_info, # maps language id to name
+                image_path_dict,
+                collision_width=1,
+                collision_height=1,
+                examine_info=None,
+                interaction_id=None,
+                replacement_object_id=None,
+                respawn_time_s=None, # None means never respawns.
+            ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
@@ -32,11 +34,11 @@ class Interactive_Object(pygame.sprite.Sprite):
         self.name_info = name_info
         self.collision_width = collision_width
         self.collision_height = collision_height
+        self.replacement_object_id = replacement_object_id
+        self.respawn_time_s = respawn_time_s
 
         # Set interaction ID.
-        self.interaction_id = interactiondata.DEFAULT_ID
-        if interaction_id is not None:
-            self.interaction_id = interaction_id
+        self.interaction_id = interaction_id
 
         # get examine info
         self.examine_info = {}
@@ -47,10 +49,11 @@ class Interactive_Object(pygame.sprite.Sprite):
         # load images
         self.image_dict = {}
         for image_type_id, image_path in image_path_dict.items():
+            logger.debug("Loading image from path {0}".format(image_path))
             # convert alpha for transparency
             self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
 
-        self.curr_image_id = objdata.OW_IMAGE_ID_DEFAULT
+        self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
 
     def get_name(self, language_id):
         ret_name = ""
@@ -100,8 +103,80 @@ class Interactive_Object(pygame.sprite.Sprite):
                     surface.blit(image_to_blit, top_left)
 
     @classmethod
+    def misc_interactive_object_factory(cls, obj_id):
+        ret_object = None
+
+        # Make sure we are dealing with a miscellaneous object.
+        if cls.is_miscellaneous_id(obj_id):
+            # Check if we already have the object made.
+            obj_from_listing = cls.get_interactive_object(obj_id)
+
+            if obj_from_listing:
+                # Return the already made object.
+                ret_object = obj_from_listing
+            else:
+                # Make the new object ourselves. First, get the
+                # object data.
+                obj_data = objdata.MISC_OBJECT_DATA.get(obj_id, None)
+
+                if obj_data:
+                    # Get the object fields
+                    # TODO - change default values?
+                    name_info = obj_data.get(objdata.OBJECT_NAME_INFO_FIELD, {})
+                    image_path_dict = obj_data.get(objdata.IMAGE_PATH_DICT_FIELD, {})
+                    collision_width = obj_data.get(objdata.COLLISION_WIDTH_FIELD, 1)
+                    collision_height = obj_data.get(objdata.COLLISION_HEIGHT_FIELD, 1)
+                    respawn_time_s = obj_data.get(objdata.RESPAWN_TIME_S_FIELD, None)
+                    examine_info = obj_data.get(objdata.EXAMINE_INFO_FIELD, None)
+                    interaction_id = obj_data.get(
+                        objdata.INTERACTION_ID_FIELD,
+                        None,
+                    )
+                    replacement_object_id = obj_data.get(
+                        objdata.REPLACEMENT_OBJECT_ID_FIELD,
+                        None
+                    )
+
+                    # Ensure we have the required fields.
+                    if name_info and image_path_dict:
+                        # Make the miscellaneous object.
+                        new_object = Interactive_Object(
+                            objdata.TYPE_MISC,
+                            obj_id,
+                            name_info,
+                            image_path_dict,
+                            collision_width=collision_width,
+                            collision_height=collision_height,
+                            respawn_time_s=respawn_time_s,
+                            examine_info=examine_info,
+                            interaction_id=interaction_id,
+                            replacement_object_id=replacement_object_id,
+                        )
+
+                        logger.debug("Made object with ID {0}".format(obj_id))
+
+                        # Update the interactive object mapping.
+                        result = cls.add_interactive_obj_to_listing(
+                            obj_id,
+                            new_object
+                        )
+
+                        if result:
+                            ret_object = new_object
+                        else:
+                            logger.error("Failed to add object ID {0} to listing.".format(obj_id))
+                    else:
+                        logger.error("Required fields not found in misc object data for ID {0}".format(obj_id))
+                else:
+                    logger.error("Object data not found for object ID {0}".format(obj_id))
+        else:
+            logger.error("You cannot use misc factory for non-misc object ID {0}".format(obj_id))
+
+        return ret_object
+
+    @classmethod
     def get_interactive_object(cls, obj_id):
-        return Interactive_Object.interactive_obj_listing.get(obj_id, None)
+        return cls.interactive_obj_listing.get(obj_id, None)
 
     # Adds/updates the interactive object listing for the given object ID.
     # Returns True upon success, false otherwise.
@@ -154,23 +229,35 @@ class Interactive_Object(pygame.sprite.Sprite):
             and (object_id >= objdata.MIN_RESOURCE_ID)  \
             and (object_id <= objdata.MAX_RESOURCE_ID)
 
+    @classmethod
+    def is_miscellaneous_id(cls, object_id):
+        return (object_id is not None)                  \
+            and (object_id >= objdata.MIN_MISC_ID)  \
+            and (object_id <= objdata.MAX_MISC_ID)
+
     # Returns a String containing the text to display when the protagonist
     # examines an object.
     def get_examine_info(self, language_id):
         ret_str = "?????"
-        if self.name_info:
-            ret_str = "It's a {0}".format(self.get_name(language_id))
 
         if (language_id is not None) and self.examine_info:
             info = self.examine_info.get(language_id, None)
             if info:
                 ret_str = info
         elif self.name_info:
-            ret_str = "It's a {0}".format(self.get_name(language_id))
+            ret_str = self.get_name(language_id)
 
         return ret_str
 
+    @classmethod
+    def build_misc_objects(cls):
+        logger.info("Building miscellaneous interactive objects.")
+
+        for obj_id in objdata.MISC_OBJECT_DATA:
+            if not cls.misc_interactive_object_factory(obj_id):
+                logger.error("Could not construct misc object with ID {0}".format(obj_id))
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
