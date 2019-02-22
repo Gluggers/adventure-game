@@ -88,7 +88,8 @@ class Map:
 
         # Dict that maps tile location tuple
         # to list of [object ID for object to place on tile
-        # (None if removing object), entry time, and remaining time in
+        # (None if removing object), entry time or time of last refresh
+        # for object, and remaining time in
         # milliseconds].
         # TODO - when saving game, update everything. When loading game,
         # set entry times to current loading time.
@@ -505,6 +506,7 @@ class Map:
     # will not do anything, including overwriting it. # TODO - change?
     # Caller needs to refresh the map.
     def set_pending_spawn_action(
+                self,
                 bottom_left_tile_loc,
                 object_id=None,
                 countdown_time_s=0,
@@ -769,8 +771,8 @@ class Map:
 
             for tile_loc_tuple, action_info in self.pending_spawn_actions.items():
                 # action_info is of the form [object ID for object to place on tile
-                # (None if removing object), entry time, and remaining time in
-                # milliseconds].
+                # (None if removing object), time of entry or last refresh of object,
+                # and remaining time in milliseconds].
                 if action_info and (len(action_info) == 3):
                     elapsed_time_ms = curr_time_ms - action_info[1]
                     if elapsed_time_ms < 0:
@@ -778,6 +780,7 @@ class Map:
                     else:
                         remaining_time = action_info[2] - elapsed_time_ms
                         action_info[2] = remaining_time
+                        action_info[1] = curr_time_ms
                         self.pending_spawn_actions[tile_loc_tuple] = action_info
 
                         if remaining_time <= 0:

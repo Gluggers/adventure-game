@@ -35,6 +35,7 @@ class Resource(interactiveobj.Interactive_Object):
             collision_height=collision_height,
             examine_info=examine_info,
             interaction_id=interaction_id,
+            replacement_object_id=replacement_object_id,
             respawn_time_s=respawn_time_s,
         )
 
@@ -42,7 +43,6 @@ class Resource(interactiveobj.Interactive_Object):
         self.required_level = required_level
         self.gained_xp = gained_xp
         self.resource_item = resource_item
-        self.respawn_time_s = respawn_time_s
         self.exhaustion_probability = float(exhaustion_probability)
 
     # Factory method to create a resource

@@ -4,6 +4,9 @@ import time
 CLOCK_TICK = 30
 NUM_MS_SECOND = 1000
 
+# Numer of ticks between refreshing map.
+REFRESH_INTERVAL_NUM_TICKS = CLOCK_TICK
+
 class Timekeeper():
     clock = None
 
@@ -19,5 +22,5 @@ class Timekeeper():
         Timekeeper.clock.tick(tick_amount)
 
     @classmethod
-    def time_ms():
+    def time_ms(cls):
         return int(time.time_ns() / 1000)

@@ -22,7 +22,7 @@ class Interactive_Object(pygame.sprite.Sprite):
                 image_path_dict,
                 collision_width=1,
                 collision_height=1,
-                examine_info=None,
+                examine_info={},
                 interaction_id=None,
                 replacement_object_id=None,
                 respawn_time_s=None, # None means never respawns.

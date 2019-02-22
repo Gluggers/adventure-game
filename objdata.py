@@ -3,6 +3,7 @@ import skills
 import language
 import interactiondata
 import imageids
+import itemdata
 
 ### INTERACTIVE OBJECT TYPE ID CONSTANTS ###
 TYPE_CHARACTER = 0x1
@@ -145,7 +146,7 @@ RESOURCE_DATA = {
         REQUIRED_LEVEL_FIELD: 1,
         GAINED_XP_FIELD: 20,
         RESOURCE_ITEM_FIELD: None,
-        RESPAWN_TIME_S_FIELD:  1,
+        RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "Maybe I can pick this herb.",
             language.LANG_ESPANOL: "Tal vez pueda cosechar esta hierba.",
@@ -167,14 +168,15 @@ RESOURCE_DATA = {
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 1,
         GAINED_XP_FIELD: 20,
-        RESOURCE_ITEM_FIELD: None,
-        RESPAWN_TIME_S_FIELD:  1,
+        RESOURCE_ITEM_FIELD: itemdata.LOG_TREE_ID,
+        RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "It's just a tree. Maybe I can cut it down.",
             language.LANG_ESPANOL: "Es solo un arbol. Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
     },
     TREE_OAK_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -190,13 +192,14 @@ RESOURCE_DATA = {
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 10,
         GAINED_XP_FIELD: 50,
-        RESOURCE_ITEM_FIELD: None,
-        RESPAWN_TIME_S_FIELD:  10,
+        RESOURCE_ITEM_FIELD: itemdata.LOG_OAK_ID,
+        RESPAWN_TIME_S_FIELD:  30,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "What a magnificent oak. Maybe I can cut it down.",
             language.LANG_ESPANOL: "Que roble tan maravilloso! Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,
+        REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
     },
 }

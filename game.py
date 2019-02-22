@@ -309,8 +309,8 @@ class Game():
             )
 
     # Have protagonist interact with object.
-    def protag_interact(self, target_object):
-        if target_object and self.protagonist:
+    def protag_interact(self, target_object, obj_bottom_left_tile_pos):
+        if target_object and self.protagonist and obj_bottom_left_tile_pos:
             # Call appropriate interaction method.
             interaction_id = target_object.interaction_id
             interact_method = None
@@ -323,12 +323,58 @@ class Game():
                 logger.info("No interaction ID set for the object.")
 
             if interact_method:
-                interact_method(
-                    interaction_id,
-                    self,
-                    self.protagonist,
-                    target_object
-                )
+                # Get protag tile location.
+                protag_loc = self.get_protagonist_tile_position()
+                if protag_loc:
+                    interact_method(
+                        interaction_id,
+                        self,
+                        self.protagonist,
+                        target_object,
+                        protag_loc,
+                        obj_bottom_left_tile_pos,
+                    )
+
+    # Returns bottom left tile location tuple of the bottom left
+    # tile associated with the object occupying the given tile location tuple
+    # on the game's current map.
+    # Returns None if the provided tile location tuple is not occupied.
+    def get_bottom_left_tile_of_occupied_tile(self, tile_loc):
+        return self.curr_map.get_bottom_left_tile_of_occupied_tile(tile_loc)
+
+    # Sets spawn action for the given map.
+    def set_pending_spawn_action(
+                self,
+                map_obj,
+                bottom_left_tile_loc,
+                object_id=None,
+                countdown_time_s=0,
+            ):
+        logger.info("Setting spawn action for tile loc {0} using obj id {1} with countdown {2}".format(
+            bottom_left_tile_loc,
+            object_id,
+            countdown_time_s
+        ))
+        if map_obj and bottom_left_tile_loc:
+            map_obj.set_pending_spawn_action(
+                bottom_left_tile_loc,
+                object_id=object_id,
+                countdown_time_s=countdown_time_s,
+            )
+
+    # Sets spawn action for the current map.
+    def set_pending_spawn_action_curr_map(
+                self,
+                bottom_left_tile_loc,
+                object_id=None,
+                countdown_time_s=0,
+            ):
+        self.set_pending_spawn_action(
+            self.curr_map,
+            bottom_left_tile_loc,
+            object_id=object_id,
+            countdown_time_s=countdown_time_s,
+        )
 
     def get_save_data(self):
         save_data = {}
@@ -404,6 +450,8 @@ class Game():
             num_ticks = num_ticks + 1
 
             # TODO: update map
+            if num_ticks % timekeeper.REFRESH_INTERVAL_NUM_TICKS == 0:
+                self.refresh_and_blit_overworld()
 
             interact_in_front = False
             examine_in_front = False
@@ -506,12 +554,19 @@ class Game():
                 # space takes up the facing tile.
                 inter_obj = self.curr_map.get_object_occupying_tile(front_tile_pos)
 
-                if inter_obj:
+                # Get bottom left tile of object.
+                obj_bottom_left_tile_pos = \
+                    self.get_bottom_left_tile_of_occupied_tile(front_tile_pos)
+
+                if inter_obj and obj_bottom_left_tile_pos:
                     logger.debug("Facing object {0}".format(inter_obj.object_id))
 
                     if interact_in_front:
                         # Interact with object.
-                        self.protag_interact(inter_obj)
+                        self.protag_interact(
+                            inter_obj,
+                            obj_bottom_left_tile_pos
+                        )
                     elif examine_in_front:
                         # Display examine text at bottom of screen.
                         self.display_bottom_text(
