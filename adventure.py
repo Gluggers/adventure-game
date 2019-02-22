@@ -34,11 +34,17 @@ def main():
     # init clock
     timekeeper.Timekeeper.init_clock()
 
+    # init locked logging
+    #lockedlogging.Locked_Logger.init_locked_loggers()
+
     # init interactions
     interaction.Interaction.init_interactions()
 
     # load fonts
     display.Display.init_fonts()
+
+    # Init spawn handler queues.
+    #spawnhandler.Spawn_Handler.init_spawn_queues()
 
     # create game
     game_obj = game.Game(game.GAME_TITLE, language.LANG_ESPANOL)

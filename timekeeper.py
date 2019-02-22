@@ -1,4 +1,5 @@
 import pygame
+import time
 
 CLOCK_TICK = 30
 NUM_MS_SECOND = 1000
@@ -16,3 +17,7 @@ class Timekeeper():
     @classmethod
     def tick(cls, tick_amount=CLOCK_TICK):
         Timekeeper.clock.tick(tick_amount)
+
+    @classmethod
+    def time_ms():
+        return int(time.time_ns() / 1000)

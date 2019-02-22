@@ -9,6 +9,8 @@ import tiledata
 import mapdata
 import imageids
 import viewingdata
+import time
+import timekeeper
 from pygame.locals import *
 
 ### CLASS NAME ###
@@ -17,6 +19,34 @@ MAP_CLASS = 'Map'
 class Map:
     # maps map IDs to map objects
     map_listing = {}
+
+    # Maps map IDs to dict that maps bottom left tile location tuples to
+    # a list of [original object ID, current object ID (None if no object
+    # currently on tile)]
+    #changed_bottom_left_tile_obj_mapping = {}
+
+    # Maps map IDs to dict that maps bottom left tile location tuples
+    # to the object ID of the original interactive obj on the tile
+    # (None if no obj on tile originally)
+    #original_bottom_left_tile_obj_mapping = {}
+
+    # Maps map IDs to dict that maps tile location tuples to
+    # a tile ID for the new tile at the location.
+    #changed_tile_mapping = {}
+
+    # Maps map IDs to timestamp of last refresh for the map ID.
+    # TODO - when saving game, refresh all maps. When loading game,
+    # set last refresh timestamp for all maps to be timestamp of game load,
+    # and then refresh all maps.
+    #last_refresh_timestamp_mapping = {}
+
+    # Dict that maps map IDs to dict that maps tile location tuple
+    # to list of [object ID for object to place on tile
+    # (None if removing object), entry time, and remaining time in
+    # milliseconds].
+    # TODO - when saving game, update everything. When loading game,
+    # set entry times to current loading time.
+    #pending_spawn_actions = {}
 
     ### INITIALIZER METHODS ###
 
@@ -45,6 +75,24 @@ class Map:
         self.connector_tile_dict = {}
         self.adj_map_dict = {}
         self.top_left_position = top_left
+
+        # Maps bottom left tile location tuples
+        # to the object ID of the original interactive obj on the tile
+        # (No entry in dict for tile locations that are not
+        # bottom left tile locations).
+        self.original_bottom_left_tile_obj_mapping = {}
+
+        # Maps tile location tuples to
+        # the tile ID for the new tile at the location.
+        self.changed_tile_mapping = {}
+
+        # Dict that maps tile location tuple
+        # to list of [object ID for object to place on tile
+        # (None if removing object), entry time, and remaining time in
+        # milliseconds].
+        # TODO - when saving game, update everything. When loading game,
+        # set entry times to current loading time.
+        self.pending_spawn_actions = {}
 
         # maps bottom left tile coordinate tuple to
         # a length-2 list of [object ID, collision tile set],
@@ -120,15 +168,28 @@ class Map:
     # will not fully place all the objects
     # This method must only be called during the map factory method
     # Returns True if all items set successfully, false otherwise
-    def init_interactive_obj_dict(self, interactive_obj_dict):
+    def init_interactive_obj(self, interactive_obj_dict):
         successful = True
-        # set up initial interactive objects for map
-        for bottom_left_tile_loc, object_id in interactive_obj_dict.items():
-            if (object_id is not None) and bottom_left_tile_loc:
-                logger.debug("About to set object {0} at {1}".format(object_id, bottom_left_tile_loc))
-                if not self.set_interactive_object(object_id, bottom_left_tile_loc):
-                    successful = False
-                    logger.warn("Could not place object {0} at {1}".format(object_id, bottom_left_tile_loc))
+
+        if self.original_bottom_left_tile_obj_mapping is not None:
+            # set up initial interactive objects for map
+            for bottom_left_tile_loc, object_id in interactive_obj_dict.items():
+                if (object_id is not None) and bottom_left_tile_loc:
+                    logger.debug("About to set object {0} at {1}".format(object_id, bottom_left_tile_loc))
+                    if not self.set_interactive_object(object_id, bottom_left_tile_loc):
+                        successful = False
+                        logger.warn("Could not place object {0} at {1}".format(object_id, bottom_left_tile_loc))
+                    else:
+                        # Mark the original interactive obj for the bottom left tile.
+                        self.original_bottom_left_tile_obj_mapping[bottom_left_tile_loc] = object_id
+            logger.info("Original bottom left tile obj mapping for {0}: {1}".format(
+                self.map_id,
+                self.original_bottom_left_tile_obj_mapping
+            ))
+        else:
+            successful = False
+            logger.error("Error: did not set original bottom left tile obj mapping for map id {0}".format(self.map_id))
+
         return successful
 
     ### GETTERS AND SETTERS ###
@@ -142,16 +203,15 @@ class Map:
     def protagonist_location(self, new_location):
         """Set the protagonist location on map."""
         if new_location:
-            if self._protagonist_location:
-                # Clear old tile location
-                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
-                self.occupied_tile_dict.pop(self._protagonist_location, None)
-
             # Check if new location is occupied
-            if self.bottom_left_tile_obj_mapping.get(new_location, None) \
-                    or self.occupied_tile_dict.get(new_location, None):
+            if self.tile_occupied(new_location):
                 logger.error("Cannot move protag from {0} to {1}".format(self._protagonist_location, new_location))
             else:
+                if self._protagonist_location:
+                    # Clear old tile location
+                    self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
+                    self.occupied_tile_dict.pop(self._protagonist_location, None)
+
                 # Mark new location as occupied
                 self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
                 self.occupied_tile_dict[new_location] = new_location
@@ -182,6 +242,12 @@ class Map:
 
 
     ### OBJECT SETTING/REMOVING METHODS ###
+
+    # Returns bottom left tile location tuple of the bottom left
+    # tile associated with the object occupying the given tile location tuple,
+    # None if the provided tile location tuple is not occupied.
+    def get_bottom_left_tile_of_occupied_tile(self, tile_loc):
+        return self.occupied_tile_dict.get(tile_loc, None)
 
     # Sets an interactive object corresponding to obj_id
     # such that the bottom left tile of the
@@ -258,25 +324,25 @@ class Map:
     # coordinate (x,y) on the Map. Note that for interactive objects
     # that take up more than one tile, passing in just one of the tiles
     # will remove the object.
-    # Returns True if removal was successful, False otherwise. Reasons for
-    # failure include:
+    # Returns the object ID of removed object if successful, None otherwise.
+    # Reasons for failure include:
     #   - Map is empty
     #   - location is invalid
     #   - invalid or no tile location specified
     # If no interactive object has a bottom left tile at the location,
-    # the method still returns True.
+    # the method still returns None.
     # Caller will need to reblit the map and update the surface to show
     # the updated images
     def unset_interactive_object(self, tile_location):
-        successful_remove = False
+        removed_id = None
 
         if self and tile_location and self.tile_grid:
             # make sure (x,y) location is in bounds
             if self.location_within_bounds(tile_location):
                 # Check if the tile location maps to an object's
                 # bottom left tile location.
-                successful_remove = True
-                bottom_left_tile_loc = self.occupied_tile_dict.get(tile_location, None)
+                bottom_left_tile_loc = \
+                    self.get_bottom_left_tile_of_occupied_tile(tile_location)
 
                 if bottom_left_tile_loc:
                     # Get object to remove and remove from map
@@ -296,13 +362,14 @@ class Map:
                             self.occupied_tile_dict.pop(tile_loc, None)
                             logger.debug("Freed tile {0}".format(tile_loc))
 
+                        if obj_id is not None:
+                            removed_id = obj_id
             else:
                 logger.error(                                            \
                     "Invalid location %s for unset_interactive_object", \
                     str(tile_location))
 
-
-        return successful_remove
+        return removed_id
 
     # removes an interactive object from the specified Tile coordinate
     # (x,y) location on the Map.
@@ -370,7 +437,8 @@ class Map:
 
         if tile_position and self.location_within_bounds(tile_position):
             # Check if the tile is part of an object's collision space.
-            bottom_left_tile_pos = self.occupied_tile_dict.get(tile_position, None)
+            bottom_left_tile_pos = \
+                self.get_bottom_left_tile_of_occupied_tile(tile_position)
 
             if bottom_left_tile_pos:
                 # Get ID of object occupying the space.
@@ -382,78 +450,94 @@ class Map:
 
         return occupying_object
 
+    # Returns dict mapping bottom left tile location tuple to
+    # object ID of object that is different from the object that
+    # was originally using that bottom left tile (or a blank tile).
+    def get_changed_object_location_mapping(self):
+        ret_dict = {}
 
+        for tile_loc, obj_info in self.bottom_left_tile_obj_mapping.items():
+            if tile_loc and obj_info:
+                # Compare current object with original one.
+                curr_id = obj_info[0]
+                original_id = self.original_bottom_left_tile_obj_mapping.get(
+                        tile_loc,
+                        None
+                    )
+                if (curr_id is not None) and (curr_id != original_id):
+                    # Changed from original.
+                    ret_dict[tile_loc] = curr_id
 
-    """
-    def change_protagonist_location(self, new_location):
-        if new_location:
-            if self._protagonist_location:
-                # Clear old tile location
-                self.bottom_left_tile_obj_mapping.pop(self._protagonist_location, None)
-                self.occupied_tile_dict.pop(self._protagonist_location, None)
+        return ret_dict
 
-            # Mark new location as occupied
-            self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
-            self.occupied_tile_dict[new_location] = new_location
+    # Returns list of bottom left tile location tuples that used to
+    # be the bottom left tile of an interactive object but no longer
+    # hold one.
+    def get_removed_object_bottom_left_locations(self):
+        ret_list = []
 
-            logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
+        for tile_loc, obj_id in self.original_bottom_left_tile_obj_mapping.items():
+            if tile_loc and obj_id:
+                # Check if the originally occupied tile no longer has an obj.
+                curr_obj_info = self.bottom_left_tile_obj_mapping.get(
+                        tile_loc,
+                        None
+                    )
+                if not curr_obj_info:
+                    ret_list.append(tile_loc)
 
-            self._protagonist_location = new_location
-    """
+        return ret_list
+
 
     ### OBJECT RESPAWNING METHODS ###
 
-    # TODO document
-    def set_respawn_timer(self, obj_to_respawn, tile_location, num_ticks):
-        success = False
-        if self and obj_to_respawn and tile_location and num_ticks >= 0:
-            if self.tile_grid:
-                # make sure (x,y) location is in bounds
-                if self.location_within_bounds(tile_location):
-                    # TODO
-                    pass
-                else:
-                    logger.error(                                           \
-                        "Invalid location %s for set_respawn_timer", \
-                        str(tile_location))
+    # bottom_left_tile_loc is the location tuple of the bottom left tile
+    # location where the spawn action will take place.
+    # If object_id is None (meaning the spawn action is to
+    # remove an object), then the object occupying bottom_left_tile_loc will
+    # be removed if there is one there after countdown_time_s seconds has
+    # passed.
+    # If object_id is not None,
+    # then the object will be placed at the tile such that the bottom left
+    # collision tile for the object is at bottom_left_tile_loc, after
+    # the designated countdown time.
+    # If the tile location already has a pending spawn action, the method
+    # will not do anything, including overwriting it. # TODO - change?
+    # Caller needs to refresh the map.
+    def set_pending_spawn_action(
+                bottom_left_tile_loc,
+                object_id=None,
+                countdown_time_s=0,
+            ):
+        if bottom_left_tile_loc \
+                and not self.pending_spawn_actions.get(
+                    bottom_left_tile_loc,
+                    None
+                ):
+            countdown_ms = int(countdown_time_s * 1000)
+            if countdown_ms <= 0:
+                # Immediate action.
+                self.execute_spawn_action(bottom_left_tile_loc, object_id)
             else:
-                logger.error("Empty map in set_respawn_timer")
-
-        return success
-
-    # checks for pending respawns and updates their time to respawn
-    # will respawn objects that have expired respawn timers
-    def check_respawns(self, surface, elapsed_ticks):
-        pass
-        # iterate through pending respawns
-        """
-        updated_pending_respawns = {}
-        for location, obj_data in self.pending_respawns.items():
-            # get remaining number of ticks to respawn
-            remaining_ticks = obj_data[1] - elapsed_ticks
-            if remaining_ticks <= 0:
-                # item needs to respawn
-                item = obj_data[0]
-                # TODO
-
-                # check if protagonist is blocking the location - if so,
-                # set item to respawn again in a couple more ticks.
-                # if protag isnt' blocking location, then clear the tile
-                # (by reblitting the tile object at the location)
-                # and add the respawned object back in
-            else:
-                obj_data[1] = remaining_ticks
-                updated_pending_respawns[location] = obj_data
-
-        self.pending_respawns = updated_pending_respawns
-        """
+                # Timed action.
+                #curr_time_ms = timekeeper.Timekeeper.time_ms()
+                curr_time_ms = pygame.time.get_ticks()
+                spawn_info = [object_id, curr_time_ms, countdown_ms]
+                self.pending_spawn_actions[bottom_left_tile_loc] = spawn_info
+                logger.info("Added pending spawn action to tile location {0}: {1}".format(
+                    bottom_left_tile_loc,
+                    spawn_info
+                ))
 
     ### TILE-RELATED METHODS ###
 
     def tile_occupied(self, tile_loc):
         occupied = False
 
-        if tile_loc and self.occupied_tile_dict.get(tile_loc, None):
+        if tile_loc and (
+                    self.get_bottom_left_tile_of_occupied_tile(tile_loc)   \
+                    or self.bottom_left_tile_obj_mapping.get(tile_loc, None)
+                ):
             occupied = True
 
         return occupied
@@ -647,6 +731,27 @@ class Map:
                     tile_subset_rect=tile_subset_rect                   \
                 )
 
+    def execute_spawn_action(self, tile_loc, obj_id):
+        if tile_loc:
+            # Remove the object, if any, currently on the tile.
+            logger.info("Removing obj at {0}".format(tile_loc))
+            removed_id = self.unset_interactive_object(tile_loc)
+
+            if removed_id is not None:
+                logger.info("Removed object id {0} from {1}".format(
+                    removed_id,
+                    tile_loc
+                ))
+
+            if obj_id is not None:
+                # We are adding in a new object.
+                logger.info("Spawning object ID {0} at {1}".format(
+                    obj_id,
+                    tile_loc
+                ))
+
+                self.set_interactive_object(obj_id, tile_loc)
+
     # Refreshes map. Check for respawns.
     # Does not reblit map - caller will have to do that.
     def refresh_self(
@@ -654,15 +759,44 @@ class Map:
                 #surface,
                 #tile_subset_rect=None,
             ):
-        # TODO - check for respawns
-        pass
-        """
-        if surface:
-            self.blit_onto_surface(                                 \
-                surface,                                            \
-                tile_subset_rect=tile_subset_rect                   \
-            )
-        """
+        # Update remaining timers for spawn actions.
+        if self.pending_spawn_actions:
+            logger.debug("Refreshing self.")
+
+            #curr_time_ms = timekeeper.Timekeeper.time_ms()
+            curr_time_ms = pygame.time.get_ticks()
+            to_finish = []
+
+            for tile_loc_tuple, action_info in self.pending_spawn_actions.items():
+                # action_info is of the form [object ID for object to place on tile
+                # (None if removing object), entry time, and remaining time in
+                # milliseconds].
+                if action_info and (len(action_info) == 3):
+                    elapsed_time_ms = curr_time_ms - action_info[1]
+                    if elapsed_time_ms < 0:
+                        logger.error("Error in elapsed time for pending spawn for map {0}".format(self.map_id))
+                    else:
+                        remaining_time = action_info[2] - elapsed_time_ms
+                        action_info[2] = remaining_time
+                        self.pending_spawn_actions[tile_loc_tuple] = action_info
+
+                        if remaining_time <= 0:
+                            # Add to processing list.
+                            to_finish.append(tile_loc_tuple)
+                else:
+                    logger.error("Invalid spawn action info {0}.".format(action_info))
+
+            # Remove spawn action from the pending dict and execute
+            # the spawn action.
+            for loc_tuple in to_finish:
+                spawn_action = self.pending_spawn_actions.pop(loc_tuple, None)
+
+                if spawn_action:
+                    obj_id = spawn_action[0]
+
+                    self.execute_spawn_action(loc_tuple, obj_id)
+
+            logger.info("Remaining spawns: {0}".format(self.pending_spawn_actions))
 
     ### CLASS METHODS ###
 
@@ -706,8 +840,7 @@ class Map:
                     # like with the interactive objects?
 
                     if ret_map:
-                        # set up initial interactive objects for map
-                        if ret_map.init_interactive_obj_dict(               \
+                        if ret_map.init_interactive_obj(               \
                                     ret_map_data.get(                       \
                                         mapdata.MAP_INTER_OBJ_DICT_FIELD,   \
                                         {}                                  \

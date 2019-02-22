@@ -18,6 +18,7 @@ import skills
 import json
 import savefiledata
 import pprint
+import time
 
 logger = None
 
@@ -83,6 +84,8 @@ class Game():
                 default_color
             )
 
+            logger.info("Protag location: {0}".format(self.curr_map.protagonist_location))
+
     # TODO
     def build_protagonist(self, name):
         protagonist = entity.Protagonist.protagonist_factory(name)
@@ -127,6 +130,7 @@ class Game():
     # successful moves will cause the map to scroll and blit along with
     # screen updates.  Successful moves across different maps will
     # also trigger map changes and associated display changes.
+    # Returns True if successful move, False otherwise.
     def move_protagonist(self, protag_move_dir, transportation_type):
         can_move = False
         changing_maps = False
@@ -204,11 +208,18 @@ class Game():
             logger.debug("Moving to destination tile: {0}".format(real_dest_tile_loc))
 
             if changing_maps:
+                # TODO - Make sure protag maintains facing direction.
                 self.change_current_map(dest_map, real_dest_tile_loc)
                 logger.debug("Changing map - Dest map ID: {0}".format(dest_map_id))
             else:
                 # same map, just scroll
                 self.viewing.scroll_map_single_tile(map_scroll_dir)
+
+                # Check if the new tile is a connector tile for the map.
+                # If so, switch to the map and tile position. (always call change map method?)
+                # Make sure protag maintains facing direction.
+
+        return can_move
 
     # does not update surface - caller will have to do that
     def turn_protagonist(self, direction_to_face):
@@ -226,8 +237,8 @@ class Game():
             bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
         )
 
-        # refresh viewing
-        self.viewing.refresh_and_blit_overworld()
+        # refresh viewing and update display.
+        self.refresh_and_blit_overworld()
 
     # Returns the tile location tuple for the tile that the protagonist
     # is facing.
@@ -257,9 +268,10 @@ class Game():
             self.game_language = new_language
             self.viewing.change_language(new_language)
 
-    # Does not update display.
+    # Updates display.
     def refresh_and_blit_overworld(self):
         self.viewing.refresh_and_blit_overworld()
+        pygame.display.update()
 
     # Blits text in bottom text box.
     # If refresh_after is True, refreshes
@@ -340,6 +352,8 @@ class Game():
                 #pickle.dump(save_data, save_file, pickle.HIGHEST_PROTOCOL)
 
     def save_game(self):
+        #
+
         self.write_data_to_save_file(DEFAULT_SAVE_FILE_NAME)
         logger.info("Saved game.")
 
@@ -382,9 +396,12 @@ class Game():
         interact_in_front = False
         examine_in_front = False
 
+        num_ticks = 0
+
         while continue_playing:
             # Tick clock.
             timekeeper.Timekeeper.tick()
+            num_ticks = num_ticks + 1
 
             # TODO: update map
 
@@ -461,19 +478,22 @@ class Game():
 
                 # Make protagonist face the direction and update tile
                 # that protagonist is on to clear the previous protagonist
-                # sprite image.
+                # sprite image. This will update display.
                 self.turn_protagonist(protag_move_dir)
 
                 # Blit top display on top of the current viewing.
-                self.viewing.blit_top_display()
+                #self.viewing.blit_top_display()
 
                 # Update display to reflect blit changes.
-                pygame.display.update()
+                #pygame.display.update()
 
                 # Attempt to move the protagonist.
-                self.move_protagonist(protag_move_dir, transport_type)
-                logger.debug("Protagonist tile_pos: {0}".format(self.curr_map.protagonist_location))
-                logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
+                if self.move_protagonist(protag_move_dir, transport_type):
+                    logger.debug("Protagonist tile_pos: {0}".format(self.curr_map.protagonist_location))
+                    logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
+
+                    # Update map and display.
+                    self.refresh_and_blit_overworld()
             elif interact_in_front or examine_in_front:
                 logger.debug("Trying to interact/examine in front")
 
