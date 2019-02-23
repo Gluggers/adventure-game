@@ -118,6 +118,9 @@ DEFAULT_LEVEL = 1
 DEFAULT_EXP = 0
 MIN_LEVEL = 1
 MIN_EXP = 0
+### EXP FORMULA: Level 1 = 0
+### Level N for N = 2 to 100:
+###  sum from x = 1 to N-1 of floor(100*2^(x/11) + 32x + 49.425)
 EXP_LADDER = [
     3000,
     2500,
@@ -131,21 +134,146 @@ EXP_LADDER = [
     0 # level 1
 ]
 
-MAX_LEVEL = len(EXP_LADDER)
-MAX_EXP = 1000000
+LEVEL_EXP_MAPPING = {
+    1: 0,
+    2: 187,
+    3: 413,
+    4: 679,
+    5: 985,
+    6: 1331,
+    7: 1718,
+    8: 2146,
+    9: 2616,
+    10: 3129,
+    11: 3686,
+    12: 4287,
+    13: 4933,
+    14: 5625,
+    15: 6364,
+    16: 7150,
+    17: 7985,
+    18: 8870,
+    19: 9806,
+    20: 10794,
+    21: 11836,
+    22: 12932,
+    23: 14085,
+    24: 15296,
+    25: 16567,
+    26: 17899,
+    27: 19295,
+    28: 20756,
+    29: 22285,
+    30: 23884,
+    31: 25555,
+    32: 27301,
+    33: 29125,
+    34: 31030,
+    35: 33019,
+    36: 35095,
+    37: 37262,
+    38: 39524,
+    39: 41885,
+    40: 44350,
+    41: 46922,
+    42: 49607,
+    43: 52410,
+    44: 55337,
+    45: 58394,
+    46: 61587,
+    47: 64923,
+    48: 68409,
+    49: 72053,
+    50: 75862,
+    51: 79846,
+    52: 84014,
+    53: 88376,
+    54: 92942,
+    55: 97724,
+    56: 102733,
+    57: 107982,
+    58: 113485,
+    59: 119256,
+    60: 125310,
+    61: 131664,
+    62: 138335,
+    63: 145342,
+    64: 152705,
+    65: 160444,
+    66: 168582,
+    67: 177143,
+    68: 186152,
+    69: 195637,
+    70: 205626,
+    71: 216150,
+    72: 227241,
+    73: 238935,
+    74: 251268,
+    75: 264280,
+    76: 278013,
+    77: 292512,
+    78: 307825,
+    79: 324002,
+    80: 341098,
+    81: 359170,
+    82: 378280,
+    83: 398493,
+    84: 419879,
+    85: 442512,
+    86: 466471,
+    87: 491841,
+    88: 518711,
+    89: 547176,
+    90: 577338,
+    91: 609305,
+    92: 643193,
+    93: 679125,
+    94: 717231,
+    95: 757651,
+    96: 800533,
+    97: 846035,
+    98: 894325,
+    99: 945583,
+    100: 1000000,
+}
 
-def get_level_from_experience(experience):
-    ret_level = DEFAULT_LEVEL
+MAX_LEVEL = len(LEVEL_EXP_MAPPING)
+DEFAULT_MAX_XP = 1000000
+MAX_EXP = LEVEL_EXP_MAPPING.get(MAX_LEVEL, DEFAULT_MAX_XP)
+
+def get_level_from_experience_test(experience):
+    ret_level = MIN_LEVEL
     for i in range(MAX_LEVEL):
         if EXP_LADDER[i] <= experience:
             ret_level = i + 1
         else:
             break
 
-def get_experience_from_level(level):
-    ret_exp = DEFAULT_EXP
+    return ret_level
+
+# Returns the lowest level that the given experience will satisfy.
+def get_level_from_experience(experience):
+    ret_level = MIN_LEVEL
+    for i in range(MAX_LEVEL):
+        if LEVEL_EXP_MAPPING.get(i + 1, DEFAULT_MAX_XP) <= experience:
+            ret_level = i + 1
+        else:
+            break
+
+    return ret_level
+
+def get_experience_from_level_test(level):
+    ret_exp = MIN_EXP
     if level and level <= len(EXP_LADDER):
         ret_exp = EXP_LADDER[len(EXP_LADDER) - level]
+
+    logger.debug("Exp for level {0} is {1}".format(level, ret_exp))
+    return ret_exp
+
+def get_experience_from_level(level):
+    ret_exp = MIN_EXP
+    if level and (level >= MIN_LEVEL) and (level <= MAX_LEVEL):
+        ret_exp = LEVEL_EXP_MAPPING.get(level, DEFAULT_MAX_XP)
 
     logger.debug("Exp for level {0} is {1}".format(level, ret_exp))
     return ret_exp
@@ -154,9 +282,14 @@ def get_experience_from_level(level):
 def get_experience_to_next_level(level, curr_exp):
     ret_exp = 0
 
-    if (curr_exp is not None) and level and (level < MAX_LEVEL):
+    if (curr_exp is not None) \
+            and curr_exp >= MIN_EXP \
+            and level \
+            and (level < MAX_LEVEL) \
+            and (level >= MIN_LEVEL):
         next_level = level + 1
         next_level_exp = get_experience_from_level(next_level)
+
         if next_level_exp:
             ret_exp = max(0, next_level_exp - curr_exp)
 
