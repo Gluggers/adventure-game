@@ -2,9 +2,10 @@ import logging
 import language
 
 ### SKILLS CONSTANTS ###
-SKILL_ID_ATTACK = 0x1
-SKILL_ID_STRENGTH = 0x2
-SKILL_ID_DEFENSE = 0x3
+#SKILL_ID_ATTACK = 0x1
+#SKILL_ID_STRENGTH = 0x2
+#SKILL_ID_DEFENSE = 0x3
+SKILL_ID_MELEE = 0x3
 SKILL_ID_HITPOINTS = 0x4
 SKILL_ID_ARCHERY = 0x5
 SKILL_ID_WHITE_MAGIC = 0x6
@@ -26,17 +27,21 @@ SKILL_ID_HUSBANDRY = 0x15
 
 # Maps skill IDs to their names in the various languages.
 SKILL_ID_NAME_MAPPING = {
-    SKILL_ID_ATTACK: {
-        language.LANG_ENGLISH: "ATTACK",
-        language.LANG_ESPANOL: "ATAQUE",
-    },
-    SKILL_ID_STRENGTH: {
-          language.LANG_ENGLISH: "STRENGTH",
-          language.LANG_ESPANOL: "FUERZA",
-    },
-    SKILL_ID_DEFENSE: {
-          language.LANG_ENGLISH: "DEFENSE",
-          language.LANG_ESPANOL: "DEFENSA",
+    #SKILL_ID_ATTACK: {
+        #language.LANG_ENGLISH: "ATTACK",
+        #language.LANG_ESPANOL: "ATAQUE",
+    #},
+    #SKILL_ID_STRENGTH: {
+         # language.LANG_ENGLISH: "STRENGTH",
+          #language.LANG_ESPANOL: "FUERZA",
+    #},
+    #SKILL_ID_DEFENSE: {
+          #language.LANG_ENGLISH: "DEFENSE",
+          #language.LANG_ESPANOL: "DEFENSA",
+#    },
+    SKILL_ID_MELEE: {
+        language.LANG_ENGLISH: "MELEE",
+        language.LANG_ESPANOL: "MELEE",
     },
     SKILL_ID_HITPOINTS: {
           language.LANG_ENGLISH: "HITPOINTS",
@@ -111,6 +116,8 @@ SKILL_ID_NAME_MAPPING = {
           language.LANG_ESPANOL: "CRIA DE ANIMALES",
     },
 }
+
+SKILL_ID_LIST = sorted(list(SKILL_ID_NAME_MAPPING.keys()))
 
 ### LEVEL AND EXPERIENCE CONSTANTS ###
 DEFAULT_LEVEL_HITPOINTS = 10
@@ -295,7 +302,8 @@ def get_experience_to_next_level(level, curr_exp):
 
     return ret_exp
 
-def calculate_combat_level(skill_info_dict):
+"""
+def calculate_combat_level_test(skill_info_dict):
     ret_level = 1
 
     if skill_info_dict:
@@ -306,6 +314,24 @@ def calculate_combat_level(skill_info_dict):
             + skill_info_dict.get(SKILL_ID_HITPOINTS, [1])[0]       \
             + max(                                                  \
                 skill_info_dict.get(SKILL_ID_ARCHERY, [1])[0],      \
+                skill_info_dict.get(SKILL_ID_BLACK_MAGIC, [1])[0],  \
+                skill_info_dict.get(SKILL_ID_WHITE_MAGIC, [1])[0],  \
+            )
+        ) / 3)
+        logger.debug("Combat level: {0}".format(ret_level))
+
+    return ret_level
+"""
+
+def calculate_combat_level(skill_info_dict):
+    ret_level = 1
+
+    if skill_info_dict:
+        ret_level = int((                                           \
+            skill_info_dict.get(SKILL_ID_MELEE, [1])[0]             \
+            + skill_info_dict.get(SKILL_ID_HITPOINTS, [1])[0]       \
+            + skill_info_dict.get(SKILL_ID_ARCHERY, [1])[0]         \
+            + max(                                                  \
                 skill_info_dict.get(SKILL_ID_BLACK_MAGIC, [1])[0],  \
                 skill_info_dict.get(SKILL_ID_WHITE_MAGIC, [1])[0],  \
             )

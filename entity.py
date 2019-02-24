@@ -21,6 +21,8 @@ RACE_HUMAN = 0x1
 
 START_NUM_GOLD_COINS = 100
 
+DEFAULT_MAX_HEALTH = 10
+
 class Entity(interactiveobj.Interactive_Object):
     # id represents the object ID.
     # name_info maps language ID to entity name.
@@ -35,6 +37,9 @@ class Entity(interactiveobj.Interactive_Object):
     # skill IDs will set default values.
     # equipment_dict maps the equipment slot ID to the corresponding item ID
     # that the Entity is wielding.
+    # manual_hitpoints allows manually setting the number of hitpoints
+    # for the entity. If None, hitpoints will be set according to
+    # the default formula of 10*hitpoints level.
     def __init__(
                     self,
                     id,
@@ -48,6 +53,7 @@ class Entity(interactiveobj.Interactive_Object):
                     race=RACE_HUMAN,
                     examine_info=None,
                     interaction_id=interactiondata.DEFAULT_ID,
+                    manual_hitpoints=None,
                 ):
         interactiveobj.Interactive_Object.__init__(
             self,
@@ -102,9 +108,17 @@ class Entity(interactiveobj.Interactive_Object):
             self.skill_info_mapping[skill_id] = [skill_level, exp, remaining_exp]
 
         # Set up health - use hitpoint stat if possible, otherwise default hitpoints value.
-        self.max_health = self.skill_info_mapping.get(
-            skills.SKILL_ID_HITPOINTS, [skills.DEFAULT_LEVEL_HITPOINTS]
-        )[0]
+        self.max_health = DEFAULT_MAX_HEALTH
+        if manual_hitpoints and (manual_hitpoints > 0):
+            self.max_health = manual_hitpoints
+        else:
+            hitpoint_level = self.skill_info_mapping.get(
+                skills.SKILL_ID_HITPOINTS, [skills.DEFAULT_LEVEL_HITPOINTS]
+            )[0]
+            max_health = Entity.calculate_max_health(hitpoint_level)
+
+            if max_health:
+                self.max_health = max_health
 
         self.curr_health = self.max_health
 
@@ -132,6 +146,17 @@ class Entity(interactiveobj.Interactive_Object):
 
             if skill_info:
                 ret_exp = skill_info[1]
+
+        return ret_exp
+
+    def get_experience_to_next_level(self, skill_id):
+        ret_exp = None
+
+        if skill_id is not None:
+            skill_info = self.skill_info_mapping.get(skill_id, None)
+
+            if skill_info:
+                ret_exp = skill_info[2]
 
         return ret_exp
 
@@ -170,6 +195,15 @@ class Entity(interactiveobj.Interactive_Object):
                     top_left_pixel=top_left_pixel           \
                 )
                 self.curr_image_id = image_id
+
+    @classmethod
+    def calculate_max_health(cls, hitpoint_level):
+        max_health = 0
+
+        if hitpoint_level and hitpoint_level > 0:
+            max_health = hitpoint_level * 10
+
+        return max_health
 
 # extend Entity class
 class Character(Entity):
@@ -297,7 +331,8 @@ class Protagonist(Character):
         }
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
         protag_skill_levels = {
-            skills.SKILL_ID_HITPOINTS: 10,
+            skills.SKILL_ID_HITPOINTS: 1,
+            skills.SKILL_ID_WOODCUTTING: 10, # TESTING.
         }
 
         protagonist = Protagonist(

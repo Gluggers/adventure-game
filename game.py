@@ -424,6 +424,26 @@ class Game():
         logger.debug("Curr game language: {0}".format(self.game_language))
         logger.debug("Protag location: {0}".format(self.get_protagonist_tile_position()))
 
+    def display_statistics(self):
+        # Debugging for now. TODO.
+        logger.info("Protagonist stats (level, curr exp, exp to next level):")
+        for skill_id in skills.SKILL_ID_LIST:
+            skill_name = skills.get_skill_name(skill_id, self.game_language)
+            level = self.protagonist.get_skill_level(skill_id)
+            curr_exp = self.protagonist.get_skill_experience(skill_id)
+            remaining_exp = self.protagonist.get_experience_to_next_level(skill_id)
+
+            if skill_name \
+                    and (level is not None) \
+                    and (curr_exp is not None) \
+                    and (remaining_exp is not None):
+                logger.info("{0}: Level {1}; Curr Exp {2}; Remaining Exp {3}".format(
+                    skill_name,
+                    level,
+                    curr_exp,
+                    remaining_exp
+                ))
+
     def handle_overworld_loop(self):
         continue_playing = True
 
@@ -502,6 +522,10 @@ class Game():
                         # Load game.
                         logger.info("Loading game initiated.")
                         self.load_game()
+                    elif events.key == pygame.K_1:
+                        # Display stats. # TESTING TODO.
+                        logger.info("Displaying statistics.")
+                        self.display_statistics()
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False

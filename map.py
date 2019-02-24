@@ -799,7 +799,7 @@ class Map:
 
                     self.execute_spawn_action(loc_tuple, obj_id)
 
-            logger.info("Remaining spawns: {0}".format(self.pending_spawn_actions))
+            logger.debug("Remaining spawns: {0}".format(self.pending_spawn_actions))
 
     ### CLASS METHODS ###
 

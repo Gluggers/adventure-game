@@ -13,7 +13,7 @@ import items
 import logging
 
 GATHERING_START_DELAY_MS = 500
-GATHERING_EXHAUST_DELAY_MS = 1500
+GATHERING_EXHAUST_DELAY_MS = 1000
 NUM_MS_SECOND = 1000
 
 DEFAULT_INTERACTION_MESSAGE_INFO = {
@@ -122,7 +122,7 @@ class Interaction():
                 acting_object_loc,
                 target_object_loc,
                 main_skilling_text,
-                resource_gather_text=None,
+                #resource_gather_text=None,
                 resource_exhaust_text=None,
                 intro_skilling_text=None,
             ):
@@ -191,6 +191,22 @@ class Interaction():
                 curr_display_text = main_skilling_text
                 countdown_resource_message = 0
                 prev_overworld_image_id = acting_object.curr_image_id
+
+                # TODO consider cases of boosted EXP
+                resource_gather_text = None
+                gained_resource = items.Item.get_item(target_object.resource_item)
+                resource_exp = target_object.gained_xp
+                if gained_resource:
+                    resource_gather_text = interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
+                        interaction_id,
+                        {}
+                    ).get(
+                        game_object.game_language,
+                        ""
+                    ).format(
+                        gained_resource.get_name(game_object.game_language),
+                        resource_exp
+                    )
 
                 while skilling and not resource_exhausted:
                     timekeeper.Timekeeper.tick()
@@ -341,7 +357,6 @@ class Interaction():
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             obj_name = target_object.get_name(game_object.game_language)
-            resource_exp = target_object.gained_xp
 
             main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
                     interaction_id,
@@ -359,21 +374,6 @@ class Interaction():
                     ""
                 ).format(obj_name)
 
-            # TODO consider cases of boosted EXP
-            resource_gain_text = None
-            gained_resource = items.Item.get_item(target_object.resource_item)
-            if gained_resource:
-                resource_gain_text = interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
-                    interaction_id,
-                    {}
-                ).get(
-                    game_object.game_language,
-                    ""
-                ).format(
-                    gained_resource.get_name(game_object.game_language),
-                    resource_exp
-                )
-
             cls.gathering_interaction(
                 interaction_id,
                 game_object,
@@ -382,7 +382,6 @@ class Interaction():
                 acting_object_loc,
                 target_object_loc,
                 main_skilling_text,
-                resource_gather_text=resource_gain_text,
                 resource_exhaust_text=resource_exhaust_text,
             )
 
