@@ -122,6 +122,7 @@ class Interaction():
                 acting_object_loc,
                 target_object_loc,
                 main_skilling_text,
+                skill_id,
                 #resource_gather_text=None,
                 resource_exhaust_text=None,
                 intro_skilling_text=None,
@@ -133,7 +134,8 @@ class Interaction():
                 and acting_object_loc   \
                 and target_object_loc   \
                 and (interaction_id is not None)    \
-                and main_skilling_text:
+                and main_skilling_text  \
+                and (skill_id is not None):
             # Check if inventory is full and if we have the right level
             # and equipment. TODO equipment check.
             if acting_object.inventory_full():
@@ -188,8 +190,6 @@ class Interaction():
                 num_skill_ticks = 0
                 image_id_index = 0
                 pygame.event.clear()
-                curr_display_text = main_skilling_text
-                countdown_resource_message = 0
                 prev_overworld_image_id = acting_object.curr_image_id
 
                 # TODO consider cases of boosted EXP
@@ -213,9 +213,6 @@ class Interaction():
 
                     num_skill_ticks = num_skill_ticks + 1
 
-                    if countdown_resource_message <= 0:
-                        curr_display_text = main_skilling_text
-
                     # TODO set next character image ID for skilling.
                     if num_skill_ticks % GATHERING_IMAGE_INTERVAL_NUM_TICKS == 0:
                         logger.debug("Switch image IDs here.")
@@ -226,7 +223,7 @@ class Interaction():
 
                     # This will update display for us.
                     game_object.display_bottom_first_text_page(
-                        curr_display_text,
+                        main_skilling_text,
                         auto_advance=True,
                         advance_delay_ms=0,
                         refresh_after=False,
@@ -259,14 +256,18 @@ class Interaction():
                                 logger.info("Gathered resource!")
 
                                 # TODO handle all the item stuff here.
+                                acting_object.add_item_to_inventory(gained_resource.item_id)
 
-                                # TODO handle experience stuff here.
-                                    # Check if level up.
-                                    # If level up:
-                                        # skilling = False.
-                                        # Handle level up.
-                                        # refresh and blit overworld viewing
-                                        # update display
+                                # This will display level up message if needed.
+                                levels_gained = game_object.gain_experience(
+                                    acting_object,
+                                    skill_id,
+                                    resource_exp,
+                                )
+
+                                # Stop skilling if we level up.
+                                if levels_gained and levels_gained > 0:
+                                    skilling = False
 
                                 # Check if resource has been exhausted.
                                 if random.randint(0, 100) < int(100*target_object.exhaustion_probability):
@@ -307,9 +308,6 @@ class Interaction():
 
                                 # Display the resource gather message.
                                 if resource_gather_text:
-                                    curr_display_text = resource_gather_text
-                                    countdown_resource_message = NUM_TICK_HOLD_RESOURCE_GATHER_MESSAGE
-
                                     game_object.display_bottom_first_text_page(
                                         resource_gather_text,
                                         auto_advance=False,
@@ -334,8 +332,6 @@ class Interaction():
                                     skilling = False
                                     cls.display_inventory_full_message()
                                     game_object.refresh_and_blit_overworld()
-
-                    countdown_resource_message = countdown_resource_message - 1
 
         pygame.event.clear()
 
@@ -382,6 +378,7 @@ class Interaction():
                 acting_object_loc,
                 target_object_loc,
                 main_skilling_text,
+                skills.SKILL_ID_WOODCUTTING,
                 resource_exhaust_text=resource_exhaust_text,
             )
 

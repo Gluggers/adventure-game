@@ -9,6 +9,7 @@ import logging
 import interactiondata
 import language
 import imageids
+import items
 import currency
 
 ### CONSTANTS ###
@@ -127,6 +128,62 @@ class Entity(interactiveobj.Interactive_Object):
         for equipment_slot_id, item_id in equipment_dict.items():
             self.equipment_dict[equipment_slot_id] = item_id
 
+        # Maps Item IDs to the number of items held.
+        self.inventory = {}
+
+    # Returns True if inventory is full, false otherwise.
+    def inventory_full(self):
+        return False
+
+    # Adds items to inventory. Returns True upon success, False on failure.
+    def add_item_to_inventory(self, item_id):
+        success = False
+
+        if not self.inventory_full():
+            # Make sure item ID is valid.
+            if (items.Item.get_item(item_id)):
+                success = True
+                self.inventory[item_id] = self.inventory.get(item_id, 0) + 1
+                logger.info("Added item ID {0} to inventory.".format(
+                    item_id
+                ))
+            else:
+                logger.error("Trying to add invalid item ID {0} to inventory.".format(
+                    item_id
+                ))
+        else:
+            logger.warn("Trying to add item to full inventory.")
+
+        return success
+
+    def remove_item_from_inventory(self, item_id):
+        item_quantity = self.inventory.get(item_id, 0)
+        if item_quantity:
+            self.inventory[item_id] = item_quantity - 1
+            if self.inventory.get(item_id, 0) <= 0:
+                self.inventory.pop(item_id, 0)
+
+    def get_item_quantity_from_inventory(self, item_id):
+        return self.inventory.get(item_id, 0)
+
+    def has_item_in_inventory(self, item_id):
+        if self.get_item_quantity_from_inventory(item_id):
+            return True
+        else:
+            return False
+
+    def has_item_equipped(self, item_id):
+        has_equipped = False
+
+        for equipment_slot_id, equipped_item_id in self.equipment_dict.items():
+            if equiped_item_id == item_id:
+                has_equipped = True
+
+        return has_equipped
+
+    def has_item(self, item_id):
+        return has_item_in_inventory(item_id) or has_item_equipped(item_id)
+
     def get_skill_level(self, skill_id):
         ret_level = None
 
@@ -159,6 +216,46 @@ class Entity(interactiveobj.Interactive_Object):
                 ret_exp = skill_info[2]
 
         return ret_exp
+
+    # Returns the number of levels gained when adding exp to skill_id.
+    def gain_experience(self, skill_id, exp):
+        levels_gained = 0
+
+        if (skill_id is not None) and exp and (exp > 0):
+            skill_info = self.skill_info_mapping.get(skill_id, None)
+            exp_to_process = exp
+
+            if skill_info:
+                old_level = skill_info[0]
+                old_exp = skill_info[1]
+
+                new_exp = old_exp + exp
+                new_level = skills.get_level_from_experience(new_exp)
+                new_exp_to_next_level = skills.get_experience_to_next_level(new_level, new_exp)
+
+                if new_level < old_level:
+                    logger.error("Error in exp gain.")
+                else:
+                    logger.info("Started at level {0} with {1} exp ({2} remaining to next level.)".format(
+                        old_level,
+                        old_exp,
+                        skill_info[2]
+                    ))
+                    logger.info("Now reached level {0} with {1} exp ({2} remaining to next level.)".format(
+                        new_level,
+                        new_exp,
+                        new_exp_to_next_level,
+                    ))
+
+                    skill_info[0] = new_level
+                    skill_info[1] = new_exp
+                    skill_info[2] = new_exp_to_next_level
+
+                    self.skill_info_mapping[skill_id] = skill_info
+
+                    levels_gained = max(0, new_level - old_level)
+
+        return levels_gained
 
     # reblit the entity to face the specified direction.
     # Can specify either top_left_pixel or
@@ -293,9 +390,6 @@ class Protagonist(Character):
         )
         self.quest_journal = {}
 
-        # Maps Item IDs to the number of items held.
-        self.inventory = {}
-
         # Maps currency IDs to the number of units of currency.
         self.money_pouch = {}
 
@@ -309,10 +403,6 @@ class Protagonist(Character):
 
         # Set default gold value.
         self.money_pouch[currency.CURRENCY_GOLD_COIN] = START_NUM_GOLD_COINS
-
-    # Returns True if inventory is full, false otherwise.
-    def inventory_full(self):
-        return False
 
     @classmethod
     def protagonist_factory(

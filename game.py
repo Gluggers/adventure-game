@@ -19,6 +19,7 @@ import json
 import savefiledata
 import pprint
 import time
+import items
 
 logger = None
 
@@ -253,6 +254,51 @@ class Game():
 
         return front_tile_pos
 
+    # Gain experience. Returns number of levels gained from experience gain.
+    # Displays bottom message in case of level up.
+    def gain_experience(self, target_entity, skill_id, exp_gained):
+        levels_gained = 0
+        if target_entity:
+            levels_gained = target_entity.gain_experience(skill_id, exp_gained)
+
+        if levels_gained and levels_gained > 0:
+            # Display level-up message.
+            skill_name = skills.get_skill_name(skill_id, self.game_language)
+            curr_skill_level = self.protagonist.get_skill_level(skill_id)
+
+            if skill_name and curr_skill_level:
+                level_up_message = skills.LEVEL_UP_MESSAGE_INFO.get(
+                        self.game_language,
+                        ""
+                    ).format(
+                        levels_gained,
+                        skill_name,
+                        curr_skill_level,
+                    )
+
+                if level_up_message:
+                    # This will update display.
+                    self.display_bottom_text(
+                        level_up_message,
+                        refresh_after=True,
+                        auto_advance=False,
+                    )
+
+    # TODO enhance once menus are set up.
+    def display_inventory(self, target_entity):
+        if target_entity:
+            for item_id, quantity in target_entity.inventory.items():
+                item_obj = items.Item.get_item(item_id)
+
+                if item_obj:
+                    item_name = item_obj.get_name(self.game_language)
+                    logger.info("{0} x{1}".format(item_name, quantity))
+                else:
+                    logger.error("Invalid item with ID {0} in inventory.".format(
+                        item_id
+                    ))
+                    break
+
     def toggle_language(self):
         # For now, just switch to other language
         if self.game_language == language.LANG_ENGLISH:
@@ -424,25 +470,26 @@ class Game():
         logger.debug("Curr game language: {0}".format(self.game_language))
         logger.debug("Protag location: {0}".format(self.get_protagonist_tile_position()))
 
-    def display_statistics(self):
+    def display_statistics(self, target_entity):
         # Debugging for now. TODO.
-        logger.info("Protagonist stats (level, curr exp, exp to next level):")
-        for skill_id in skills.SKILL_ID_LIST:
-            skill_name = skills.get_skill_name(skill_id, self.game_language)
-            level = self.protagonist.get_skill_level(skill_id)
-            curr_exp = self.protagonist.get_skill_experience(skill_id)
-            remaining_exp = self.protagonist.get_experience_to_next_level(skill_id)
+        if target_entity:
+            logger.info("Stats (level, curr exp, exp to next level):")
+            for skill_id in skills.SKILL_ID_LIST:
+                skill_name = skills.get_skill_name(skill_id, self.game_language)
+                level = target_entity.get_skill_level(skill_id)
+                curr_exp = target_entity.get_skill_experience(skill_id)
+                remaining_exp = target_entity.get_experience_to_next_level(skill_id)
 
-            if skill_name \
-                    and (level is not None) \
-                    and (curr_exp is not None) \
-                    and (remaining_exp is not None):
-                logger.info("{0}: Level {1}; Curr Exp {2}; Remaining Exp {3}".format(
-                    skill_name,
-                    level,
-                    curr_exp,
-                    remaining_exp
-                ))
+                if skill_name \
+                        and (level is not None) \
+                        and (curr_exp is not None) \
+                        and (remaining_exp is not None):
+                    logger.info("{0}: Level {1}; Curr Exp {2}; Remaining Exp {3}".format(
+                        skill_name,
+                        level,
+                        curr_exp,
+                        remaining_exp
+                    ))
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -523,9 +570,13 @@ class Game():
                         logger.info("Loading game initiated.")
                         self.load_game()
                     elif events.key == pygame.K_1:
+                        # Display inventory. # TESTING TODO.
+                        logger.info("Displaying inventory.")
+                        self.display_inventory(self.protagonist)
+                    elif events.key == pygame.K_2:
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
-                        self.display_statistics()
+                        self.display_statistics(self.protagonist)
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
