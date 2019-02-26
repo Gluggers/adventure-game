@@ -5,6 +5,7 @@ import language
 import timekeeper
 import logging
 import sys
+import imagepaths
 import math
 
 ### FONTS AND TEXT ###
@@ -37,10 +38,13 @@ SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                     + ":;[]{},./?<>-_=+~\`!@#$%^&*()\\|\"'"
 
+CONTINUE_ICON_HORIZ_SPACE = 10
+LINE_SPACING_FACTOR = 1.25
+
 # Number of milliseconds to wait in between each
 # text display.
 BOTTOM_TEXT_DELAY_MS = 500
-DEFAULT_ADVANCE_DELAY_MS = 500
+DEFAULT_ADVANCE_DELAY_MS = 1500
 
 LEVEL_TEXT_PREFIX_INFO = {
     language.LANG_ENGLISH: "LEVEL: ",
@@ -298,6 +302,9 @@ class Text_Display(Display):
     # If no background image is specified, default to background_color.
     # For best results, ensure that background_image_path points to an image
     # of size equal to the display_rect dimension values.
+    # continue_icon_image_path points to the image path for an icon
+    # to blit after the last line of a page if needed. The icon should be
+    # small.
     def __init__(
                 self,
                 main_display_surface,
@@ -308,6 +315,7 @@ class Text_Display(Display):
                 background_color=viewingdata.COLOR_WHITE,
                 side_padding=TEXT_DISPLAY_SIDE_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
+                continue_icon_image_path=None,
             ):
         Display.__init__(
             self,
@@ -361,12 +369,19 @@ class Text_Display(Display):
 
         # Define background image if possible.
         self.background_image = None
-
         if background_image_path:
             # Load image if path is provided.
             self.background_image = pygame.image.load(
                                         background_image_path
                                     ).convert_alpha()
+
+        # Define continuation icon if possible.
+        self.continue_icon = None
+        if continue_icon_image_path:
+            # Load image if path is provided.
+            self.continue_icon = pygame.image.load(
+                    continue_icon_image_path
+                ).convert_alpha()
 
     @classmethod
     def get_char_per_line(cls, horizontal_pixels, font_object):
@@ -405,13 +420,13 @@ class Text_Display(Display):
             num_total_lines = int(vertical_pixel_height / text_height)
 
             if (num_total_lines % 2) == 0:
-                # Even number of total lines. Halve the number of lines
+                # Even number of total lines. Divide by line space factor
                 # to account for space in between the lines.
-                num_lines = int(num_total_lines / 2)
+                num_lines = int(num_total_lines / LINE_SPACING_FACTOR)
             else:
                 # Odd number of total lines. We don't need space after
                 # the final line.
-                num_lines = int(num_total_lines / 2) + 1
+                num_lines = int(num_total_lines / LINE_SPACING_FACTOR) + 1
 
         return num_lines
 
@@ -627,7 +642,14 @@ class Text_Display(Display):
 
     # Blit text for the single page.
     # Does not update display, caller will need to do that.
-    def blit_page(self, surface, text_page):
+    # If continue_icon is set to True, we will blit the object's continue
+    # icon after the last line of the page.
+    def blit_page(
+                self,
+                surface,
+                text_page,
+                continue_icon=False,
+            ):
         if surface and text_page:
             # Blit background
             self.blit_background(surface)
@@ -636,7 +658,11 @@ class Text_Display(Display):
 
             logger.debug("Page has {0} line(s)".format(len(text_page.text_lines)))
 
-            for text_line in text_page.text_lines:
+            #for text_line in text_page.text_lines:
+            num_lines = len(text_page.text_lines)
+            for index in range(num_lines):
+                text_line = text_page.text_lines[index]
+
                 rendered_text = self.font_object.render(
                     text_line,
                     False,
@@ -658,8 +684,28 @@ class Text_Display(Display):
                     text_top_left
                 )
 
+                # Blit the continue icon if we are on the last line.
+                if (index == (num_lines - 1)) \
+                        and self.continue_icon \
+                        and continue_icon:
+                    text_height = rendered_text_dimensions[1]
+                    icon_top_left = (
+                        text_top_left[0] \
+                            + text_width \
+                            + CONTINUE_ICON_HORIZ_SPACE,
+                        text_top_left[1] \
+                            + text_height \
+                            - self.continue_icon.get_height()
+                    )
+
+                    surface.blit(
+                        self.continue_icon,
+                        icon_top_left
+                    )
+
                 # Move to spot for next line.
-                vertical_offset = vertical_offset + (2 * self.text_height)
+                vertical_offset = vertical_offset \
+                        + int(LINE_SPACING_FACTOR * self.text_height)
 
     # advance_delay_ms is time in milliseconds to pause before allowing
     # manual advance.
@@ -675,8 +721,11 @@ class Text_Display(Display):
                 auto_advance=False,
             ):
         if surface and page:
-            # Blit single page and update display.
-            self.blit_page(surface, page)
+            self.blit_page(
+                surface,
+                page,
+            )
+
             pygame.display.update()
 
             # Pause if needed.
@@ -684,6 +733,15 @@ class Text_Display(Display):
                 pygame.time.wait(advance_delay_ms)
 
             if not auto_advance:
+                # Reblit page but with continue icon if available.
+                self.blit_page(
+                    surface,
+                    page,
+                    continue_icon=True
+                )
+
+                pygame.display.update()
+
                 # Clear event queue to prevent premature advancement.
                 pygame.event.clear()
 

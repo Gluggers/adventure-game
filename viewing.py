@@ -8,6 +8,7 @@ import objdata
 import language
 import imageids
 import viewingdata
+import imagepaths
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -86,6 +87,7 @@ class Viewing():
                 self.bottom_text_display_rect,
                 display.Display.bottom_text_display_font,
                 display_language=self.display_language,
+                continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
             )
         else:
             logger.error("Bottom text display font not found.")

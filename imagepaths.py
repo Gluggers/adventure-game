@@ -11,6 +11,10 @@ TILE_IMAGE_PATH = IMAGE_HOME_PATH + "tiles/"
 INTER_OBJ_PATH = IMAGE_HOME_PATH + "interactive_objects/"
 CHARACTER_PATH = IMAGE_HOME_PATH + "characters/"
 PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
+DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
+
+### DISPLAY IMAGE CONSTANTS ###
+DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH + "text_continue_icon_10x10_dk.png" # [0]
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_lz.png" # [1]
@@ -26,7 +30,9 @@ TILE_WATER_NORMAL_3_PATH = TILE_IMAGE_PATH + "tile_water_normal_3_32x32_lz.png" 
 
 ### INTERACTIVE OBJECTS
 HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32_lz.png" # [1]
-ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
+#ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
+ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
+ORE_COPPER_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_copper_32x32_dk.png" # [0]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz.png" # [1]
 TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
