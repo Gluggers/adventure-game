@@ -1,6 +1,53 @@
 import logging
 import language
 
+### TIERS ###
+"""
+MELEE WEAPONS AND ARMOUR
+01 wooden/stone
+10 bronze
+20 iron
+30 steel
+40 titanium
+50 mithril
+60 adamant
+70 ancient
+80 astral
+90 dragonite
+100 master/celestial
+
+RANGED WEAPONS
+01 simple bow, stone/wooden arrow
+10 bronze arrow
+15 oak bow (upgrade with bronze)
+20 iron arrow
+30 willow bow (upgrade with iron), steel arrow
+45 maple bow (upgrade with steel)
+60 yew bow (upgrade with titanium)
+70 ancient bow, ancient arrow
+80 astral bow, astral arrow
+90 dragonite bow, dragonite arrow
+100 master/celestial bow/arrow
+
+RANGED ARMOUR
+01 leather
+10 snakeskin
+20 fortified snakeskin
+30 crocodile skin
+40 fortified crocodile skin
+50 normal dragonhide
+60 fortified dragonhide
+70 ancient (from ancient dragonhide)
+80 astral (from astral dragonhide)
+90 purified dragonhide (from pure dragon hide)
+100 master/celestial (from celestial dragon hide)
+
+MAGIC WEAPONS
+01 basic/apprentice
+10 oak
+20
+"""
+
 ### SKILLS CONSTANTS ###
 #SKILL_ID_ATTACK = 0x1
 #SKILL_ID_STRENGTH = 0x2

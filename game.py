@@ -32,6 +32,29 @@ DIFFICULTY_HARD = 0x1
 
 DEFAULT_SAVE_FILE_NAME = "savegame.pkl"
 
+OVERWORLD_MENU_OPTION_INFO = {
+    language.LANG_ENGLISH: [
+        "Inventory",
+        "Equipment",
+        "Stats",
+        "Quests",
+        "Configuration",
+        "Quit Game"
+    ],
+    language.LANG_ESPANOL: [
+        "Inventario",
+        "Equipo",
+        "Niveles",
+        "Misiones",
+        "Configuracion",
+        "Salir de juego"
+    ],
+}
+
+OVERWORLD_MENU_MORE_OPTION_INFO = {
+    language.LANG_ENGLISH: "More Options...",
+    language.LANG_ESPANOL: "Mas Opciones...",
+}
 
 class Game():
     def __init__(self, game_name, game_language=language.DEFAULT_LANGUAGE):
@@ -491,6 +514,32 @@ class Game():
                         remaining_exp
                     ))
 
+    def get_overworld_menu_options(self):
+        return OVERWORLD_MENU_OPTION_INFO.get(
+            self.game_language,
+            []
+        )
+
+    def get_overworld_more_menu_option_str(self):
+        return OVERWORLD_MENU_MORE_OPTION_INFO.get(
+            self.game_language,
+            ""
+        )
+
+    def display_overworld_side_menu(self):
+        ret_option = None
+        # Get menu options.
+        menu_options = self.get_overworld_menu_options()
+        more_options_str = self.get_overworld_more_menu_option_str()
+
+        if menu_options and more_options_str:
+            ret_option = self.viewing.display_overworld_side_menu(
+                menu_options,
+                more_options_str,
+            )
+
+        return ret_option
+
     def handle_overworld_loop(self):
         continue_playing = True
 
@@ -577,6 +626,14 @@ class Game():
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
                         self.display_statistics(self.protagonist)
+                    elif events.key == pygame.K_ESCAPE:
+                        # Display menu.
+                        logger.info("Displaying menu.")
+                        # TODO get menu options.
+                        # TESTING.
+                        selected_option = self.display_overworld_side_menu()
+                        logger.info("Selected option: {0}".format(selected_option))
+                        self.refresh_and_blit_overworld()
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False

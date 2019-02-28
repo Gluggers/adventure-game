@@ -422,7 +422,7 @@ class Protagonist(Character):
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
         protag_skill_levels = {
             skills.SKILL_ID_HITPOINTS: 1,
-            skills.SKILL_ID_WOODCUTTING: 10, # TESTING.
+            skills.SKILL_ID_WOODCUTTING: 9, # TESTING.
         }
 
         protagonist = Protagonist(

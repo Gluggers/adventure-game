@@ -64,6 +64,7 @@ class Viewing():
 
         self.top_display = None
         self.bottom_text_display = None
+        self.side_menu_display = None
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_top_display(self):
@@ -93,11 +94,28 @@ class Viewing():
             logger.error("Bottom text display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
+    def create_side_menu_display(self):
+        # TODO
+        if display.Display.side_menu_display_font:
+            self.side_menu_display = display.Menu_Display(
+                self.main_display_surface,
+                self.ow_side_menu_rect,
+                display.Display.side_menu_display_font,
+                display_language=self.display_language,
+                background_image_path=None,
+                background_color=viewingdata.COLOR_WHITE,
+                font_color=display.FONT_COLOR_DEFAULT,
+                side_padding=display.OW_SIDE_MENU_SIDE_PADDING,
+                vertical_padding=display.OW_SIDE_MENU_VERTICAL_PADDING,
+                selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
+                spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
+            )
+
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
         self.create_top_display()
         self.create_bottom_text_display()
-
+        self.create_side_menu_display()
 
     ### GETTERS AND SETTERS ###
 
@@ -122,8 +140,11 @@ class Viewing():
             if self.top_display:
                 self.top_display.display_language = new_language
 
-                # Update self.
-                self.refresh_and_blit_overworld()
+            if self.side_menu_display:
+                self.side_menu_display.display_language = new_language
+
+            # Update self.
+            self.refresh_and_blit_overworld()
 
     ### DISPLAY HANDLING METHODS ###
 
@@ -259,6 +280,27 @@ class Viewing():
                 self.main_display_surface,
                 tile_subset_rect=tile_subset_rect
             )
+
+    def display_overworld_side_menu(
+                self,
+                menu_options,
+                more_options_str,
+                #orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                #load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
+                #option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+            ):
+        ret_option = None
+        if menu_options and more_options_str:
+            ret_option = self.side_menu_display.display_self(
+                self.main_display_surface,
+                menu_options,
+                more_options_str,
+                #orientation=orientation,
+                #load_delay_ms=load_delay_ms,
+                #option_switch_delay_ms=option_switch_delay_ms,
+            )
+        logger.info("Returning option {0}".format(ret_option))
+        return ret_option
 
     # Blits overworld viewing as is, without updating.
     # Does not update display.

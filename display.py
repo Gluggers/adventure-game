@@ -14,7 +14,8 @@ DEFAULT_FONT = None
 
 FONT_SIZE_DEFAULT = 24
 FONT_SIZE_TOP_DISPLAY = 24
-FONT_SIZE_BOTTOM_TEXT_DISPLAY = 16
+FONT_SIZE_BOTTOM_TEXT = 16
+FONT_SIZE_SIDE_MENU_TEXT = 16
 
 FONT_TYPE_DEFAULT = 'Comic Sans MS'
 FONT_TYPE_TOP_DISPLAY = 'Comic Sans MS'
@@ -23,6 +24,7 @@ FONT_TYPE_TOP_DISPLAY = 'Comic Sans MS'
 FONT_PATH_DEFAULT = "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"
 FONT_PATH_TOP_DISPLAY = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 FONT_PATH_BOTTOM_TEXT_DISPLAY = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+FONT_PATH_SIDE_MENU_DISPLAY = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 
 FONT_COLOR_DEFAULT = viewingdata.COLOR_BLACK
 FONT_COLOR_TOP_DISPLAY = viewingdata.COLOR_BLACK
@@ -38,13 +40,36 @@ SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                     + ":;[]{},./?<>-_=+~\`!@#$%^&*()\\|\"'"
 
+# Space between text and the continue icon.
 CONTINUE_ICON_HORIZ_SPACE = 10
-LINE_SPACING_FACTOR = 1.25
+
+# Space between text and the selected option icon.
+SELECTION_ICON_HORIZ_SPACE = 8
+
+# Spacing factors for space between lines.
+DEFAULT_LINE_SPACING_FACTOR = 1.25
+MENU_LINE_SPACING_FACTOR = 1.5
 
 # Number of milliseconds to wait in between each
 # text display.
 BOTTOM_TEXT_DELAY_MS = 500
 DEFAULT_ADVANCE_DELAY_MS = 1500
+
+# Number of milliseconds to wait when loading menu.
+DEFAULT_MENU_LOAD_DELAY_MS = 750
+
+# Number of milliseconds to wait after changing selected options.
+DEFAULT_MENU_OPTION_SWITCH_DELAY_MS = 750
+
+
+### ORIENTATIONS FOR MENU OPTIONS ###
+ORIENTATION_CENTERED = 0x1
+ORIENTATION_LEFT_JUSTIFIED = 0x2
+
+MORE_OPTIONS_MENU_INFO = {
+    language.LANG_ENGLISH: "More Options",
+    language.LANG_ESPANOL: "Mas Opciones",
+}
 
 LEVEL_TEXT_PREFIX_INFO = {
     language.LANG_ENGLISH: "LEVEL: ",
@@ -60,6 +85,9 @@ TOP_DISPLAY_SIDE_PADDING = 16
 TEXT_DISPLAY_SIDE_PADDING = 16
 TEXT_DISPLAY_VERTICAL_PADDING = 16
 
+OW_SIDE_MENU_SIDE_PADDING = 32
+OW_SIDE_MENU_VERTICAL_PADDING = 16
+
 TEXT_ADVANCE_KEYS = set([
     pygame.K_SPACE,
     pygame.K_RETURN,
@@ -70,17 +98,45 @@ TEXT_ADVANCE_KEYS = set([
     pygame.K_RIGHT,
 ])
 
+MENU_OPTION_SELECT_KEYS = set([
+    pygame.K_SPACE,
+    pygame.K_RETURN,
+    pygame.K_RIGHT,
+    pygame.K_TAB,
+])
+
+MENU_OPTION_EXIT_KEYS = set([
+    pygame.K_BACKSPACE,
+    pygame.K_ESCAPE,
+])
+
 class Text_Page():
     def __init__(self, line_list):
         self.text_lines = []
 
         if line_list:
-            self.text_lines = line_list
+            for item in line_list:
+                self.text_lines.append(item)
+
+class Menu_Page():
+    def __init__(self, option_list):
+        self.option_list = []
+
+        if option_list:
+            for item in option_list:
+                self.option_list.append(item)
+
+    def get_num_options(self):
+        return len(self.option_list)
+
+    def get_option(self, index):
+        return self.option_list[index]
 
 class Display():
     default_font = None
     top_display_font = None
     bottom_text_display_font = None
+    side_menu_display_font = None
 
     # Background color is color to use in case of no background image.
     # If background image is provided, we will use that rather than
@@ -93,12 +149,14 @@ class Display():
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                font_color=FONT_COLOR_DEFAULT,
                 display_language=language.DEFAULT_LANGUAGE,
             ):
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
         self.top_left_pixel_position = (self.display_rect[0], self.display_rect[1])
         self.font_object = font_object
+        self.font_color = font_color,
         self.pixel_width = self.display_rect[2]
         self.pixel_height = self.display_rect[3]
         self.background_color = background_color
@@ -141,7 +199,11 @@ class Display():
         )
         Display.bottom_text_display_font = pygame.font.Font(
             FONT_PATH_BOTTOM_TEXT_DISPLAY,
-            FONT_SIZE_BOTTOM_TEXT_DISPLAY
+            FONT_SIZE_BOTTOM_TEXT
+        )
+        Display.side_menu_display_font = pygame.font.Font(
+            FONT_PATH_SIDE_MENU_DISPLAY,
+            FONT_SIZE_SIDE_MENU_TEXT
         )
         """
         Display.default_font = pygame.font.SysFont(
@@ -162,6 +224,7 @@ class Top_Display(Display):
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                font_color=FONT_COLOR_DEFAULT,
                 protagonist=None,
                 curr_map=None,
                 display_language=language.DEFAULT_LANGUAGE,
@@ -173,7 +236,8 @@ class Top_Display(Display):
             font_object,
             background_image_path=background_image_path,
             background_color=background_color,
-            display_language=display_language
+            font_color=font_color,
+            display_language=display_language,
         )
 
         self._protagonist = protagonist
@@ -190,14 +254,14 @@ class Top_Display(Display):
             self.level_text = Display.top_display_font.render(
                 self.level_text_str,
                 False,
-                FONT_COLOR_TOP_DISPLAY
+                self.font_color
             )
 
         if self.health_text_str:
             self.health_text = Display.top_display_font.render(
                 self.health_text_str,
                 False,
-                FONT_COLOR_TOP_DISPLAY
+                self.font_color
             )
 
         # Get top left positions for rendering each text.
@@ -255,12 +319,12 @@ class Top_Display(Display):
                 self.level_text = Display.top_display_font.render(
                     self.level_text_str,
                     False,
-                    FONT_COLOR_TOP_DISPLAY
+                    self.font_color
                 )
                 self.health_text = Display.top_display_font.render(
                     self.health_text_str,
                     False,
-                    FONT_COLOR_TOP_DISPLAY
+                    self.font_color
                 )
 
     @property
@@ -313,9 +377,11 @@ class Text_Display(Display):
                 display_language=language.DEFAULT_LANGUAGE,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                font_color=FONT_COLOR_DEFAULT,
                 side_padding=TEXT_DISPLAY_SIDE_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
                 continue_icon_image_path=None,
+                spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR,
             ):
         Display.__init__(
             self,
@@ -325,10 +391,12 @@ class Text_Display(Display):
             display_language=display_language,
             background_image_path=background_image_path,
             background_color=background_color,
+            font_color=font_color,
         )
 
         self.side_padding = side_padding
         self.vertical_padding = vertical_padding
+        self.spacing_factor_between_lines = spacing_factor_between_lines
 
         # Define where text will start.
         self.text_top_left_pixel = (
@@ -360,9 +428,10 @@ class Text_Display(Display):
 
         # Get max number of lines that we can blit per page.
         # Assuming monospaced font.
-        self.lines_per_page = Text_Display.get_line_per_page(
+        self.lines_per_page = Text_Display.get_num_lines_per_page(
             self.text_space_vertical,
-            self.font_object
+            self.font_object,
+            self.spacing_factor_between_lines
         )
 
         logger.debug("Char per line {0}, line per page {1}".format(self.char_per_line, self.lines_per_page))
@@ -409,9 +478,16 @@ class Text_Display(Display):
 
         return num_char
 
-    # Includes spaces in between the lines, as well
+    # Includes spaces in between the lines, as well.
+    # spacing_factor_between_lines is a float that determines
+    # spacing in between lines (e.g. 1.25 means add 0.25 of the text height
+    # as spacing in between lines)
     @classmethod
-    def get_line_per_page(cls, vertical_pixel_height, font_object):
+    def get_num_lines_per_page(
+                cls,
+                vertical_pixel_height,
+                font_object,
+                spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR):
         num_lines = 0
 
         if vertical_pixel_height and (vertical_pixel_height > 0) and font_object:
@@ -422,11 +498,11 @@ class Text_Display(Display):
             if (num_total_lines % 2) == 0:
                 # Even number of total lines. Divide by line space factor
                 # to account for space in between the lines.
-                num_lines = int(num_total_lines / LINE_SPACING_FACTOR)
+                num_lines = int(num_total_lines / spacing_factor_between_lines)
             else:
                 # Odd number of total lines. We don't need space after
                 # the final line.
-                num_lines = int(num_total_lines / LINE_SPACING_FACTOR) + 1
+                num_lines = int(num_total_lines / spacing_factor_between_lines) + 1
 
         return num_lines
 
@@ -648,7 +724,7 @@ class Text_Display(Display):
                 self,
                 surface,
                 text_page,
-                continue_icon=False,
+                show_continue_icon=False,
             ):
         if surface and text_page:
             # Blit background
@@ -666,7 +742,7 @@ class Text_Display(Display):
                 rendered_text = self.font_object.render(
                     text_line,
                     False,
-                    FONT_COLOR_BOTTOM_TEXT_DISPLAY
+                    self.font_color,
                 )
 
                 rendered_text_dimensions = rendered_text.get_size()
@@ -687,7 +763,7 @@ class Text_Display(Display):
                 # Blit the continue icon if we are on the last line.
                 if (index == (num_lines - 1)) \
                         and self.continue_icon \
-                        and continue_icon:
+                        and show_continue_icon:
                     text_height = rendered_text_dimensions[1]
                     icon_top_left = (
                         text_top_left[0] \
@@ -705,7 +781,7 @@ class Text_Display(Display):
 
                 # Move to spot for next line.
                 vertical_offset = vertical_offset \
-                        + int(LINE_SPACING_FACTOR * self.text_height)
+                        + int(self.spacing_factor_between_lines * self.text_height)
 
     # advance_delay_ms is time in milliseconds to pause before allowing
     # manual advance.
@@ -737,7 +813,7 @@ class Text_Display(Display):
                 self.blit_page(
                     surface,
                     page,
-                    continue_icon=True
+                    show_continue_icon=True
                 )
 
                 pygame.display.update()
@@ -813,6 +889,330 @@ class Text_Display(Display):
                     advance_delay_ms=advance_delay_ms,
                     auto_advance=auto_advance,
                 )
+
+class Menu_Display(Text_Display):
+    # If no background image is specified, default to background_color.
+    # For best results, ensure that background_image_path points to an image
+    # of size equal to the display_rect dimension values.
+    # For best results, ensure that selection_icon_image_path points to an
+    # image of small enough size.
+    def __init__(
+                self,
+                main_display_surface,
+                display_rect,
+                font_object,
+                display_language=language.DEFAULT_LANGUAGE,
+                background_image_path=None,
+                background_color=viewingdata.COLOR_WHITE,
+                font_color=FONT_COLOR_DEFAULT,
+                side_padding=OW_SIDE_MENU_SIDE_PADDING,
+                vertical_padding=OW_SIDE_MENU_VERTICAL_PADDING,
+                selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
+                spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
+            ):
+        Text_Display.__init__(
+            self,
+            main_display_surface,
+            display_rect,
+            font_object,
+            display_language=display_language,
+            background_image_path=background_image_path,
+            background_color=background_color,
+            font_color=font_color,
+            side_padding=side_padding,
+            vertical_padding=vertical_padding,
+            spacing_factor_between_lines=spacing_factor_between_lines,
+        )
+
+        # Define selection icon.
+        self.selection_icon = None
+        if selection_icon_image_path:
+            # Load image if path is provided.
+            self.selection_icon = pygame.image.load(
+                    selection_icon_image_path
+                ).convert_alpha()
+
+        if not self.selection_icon:
+            logger.error("Error setting up selection icon for menu.")
+
+        # determine max number of options (one option per line)
+        # that can be blitted per page.
+        self.max_options_per_page = Text_Display.get_num_lines_per_page(
+                self.text_space_vertical,
+                self.font_object,
+                self.spacing_factor_between_lines
+            )
+
+        logger.info("Max options per menu page: {0}".format(self.max_options_per_page))
+
+    # Returns list of Menu Pages containing the menu option names.
+    # If the returned list contains multiple Menu Pages, then each
+    # Menu Page (including the final one) will have its last
+    # option name be the "MORE OPTIONS" option to indicate that there
+    # are additional menu options. The "MORE OPTIONS" option on the final
+    # page will lead to the first page to allow looping.
+    # option_list is a list of strings representing the options
+    # for the menu. They cannot be equal to the "MORE OPTIONS" option name.
+    # more_options_str indicates the string to display if we need to display
+    # additional options on a subsequent menu page.
+    # max_options_per_page indicates how many options (lines) fit on one page.
+    @classmethod
+    def get_menu_page_list(
+                cls,
+                option_list,
+                more_options_str,
+                max_options_per_page
+            ):
+        ret_pages = []
+
+        if option_list and max_options_per_page and more_options_str:
+            logger.debug("Adding {0} options to page with max of {1} options per page".format(
+                len(option_list),
+                max_options_per_page
+            ))
+
+            done = False
+            remaining_options = option_list
+
+            while not done:
+                options_to_add = []
+
+                if len(remaining_options) <= max_options_per_page:
+                    # We can add all remaining options to this page.
+                    options_to_add = remaining_options
+                    logger.debug("Adding remaining {0} pages to menu page: {1}".format(
+                        len(options_to_add),
+                        options_to_add
+                    ))
+                    done = True
+                else:
+                    # Options will carry on to next page.
+                    options_to_add = remaining_options[0:max_options_per_page - 1]
+                    options_to_add.append(more_options_str)
+                    logger.debug("Adding {0} options plus \"more options\" to menu page: {1}".format(
+                        len(options_to_add) - 1,
+                        options_to_add
+                    ))
+                    remaining_options = remaining_options[max_options_per_page - 1:]
+                    logger.debug("Remaining options: {0}".format(
+                        remaining_options
+                    ))
+
+                if options_to_add:
+                    curr_page = Menu_Page(options_to_add)
+                    ret_pages.append(curr_page)
+
+        return ret_pages
+
+    # Does not update display.
+    def blit_menu_page(
+                self,
+                surface,
+                menu_page,
+                curr_selected_index,
+                orientation=ORIENTATION_LEFT_JUSTIFIED,
+            ):
+        if surface and menu_page and (orientation is not None):
+            num_options = menu_page.get_num_options()
+
+            if num_options <= self.max_options_per_page:
+                # Blit background.
+                self.blit_background(surface)
+
+                vertical_offset = 0
+
+                for index in range(num_options):
+                    curr_option = menu_page.get_option(index)
+
+                    # Get rendered text and dimensions.
+                    rendered_text = self.font_object.render(
+                        curr_option,
+                        False,
+                        self.font_color,
+                    )
+
+                    rendered_text_dimensions = rendered_text.get_size()
+                    text_width = rendered_text_dimensions[0]
+                    text_height = rendered_text_dimensions[1]
+
+                    text_top_left = None
+
+                    if orientation == ORIENTATION_CENTERED:
+                        # Get top left for centered option text.
+                        # Center the text horizontally.
+                        text_top_left = (
+                            self.text_center_x - int(text_width / 2),
+                            self.text_top_left_pixel[1] + vertical_offset
+                        )
+                    elif orientation == ORIENTATION_LEFT_JUSTIFIED:
+                        # Left justify the text.
+                        text_top_left = (
+                            self.text_top_left_pixel[0],
+                            self.text_top_left_pixel[1] + vertical_offset
+                        )
+
+                    if text_top_left:
+                        # Blit the text.
+                        surface.blit(
+                            rendered_text,
+                            text_top_left
+                        )
+
+                        # Blit the selection icon if we are on the selected index.
+                        if index == curr_selected_index and self.selection_icon:
+                            # Vertically center the selection icon with the option.
+                            icon_top_left = (
+                                text_top_left[0] \
+                                    - self.selection_icon.get_width()
+                                    - SELECTION_ICON_HORIZ_SPACE,
+                                text_top_left[1] \
+                                    + int(text_height / 2) \
+                                    - int(self.selection_icon.get_height() / 2)
+                            )
+
+                            surface.blit(
+                                self.selection_icon,
+                                icon_top_left
+                            )
+
+                    # Advance.
+                    vertical_offset = vertical_offset \
+                        + int(self.spacing_factor_between_lines * text_height)
+
+    # Orientation can be centered or left justified (default).
+    # Returns option that was selected (None if menu was exited without
+    # selecting option).
+    def display_self(
+                self,
+                surface,
+                option_list,
+                more_options_str,
+                orientation=ORIENTATION_LEFT_JUSTIFIED,
+                load_delay_ms=DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+            ):
+        ret_option = None
+
+        if surface and option_list and more_options_str and (orientation is not None):
+            # Get list of menu pages.
+            menu_pages = Menu_Display.get_menu_page_list(
+                    option_list,
+                    more_options_str,
+                    self.max_options_per_page,
+                )
+
+            if menu_pages:
+                 # Start at top of menu.
+                curr_selected_index = 0
+
+                # Blit first menu page.
+                curr_page_index = 0
+
+                num_pages = len(menu_pages)
+
+                done = False
+                while not done:
+                    curr_page = menu_pages[curr_page_index]
+                    num_options = len(curr_page.option_list)
+
+                    # Blit the current menu page.
+                    self.blit_menu_page(
+                        surface,
+                        curr_page,
+                        curr_selected_index,
+                        orientation=orientation,
+                    )
+
+                    pygame.display.update()
+
+                    # Wait a bit before allowing user to select options.
+                    if load_delay_ms:
+                        pygame.time.wait(load_delay_ms)
+
+                    # Clear event queue to prevent premature advancement.
+                    #pygame.event.clear() # TODO remove?
+
+                    logger.info("Waiting for user to select a menu option...")
+                    selected = False
+                    while not selected:
+                        timekeeper.Timekeeper.tick()
+                        changed_options = False
+                        curr_option = curr_page.get_option(curr_selected_index)
+
+                        for events in pygame.event.get():
+                            if events.type == pygame.QUIT:
+                                pygame.quit()
+                                sys.exit(0)
+                            elif events.type == pygame.KEYDOWN:
+                                if events.key == pygame.K_DOWN:
+                                    curr_selected_index = (curr_selected_index + 1) % num_options
+                                    logger.info("Advancing to next option {0}".format(
+                                        curr_option
+                                    ))
+                                    changed_options = True
+
+                                    pygame.display.update()
+                                elif events.key == pygame.K_UP:
+                                    curr_selected_index = (curr_selected_index - 1) % num_options
+                                    logger.info("Advancing to previous option {0}".format(
+                                        curr_option
+                                    ))
+                                    changed_options = True
+                                elif events.key in MENU_OPTION_EXIT_KEYS:
+                                    # Exit without selecting option.
+                                    selected = True
+                                    done = True
+                                    ret_option = None
+                                    logger.info("Leaving menu without selecting option.")
+                                elif events.key in MENU_OPTION_SELECT_KEYS:
+                                    # We selected the current option.
+                                    selected = True
+                                    logger.info("Selecting option {0}".format(
+                                        curr_option
+                                    ))
+
+                                    if curr_option == more_options_str:
+                                        # Go to next page and don't return.
+                                        curr_page_index = (curr_page_index + 1) % num_pages
+                                        curr_selected_index = 0
+                                        logger.info("Moving to next menu page.")
+                                    else:
+                                        # Selected a valid option.
+                                        done = True
+                                        ret_option = curr_option
+                                        logger.info("Selected option {0}".format(
+                                            ret_option
+                                        ))
+
+                        if changed_options:
+                            # Reblit menu page with new selected option.
+                            self.blit_menu_page(
+                                surface,
+                                curr_page,
+                                curr_selected_index,
+                                orientation=orientation,
+                            )
+
+                            pygame.display.update()
+
+                            # Delay before allowing user to go to next option.
+                            if option_switch_delay_ms:
+                                pygame.time.wait(option_switch_delay_ms)
+
+                            # Clear event queue to prevent premature advancement.
+                            #pygame.event.clear() # TODO remove?
+
+        logger.info("returning option {0}".format(ret_option))
+        return ret_option
+
+    # TODO - set up display method
+    # display_curr_options(option list, selected_option_index)
+    #   make sure len(option list) <= max options per page
+    # display menu(option list)
+    #   if num options <= max options per page, we good
+    #   else, show max num options - 1 and then make last option
+    #   "MORE"
+    #   if more is selected, go to next page, etc
 
 # set up logger
 logging.basicConfig(level=logging.INFO)

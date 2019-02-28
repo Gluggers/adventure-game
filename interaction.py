@@ -255,6 +255,14 @@ class Interaction():
                                 # We generated a resource.
                                 logger.info("Gathered resource!")
 
+                                # Display the resource gather message.
+                                if resource_gather_text:
+                                    game_object.display_bottom_first_text_page(
+                                        resource_gather_text,
+                                        auto_advance=False,
+                                        refresh_after=True,
+                                    )
+
                                 # TODO handle all the item stuff here.
                                 acting_object.add_item_to_inventory(gained_resource.item_id)
 
@@ -264,6 +272,8 @@ class Interaction():
                                     skill_id,
                                     resource_exp,
                                 )
+
+                                game_object.refresh_and_blit_overworld()
 
                                 # Stop skilling if we level up.
                                 if levels_gained and levels_gained > 0:
@@ -303,16 +313,6 @@ class Interaction():
                                             object_id=original_id,
                                             countdown_time_s=respawn_time_s,
                                         )
-
-                                    game_object.refresh_and_blit_overworld()
-
-                                # Display the resource gather message.
-                                if resource_gather_text:
-                                    game_object.display_bottom_first_text_page(
-                                        resource_gather_text,
-                                        auto_advance=False,
-                                        refresh_after=True,
-                                    )
 
                                 game_object.refresh_and_blit_overworld()
 
