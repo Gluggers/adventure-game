@@ -2,7 +2,8 @@
 # [1] Lanea Zimmerman - https://sharm.itch.io/
 #      https://sharm.itch.io/tiny16
 # [2] 0x72 - https://0x72.itch.io/dungeontileset-ii
-# [3] Antifarea, opengameart - https://opengameart.org/content/twelve-16x18-rpg-sprites-plus-base
+# [3] Antifarea, opengameart -
+#       https://opengameart.org/content/twelve-16x18-rpg-sprites-plus-base
 # https://opengameart.org/content/antifareas-rpg-sprite-set-1-enlarged-w-transparent-background
 
 ### IMAGE CONSTANTS ###
@@ -14,8 +15,10 @@ PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
 DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
 
 ### DISPLAY IMAGE CONSTANTS ###
-DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH + "text_continue_icon_10x10_dk.png" # [0]
-DEFAULT_MENU_SELECTION_ICON_PATH = DISPLAY_PATH + "menu_selection_icon_10x10_dk.png" # [0]
+DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
+                                + "text_continue_icon_10x10_dk.png" # [0]
+DEFAULT_MENU_SELECTION_ICON_PATH = DISPLAY_PATH \
+                                + "menu_selection_icon_10x10_dk.png" # [0]
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_lz.png" # [1]

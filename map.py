@@ -127,6 +127,7 @@ class Map:
                     # TODO ERROR MESSAGE
                     logger.error("Invalid grid format - check grid dimensions")
                     valid_grid_dimensions = False
+                    pygame.quit()
                     sys.exit(1)
 
             if valid_grid_dimensions:
@@ -140,6 +141,7 @@ class Map:
                         if (x is not None) and (x.__class__.__name__ != tile.TILE_CLASS):
                             logger.error("Tile grids can only accept None or Tile objects")
                             valid_grid_dimensions = False
+                            pygame.quit()
                             sys.exit(1)
 
                     row_to_copy = [x for x in grid_row]

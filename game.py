@@ -20,6 +20,7 @@ import savefiledata
 import pprint
 import time
 import items
+import menuoptions
 
 logger = None
 
@@ -32,32 +33,12 @@ DIFFICULTY_HARD = 0x1
 
 DEFAULT_SAVE_FILE_NAME = "savegame.pkl"
 
-OVERWORLD_MENU_OPTION_INFO = {
-    language.LANG_ENGLISH: [
-        "Inventory",
-        "Equipment",
-        "Stats",
-        "Quests",
-        "Configuration",
-        "Quit Game"
-    ],
-    language.LANG_ESPANOL: [
-        "Inventario",
-        "Equipo",
-        "Niveles",
-        "Misiones",
-        "Configuracion",
-        "Salir de juego"
-    ],
-}
-
-OVERWORLD_MENU_MORE_OPTION_INFO = {
-    language.LANG_ENGLISH: "More Options...",
-    language.LANG_ESPANOL: "Mas Opciones...",
-}
-
 class Game():
-    def __init__(self, game_name, game_language=language.DEFAULT_LANGUAGE):
+    def __init__(
+                self,
+                game_name,
+                game_language=language.DEFAULT_LANGUAGE,
+            ):
         if game_name and game_name:
             # will change as game progresses
             self.protagonist = None
@@ -65,19 +46,23 @@ class Game():
             self.game_language = game_language
 
             # create main display screen
-            self.main_display_screen = pygame.display.set_mode(             \
-                (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)   \
+            self.main_display_screen = pygame.display.set_mode(
+                (
+                    viewingdata.MAIN_DISPLAY_WIDTH,
+                    viewingdata.MAIN_DISPLAY_HEIGHT
+                )
             )
 
             pygame.display.set_caption(game_name)
 
             # create initial viewing object
-            self.viewing = viewing.Viewing.create_viewing(
-                self.main_display_screen,
-                display_language=self.game_language,
-            )
+            self.overworld_viewing = \
+                viewing.Overworld_Viewing.create_overworld_viewing(
+                    self.main_display_screen,
+                    display_language=self.game_language,
+                )
 
-            if not self.viewing:
+            if not self.overworld_viewing:
                 logger.error("Failed to create viewing object.")
             else:
                 logger.debug("Created viewing object.")
@@ -88,38 +73,39 @@ class Game():
     # TODO document
     # centers map automatically depending on where protagonist is
     # DOES NOT UPDATE SURFACE
-    def set_and_blit_current_game_map(                                      \
-                self,                                                       \
-                curr_map_id,                                                \
-                protag_tile_location=(0,0),                                 \
-                default_color=viewingdata.COLOR_BLACK                           \
+    def set_and_blit_current_game_map(
+                self,
+                curr_map_id,
+                protag_tile_location=(0,0),
+                default_color=viewingdata.COLOR_BLACK,
             ):
         curr_map = map.Map.get_map(curr_map_id)
 
         if curr_map and protag_tile_location:
             self.curr_map = curr_map
-            self.viewing.curr_map = curr_map
+            self.overworld_viewing.curr_map = curr_map
             self.curr_map.protagonist_location = protag_tile_location
 
             # TODO - check if protag tile location is not collision-bound?
 
-            self.viewing.set_and_blit_map_on_view(
+            self.overworld_viewing.set_and_blit_map_on_view(
                 protag_tile_location,
                 default_color
             )
 
-            logger.info("Protag location: {0}".format(self.curr_map.protagonist_location))
+            logger.info(
+                "Protag location: {0}".format(
+                    self.curr_map.protagonist_location
+                )
+            )
 
     # TODO
     def build_protagonist(self, name):
         protagonist = entity.Protagonist.protagonist_factory(name)
 
-        # associate protag with game and viewing
+        # Associate protag with game and viewing.
         self.protagonist = protagonist
-        self.viewing.protagonist = protagonist
-
-        # Add protagonist to object listing
-        interactiveobj.Interactive_Object.interactive_obj_listing[objdata.PROTAGONIST_ID] = protagonist
+        self.overworld_viewing.protagonist = protagonist
 
     def set_protagonist_tile_position(self, new_position):
         if new_position and self.protagonist and self.curr_map:
@@ -135,7 +121,12 @@ class Game():
     # updates display screen
     # TODO document and change
     """
-    def change_current_map(self, dest_map, protag_dest_tile_pos, default_color=viewingdata.COLOR_BLACK):
+    def change_current_map(
+                self,
+                dest_map,
+                protag_dest_tile_pos,
+                default_color=viewingdata.COLOR_BLACK
+            ):
         if dest_map and protag_dest_tile_pos:
             # set and blit map
             self.set_and_blit_current_game_map(dest_map, protag_dest_tile_loc)
@@ -143,7 +134,11 @@ class Game():
             self.set_protagonist_tile_position(protag_dest_tile_loc)
 
             # blit protagonist
-            self.viewing.blit_interactive_object_bottom_left(self.protagonist, objdata.OW_IMAGE_ID_DEFAULT, viewingdata.CENTER_OW_TILE_BOTTOM_LEFT)
+            self.overworld_viewing.blit_interactive_object_bottom_left(
+                self.protagonist,
+                objdata.OW_IMAGE_ID_DEFAULT,
+                viewingdata.CENTER_OW_TILE_BOTTOM_LEFT
+            )
 
             # update screen
             pygame.display.update()
@@ -185,19 +180,30 @@ class Game():
         if self.curr_map.location_within_bounds(intended_dest_tile_loc):
             # Check if the destination tile is reachable with given
             # transportation type.
-            if self.curr_map.valid_transportation(intended_dest_tile_loc, transportation_type):
+            if self.curr_map.valid_transportation(
+                        intended_dest_tile_loc,
+                        transportation_type
+                    ):
                 # Check if the intended dest tile is occupied by
                 # an interactive object.
                 if self.curr_map.tile_occupied(intended_dest_tile_loc):
                     # Object is in the way.
-                    logger.debug("Cannot move to occupied dest tile {0}".format(intended_dest_tile_loc))
+                    logger.debug(
+                        "Cannot move to occupied dest tile {0}".format(
+                            intended_dest_tile_loc
+                        )
+                    )
                 else:
                     # We can move here.
                     real_dest_tile_loc = intended_dest_tile_loc
                     can_move = True
             else:
-                logger.debug("Cannot move to destination tile {0} " + \
-                    "with transportation type {1}".format(intended_dest_tile_loc, transportation_type))
+                logger.debug(
+                    "Cannot move to destination tile {0} " + \
+                    "with transportation type {1}".format(
+                        intended_dest_tile_loc, transportation_type
+                    )
+                )
         else:
             # Check if map has neighbor in the intended direction.
             adj_map_info = self.curr_map.get_adjacent_map_info(protag_move_dir)
@@ -208,39 +214,62 @@ class Game():
                 dest_map = map.Map.get_map(dest_map_id)
                 real_dest_tile_loc = adj_map_info[1]
 
-                # Make sure dest tile is reachable with given transportation method.
-                if dest_map and dest_map.valid_transportation(real_dest_tile_loc, transportation_type):
+                # Make sure dest tile is reachable
+                # with given transportation method.
+                if dest_map \
+                        and dest_map.valid_transportation(
+                            real_dest_tile_loc,
+                            transportation_type
+                        ):
                     # Check if the tile is occupied by an interactive object.
                     if dest_map.tile_occupied(real_dest_tile_loc):
                         # Object is in the way.
-                        logger.debug("Cannot move to occupied dest tile {0}".format(real_dest_tile_loc))
+                        logger.debug(
+                            "Cannot move to occupied dest tile {0}".format(
+                                real_dest_tile_loc
+                            )
+                        )
                     else:
                         # We can move here.
                         can_move = True
                         changing_maps = True
                 else:
-                    logger.debug("Cannot reach tile position {0} on map {1} with \
-                        transportation type {2}".format(real_dest_tile_loc, dest_map_id, transportation_type))
+                    logger.debug(
+                        "Cannot reach tile position {0} on map {1} with" + \
+                        "transportation type {2}".format(
+                            real_dest_tile_loc,
+                            dest_map_id,
+                            transportation_type
+                        )
+                    )
             else:
                 # no adjacent map, we can't move here
-                logger.debug("No adjacent map found in this direction. Can't move out of map boundary")
+                logger.debug(
+                    "No adjacent map found in this direction." \
+                    + " Can't move out of map boundary"
+                )
 
         if can_move:
             # TODO check if collision between protag and dest map/tile
             # change protagonist tile location
             self.set_protagonist_tile_position(real_dest_tile_loc)
-            logger.debug("Moving to destination tile: {0}".format(real_dest_tile_loc))
+            logger.debug(
+                "Moving to destination tile: {0}".format(real_dest_tile_loc)
+            )
 
             if changing_maps:
                 # TODO - Make sure protag maintains facing direction.
                 self.change_current_map(dest_map, real_dest_tile_loc)
-                logger.debug("Changing map - Dest map ID: {0}".format(dest_map_id))
+                logger.debug(
+                    "Changing map - Dest map ID: {0}".format(dest_map_id)
+                )
             else:
                 # same map, just scroll
-                self.viewing.scroll_map_single_tile(map_scroll_dir)
+                self.overworld_viewing.scroll_map_single_tile(map_scroll_dir)
 
                 # Check if the new tile is a connector tile for the map.
-                # If so, switch to the map and tile position. (always call change map method?)
+                # If so, switch to the map and tile position.
+                # (always call change map method?)
                 # Make sure protag maintains facing direction.
 
         return can_move
@@ -248,28 +277,29 @@ class Game():
     # does not update surface - caller will have to do that
     def turn_protagonist(self, direction_to_face):
         # reblit tile that the protagonist is on
-        self.curr_map.blit_tile(                \
-            self.viewing.main_display_surface,  \
-            self.curr_map.protagonist_location,     \
-            viewingdata.CENTER_OW_TILE_TOP_LEFT     \
+        self.curr_map.blit_tile(
+            self.overworld_viewing.main_display_surface,
+            self.curr_map.protagonist_location,
+            viewingdata.CENTER_OW_TILE_TOP_LEFT,
         )
 
         # make protagonist face the direction
-        self.protagonist.face_direction(                            \
-            self.viewing.main_display_surface,                      \
-            direction_to_face,                                      \
-            bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT    \
+        self.protagonist.face_direction(
+            self.overworld_viewing.main_display_surface,
+            direction_to_face,
+            bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT,
         )
 
         # refresh viewing and update display.
-        self.refresh_and_blit_overworld()
+        self.refresh_and_blit_overworld_viewing()
 
     # Returns the tile location tuple for the tile that the protagonist
     # is facing.
     def get_protagonist_facing_tile_location(self):
         front_tile_pos = None
 
-        if self.protagonist and (self.protagonist.facing_direction is not None):
+        if self.protagonist \
+                and (self.protagonist.facing_direction is not None):
             front_tile_pos = self.curr_map.get_adjacent_tile_position(
                 self.curr_map.protagonist_location,
                 self.protagonist.facing_direction
@@ -301,9 +331,10 @@ class Game():
 
                 if level_up_message:
                     # This will update display.
-                    self.display_bottom_text(
+                    self.display_overworld_bottom_text(
                         level_up_message,
                         refresh_after=True,
+                        refresh_during=True,
                         auto_advance=False,
                     )
 
@@ -317,9 +348,11 @@ class Game():
                     item_name = item_obj.get_name(self.game_language)
                     logger.info("{0} x{1}".format(item_name, quantity))
                 else:
-                    logger.error("Invalid item with ID {0} in inventory.".format(
-                        item_id
-                    ))
+                    logger.error(
+                        "Invalid item with ID {0} in inventory.".format(
+                            item_id
+                        )
+                    )
                     break
 
     def toggle_language(self):
@@ -335,46 +368,51 @@ class Game():
     def change_language(self, new_language):
         if new_language is not None:
             self.game_language = new_language
-            self.viewing.change_language(new_language)
+            self.overworld_viewing.change_language(new_language)
 
     # Updates display.
-    def refresh_and_blit_overworld(self):
-        self.viewing.refresh_and_blit_overworld()
+    def refresh_and_blit_overworld_viewing(self):
+        self.overworld_viewing.refresh_and_blit_self()
         pygame.display.update()
 
     # Blits text in bottom text box.
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
-    def display_bottom_text(
+    def display_overworld_bottom_text(
                 self,
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
-                refresh_after=False
+                refresh_after=True,
+                refresh_during=True,
             ):
-        if text and self.viewing:
+        if text and self.overworld_viewing:
             # Display text at bottom of screen.
-            self.viewing.display_bottom_text(
+            self.overworld_viewing.display_bottom_text(
                 text,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
                 refresh_after=refresh_after,
+                refresh_during=refresh_during,
             )
+
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
-    def display_bottom_first_text_page(
+    def display_overworld_bottom_text_first_page(
                 self,
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
-                refresh_after=False,
+                refresh_after=True,
+                refresh_during=True,
             ):
-        if text and self.viewing:
-            self.viewing.display_bottom_first_text_page(
+        if text and self.overworld_viewing:
+            self.overworld_viewing.display_bottom_text_first_page(
                 text,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
                 refresh_after=refresh_after,
+                refresh_during=refresh_during,
             )
 
     # Have protagonist interact with object.
@@ -385,9 +423,10 @@ class Game():
             interact_method = None
 
             if interaction_id is not None:
-                interact_method = interaction.Interaction.get_interaction_method(
-                    interaction_id
-                )
+                interact_method = \
+                    interaction.Interaction.get_interaction_method(
+                        interaction_id
+                    )
             else:
                 logger.info("No interaction ID set for the object.")
 
@@ -419,11 +458,15 @@ class Game():
                 object_id=None,
                 countdown_time_s=0,
             ):
-        logger.info("Setting spawn action for tile loc {0} using obj id {1} with countdown {2}".format(
-            bottom_left_tile_loc,
-            object_id,
-            countdown_time_s
-        ))
+        logger.info(
+            ("Setting spawn action for tile loc {0} " \
+            + "using obj id {1} with countdown {2}").format(
+                bottom_left_tile_loc,
+                object_id,
+                countdown_time_s
+            )
+        )
+
         if map_obj and bottom_left_tile_loc:
             map_obj.set_pending_spawn_action(
                 bottom_left_tile_loc,
@@ -449,7 +492,8 @@ class Game():
         save_data = {}
 
         save_data[savefiledata.CURRENT_MAP_ID] = self.curr_map.map_id
-        save_data[savefiledata.CURRENT_PROTAG_TILE_LOCATION] = self.get_protagonist_tile_position()
+        save_data[savefiledata.CURRENT_PROTAG_TILE_LOCATION] = \
+            self.get_protagonist_tile_position()
         save_data[savefiledata.GAME_LANGUAGE] = self.game_language
 
         # TODO implement further
@@ -491,54 +535,71 @@ class Game():
 
         # Debugging
         logger.debug("Curr game language: {0}".format(self.game_language))
-        logger.debug("Protag location: {0}".format(self.get_protagonist_tile_position()))
+        logger.debug(
+            "Protag location: {0}".format(self.get_protagonist_tile_position())
+        )
 
     def display_statistics(self, target_entity):
         # Debugging for now. TODO.
         if target_entity:
             logger.info("Stats (level, curr exp, exp to next level):")
             for skill_id in skills.SKILL_ID_LIST:
-                skill_name = skills.get_skill_name(skill_id, self.game_language)
+                skill_name = skills.get_skill_name(
+                        skill_id,
+                        self.game_language
+                    )
                 level = target_entity.get_skill_level(skill_id)
                 curr_exp = target_entity.get_skill_experience(skill_id)
-                remaining_exp = target_entity.get_experience_to_next_level(skill_id)
+                remaining_exp = target_entity.get_experience_to_next_level(
+                        skill_id
+                    )
 
                 if skill_name \
                         and (level is not None) \
                         and (curr_exp is not None) \
                         and (remaining_exp is not None):
-                    logger.info("{0}: Level {1}; Curr Exp {2}; Remaining Exp {3}".format(
-                        skill_name,
-                        level,
-                        curr_exp,
-                        remaining_exp
-                    ))
-
-    def get_overworld_menu_options(self):
-        return OVERWORLD_MENU_OPTION_INFO.get(
-            self.game_language,
-            []
-        )
+                    logger.info(
+                        ("{0}: Level {1}; Curr Exp {2};" \
+                        + " Remaining Exp {3}").format(
+                            skill_name,
+                            level,
+                            curr_exp,
+                            remaining_exp
+                        )
+                    )
 
     def get_overworld_more_menu_option_str(self):
-        return OVERWORLD_MENU_MORE_OPTION_INFO.get(
+        return menuoptions.OVERWORLD_MENU_MORE_OPTION_INFO.get(
             self.game_language,
             ""
         )
 
-    def display_overworld_side_menu(self):
-        ret_option = None
-        # Get menu options.
-        menu_options = self.get_overworld_menu_options()
-        more_options_str = self.get_overworld_more_menu_option_str()
+    # Returns option ID of selected option, None if none selected.
+    def display_overworld_side_menu(
+                self,
+                refresh_after=True,
+                refresh_during=True,
+            ):
 
-        if menu_options and more_options_str:
-            ret_option = self.viewing.display_overworld_side_menu(
-                menu_options,
-                more_options_str,
-            )
+        ret_option_id = self.overworld_viewing.display_overworld_side_menu(
+            menuoptions.OVERWORLD_MENU_OPTION_IDS,
+            refresh_after=refresh_after,
+            refresh_during=refresh_during,
+        )
 
-        return ret_option
+        return ret_option_id
+
+    def process_overworld_menu_option(self, option_id):
+        if option_id == menuoptions.QUIT_GAME_OPTION_ID:
+            logger.info("Quitting game from menu.")
+            pygame.quit()
+            sys.exit(0)
+        elif option_id == menuoptions.INVENTORY_OPTION_ID:
+            logger.info("Displaying inventory from menu.")
+            self.display_inventory(self.protagonist)
+        elif option_id == menuoptions.STATS_OPTION_ID:
+            logger.info("Displaying stat levels from menu.")
+            self.display_statistics(self.protagonist)
 
     def handle_overworld_loop(self):
         continue_playing = True
@@ -567,7 +628,7 @@ class Game():
 
             # TODO: update map
             if num_ticks % timekeeper.REFRESH_INTERVAL_NUM_TICKS == 0:
-                self.refresh_and_blit_overworld()
+                self.refresh_and_blit_overworld_viewing()
 
             interact_in_front = False
             examine_in_front = False
@@ -631,9 +692,19 @@ class Game():
                         logger.info("Displaying menu.")
                         # TODO get menu options.
                         # TESTING.
-                        selected_option = self.display_overworld_side_menu()
-                        logger.info("Selected option: {0}".format(selected_option))
-                        self.refresh_and_blit_overworld()
+                        selected_option_id = self.display_overworld_side_menu()
+                        logger.info(
+                            "Selected option: {0}, ID {1}".format(
+                                menuoptions.get_option_name(
+                                    selected_option_id,
+                                    self.game_language
+                                ),
+                                selected_option_id,
+                            )
+                        )
+                        self.refresh_and_blit_overworld_viewing()
+
+                        self.process_overworld_menu_option(selected_option_id)
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -662,18 +733,26 @@ class Game():
                 self.turn_protagonist(protag_move_dir)
 
                 # Blit top display on top of the current viewing.
-                #self.viewing.blit_top_display()
+                #self.overworld_viewing.blit_top_display()
 
                 # Update display to reflect blit changes.
                 #pygame.display.update()
 
                 # Attempt to move the protagonist.
                 if self.move_protagonist(protag_move_dir, transport_type):
-                    logger.debug("Protagonist tile_pos: {0}".format(self.curr_map.protagonist_location))
-                    logger.debug("Map top left now at {0}".format(self.curr_map.top_left_position))
+                    logger.debug(
+                        "Protagonist tile_pos: {0}".format(
+                            self.curr_map.protagonist_location
+                        )
+                    )
+                    logger.debug(
+                        "Map top left now at {0}".format(
+                            self.curr_map.top_left_position
+                        )
+                    )
 
                     # Update map and display.
-                    self.refresh_and_blit_overworld()
+                    self.refresh_and_blit_overworld_viewing()
             elif interact_in_front or examine_in_front:
                 logger.debug("Trying to interact/examine in front")
 
@@ -684,14 +763,18 @@ class Game():
 
                 # See if the map has an interactive object whose collision
                 # space takes up the facing tile.
-                inter_obj = self.curr_map.get_object_occupying_tile(front_tile_pos)
+                inter_obj = self.curr_map.get_object_occupying_tile(
+                        front_tile_pos
+                    )
 
                 # Get bottom left tile of object.
                 obj_bottom_left_tile_pos = \
                     self.get_bottom_left_tile_of_occupied_tile(front_tile_pos)
 
                 if inter_obj and obj_bottom_left_tile_pos:
-                    logger.debug("Facing object {0}".format(inter_obj.object_id))
+                    logger.debug(
+                        "Facing object {0}".format(inter_obj.object_id)
+                    )
 
                     if interact_in_front:
                         # Interact with object.
@@ -701,18 +784,12 @@ class Game():
                         )
                     elif examine_in_front:
                         # Display examine text at bottom of screen.
-                        self.display_bottom_text(
+                        self.display_overworld_bottom_text(
                             inter_obj.get_examine_info(self.game_language),
                             refresh_after=True,
+                            refresh_during=True,
                         )
-                        #self.viewing.display_bottom_text(inter_obj.get_examine_info(self.game_language))
 
-                        # Refresh map
-                        #self.viewing.refresh_ow_viewing()
-
-                        #pygame.display.update()
-
-                        #logger.debug("EXAMINE INFO: {0}".format(inter_obj.get_examine_info(self.game_language)))
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

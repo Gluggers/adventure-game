@@ -74,11 +74,11 @@ def main():
     game_obj.set_and_blit_current_game_map(mapdata.R0_A0_ID, protag_tile_loc)
 
     # blit protagonist
-    game_obj.viewing.blit_interactive_object(
-        game_obj.protagonist,
-        imageids.OW_IMAGE_ID_DEFAULT,
-        bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT,
-    )
+    #game_obj.viewing.blit_interactive_object(
+        #game_obj.protagonist,
+        #imageids.OW_IMAGE_ID_DEFAULT,
+        #bottom_left_pixel=viewingdata.CENTER_OW_TILE_BOTTOM_LEFT,
+    #)
 
     # update screen
     pygame.display.update()

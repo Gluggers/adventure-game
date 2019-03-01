@@ -7,8 +7,11 @@ import display
 import objdata
 import language
 import imageids
+import menuoptions
 import viewingdata
 import imagepaths
+import timekeeper
+import sys
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -22,45 +25,430 @@ SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
 
 VIEWING_TILE_PADDING = 2
 
+# Base Viewing class.
 class Viewing():
     ### INITIALIZER METHODS ###
 
     def __init__(
                 self,
                 main_display_surface,
-                protagonist=None,
-                curr_map=None,
                 display_language=language.DEFAULT_LANGUAGE,
             ):
         self.main_display_surface = main_display_surface
+        self.display_language = display_language
+        self.displays = {}
+
+    ### GETTERS AND SETTERS ###
+    def change_language(self, new_language):
+        if new_language is not None:
+            for display_id, viewing_display in self.displays.items():
+                if viewing_display:
+                    viewing_display.display_language = new_language
+
+            # Update self.
+            self.refresh_and_blit_self()
+
+    ### DISPLAY HANDLING METHODS ###
+
+    # Refreshes self. Does not update display.
+    def refresh_self(self):
+        pass
+
+    # Does not update display.
+    def blit_self(self):
+        pass
+
+    # Updates and blits self.
+    # Does not update display - caller must do that.
+    def refresh_and_blit_self(self):
+        self.refresh_self()
+        self.blit_self()
+
+    def display_single_text_page(
+                self,
+                text_display,
+                page,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+                refresh_during=True,
+            ):
+        if page and text_display and self.main_display_surface:
+            text_display.blit_page(
+                self.main_display_surface,
+                page,
+            )
+            pygame.display.update()
+
+            # Pause if needed.
+            if advance_delay_ms:
+                pygame.time.wait(advance_delay_ms)
+
+            if not auto_advance:
+                # Refresh and reblit self.
+                if refresh_during:
+                    self.refresh_and_blit_self()
+                    pygame.display.update()
+
+                # Reblit page but with continue icon if available.
+                text_display.blit_page(
+                    self.main_display_surface,
+                    page,
+                    show_continue_icon=True,
+                )
+
+                pygame.display.update()
+
+                # Clear event queue to prevent premature advancement.
+                pygame.event.clear()
+
+                # Wait for user to advance.
+                advance = False
+                refresh_tick_counter = 0
+
+                logger.debug("Waiting to advance...")
+
+                while not advance:
+                    timekeeper.Timekeeper.tick()
+                    refresh_tick_counter = (refresh_tick_counter + 1) \
+                                    % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+
+                    if refresh_during \
+                            and (refresh_tick_counter == 0):
+                        # Refresh and reblit self and page.
+                        logger.debug("Refreshing while waiting.")
+                        self.refresh_and_blit_self()
+                        text_display.blit_page(
+                            self.main_display_surface,
+                            page,
+                            show_continue_icon=True,
+                        )
+                        pygame.display.update()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key in viewingdata.TEXT_ADVANCE_KEYS:
+                                logger.debug("Advancing to next page")
+                                advance = True
+
+    # If refresh_after is True, refreshes
+    # and blits self and updates display after all pages.
+    # If refresh_during is True, refreshes and blits self and updates display
+    # while waiting for advancement and in between pages.
+    def display_text_display(
+                self,
+                text_display,
+                text_to_display,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+                refresh_during=True,
+                refresh_after=True,
+            ):
+        if self.main_display_surface and text_display and text_to_display:
+            # Get the pages.
+            page_list = text_display.get_text_pages(text_to_display)
+
+            logger.debug("Blitting {0} page(s)".format(len(page_list)))
+
+            if page_list:
+                # Display each text page.
+                for page in page_list:
+                    self.display_single_text_page(
+                        text_display,
+                        page,
+                        advance_delay_ms=advance_delay_ms,
+                        auto_advance=auto_advance,
+                        refresh_during=refresh_during,
+                    )
+
+                    # Refresh and reblit self.
+                    if refresh_during:
+                        self.refresh_and_blit_self()
+                        pygame.display.update()
+
+            if refresh_after:
+                self.refresh_and_blit_self()
+                pygame.display.update()
+
+    # If refresh_after is True, refreshes
+    # and blits self and updates display after all pages.
+    # If refresh_during is True, refreshes and blits self and updates display
+    # while waiting for advancement and in between pages.
+    def display_text_display_first_page(
+                self,
+                text_display,
+                text_to_display,
+                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                auto_advance=False,
+                refresh_during=True,
+                refresh_after=True,
+            ):
+        if text_to_display and self.main_display_surface and text_display:
+            # Get the pages.
+            page_list = text_display.get_text_pages(text_to_display)
+            num_pages = len(page_list)
+
+            logger.debug("Blitting {0} page(s)".format(num_pages))
+
+            if num_pages > 1:
+                logger.warn("This method only blits first page.")
+                logger.warn("Submitted text is {0} pages.".format(num_pages))
+
+            if page_list:
+                # Display just the first page.
+                self.display_single_text_page(
+                    text_display,
+                    page_list[0],
+                    advance_delay_ms=advance_delay_ms,
+                    auto_advance=auto_advance,
+                    refresh_during=refresh_during,
+                )
+
+            if refresh_after:
+                self.refresh_and_blit_self()
+                pygame.display.update()
+
+    # Returns option ID for selected option, None if no option selected.
+    def display_menu_display(
+                self,
+                menu_display,
+                option_id_list,
+                orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                refresh_during=True,
+                refresh_after=True,
+            ):
+        ret_option_id = None
+        menu_pages = []
+
+        if self.main_display_surface \
+                and menu_display \
+                and option_id_list:
+            # Get list of menu pages.
+            menu_pages = menu_display.get_menu_page_list(option_id_list)
+
+        if menu_pages:
+             # Start at top of menu.
+            curr_selected_index = 0
+
+            # Blit first menu page.
+            curr_page_index = 0
+
+            num_pages = len(menu_pages)
+
+            done = False
+            refresh_tick_counter = 0
+
+            while not done:
+                curr_page = menu_pages[curr_page_index]
+                num_options = len(curr_page.option_id_list)
+                curr_option_id = None
+
+                # Blit the current menu page.
+                menu_display.blit_menu_page(
+                    self.main_display_surface,
+                    curr_page,
+                    curr_selected_index,
+                    orientation=orientation,
+                )
+
+                pygame.display.update()
+
+                # Wait a bit before allowing user to select options.
+                if load_delay_ms:
+                    pygame.time.wait(load_delay_ms)
+
+                if refresh_during:
+                    self.refresh_and_blit_self()
+                    # Blit the current menu page.
+                    menu_display.blit_menu_page(
+                        self.main_display_surface,
+                        curr_page,
+                        curr_selected_index,
+                        orientation=orientation,
+                    )
+                    pygame.display.update()
+
+                # Clear event queue to prevent premature advancement.
+                #pygame.event.clear() # TODO remove?
+
+                logger.debug("Waiting for user to select a menu option...")
+                selected = False
+                while not selected:
+                    timekeeper.Timekeeper.tick()
+
+                    next_option = False
+                    prev_option = False
+
+                    refresh_tick_counter = (refresh_tick_counter + 1) \
+                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+
+                    if refresh_during \
+                            and (refresh_tick_counter == 0):
+                        logger.debug("Refreshing while waiting.")
+                        self.refresh_and_blit_self()
+                        menu_display.blit_menu_page(
+                            self.main_display_surface,
+                            curr_page,
+                            curr_selected_index,
+                            orientation=orientation,
+                        )
+                        pygame.display.update()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key == pygame.K_DOWN:
+                                prev_option = False
+                                next_option = True
+                            elif events.key == pygame.K_UP:
+                                prev_option = True
+                                next_option = False
+                            elif events.key in viewingdata.MENU_OPTION_EXIT_KEYS:
+                                # Exit without selecting option.
+                                selected = True
+                                done = True
+                                ret_option = None
+                                prev_option = False
+                                next_option = False
+
+                                logger.info(
+                                    "Leaving menu without selecting option."
+                                )
+                            elif events.key in viewingdata.MENU_OPTION_SELECT_KEYS:
+                                # We selected the current option.
+                                selected = True
+                                prev_option = False
+                                next_option = False
+                                curr_option_id = curr_page.get_option_id(
+                                            curr_selected_index
+                                        )
+
+                                logger.info(
+                                    "Selecting option {0}".format(
+                                         menuoptions.get_option_name(
+                                            curr_option_id,
+                                            self.display_language
+                                        )
+                                    )
+                                )
+
+                                if curr_option_id \
+                                        == menuoptions.MORE_OPTIONS_OPTION_ID:
+                                    # Go to next page and don't return.
+                                    curr_page_index = \
+                                        (curr_page_index + 1) % num_pages
+                                    curr_selected_index = 0
+                                    logger.info(
+                                        "Moving to next menu page."
+                                    )
+                                elif curr_option_id:
+                                    # Selected a valid option.
+                                    done = True
+                                    ret_option_id = curr_option_id
+                                    logger.info(
+                                        "Selected option {0}".format(
+                                         menuoptions.get_option_name(
+                                                ret_option_id,
+                                                self.display_language
+                                            )
+                                        )
+                                    )
+
+                    if (not done) \
+                            and (not selected) \
+                            and (prev_option or next_option):
+                        if prev_option:
+                            curr_selected_index = (curr_selected_index - 1) \
+                                            % num_options
+                            logger.info(
+                                "Advancing to previous option {0}".format(
+                                    menuoptions.get_option_name(
+                                        curr_page.get_option_id(
+                                            curr_selected_index
+                                        ),
+                                        self.display_language
+                                    )
+                                )
+                            )
+                        elif next_option:
+                            curr_selected_index = (curr_selected_index + 1) \
+                                            % num_options
+                            logger.info(
+                                "Advancing to next option {0}".format(
+                                    menuoptions.get_option_name(
+                                        curr_page.get_option_id(
+                                            curr_selected_index
+                                        ),
+                                        self.display_language
+                                    )
+                                )
+                            )
+
+                        if refresh_during:
+                            self.refresh_and_blit_self()
+
+                        # Reblit menu page with new selected option.
+                        menu_display.blit_menu_page(
+                            self.main_display_surface,
+                            curr_page,
+                            curr_selected_index,
+                            orientation=orientation,
+                        )
+                        pygame.display.update()
+
+                        # Delay before allowing user to go to next option.
+                        if option_switch_delay_ms:
+                            pygame.time.wait(option_switch_delay_ms)
+
+                        if refresh_during:
+                            self.refresh_and_blit_self()
+                            menu_display.blit_menu_page(
+                                self.main_display_surface,
+                                curr_page,
+                                curr_selected_index,
+                                orientation=orientation,
+                            )
+                            pygame.display.update()
+
+                        # Clear event queue to prevent
+                        # premature advancement.
+                        #pygame.event.clear() # TODO remove?
+
+        if refresh_after:
+            self.refresh_and_blit_self()
+            pygame.display.update()
+
+        return ret_option_id
+
+    @classmethod
+    def init_text_surfaces(cls):
+        global DEFAULT_FONT
+        global TOP_DISPLAY_TEXT
+        DEFAULT_FONT = pygame.font.SysFont('Comic Sans MS', 30)
+        TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, viewingdata.COLOR_BLACK)
+
+class Overworld_Viewing(Viewing):
+    def __init__(
+                self,
+                main_display_surface,
+                display_language=language.DEFAULT_LANGUAGE,
+                protagonist=None,
+                curr_map=None,
+            ):
+        Viewing.__init__(
+            self,
+            main_display_surface,
+            display_language=display_language,
+        )
+
         self._protagonist = protagonist
         self.curr_map = curr_map
-        self.display_language=display_language
-
-        # create Rect objects for main display
-        self.top_display_rect = pygame.Rect(                            \
-            viewingdata.TOP_DISPLAY_LOCATION,                         \
-            (viewingdata.TOP_DISPLAY_WIDTH, viewingdata.TOP_DISPLAY_HEIGHT)     \
-        )
-        self.ow_viewing_rect = pygame.Rect(                             \
-            viewingdata.OW_VIEWING_LOCATION,                           \
-            (viewingdata.OW_VIEWING_WIDTH, viewingdata.OW_VIEWING_HEIGHT)   \
-        )
-        self.ow_side_menu_rect = pygame.Rect(                           \
-            viewingdata.OW_SIDE_MENU_LOCATION,                                      \
-            (viewingdata.OW_SIDE_MENU_WIDTH, viewingdata.OW_SIDE_MENU_HEIGHT)                   \
-        )
-        self.main_display_rect = pygame.Rect(                           \
-            viewingdata.MAIN_DISPLAY_LOCATION,                                      \
-            (viewingdata.MAIN_DISPLAY_WIDTH, viewingdata.MAIN_DISPLAY_HEIGHT)                     \
-        )
-
-        self.bottom_text_display_rect = pygame.Rect(
-            viewingdata.BOTTOM_TEXT_DISPLAY_TOP_LEFT[0],
-            viewingdata.BOTTOM_TEXT_DISPLAY_TOP_LEFT[1],
-            viewingdata.BOTTOM_TEXT_DISPLAY_WIDTH,
-            viewingdata.BOTTOM_TEXT_DISPLAY_HEIGHT
-        )
 
         self.top_display = None
         self.bottom_text_display = None
@@ -71,12 +459,16 @@ class Viewing():
         if display.Display.top_display_font:
             self.top_display = display.Top_Display(
                 self.main_display_surface,
-                self.top_display_rect,
+                viewingdata.OW_TOP_DISPLAY_RECT,
                 display.Display.top_display_font,
                 background_color=viewingdata.COLOR_WHITE,
                 protagonist=self._protagonist,
                 display_language=self.display_language,
             )
+            if self.top_display:
+                self.displays[viewingdata.OW_TOP_DISPLAY_ID] = self.top_display
+            else:
+                logger.error("Failed to make top display")
         else:
             logger.error("Top display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
@@ -85,11 +477,15 @@ class Viewing():
         if display.Display.bottom_text_display_font:
             self.bottom_text_display = display.Text_Display(
                 self.main_display_surface,
-                self.bottom_text_display_rect,
+                viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 display.Display.bottom_text_display_font,
                 display_language=self.display_language,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
             )
+            if self.bottom_text_display:
+                self.displays[viewingdata.OW_BOTTOM_TEXT_DISPLAY_ID] = self.bottom_text_display
+            else:
+                logger.error("Failed to make bottom text display")
         else:
             logger.error("Bottom text display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
@@ -99,7 +495,7 @@ class Viewing():
         if display.Display.side_menu_display_font:
             self.side_menu_display = display.Menu_Display(
                 self.main_display_surface,
-                self.ow_side_menu_rect,
+                viewingdata.OW_SIDE_MENU_RECT,
                 display.Display.side_menu_display_font,
                 display_language=self.display_language,
                 background_image_path=None,
@@ -110,12 +506,21 @@ class Viewing():
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
             )
+            if self.side_menu_display:
+                self.displays[viewingdata.OW_SIDE_MENU_DISPLAY_ID] = self.side_menu_display
+            else:
+                logger.error("Failed to make side menu display.")
+        else:
+            logger.error("Side menu display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
         self.create_top_display()
         self.create_bottom_text_display()
         self.create_side_menu_display()
+
 
     ### GETTERS AND SETTERS ###
 
@@ -134,18 +539,6 @@ class Viewing():
             # the top display
             self.top_display.protagonist = value
 
-    def change_language(self, new_language):
-        if new_language is not None:
-            # Need to change language for Top Display.
-            if self.top_display:
-                self.top_display.display_language = new_language
-
-            if self.side_menu_display:
-                self.side_menu_display.display_language = new_language
-
-            # Update self.
-            self.refresh_and_blit_overworld()
-
     ### DISPLAY HANDLING METHODS ###
 
     # blits the top display view onto the main display screen
@@ -154,26 +547,6 @@ class Viewing():
         if self.main_display_surface and self.top_display:
             self.top_display.blit_onto_surface(self.main_display_surface)
 
-            # Add background for top display.
-            #pygame.draw.rect(self.main_display_surface, viewingdata.COLOR_WHITE, \
-                #self.top_display_rect)
-
-            # Blit the top display details
-            #if self._protagonist:
-                #self.main_display_surface.blit(TOP_DISPLAY_TEXT, (0,0))
-
-    """
-    def display_bottom_text(self, text):
-        if text and self.main_display_surface and self.bottom_text_display:
-            self.bottom_text_display.display_text(
-                self.main_display_surface,
-                text
-            )
-
-            # Wait a little after finishing pages.
-            pygame.time.wait(display.BOTTOM_TEXT_DELAY_MS)
-            pygame.event.clear()
-    """
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
     def display_bottom_text(
@@ -181,44 +554,39 @@ class Viewing():
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
-                refresh_after=False,
+                refresh_during=True,
+                refresh_after=True,
             ):
-        if text and self.main_display_surface and self.bottom_text_display:
-            self.bottom_text_display.display_text(
-                self.main_display_surface,
+        if text and self.bottom_text_display:
+            self.display_text_display(
+                self.bottom_text_display,
                 text,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
+                refresh_during=refresh_during,
+                refresh_after=refresh_after,
             )
-
-            # pygame.event.clear()
-
-            if refresh_after:
-                self.refresh_and_blit_overworld()
-                pygame.display.update()
 
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
-    def display_bottom_first_text_page(
+    def display_bottom_text_first_page(
                 self,
                 text,
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
-                refresh_after=False,
+                refresh_during=True,
+                refresh_after=True,
             ):
         if text and self.main_display_surface and self.bottom_text_display:
-            self.bottom_text_display.display_first_text_page(
-                self.main_display_surface,
+            self.display_text_display_first_page(
+                self.bottom_text_display,
                 text,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
+                refresh_during=refresh_during,
+                refresh_after=refresh_after,
             )
 
-            # pygame.event.clear()
-
-            if refresh_after:
-                self.refresh_and_blit_overworld()
-                pygame.display.update()
 
     ### MAP HANDLING METHODS ###
 
@@ -232,7 +600,7 @@ class Viewing():
         # set current map's top left position on display screen
         if self.curr_map and protag_tile_location:
             # Calculate map top left position based on protag location.
-            map_top_left = Viewing.get_centered_map_top_left_pixel(
+            map_top_left = Overworld_Viewing.get_centered_map_top_left_pixel(
                 protag_tile_location
             )
 
@@ -242,7 +610,7 @@ class Viewing():
                 self.curr_map.top_left_position = viewingdata.OW_VIEWING_LOCATION
 
             # Refresh and blit viewing.
-            self.refresh_and_blit_overworld()
+            self.refresh_and_blit_self()
         else:
             logger.error("Missing parameters for setting and blitting map.")
 
@@ -250,7 +618,7 @@ class Viewing():
     # and top display.
     # Does not reblit map or top display - caller will have
     # to do that.
-    def refresh_overworld(self):
+    def refresh_self(self):
         # Update map.
         self.refresh_map()
 
@@ -262,14 +630,14 @@ class Viewing():
         if self.curr_map:
             # Set top left viewing tile to define what portions of map to blit
             top_left_viewing_tile_coord =                           \
-                Viewing.calculate_top_left_ow_viewing_tile(
+                Overworld_Viewing.calculate_top_left_ow_viewing_tile(
                     self.curr_map.top_left_position
                 )
 
             #logger.debug("Top left viewing tile for map at {0}".format(top_left_viewing_tile_coord))
 
             # get subset of tiles to blit
-            tile_subset_rect = Viewing.calculate_tile_viewing_rect(
+            tile_subset_rect = Overworld_Viewing.calculate_tile_viewing_rect(
                 self.curr_map,
                 top_left_viewing_tile_coord
             )
@@ -283,30 +651,35 @@ class Viewing():
 
     def display_overworld_side_menu(
                 self,
-                menu_options,
-                more_options_str,
+                menu_option_ids,
+                refresh_after=True,
+                refresh_during=True,
                 #orientation=display.ORIENTATION_LEFT_JUSTIFIED,
                 #load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
                 #option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
             ):
-        ret_option = None
-        if menu_options and more_options_str:
-            ret_option = self.side_menu_display.display_self(
-                self.main_display_surface,
-                menu_options,
-                more_options_str,
-                #orientation=orientation,
-                #load_delay_ms=load_delay_ms,
-                #option_switch_delay_ms=option_switch_delay_ms,
+        ret_option_id = None
+        if menu_option_ids:
+            # TODO - parent class call display menu
+
+            ret_option_id = self.display_menu_display(
+                self.side_menu_display,
+                menu_option_ids,
+                orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                refresh_after=refresh_after,
+                refresh_during=refresh_during,
             )
-        logger.info("Returning option {0}".format(ret_option))
-        return ret_option
+
+        return ret_option_id
 
     # Blits overworld viewing as is, without updating.
     # Does not update display.
-    def blit_overworld_viewing(self):
+    # OVERRIDES
+    def blit_self(self):
         # Blit background.
-        self.set_viewing_screen_default()
+        self.blit_background()
 
         # Blit map and top display.
         self.blit_map()
@@ -315,15 +688,18 @@ class Viewing():
 
     # Updates and blit current overworld viewing.
     # Does not update display - caller must do that.
-    def refresh_and_blit_overworld(self):
+    # OVERRIDES
+    """
+    def refresh_and_blit_self(self):
         # Blit background.
-        self.set_viewing_screen_default()
+        self.blit_background()
 
         # Refresh and blit map.
         self.refresh_and_blit_map()
 
         # Update top display and blit.
         self.refresh_and_blit_top_display()
+    """
 
     def refresh_top_display(self):
         if self.top_display:
@@ -352,14 +728,16 @@ class Viewing():
     def scroll_map_single_tile(self, direction):
         # get top left viewing tile and tile subset rect to blit
 
-        tile_subset_rect = Viewing.calculate_tile_viewing_rect(         \
-            self.curr_map,                                              \
-            Viewing.calculate_top_left_ow_viewing_tile(                 \
-                self.curr_map.top_left_position                         \
-            )                                                           \
+        tile_subset_rect = Overworld_Viewing.calculate_tile_viewing_rect(
+            self.curr_map,
+            Overworld_Viewing.calculate_top_left_ow_viewing_tile(
+                self.curr_map.top_left_position
+            )
         )
 
-        logger.debug("Tile subset viewing rect for map at {0}".format(tile_subset_rect))
+        logger.debug(
+            "Tile subset viewing rect for map at {0}".format(tile_subset_rect)
+        )
 
         # walk1 for TILE_SIZE/4 duration, stand for TILE_SIZE/4,
         # walk2 for TILE_SIZE/4, stand for TILE_SIZE/4
@@ -368,7 +746,7 @@ class Viewing():
         for i in range(tile.TILE_SIZE):
             # reset the surface screen to default to black for empty map
             # spaces
-            self.set_viewing_screen_default(fill_color=viewingdata.COLOR_BLACK)
+            self.blit_background(fill_color=viewingdata.COLOR_BLACK)
 
             # blit protagonist
             # TODO - have designated spot for protagonist?
@@ -431,7 +809,7 @@ class Viewing():
 
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
-    def set_viewing_screen_default(self, fill_color=viewingdata.COLOR_BLACK):
+    def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
         self.main_display_surface.fill(fill_color)
 
     # blits the obj_to_blit sprite image corresponding to image_type_id
@@ -470,12 +848,12 @@ class Viewing():
             if map_top_left_pixel_pos[0] < 0:
                 # map top left is behind the left side of viewing
                 coord_x = -1 * int(map_top_left_pixel_pos[0] / tile.TILE_SIZE)
-            if map_top_left_pixel_pos[1] >= viewingdata.TOP_DISPLAY_HEIGHT:
+            if map_top_left_pixel_pos[1] >= viewingdata.OW_TOP_DISPLAY_HEIGHT:
                 # map top left is aligned with or below top of overworld viewing
                 coord_y = 0
             else:
                 # map top left is above top of overworld viewing
-                coord_y = -1 * int((map_top_left_pixel_pos[1] - viewingdata.TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
+                coord_y = -1 * int((map_top_left_pixel_pos[1] - viewingdata.OW_TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
 
             ret_coord = (coord_x, coord_y)
             logger.debug("Top left ow viewing tile: {0}, map top left {1}".format(ret_coord, map_top_left_pixel_pos))
@@ -557,14 +935,7 @@ class Viewing():
         return ret_rect
 
     @classmethod
-    def init_text_surfaces(cls):
-        global DEFAULT_FONT
-        global TOP_DISPLAY_TEXT
-        DEFAULT_FONT = pygame.font.SysFont('Comic Sans MS', 30)
-        TOP_DISPLAY_TEXT = DEFAULT_FONT.render('Test text', False, viewingdata.COLOR_BLACK)
-
-    @classmethod
-    def create_viewing(
+    def create_overworld_viewing(
                 cls,
                 main_display_surface,
                 protagonist=None,
@@ -574,7 +945,7 @@ class Viewing():
         ret_viewing = None
 
         if main_display_surface:
-            ret_viewing = Viewing(
+            ret_viewing = Overworld_Viewing(
                 main_display_surface,
                 protagonist=protagonist,
                 curr_map=curr_map,

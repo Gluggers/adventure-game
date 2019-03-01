@@ -75,7 +75,7 @@ class Interaction():
                     ""
                 ).format(target_object.get_name(game_object.game_language))
 
-            game_object.display_bottom_text(
+            game_object.display_overworld_bottom_text(
                 display_text,
                 refresh_after=True,
             )
@@ -101,7 +101,7 @@ class Interaction():
     @classmethod
     def display_inventory_full_message(cls, game_object):
         if game_object:
-            game_object.display_bottom_text(
+            game_object.display_overworld_bottom_text(
                 INVENTORY_FULL_MESSAGE_INFO.get(
                     game_object.game_language,
                     ""
@@ -128,7 +128,7 @@ class Interaction():
                 intro_skilling_text=None,
             ):
         if game_object \
-                and game_object.viewing \
+                and game_object.overworld_viewing \
                 and acting_object \
                 and target_object   \
                 and acting_object_loc   \
@@ -157,29 +157,32 @@ class Interaction():
                         ""
                     ).format(required_level, skill_name)
 
-                game_object.display_bottom_text(
+                game_object.display_overworld_bottom_text(
                     reject_message,
                     auto_advance=False,
                     advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                     refresh_after=True,
+                    refresh_during=True,
                 )
             # TODO equipment check
             else:
                 # Display intro skilling text if needed.
                 if intro_skilling_text:
-                    game_object.display_bottom_text(
+                    game_object.display_overworld_bottom_text(
                         intro_skilling_text,
                         auto_advance=False,
                         advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                         refresh_after=True,
+                        refresh_during=True,
                     )
 
                 # Display main skilling text. Pause before we start skilling.
-                game_object.display_bottom_first_text_page(
+                game_object.display_overworld_bottom_text_first_page(
                     main_skilling_text,
                     auto_advance=True,
                     advance_delay_ms=GATHERING_START_DELAY_MS,
                     refresh_after=False,
+                    refresh_during=False
                 )
 
                 logger.info("Beginning gathering.")
@@ -194,19 +197,24 @@ class Interaction():
 
                 # TODO consider cases of boosted EXP
                 resource_gather_text = None
-                gained_resource = items.Item.get_item(target_object.resource_item)
+                gained_resource = items.Item.get_item(
+                            target_object.resource_item
+                        )
                 resource_exp = target_object.gained_xp
                 if gained_resource:
-                    resource_gather_text = interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
-                        interaction_id,
-                        {}
-                    ).get(
-                        game_object.game_language,
-                        ""
-                    ).format(
-                        gained_resource.get_name(game_object.game_language),
-                        resource_exp
-                    )
+                    resource_gather_text = \
+                        interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
+                            interaction_id,
+                            {}
+                        ).get(
+                            game_object.game_language,
+                            ""
+                        ).format(
+                            gained_resource.get_name(
+                                game_object.game_language
+                            ),
+                            resource_exp
+                        )
 
                 while skilling and not resource_exhausted:
                     timekeeper.Timekeeper.tick()
@@ -214,19 +222,22 @@ class Interaction():
                     num_skill_ticks = num_skill_ticks + 1
 
                     # TODO set next character image ID for skilling.
-                    if num_skill_ticks % GATHERING_IMAGE_INTERVAL_NUM_TICKS == 0:
+                    if (num_skill_ticks \
+                            % GATHERING_IMAGE_INTERVAL_NUM_TICKS) == 0:
                         logger.debug("Switch image IDs here.")
 
-                    if num_skill_ticks % timekeeper.REFRESH_INTERVAL_NUM_TICKS == 0:
+                    if (num_skill_ticks \
+                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS) == 0:
                         # Refresh and reblit overworld.
-                        game_object.refresh_and_blit_overworld()
+                        game_object.refresh_and_blit_overworld_viewing()
 
                     # This will update display for us.
-                    game_object.display_bottom_first_text_page(
+                    game_object.display_overworld_bottom_text_first_page(
                         main_skilling_text,
                         auto_advance=True,
                         advance_delay_ms=0,
                         refresh_after=False,
+                        refresh_during=False,
                     )
 
                     # Check if user is ending early by pressing a valid key.
@@ -243,100 +254,113 @@ class Interaction():
 
                     if exit_key_pressed:
                         skilling = False
+
                     # Chance to generate a resource after every gathering
                     # interval.
-                    elif (num_skill_ticks % GATHERING_INTERVAL_NUM_TICKS) == 0:
-                            # Check if we have generated a resource.
-                            # (for now, just use strict probability. later,
-                            # implement function that determines generation based on
-                            # resource required level and character level and
-                            # character equipment)
-                            if random.randint(0,4) == 0:
-                                # We generated a resource.
-                                logger.info("Gathered resource!")
+                    elif (num_skill_ticks \
+                            % GATHERING_INTERVAL_NUM_TICKS) == 0:
+                        # Check if we have generated a resource.
+                        # (for now, just use strict probability. later,
+                        # implement function that determines generation based on
+                        # resource required level and character level and
+                        # character equipment)
+                        if random.randint(0,4) == 0:
+                            # We generated a resource.
+                            logger.info("Gathered resource!")
 
-                                # Display the resource gather message.
-                                if resource_gather_text:
-                                    game_object.display_bottom_first_text_page(
-                                        resource_gather_text,
-                                        auto_advance=False,
-                                        refresh_after=True,
-                                    )
-
-                                # TODO handle all the item stuff here.
-                                acting_object.add_item_to_inventory(gained_resource.item_id)
-
-                                # This will display level up message if needed.
-                                levels_gained = game_object.gain_experience(
-                                    acting_object,
-                                    skill_id,
-                                    resource_exp,
+                            # TODO handle all the item stuff here.
+                            acting_object.add_item_to_inventory(
+                                    gained_resource.item_id
                                 )
 
-                                game_object.refresh_and_blit_overworld()
+                            # Check if resource has been exhausted.
+                            if random.randint(0, 100) \
+                                    < int(
+                                        100 \
+                                        * target_object.exhaustion_probability
+                                    ):
+                                # Resource has been exhausted.
+                                skilling = False
+                                resource_exhausted = True
+                                logger.info("Resource exhausted.")
 
-                                # Stop skilling if we level up.
-                                if levels_gained and levels_gained > 0:
-                                    skilling = False
+                                # Get exhausted version of object.
+                                replacement_id = \
+                                    target_object.replacement_object_id
+                                respawn_time_s = \
+                                    target_object.respawn_time_s
+                                original_id = \
+                                    target_object.object_id
 
-                                # Check if resource has been exhausted.
-                                if random.randint(0, 100) < int(100*target_object.exhaustion_probability):
-                                    # Resource has been exhausted.
-                                    skilling = False
-                                    resource_exhausted = True
-                                    logger.info("Resource exhausted.")
+                                logger.info("Replacing object {0} with {1} for {2} seconds. Bottom tile loc {3}".format(
+                                    original_id,
+                                    replacement_id,
+                                    respawn_time_s,
+                                    target_object_loc,
+                                ))
 
-                                    # Get exhausted version of object.
-                                    replacement_id = target_object.replacement_object_id
-                                    respawn_time_s = target_object.respawn_time_s
-                                    original_id = target_object.object_id
+                                # Clear previous object and add replacement obj.
+                                game_object.set_pending_spawn_action_curr_map(
+                                    target_object_loc,
+                                    object_id=replacement_id,
+                                    countdown_time_s=0,
+                                )
 
-                                    logger.info("Replacing object {0} with {1} for {2} seconds. Bottom tile loc {3}".format(
-                                        original_id,
-                                        replacement_id,
-                                        respawn_time_s,
-                                        target_object_loc,
-                                    ))
-
-                                    # Clear previous object and add replacement obj.
+                                # Set pending spawn action and update map.
+                                # None respawn time means never respawn.
+                                if respawn_time_s is not None:
                                     game_object.set_pending_spawn_action_curr_map(
                                         target_object_loc,
-                                        object_id=replacement_id,
-                                        countdown_time_s=0,
+                                        object_id=original_id,
+                                        countdown_time_s=respawn_time_s,
                                     )
 
-                                    # Set pending spawn action and update map.
-                                    # None respawn time means never respawn.
-                                    if respawn_time_s is not None:
-                                        game_object.set_pending_spawn_action_curr_map(
-                                            target_object_loc,
-                                            object_id=original_id,
-                                            countdown_time_s=respawn_time_s,
-                                        )
+                            game_object.refresh_and_blit_overworld_viewing()
 
-                                game_object.refresh_and_blit_overworld()
+                            # Display the resource gather message.
+                            if resource_gather_text:
+                                game_object.display_overworld_bottom_text_first_page(
+                                    resource_gather_text,
+                                    auto_advance=False,
+                                    refresh_after=True,
+                                    refresh_during=True,
+                                )
+                            else:
+                                game_object.refresh_and_blit_overworld_viewing()
 
-                                if resource_exhausted:
-                                    # Display exhaust message.
-                                    game_object.display_bottom_first_text_page(
-                                        resource_exhaust_text,
-                                        auto_advance=False,
-                                        advance_delay_ms=GATHERING_EXHAUST_DELAY_MS,
-                                        refresh_after=True,
-                                    )
+                            # This will display level up message if needed.
+                            levels_gained = game_object.gain_experience(
+                                acting_object,
+                                skill_id,
+                                resource_exp,
+                            )
 
-                                    game_object.refresh_and_blit_overworld()
+                            # Stop skilling if we level up.
+                            if levels_gained and levels_gained > 0:
+                                skilling = False
 
-                                if skilling and acting_object.inventory_full():
-                                    # Inventory is full.
-                                    skilling = False
-                                    cls.display_inventory_full_message()
-                                    game_object.refresh_and_blit_overworld()
+                            if resource_exhausted:
+                                # Display exhaust message.
+                                game_object.display_overworld_bottom_text_first_page(
+                                    resource_exhaust_text,
+                                    auto_advance=False,
+                                    advance_delay_ms=GATHERING_EXHAUST_DELAY_MS,
+                                    refresh_after=True,
+                                    refresh_during=True,
+                                )
+
+                                #game_object.refresh_and_blit_overworld_viewing()
+
+                            if skilling and acting_object.inventory_full():
+                                # Inventory is full.
+                                skilling = False
+                                cls.display_inventory_full_message()
+                                game_object.refresh_and_blit_overworld_viewing()
 
         pygame.event.clear()
 
         # Update overworld and display.
-        game_object.refresh_and_blit_overworld()
+        game_object.refresh_and_blit_overworld_viewing()
         pygame.display.update()
 
     # TODO - pass in interaction ID?
@@ -381,15 +405,6 @@ class Interaction():
                 skills.SKILL_ID_WOODCUTTING,
                 resource_exhaust_text=resource_exhaust_text,
             )
-
-            """
-            game_object.display_bottom_text(
-                display_text,
-                refresh_after=True,
-            )
-            """
-
-            # TODO - chopping tree logic
 
     @classmethod
     def mine_rock_interaction(

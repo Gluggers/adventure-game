@@ -95,10 +95,14 @@ class Entity(interactiveobj.Interactive_Object):
             exp = skills.get_experience_from_level(skill_level)
 
             # Get remaining experience for next level.
-            remaining_exp = skills.get_experience_to_next_level(skill_level, exp)
+            remaining_exp = skills.get_experience_to_next_level(
+                    skill_level,
+                    exp
+                )
 
             logger.debug(
-                "Setting skill level {0}, exp {1}. exp to next level {2}".format(
+                ("Setting skill level {0}, exp {1}. " \
+                + "exp to next level {2}").format(
                     skill_level,
                     exp,
                     remaining_exp
@@ -106,9 +110,14 @@ class Entity(interactiveobj.Interactive_Object):
             )
 
             # Record skill information.
-            self.skill_info_mapping[skill_id] = [skill_level, exp, remaining_exp]
+            self.skill_info_mapping[skill_id] = [
+                                                    skill_level,
+                                                    exp,
+                                                    remaining_exp
+                                                ]
 
-        # Set up health - use hitpoint stat if possible, otherwise default hitpoints value.
+        # Set up health - use hitpoint stat if possible,
+        # otherwise default hitpoints value.
         self.max_health = DEFAULT_MAX_HEALTH
         if manual_hitpoints and (manual_hitpoints > 0):
             self.max_health = manual_hitpoints
@@ -148,9 +157,11 @@ class Entity(interactiveobj.Interactive_Object):
                     item_id
                 ))
             else:
-                logger.error("Trying to add invalid item ID {0} to inventory.".format(
-                    item_id
-                ))
+                logger.error(
+                    "Trying to add invalid item ID {0} to inventory.".format(
+                        item_id
+                    )
+                )
         else:
             logger.warn("Trying to add item to full inventory.")
 
@@ -231,21 +242,30 @@ class Entity(interactiveobj.Interactive_Object):
 
                 new_exp = old_exp + exp
                 new_level = skills.get_level_from_experience(new_exp)
-                new_exp_to_next_level = skills.get_experience_to_next_level(new_level, new_exp)
+                new_exp_to_next_level = skills.get_experience_to_next_level(
+                        new_level,
+                        new_exp
+                    )
 
                 if new_level < old_level:
                     logger.error("Error in exp gain.")
                 else:
-                    logger.info("Started at level {0} with {1} exp ({2} remaining to next level.)".format(
-                        old_level,
-                        old_exp,
-                        skill_info[2]
-                    ))
-                    logger.info("Now reached level {0} with {1} exp ({2} remaining to next level.)".format(
-                        new_level,
-                        new_exp,
-                        new_exp_to_next_level,
-                    ))
+                    logger.info(
+                        ("Started at level {0} with {1} exp " \
+                        + "({2} remaining to next level.)").format(
+                            old_level,
+                            old_exp,
+                            skill_info[2]
+                        )
+                    )
+                    logger.info(
+                        ("Now reached level {0} with {1} " \
+                        + " exp ({2} remaining to next level.)").format(
+                            new_level,
+                            new_exp,
+                            new_exp_to_next_level,
+                        )
+                    )
 
                     skill_info[0] = new_level
                     skill_info[1] = new_exp
@@ -265,7 +285,13 @@ class Entity(interactiveobj.Interactive_Object):
     # specified, the method will use bottom_left_pixel as an override.
     # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # DOES NOT update surface - caller will have to do that
-    def face_direction(self, surface, direction, bottom_left_pixel=None, top_left_pixel=None):
+    def face_direction(
+                self,
+                surface,
+                direction,
+                bottom_left_pixel=None,
+                top_left_pixel=None,
+            ):
         image_id = None
 
         if self and surface and (bottom_left_pixel or top_left_pixel):
@@ -285,11 +311,11 @@ class Entity(interactiveobj.Interactive_Object):
             if image_id is not None:
                 # change direction variable and blit
                 self.facing_direction = direction
-                self.blit_onto_surface(                     \
-                    surface,                                \
-                    image_id,                               \
-                    bottom_left_pixel=bottom_left_pixel,    \
-                    top_left_pixel=top_left_pixel           \
+                self.blit_onto_surface(
+                    surface,
+                    image_id,
+                    bottom_left_pixel=bottom_left_pixel,
+                    top_left_pixel=top_left_pixel,
                 )
                 self.curr_image_id = image_id
 
@@ -351,7 +377,10 @@ class Character(Entity):
             logger.warn("Cannot use character_factory to build protagonist.")
         else:
             # check if we already have this object
-            char_from_listing = Character.character_listing.get(object_id, None)
+            char_from_listing = Character.character_listing.get(
+                        object_id,
+                        None
+                    )
 
             if char_from_listing:
                 ret_character = char_from_listing
@@ -435,7 +464,9 @@ class Protagonist(Character):
         )
 
         logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
-        logger.debug("Protagonist obj type: {0}".format(protagonist.object_type))
+        logger.debug(
+            "Protagonist obj type: {0}".format(protagonist.object_type)
+        )
         logger.debug("Protagonist name: {0}".format(protagonist.name_info))
         logger.debug("Protagonist gender: {0}".format(protagonist.gender))
         logger.debug("Protagonist race: {0}".format(protagonist.race))
