@@ -488,6 +488,22 @@ class Text_Display(Display):
                     and font_object:
             text_height = font_object.get_linesize()
 
+            # Let x be number of total lines that fit in
+            # vertical_pixel_height v.
+            # Let pixels_between_lines be p.
+            # Then x*text_height + (x - 1)*p = v.
+            # x(text_height + p) - p = v.
+            # x = (v + p) / (text_height + p).
+            pixels_between_lines = int(
+                    text_height * max(0, spacing_factor_between_lines - 1)
+                )
+
+            num_lines = int(
+                (vertical_pixel_height + pixels_between_lines) \
+                / (text_height + pixels_between_lines)
+            )
+
+            """
             num_total_lines = int(vertical_pixel_height / text_height)
 
             if (num_total_lines % 2) == 0:
@@ -502,6 +518,7 @@ class Text_Display(Display):
                 num_lines = 1 + int(
                         num_total_lines / spacing_factor_between_lines
                     )
+            """
 
         return num_lines
 
