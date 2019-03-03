@@ -32,21 +32,11 @@ class Viewing():
     def __init__(
                 self,
                 main_display_surface,
-                display_language=language.DEFAULT_LANGUAGE,
             ):
         self.main_display_surface = main_display_surface
-        self.display_language = display_language
         self.displays = {}
 
     ### GETTERS AND SETTERS ###
-    def change_language(self, new_language):
-        if new_language is not None:
-            for display_id, viewing_display in self.displays.items():
-                if viewing_display:
-                    viewing_display.display_language = new_language
-
-            # Update self.
-            self.refresh_and_blit_self()
 
     ### DISPLAY HANDLING METHODS ###
 
@@ -150,8 +140,6 @@ class Viewing():
             # Get the pages.
             page_list = text_display.get_text_pages(text_to_display)
 
-            logger.debug("Blitting {0} page(s)".format(len(page_list)))
-
             if page_list:
                 # Display each text page.
                 for page in page_list:
@@ -189,8 +177,6 @@ class Viewing():
             # Get the pages.
             page_list = text_display.get_text_pages(text_to_display)
             num_pages = len(page_list)
-
-            logger.debug("Blitting {0} page(s)".format(num_pages))
 
             if num_pages > 1:
                 logger.warn("This method only blits first page.")
@@ -333,7 +319,7 @@ class Viewing():
                                     "Selecting option {0}".format(
                                          menuoptions.get_option_name(
                                             curr_option_id,
-                                            self.display_language
+                                            language.Language.current_language_id
                                         )
                                     )
                                 )
@@ -355,7 +341,7 @@ class Viewing():
                                         "Selected option {0}".format(
                                          menuoptions.get_option_name(
                                                 ret_option_id,
-                                                self.display_language
+                                                language.Language.current_language_id
                                             )
                                         )
                                     )
@@ -372,7 +358,7 @@ class Viewing():
                                         curr_page.get_option_id(
                                             curr_selected_index
                                         ),
-                                        self.display_language
+                                        language.Language.current_language_id
                                     )
                                 )
                             )
@@ -385,7 +371,7 @@ class Viewing():
                                         curr_page.get_option_id(
                                             curr_selected_index
                                         ),
-                                        self.display_language
+                                        language.Language.current_language_id
                                     )
                                 )
                             )
@@ -437,14 +423,12 @@ class Overworld_Viewing(Viewing):
     def __init__(
                 self,
                 main_display_surface,
-                display_language=language.DEFAULT_LANGUAGE,
                 protagonist=None,
                 curr_map=None,
             ):
         Viewing.__init__(
             self,
             main_display_surface,
-            display_language=display_language,
         )
 
         self._protagonist = protagonist
@@ -453,6 +437,28 @@ class Overworld_Viewing(Viewing):
         self.top_display = None
         self.bottom_text_display = None
         self.side_menu_display = None
+        self.top_health_display = None
+
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_top_health_display(self):
+        if display.Display.top_display_font:
+            self.top_health_display = display.Text_Display(
+                self.main_display_surface,
+                viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
+                display.Display.top_display_font,
+                background_color=viewingdata.COLOR_WHITE,
+                background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
+                side_padding=6,
+                vertical_padding=6,
+            )
+
+            if self.top_health_display:
+                self.displays[viewingdata.OW_TOP_HEALTH_DISPLAY_ID] = self.top_health_display
+            else:
+                logger.error("Failed to make top health display")
+        else:
+            logger.error("Top display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_top_display(self):
@@ -462,8 +468,8 @@ class Overworld_Viewing(Viewing):
                 viewingdata.OW_TOP_DISPLAY_RECT,
                 display.Display.top_display_font,
                 background_color=viewingdata.COLOR_WHITE,
+                background_image_path=imagepaths.OW_TOP_DISPLAY_BACKGROUND_PATH,
                 protagonist=self._protagonist,
-                display_language=self.display_language,
             )
             if self.top_display:
                 self.displays[viewingdata.OW_TOP_DISPLAY_ID] = self.top_display
@@ -479,8 +485,11 @@ class Overworld_Viewing(Viewing):
                 self.main_display_surface,
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 display.Display.bottom_text_display_font,
-                display_language=self.display_language,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
+                background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
+                spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
+                side_padding=display.TEXT_DISPLAY_SIDE_PADDING,
+                vertical_padding=display.TEXT_DISPLAY_VERTICAL_PADDING,
             )
             if self.bottom_text_display:
                 self.displays[viewingdata.OW_BOTTOM_TEXT_DISPLAY_ID] = self.bottom_text_display
@@ -497,8 +506,7 @@ class Overworld_Viewing(Viewing):
                 self.main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
                 display.Display.side_menu_display_font,
-                display_language=self.display_language,
-                background_image_path=None,
+                background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_WHITE,
                 font_color=display.FONT_COLOR_DEFAULT,
                 side_padding=display.OW_SIDE_MENU_SIDE_PADDING,
@@ -517,7 +525,8 @@ class Overworld_Viewing(Viewing):
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
-        self.create_top_display()
+        #self.create_top_display()
+        self.create_top_health_display()
         self.create_bottom_text_display()
         self.create_side_menu_display()
 
@@ -537,15 +546,44 @@ class Overworld_Viewing(Viewing):
 
             # Assign protagonist to top display, as well, which should update
             # the top display
-            self.top_display.protagonist = value
+            if self.top_display:
+                self.top_display.protagonist = value
 
     ### DISPLAY HANDLING METHODS ###
 
-    # blits the top display view onto the main display screen
-    # does not update the main display - caller will have to do that
+    # Blits the top display view onto the main display screen.
+    # Does not update the main display - caller will have to do that
     def blit_top_display(self):
         if self.main_display_surface and self.top_display:
             self.top_display.blit_onto_surface(self.main_display_surface)
+
+    def get_health_text(self):
+        ret_text = None
+
+        ret_text = ''.join([
+            viewingdata.HEALTH_TEXT_PREFIX_INFO.get(
+                language.Language.current_language_id,
+                ""
+            ),
+            str(self._protagonist.curr_health),
+            ' / ',
+            str(self._protagonist.max_health),
+        ])
+
+        return ret_text
+
+    # Blits the top health display onto the main display screen.
+    # Does not update the main display - caller will have to do that
+    def blit_top_health_display(self):
+        if self.main_display_surface and self.top_health_display:
+            self.display_text_display_first_page(
+                self.top_health_display,
+                self.get_health_text(),
+                advance_delay_ms=0,
+                auto_advance=True,
+                refresh_during=False,
+                refresh_after=False,
+            )
 
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
@@ -607,7 +645,7 @@ class Overworld_Viewing(Viewing):
             if map_top_left:
                 self.curr_map.top_left_position = map_top_left
             else:
-                self.curr_map.top_left_position = viewingdata.OW_VIEWING_LOCATION
+                self.curr_map.top_left_position = viewingdata.OW_VIEWING_TOP_LEFT
 
             # Refresh and blit viewing.
             self.refresh_and_blit_self()
@@ -684,7 +722,8 @@ class Overworld_Viewing(Viewing):
         # Blit map and top display.
         self.blit_map()
 
-        self.blit_top_display()
+        #self.blit_top_display()
+        self.blit_top_health_display()
 
     # Updates and blit current overworld viewing.
     # Does not update display - caller must do that.
@@ -708,7 +747,8 @@ class Overworld_Viewing(Viewing):
     def refresh_and_blit_top_display(self):
         if self.top_display:
             self.refresh_top_display()
-            self.blit_top_display()
+            #self.blit_top_display()
+            self.blit_top_health_display()
 
     # Refreshes map.
     # Does not blit map or update display - caller must
@@ -797,7 +837,8 @@ class Overworld_Viewing(Viewing):
                 )
 
                 # Also blit the top view on top.
-                self.blit_top_display()
+                #self.blit_top_display()
+                self.blit_top_health_display()
 
             # Update main display
             pygame.display.update()
@@ -840,7 +881,7 @@ class Overworld_Viewing(Viewing):
     # assumes map_top_left_pixel_pos has coordinates equally divisible
     # by tile.TILE_SIZE
     @classmethod
-    def calculate_top_left_ow_viewing_tile(cls, map_top_left_pixel_pos):
+    def calculate_top_left_ow_viewing_tile_old(cls, map_top_left_pixel_pos):
         ret_coord = None
         if map_top_left_pixel_pos:
             coord_x = 0
@@ -852,6 +893,26 @@ class Overworld_Viewing(Viewing):
                 # map top left is aligned with or below top of overworld viewing
                 coord_y = 0
             else:
+                # map top left is above top of overworld viewing
+                coord_y = -1 * int((map_top_left_pixel_pos[1] - viewingdata.OW_TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
+
+            ret_coord = (coord_x, coord_y)
+            logger.debug("Top left ow viewing tile: {0}, map top left {1}".format(ret_coord, map_top_left_pixel_pos))
+
+        return ret_coord
+
+    # assumes map_top_left_pixel_pos has coordinates equally divisible
+    # by tile.TILE_SIZE
+    @classmethod
+    def calculate_top_left_ow_viewing_tile(cls, map_top_left_pixel_pos):
+        ret_coord = None
+        if map_top_left_pixel_pos:
+            coord_x = 0
+            coord_y = 0
+            if map_top_left_pixel_pos[0] < 0:
+                # map top left is behind the left side of viewing
+                coord_x = -1 * int(map_top_left_pixel_pos[0] / tile.TILE_SIZE)
+            if map_top_left_pixel_pos[1] < 0:
                 # map top left is above top of overworld viewing
                 coord_y = -1 * int((map_top_left_pixel_pos[1] - viewingdata.OW_TOP_DISPLAY_HEIGHT) / tile.TILE_SIZE)
 
@@ -940,7 +1001,6 @@ class Overworld_Viewing(Viewing):
                 main_display_surface,
                 protagonist=None,
                 curr_map=None,
-                display_language=language.DEFAULT_LANGUAGE,
             ):
         ret_viewing = None
 
@@ -949,7 +1009,6 @@ class Overworld_Viewing(Viewing):
                 main_display_surface,
                 protagonist=protagonist,
                 curr_map=curr_map,
-                display_language=display_language,
             )
 
             # Create displays for viewing.

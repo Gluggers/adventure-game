@@ -43,7 +43,7 @@ class Game():
             # will change as game progresses
             self.protagonist = None
             self.curr_map = None
-            self.game_language = game_language
+            language.Language.set_current_language_id(game_language)
 
             # create main display screen
             self.main_display_screen = pygame.display.set_mode(
@@ -59,7 +59,6 @@ class Game():
             self.overworld_viewing = \
                 viewing.Overworld_Viewing.create_overworld_viewing(
                     self.main_display_screen,
-                    display_language=self.game_language,
                 )
 
             if not self.overworld_viewing:
@@ -316,12 +315,15 @@ class Game():
 
         if levels_gained and levels_gained > 0:
             # Display level-up message.
-            skill_name = skills.get_skill_name(skill_id, self.game_language)
+            skill_name = skills.get_skill_name(
+                skill_id,
+                language.Language.current_language_id
+            )
             curr_skill_level = self.protagonist.get_skill_level(skill_id)
 
             if skill_name and curr_skill_level:
                 level_up_message = skills.LEVEL_UP_MESSAGE_INFO.get(
-                        self.game_language,
+                        language.Language.current_language_id,
                         ""
                     ).format(
                         levels_gained,
@@ -345,7 +347,9 @@ class Game():
                 item_obj = items.Item.get_item(item_id)
 
                 if item_obj:
-                    item_name = item_obj.get_name(self.game_language)
+                    item_name = item_obj.get_name(
+                        language.Language.current_language_id
+                    )
                     logger.info("{0} x{1}".format(item_name, quantity))
                 else:
                     logger.error(
@@ -357,9 +361,9 @@ class Game():
 
     def toggle_language(self):
         # For now, just switch to other language
-        if self.game_language == language.LANG_ENGLISH:
+        if language.Language.current_language_id == language.LANG_ENGLISH:
             self.change_language(language.LANG_ESPANOL)
-        elif self.game_language == language.LANG_ESPANOL:
+        elif language.Language.current_language_id == language.LANG_ESPANOL:
             self.change_language(language.LANG_ENGLISH)
 
         # Update display.
@@ -367,8 +371,11 @@ class Game():
 
     def change_language(self, new_language):
         if new_language is not None:
-            self.game_language = new_language
-            self.overworld_viewing.change_language(new_language)
+            language.Language.set_current_language_id(new_language)
+
+            # Refresh viewings.
+            self.overworld_viewing.refresh_and_blit_self()
+            pygame.display.update()
 
     # Updates display.
     def refresh_and_blit_overworld_viewing(self):
@@ -494,7 +501,8 @@ class Game():
         save_data[savefiledata.CURRENT_MAP_ID] = self.curr_map.map_id
         save_data[savefiledata.CURRENT_PROTAG_TILE_LOCATION] = \
             self.get_protagonist_tile_position()
-        save_data[savefiledata.GAME_LANGUAGE] = self.game_language
+        save_data[savefiledata.GAME_LANGUAGE] = \
+            language.Language.current_language_id
 
         # TODO implement further
 
@@ -534,7 +542,6 @@ class Game():
         logger.info("Loaded game.")
 
         # Debugging
-        logger.debug("Curr game language: {0}".format(self.game_language))
         logger.debug(
             "Protag location: {0}".format(self.get_protagonist_tile_position())
         )
@@ -546,7 +553,7 @@ class Game():
             for skill_id in skills.SKILL_ID_LIST:
                 skill_name = skills.get_skill_name(
                         skill_id,
-                        self.game_language
+                        language.Language.current_language_id
                     )
                 level = target_entity.get_skill_level(skill_id)
                 curr_exp = target_entity.get_skill_experience(skill_id)
@@ -570,7 +577,7 @@ class Game():
 
     def get_overworld_more_menu_option_str(self):
         return menuoptions.OVERWORLD_MENU_MORE_OPTION_INFO.get(
-            self.game_language,
+            language.Language.current_language_id,
             ""
         )
 
@@ -687,6 +694,9 @@ class Game():
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
                         self.display_statistics(self.protagonist)
+                    elif events.key == pygame.K_t:
+                        # Testing stuff.
+                        logger.info("Testing.")
                     elif events.key == pygame.K_ESCAPE:
                         # Display menu.
                         logger.info("Displaying menu.")
@@ -697,7 +707,7 @@ class Game():
                             "Selected option: {0}, ID {1}".format(
                                 menuoptions.get_option_name(
                                     selected_option_id,
-                                    self.game_language
+                                    language.Language.current_language_id
                                 ),
                                 selected_option_id,
                             )
@@ -785,7 +795,9 @@ class Game():
                     elif examine_in_front:
                         # Display examine text at bottom of screen.
                         self.display_overworld_bottom_text(
-                            inter_obj.get_examine_info(self.game_language),
+                            inter_obj.get_examine_info(
+                                language.Language.current_language_id
+                            ),
                             refresh_after=True,
                             refresh_during=True,
                         )

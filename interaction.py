@@ -71,9 +71,13 @@ class Interaction():
             ):
         if game_object and acting_object and target_object:
             display_text = DEFAULT_INTERACTION_MESSAGE_INFO.get(
-                    game_object.game_language,
+                    language.Language.current_language_id,
                     ""
-                ).format(target_object.get_name(game_object.game_language))
+                ).format(
+                    target_object.get_name(
+                        language.Language.current_language_id
+                    )
+                )
 
             game_object.display_overworld_bottom_text(
                 display_text,
@@ -103,7 +107,7 @@ class Interaction():
         if game_object:
             game_object.display_overworld_bottom_text(
                 INVENTORY_FULL_MESSAGE_INFO.get(
-                    game_object.game_language,
+                    language.Language.current_language_id,
                     ""
                 ),
                 auto_advance=False,
@@ -149,11 +153,11 @@ class Interaction():
                 required_level = target_object.required_level
                 skill_name = skills.get_skill_name(
                     target_object.related_skill_id,
-                    game_object.game_language
+                    language.Language.current_language_id
                 )
 
                 reject_message = NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
-                        game_object.game_language,
+                        language.Language.current_language_id,
                         ""
                     ).format(required_level, skill_name)
 
@@ -207,11 +211,11 @@ class Interaction():
                             interaction_id,
                             {}
                         ).get(
-                            game_object.game_language,
+                            language.Language.current_language_id,
                             ""
                         ).format(
                             gained_resource.get_name(
-                                game_object.game_language
+                                language.Language.current_language_id
                             ),
                             resource_exp
                         )
@@ -376,13 +380,15 @@ class Interaction():
             ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
-            obj_name = target_object.get_name(game_object.game_language)
+            obj_name = target_object.get_name(
+                language.Language.current_language_id
+            )
 
             main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
                     interaction_id,
                     {}
                 ).get(
-                    game_object.game_language,
+                    language.Language.current_language_id,
                     ""
                 ).format(obj_name)
 
@@ -390,7 +396,7 @@ class Interaction():
                     interaction_id,
                     {}
                 ).get(
-                    game_object.game_language,
+                    language.Language.current_language_id,
                     ""
                 ).format(obj_name)
 

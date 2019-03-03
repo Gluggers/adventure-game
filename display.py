@@ -13,8 +13,8 @@ import math
 DEFAULT_FONT = None
 #TOP_DISPLAY_TEXT = None
 
-FONT_SIZE_DEFAULT = 24
-FONT_SIZE_TOP_DISPLAY = 24
+FONT_SIZE_DEFAULT = 16
+FONT_SIZE_TOP_DISPLAY = 18
 FONT_SIZE_BOTTOM_TEXT = 16
 FONT_SIZE_SIDE_MENU_TEXT = 16
 
@@ -47,14 +47,25 @@ SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                     + ":;[]{},./?<>-_=+~\`!@#$%^&*()\\|\"'"
 
+### BORDER IMAGE ID NUMBERS ###
+BORDER_TOP_LEFT_ID = 0x1
+BORDER_TOP_RIGHT_ID = 0x2
+BORDER_BOTTOM_LEFT_ID = 0x3
+BORDER_BOTTOM_RIGHT_ID = 0x4
+BORDER_TOP_SIDE_ID = 0x5
+BORDER_BOTTOM_SIDE_ID = 0x6
+BORDER_LEFT_SIDE_ID = 0x7
+BORDER_RIGHT_SIDE_ID = 0x8
+
 # Space between text and the continue icon.
-CONTINUE_ICON_HORIZ_SPACE = 10
+CONTINUE_ICON_HORIZ_SPACE = 6
 
 # Space between text and the selected option icon.
 SELECTION_ICON_HORIZ_SPACE = 8
 
 # Spacing factors for space between lines.
-DEFAULT_LINE_SPACING_FACTOR = 1.25
+DEFAULT_LINE_SPACING_FACTOR = 1.1
+TEXT_BOX_LINE_SPACING_FACTOR = 1.1
 MENU_LINE_SPACING_FACTOR = 1.5
 
 # Number of milliseconds to wait in between each
@@ -88,12 +99,12 @@ HEALTH_TEXT_PREFIX_INFO = {
 }
 
 ### PADDING ###
-TOP_DISPLAY_SIDE_PADDING = 16
-TEXT_DISPLAY_SIDE_PADDING = 16
-TEXT_DISPLAY_VERTICAL_PADDING = 16
+TOP_DISPLAY_SIDE_PADDING = 20
+TEXT_DISPLAY_SIDE_PADDING = 28
+TEXT_DISPLAY_VERTICAL_PADDING = 24
 
-OW_SIDE_MENU_SIDE_PADDING = 32
-OW_SIDE_MENU_VERTICAL_PADDING = 16
+OW_SIDE_MENU_SIDE_PADDING = 40
+OW_SIDE_MENU_VERTICAL_PADDING = 20
 
 class Text_Page():
     def __init__(self, line_list):
@@ -126,7 +137,11 @@ class Display():
     # Background color is color to use in case of no background image.
     # If background image is provided, we will use that rather than
     # background color. For best results, background image should be same
-    # size as display_rect dimensions.
+    # size as display_rect dimensions.  If smaller than display_rect,
+    # the background image will repeat in a tile fashion (TODO)
+    # border_image_path_dict maps border image IDs to the filepath
+    # containing the image to use as a border. For best results,
+    # all border image IDs should be satisfied in the mapping.
     def __init__(
                 self,
                 main_display_surface,
@@ -134,8 +149,8 @@ class Display():
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                border_image_path_dict={},
                 font_color=FONT_COLOR_DEFAULT,
-                display_language=language.DEFAULT_LANGUAGE,
             ):
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
@@ -144,11 +159,10 @@ class Display():
                     self.display_rect[1]
                 )
         self.font_object = font_object
-        self.font_color = font_color,
+        self.font_color = font_color
         self.pixel_width = self.display_rect[2]
         self.pixel_height = self.display_rect[3]
         self.background_color = background_color
-        self.display_language = display_language
 
         self.background_image = None
 
@@ -158,15 +172,30 @@ class Display():
                                         background_image_path
                                     ).convert_alpha()
 
+            logger.info("Image size: {0}".format(self.background_image.get_size()))
+
+        # Maps border image IDs to rendered images.
+        self.border_images = {}
+
+        # Load border images.
+        if border_image_path_dict:
+            for border_id, image_path in border_image_path_dict.items():
+                border_image = pygame.image.load(
+                                        image_path
+                                    ).convert_alpha()
+                if border_image:
+                    self.border_images[border_id] = border_image
+
     # Does not update display, caller must do that.
     def blit_background(self, surface):
         if surface:
             # Blit the background image/default fill color.
+            # TODO - add in blitting the borders?
             if self.background_image:
+                # TODO - tile repetition?
                 surface.blit(
                     self.background_image,
                     self.display_rect,
-                    area=self.display_rect
                 )
             else:
                 pygame.draw.rect(
@@ -202,10 +231,10 @@ class Top_Display(Display):
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                border_image_path_dict={},
                 font_color=FONT_COLOR_DEFAULT,
                 protagonist=None,
                 curr_map=None,
-                display_language=language.DEFAULT_LANGUAGE,
             ):
         Display.__init__(
             self,
@@ -214,8 +243,8 @@ class Top_Display(Display):
             font_object,
             background_image_path=background_image_path,
             background_color=background_color,
+            border_image_path_dict=border_image_path_dict,
             font_color=font_color,
-            display_language=display_language,
         )
 
         self._protagonist = protagonist
@@ -223,11 +252,11 @@ class Top_Display(Display):
 
         # Set up text
         self.level_text_str = LEVEL_TEXT_PREFIX_INFO.get(
-                    self.display_language,
+                    language.Language.current_language_id,
                     None
                 )
         self.health_text_str = HEALTH_TEXT_PREFIX_INFO.get(
-                    self.display_language,
+                    language.Language.current_language_id,
                     None
                 )
 
@@ -267,7 +296,7 @@ class Top_Display(Display):
 
         self.health_text_top_left_pixel = (
             viewingdata.TOP_DISPLAY_LOCATION[0]                             \
-                + int(viewingdata.OW_TOP_DISPLAY_WIDTH / 3),
+                + int(2 * viewingdata.OW_TOP_DISPLAY_WIDTH / 5),
             viewingdata.TOP_DISPLAY_LOCATION[1]                             \
                 + self.pixel_height                                         \
                 - vertical_offset                                           \
@@ -287,13 +316,16 @@ class Top_Display(Display):
                     self._protagonist.skill_info_mapping
                 )
             self.level_text_str = LEVEL_TEXT_PREFIX_INFO.get(
-                                    self.display_language,
+                                    language.Language.current_language_id,
                                     "",
                                 ) + str(protag_level)
 
             # Get protagonist health.
             self.health_text_str = ''.join([
-                    HEALTH_TEXT_PREFIX_INFO.get(self.display_language, ""),
+                    HEALTH_TEXT_PREFIX_INFO.get(
+                        language.Language.current_language_id,
+                        ""
+                    ),
                     str(self._protagonist.curr_health),
                     ' / ',
                     str(self._protagonist.max_health)
@@ -359,9 +391,9 @@ class Text_Display(Display):
                 main_display_surface,
                 display_rect,
                 font_object,
-                display_language=language.DEFAULT_LANGUAGE,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                border_image_path_dict={},
                 font_color=FONT_COLOR_DEFAULT,
                 side_padding=TEXT_DISPLAY_SIDE_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
@@ -373,9 +405,9 @@ class Text_Display(Display):
             main_display_surface,
             display_rect,
             font_object,
-            display_language=display_language,
             background_image_path=background_image_path,
             background_color=background_color,
+            border_image_path_dict=border_image_path_dict,
             font_color=font_color,
         )
 
@@ -394,6 +426,12 @@ class Text_Display(Display):
                                     - (2 * self.side_padding)
         self.text_space_vertical = self.pixel_height \
                                     - (2 * self.vertical_padding)
+
+        logger.info("Text top left: {0}. Space {1} x {2}".format(
+            self.text_top_left_pixel,
+            self.text_space_horizontal,
+            self.text_space_vertical
+        ))
 
         self.text_space_rect = (
             self.text_top_left_pixel[0],
@@ -602,7 +640,7 @@ class Text_Display(Display):
 
                 # Create line.
                 if sub_list:
-                    str_to_add = ''.join(sub_list)
+                    str_to_add = ''.join(sub_list).strip()
 
                     if str_to_add:
                         text_lines.append(str_to_add)
@@ -774,6 +812,25 @@ class Text_Display(Display):
 
         return ret_page_list
 
+    def get_page_height(self, text_page):
+        ret_height = 0
+
+        if text_page:
+            num_lines = len(text_page.text_lines)
+
+            # Total height = n*(text_height) + (n - 1)*(pixels_between_lines),
+            # where n is number of lines.
+            # = n*(text_height + pixels_between_lines) - pixels_between_lines.
+            text_height = self.font_object.get_linesize()
+            pixels_between_lines = int(
+                    text_height * max(0, self.spacing_factor_between_lines - 1)
+                )
+
+            ret_height = (num_lines * (text_height + pixels_between_lines)) \
+                        - pixels_between_lines
+
+        return ret_height
+
     # Blit text for the single page.
     # Does not update display, caller will need to do that.
     # If continue_icon is set to True, we will blit the object's continue
@@ -788,11 +845,11 @@ class Text_Display(Display):
             # Blit background
             self.blit_background(surface)
 
-            vertical_offset = 0
-
-            logger.debug(
-                "Page has {0} line(s)".format(len(text_page.text_lines))
-            )
+            # Center vertically.
+            page_height = self.get_page_height(text_page)
+            vertical_offset = int(
+                    max(0, self.text_space_vertical - page_height) / 2
+                )
 
             #for text_line in text_page.text_lines:
             num_lines = len(text_page.text_lines)
@@ -808,7 +865,7 @@ class Text_Display(Display):
                 rendered_text_dimensions = rendered_text.get_size()
                 text_width = rendered_text_dimensions[0]
 
-                # Center the text horizontally.
+                # Center the text horizontally and vertically.
                 text_top_left = (
                     self.text_center_x - int(text_width / 2),
                     self.text_top_left_pixel[1] + vertical_offset
@@ -831,7 +888,8 @@ class Text_Display(Display):
                             + CONTINUE_ICON_HORIZ_SPACE,
                         text_top_left[1] \
                             + text_height \
-                            - self.continue_icon.get_height()
+                            - self.continue_icon.get_height() \
+                            - 4
                     )
 
                     surface.blit(
@@ -840,8 +898,7 @@ class Text_Display(Display):
                     )
 
                 # Move to spot for next line.
-                vertical_offset = vertical_offset \
-                        + int(
+                vertical_offset += int(
                             self.spacing_factor_between_lines \
                             * self.text_height
                         )
@@ -857,9 +914,9 @@ class Menu_Display(Text_Display):
                 main_display_surface,
                 display_rect,
                 font_object,
-                display_language=language.DEFAULT_LANGUAGE,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
+                border_image_path_dict={},
                 font_color=FONT_COLOR_DEFAULT,
                 side_padding=OW_SIDE_MENU_SIDE_PADDING,
                 vertical_padding=OW_SIDE_MENU_VERTICAL_PADDING,
@@ -871,9 +928,9 @@ class Menu_Display(Text_Display):
             main_display_surface,
             display_rect,
             font_object,
-            display_language=display_language,
             background_image_path=background_image_path,
             background_color=background_color,
+            border_image_path_dict=border_image_path_dict,
             font_color=font_color,
             side_padding=side_padding,
             vertical_padding=vertical_padding,
@@ -912,7 +969,7 @@ class Menu_Display(Text_Display):
         for option_id, option_info in menuoptions.OPTION_NAME_INFO.items():
             ret_dict[option_id] = {}
 
-            for lang_id in language.LANGUAGE_ID_LIST:
+            for lang_id in language.Language.valid_language_ids:
                 option_text = option_info.get(lang_id, None)
 
                 if option_text:
@@ -1054,7 +1111,7 @@ class Menu_Display(Text_Display):
             option_id,
             {}
         ).get(
-            self.display_language,
+            language.Language.current_language_id,
             None
         )
 
@@ -1080,7 +1137,7 @@ class Menu_Display(Text_Display):
                     curr_option_id = menu_page.get_option_id(index)
                     curr_option = menuoptions.get_option_name(
                             curr_option_id,
-                            self.display_language
+                            language.Language.current_language_id
                         )
 
                     # Get rendered text and dimensions.

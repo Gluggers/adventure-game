@@ -5,6 +5,8 @@
 # [3] Antifarea, opengameart -
 #       https://opengameart.org/content/twelve-16x18-rpg-sprites-plus-base
 # https://opengameart.org/content/antifareas-rpg-sprite-set-1-enlarged-w-transparent-background
+# [4] https://bakudas.itch.io/generic-rpg-pack
+
 
 ### IMAGE CONSTANTS ###
 IMAGE_HOME_PATH = "images/"
@@ -14,11 +16,36 @@ CHARACTER_PATH = IMAGE_HOME_PATH + "characters/"
 PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
 DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
 
-### DISPLAY IMAGE CONSTANTS ###
+### DISPLAY IMAGE PATHS ###
 DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
-                                + "text_continue_icon_10x10_dk.png" # [0]
+                                + "text_continue_icon2_10x10_dk.png" # [0]
 DEFAULT_MENU_SELECTION_ICON_PATH = DISPLAY_PATH \
-                                + "menu_selection_icon_10x10_dk.png" # [0]
+                                + "menu_selection_icon2_10x10_dk.png" # [0]
+OW_TOP_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
+                                + "ow_top_display_background_672x48_dk.png" # [0]
+OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
+                                    + "ow_top_health_display_264x56_dk.png" # [0]
+OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
+                                    + "ow_bottom_text_display_640x96_dk.png" # [0]
+OW_SIDE_MENU_BACKGROUND_PATH = DISPLAY_PATH \
+                                    + "ow_side_menu_220x416_dk.png" # [0]
+
+BORDER_TOP_LEFT_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_TOP_RIGHT_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_BOTTOM_LEFT_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_BOTTOM_RIGHT_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_TOP_SIDE_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_BOTTOM_SIDE_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_LEFT_SIDE_IMAGE_PATH = DISPLAY_PATH \
+                                + ""
+BORDER_RIGHT_SIDE_IMAGE_PATH = DISPLAY_PATH \
+                                +  ""
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_lz.png" # [1]
