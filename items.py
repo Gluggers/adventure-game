@@ -6,6 +6,7 @@ import itemdata
 import battledata
 import logging
 import imageids
+import menuoptions
 
 class Item(pygame.sprite.Sprite):
     # Master dict mapping item IDs to item objects.
@@ -26,6 +27,7 @@ class Item(pygame.sprite.Sprite):
                 required_creation_items={},
                 required_creation_levels={},
                 required_creation_quests=[],
+                item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
             ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
@@ -70,6 +72,12 @@ class Item(pygame.sprite.Sprite):
         self.required_creation_quests = []
         for quest_id in required_creation_quests:
             self.required_creation_quests.append(quest_id)
+
+        self.item_menu_option_ids = menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS
+        if item_menu_option_ids:
+            self.item_menu_option_ids = []
+            for option_id in item_menu_option_ids:
+                self.item_menu_option_ids.append(option_id)
 
     def get_name(self, language_id):
         ret_name = ""
@@ -168,6 +176,10 @@ class Item(pygame.sprite.Sprite):
                         itemdata.CREATE_REQ_QUEST_FIELD,
                         []
                     )
+                item_menu_option_ids = item_data.get(
+                        itemdata.ITEM_OPTION_ID_LIST_FIELD,
+                        menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS
+                    )
 
 
                 # Ensure we have the required fields.
@@ -187,6 +199,7 @@ class Item(pygame.sprite.Sprite):
                         required_creation_items=required_creation_items,
                         required_creation_levels=required_creation_levels,
                         required_creation_quests=required_creation_quests,
+                        item_menu_option_ids=item_menu_option_ids,
                     )
 
                     logger.debug("Made item with ID {0}".format(item_id))
@@ -233,6 +246,7 @@ class Equipable_Item(Item):
                 required_creation_items={},
                 required_creation_levels={},
                 required_creation_quests=[],
+                item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
                 combat_type=battledata.COMBAT_TYPE_NONE,
                 attack_value_info={},
                 defense_value_info={},
@@ -255,6 +269,7 @@ class Equipable_Item(Item):
             required_creation_items=required_creation_items,
             required_creation_levels=required_creation_levels,
             required_creation_quests=required_creation_quests,
+            item_menu_option_ids=item_menu_option_ids,
         )
 
         self.equipment_slot_id = equipment_slot_id
@@ -296,6 +311,7 @@ class Consumable_Item(Item):
                 required_creation_items={},
                 required_creation_levels={},
                 required_creation_quests=[],
+                item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
                 skill_effect_info={},
                 combat_boost_info={},
                 required_consume_quests=[],
@@ -315,6 +331,7 @@ class Consumable_Item(Item):
             required_creation_items=required_creation_items,
             required_creation_levels=required_creation_levels,
             required_creation_quests=required_creation_quests,
+            item_menu_option_ids=item_menu_option_ids,
         )
 
         self.heal_value = 0

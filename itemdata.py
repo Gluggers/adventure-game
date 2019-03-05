@@ -1,6 +1,7 @@
 import skills
 import language
 import currency
+import menuoptions
 
 ### ITEM TYPE ID NUMBERS ###
 """
@@ -182,31 +183,33 @@ USAGE_INFO_FIELD = 0x108 # Maps language ID to string.
 WEIGHT_POINT_FIELD = 0x109 # Int representing weight points. 10 weight points = 1KG.
 PROPERTIES_FIELD = 0x10A # Int representing OR-ed boolean flags.
 INTERACTION_ID_FIELD = 0x10B # Int representing interaction ID for using this item.
+# List of option IDs for this object. Default is [discard].
+ITEM_OPTION_ID_LIST_FIELD = 0x10C
 
 ### FOR CREATABLE ITEMS ###
  # Dict mapping item IDs to number of items required to make this item.
-CREATE_REQ_ITEMS_FIELD = 0x10B
+CREATE_REQ_ITEMS_FIELD = 0x201
 
  # Dict mapping skill IDs to the level required to make this item.
-CREATE_REQ_LEVELS_FIELD = 0x10C
+CREATE_REQ_LEVELS_FIELD = 0x202
 
 # List of quest IDs required to make this item.
-CREATE_REQ_QUEST_FIELD = 0x10D
+CREATE_REQ_QUEST_FIELD = 0x203
 
 ### CONSUMABLE ITEM FIELD IDs ###
-HEAL_VALUE_FIELD = 0x201 # Int.
-SKILL_EFFECT_FIELD = 0x202 # Maps skill IDs to tuple (effect type ID, int).
-CONSUME_COMBAT_BOOST_FIELD = 0x203 # Maps boost type ID to tuple (effect type ID, int).
-CONSUME_QUEST_REQ_FIELD = 0x204 # List of quest IDs required to consume.
+HEAL_VALUE_FIELD = 0x301 # Int.
+SKILL_EFFECT_FIELD = 0x302 # Maps skill IDs to tuple (effect type ID, int).
+CONSUME_COMBAT_BOOST_FIELD = 0x303 # Maps boost type ID to tuple (effect type ID, int).
+CONSUME_QUEST_REQ_FIELD = 0x304 # List of quest IDs required to consume.
 
 ### EQUIPPABLE ITEM FIELD IDs ###
-EQUIPMENT_SLOT_FIELD = 0x301 # Int representing equipment slot ID.
-COMBAT_TYPE_FIELD = 0x302 # Int representing combat type for the item.
-ATTACK_VALUE_INFO_FIELD = 0x303 # Maps damage type ID to int.
-DEFENSE_VALUE_INFO_FIELD = 0x304 # Maps damage type ID to int.
-EQUIP_COMBAT_BOOST_INFO_FIELD = 0x305 # Maps boost type ID to tuple (effect type ID, int).
-EQUIP_LEVEL_REQ_FIELD = 0x306 # Dict mapping skill ID to required level.
-EQUIP_QUEST_REQ_FIELD = 0x307 # List of quest IDs required to equip.
+EQUIPMENT_SLOT_FIELD = 0x401 # Int representing equipment slot ID.
+COMBAT_TYPE_FIELD = 0x402 # Int representing combat type for the item.
+ATTACK_VALUE_INFO_FIELD = 0x403 # Maps damage type ID to int.
+DEFENSE_VALUE_INFO_FIELD = 0x404 # Maps damage type ID to int.
+EQUIP_COMBAT_BOOST_INFO_FIELD = 0x405 # Maps boost type ID to tuple (effect type ID, int).
+EQUIP_LEVEL_REQ_FIELD = 0x406 # Dict mapping skill ID to required level.
+EQUIP_QUEST_REQ_FIELD = 0x407 # List of quest IDs required to equip.
 
 # For items that are not consumable nor equippable.
 STANDARD_ITEM_DATA = {
@@ -227,6 +230,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        ITEM_OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_LOG_OPTION_ID_LIST,
     },
     LOG_OAK_ID: {
         NAME_INFO_FIELD: {
@@ -245,6 +249,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        ITEM_OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_LOG_OPTION_ID_LIST,
     },
 }
 

@@ -197,7 +197,7 @@ class Display():
                     self.background_image,
                     self.display_rect,
                 )
-            else:
+            elif self.background_color:
                 pygame.draw.rect(
                     surface,
                     self.background_color,

@@ -3,7 +3,6 @@ LANG_ENGLISH = 0x0
 LANG_ESPANOL = 0x1
 DEFAULT_LANGUAGE = LANG_ENGLISH
 
-
 class Language():
     current_language_id = DEFAULT_LANGUAGE
     valid_language_ids = set([

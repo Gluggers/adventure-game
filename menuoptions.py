@@ -1,16 +1,47 @@
 import language
 
 ### GAME OPTION ID NUMBERS ###
-INVENTORY_OPTION_ID = 0x1
-EQUIPMENT_OPTION_ID = 0x2
-STATS_OPTION_ID = 0x3
-QUESTS_OPTION_ID = 0x4
-CONFIGURATION_OPTION_ID = 0x5
-SAVE_GAME_OPTION_ID = 0x6
-LOAD_GAME_OPTION_ID = 0x7
-QUIT_GAME_OPTION_ID = 0x8
-
 MORE_OPTIONS_OPTION_ID = 0xFFFF
+YES_OPTION_ID = 0x1
+NO_OPTION_ID = 0x2
+
+# OVERWORLD SIDE MENU OPTIONS #
+INVENTORY_OPTION_ID = 0x11
+EQUIPMENT_OPTION_ID = 0x12
+STATS_OPTION_ID = 0x13
+QUESTS_OPTION_ID = 0x14
+CONFIGURATION_OPTION_ID = 0x15
+SAVE_GAME_OPTION_ID = 0x16
+LOAD_GAME_OPTION_ID = 0x17
+QUIT_GAME_OPTION_ID = 0x18
+CHARACTER_OPTION_ID = 0x19
+
+# ITEM OPTION IDS
+#USE_OPTION_ID = 0x30 # For using an item with another.
+DISCARD_OPTION_ID = 0x31 # For discarding items.
+LIGHT_OPTION_ID = 0x32 # For lighting items like logs on fire.
+EQUIP_OPTION_ID = 0x33 # For equipping equippable items.
+UNEQUIP_OPTION_ID = 0x34 # For unequipping equippable items.
+CRAFT_OPTION_ID = 0x35 # For craftable items.
+IDENTIFY_OPTION_ID = 0x36 # For identifying unknown items.
+READ_OPTION_ID = 0x37 # For identifying readable items.
+EAT_OPTION_ID = 0x38
+DRINK_OPTION_ID = 0x39
+
+# STORE OPTION IDS
+BUY_OPTION_ID = 0x41 # For buying items in stores.
+SELL_OPTION_ID = 0x42 # For selling items in stores.
+
+# Some convenient option ID lists for common items.
+DEFAULT_LOG_OPTION_ID_LIST = [
+    LIGHT_OPTION_ID,
+    CRAFT_OPTION_ID,
+    DISCARD_OPTION_ID,
+]
+
+DEFAULT_ITEM_MENU_OPTION_IDS = [
+    DISCARD_OPTION_ID,
+]
 
 # Maps option ID to dict that maps language ID to the option name.
 OPTION_NAME_INFO = {
@@ -46,9 +77,57 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Quit Game",
         language.LANG_ESPANOL: "Salir del Juego",
     },
+    CHARACTER_OPTION_ID: {
+        language.LANG_ENGLISH: "Character",
+        language.LANG_ESPANOL: "Caracter",
+    },
     MORE_OPTIONS_OPTION_ID: {
         language.LANG_ENGLISH: "More Options...",
         language.LANG_ESPANOL: "Mas Opciones...",
+    },
+    DISCARD_OPTION_ID: {
+        language.LANG_ENGLISH: "Discard",
+        language.LANG_ESPANOL: "Descartar",
+    },
+    LIGHT_OPTION_ID: {
+        language.LANG_ENGLISH: "Light",
+        language.LANG_ESPANOL: "Encender",
+    },
+    EQUIP_OPTION_ID: {
+        language.LANG_ENGLISH: "Equip",
+        language.LANG_ESPANOL: "Equipar",
+    },
+    UNEQUIP_OPTION_ID: {
+        language.LANG_ENGLISH: "Unequip",
+        language.LANG_ESPANOL: "Desequipar",
+    },
+    CRAFT_OPTION_ID: {
+        language.LANG_ENGLISH: "Craft",
+        language.LANG_ESPANOL: "Elaborar",
+    },
+    IDENTIFY_OPTION_ID: {
+        language.LANG_ENGLISH: "Identify",
+        language.LANG_ESPANOL: "Identificar",
+    },
+    READ_OPTION_ID: {
+        language.LANG_ENGLISH: "Read",
+        language.LANG_ESPANOL: "Leer",
+    },
+    EAT_OPTION_ID: {
+        language.LANG_ENGLISH: "Eat",
+        language.LANG_ESPANOL: "Comer",
+    },
+    DRINK_OPTION_ID: {
+        language.LANG_ENGLISH: "Drink",
+        language.LANG_ESPANOL: "Tomar",
+    },
+    BUY_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy",
+        language.LANG_ESPANOL: "Comprar",
+    },
+    SELL_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell",
+        language.LANG_ESPANOL: "Vender",
     },
 }
 
@@ -59,6 +138,7 @@ OVERWORLD_MENU_OPTION_IDS = [
     STATS_OPTION_ID,
     QUESTS_OPTION_ID,
     CONFIGURATION_OPTION_ID,
+    CHARACTER_OPTION_ID,
     SAVE_GAME_OPTION_ID,
     LOAD_GAME_OPTION_ID,
     QUIT_GAME_OPTION_ID,

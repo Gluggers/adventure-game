@@ -725,21 +725,6 @@ class Overworld_Viewing(Viewing):
         #self.blit_top_display()
         self.blit_top_health_display()
 
-    # Updates and blit current overworld viewing.
-    # Does not update display - caller must do that.
-    # OVERRIDES
-    """
-    def refresh_and_blit_self(self):
-        # Blit background.
-        self.blit_background()
-
-        # Refresh and blit map.
-        self.refresh_and_blit_map()
-
-        # Update top display and blit.
-        self.refresh_and_blit_top_display()
-    """
-
     def refresh_top_display(self):
         if self.top_display:
             self.top_display.update_self()
@@ -1015,6 +1000,9 @@ class Overworld_Viewing(Viewing):
             ret_viewing.create_displays()
 
         return ret_viewing
+
+class Inventory_Viewing(Viewing):
+    pass
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)
