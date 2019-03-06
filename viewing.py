@@ -12,6 +12,7 @@ import viewingdata
 import imagepaths
 import timekeeper
 import sys
+import fontinfo
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -441,11 +442,14 @@ class Overworld_Viewing(Viewing):
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_top_health_display(self):
-        if display.Display.top_display_font:
+        top_display_font = display.Display.get_font(
+                fontinfo.OW_HEALTH_DISPLAY_FONT_ID
+            )
+        if top_display_font:
             self.top_health_display = display.Text_Display(
                 self.main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
-                display.Display.top_display_font,
+                top_display_font,
                 background_color=viewingdata.COLOR_WHITE,
                 background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
                 side_padding=6,
@@ -460,31 +464,15 @@ class Overworld_Viewing(Viewing):
             logger.error("Top display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
-    # Requires fonts to be loaded. see display.Display.init_fonts()
-    def create_top_display(self):
-        if display.Display.top_display_font:
-            self.top_display = display.Top_Display(
-                self.main_display_surface,
-                viewingdata.OW_TOP_DISPLAY_RECT,
-                display.Display.top_display_font,
-                background_color=viewingdata.COLOR_WHITE,
-                background_image_path=imagepaths.OW_TOP_DISPLAY_BACKGROUND_PATH,
-                protagonist=self._protagonist,
-            )
-            if self.top_display:
-                self.displays[viewingdata.OW_TOP_DISPLAY_ID] = self.top_display
-            else:
-                logger.error("Failed to make top display")
-        else:
-            logger.error("Top display font not found.")
-            logger.error("Must init fonts through display.Display.init_fonts.")
-
     def create_bottom_text_display(self):
-        if display.Display.bottom_text_display_font:
+        font_obj = display.Display.get_font(
+                fontinfo.OW_BOTTOM_TEXT_FONT_ID
+            )
+        if font_obj:
             self.bottom_text_display = display.Text_Display(
                 self.main_display_surface,
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
-                display.Display.bottom_text_display_font,
+                font_obj,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
                 background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
@@ -500,15 +488,17 @@ class Overworld_Viewing(Viewing):
             logger.error("Must init fonts through display.Display.init_fonts.")
 
     def create_side_menu_display(self):
-        # TODO
-        if display.Display.side_menu_display_font:
+        font_obj = display.Display.get_font(
+                fontinfo.OW_SIDE_MENU_FONT_ID
+            )
+        if font_obj:
             self.side_menu_display = display.Menu_Display(
                 self.main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
-                display.Display.side_menu_display_font,
+                font_obj,
                 background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_WHITE,
-                font_color=display.FONT_COLOR_DEFAULT,
+                font_color=fontinfo.FONT_COLOR_DEFAULT,
                 side_padding=display.OW_SIDE_MENU_SIDE_PADDING,
                 vertical_padding=display.OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
@@ -1002,7 +992,121 @@ class Overworld_Viewing(Viewing):
         return ret_viewing
 
 class Inventory_Viewing(Viewing):
-    pass
+    # background color is fill color for background in case no
+    # background image is available.
+    def __init__(
+                self,
+                main_display_surface,
+                protagonist=None,
+                background_image_path=None,
+                background_color=viewingdata.COLOR_BLACK,
+            ):
+        Viewing.__init__(
+            self,
+            main_display_surface,
+        )
+
+        self._protagonist = protagonist
+        self.background_image = None
+        self.display_rect = viewingdata.INVENTORY_VIEWING_RECT
+
+        if background_image_path:
+            self.background_image = pygame.image.load(
+                                        background_image_path
+                                    ).convert_alpha()
+
+        # Will display the word "Inventory".
+        self.top_inventory_label_display = None
+
+        # Will display the items in the inventory.
+        self.main_inventory_display = None
+
+        # Will display details about a single item in the inventory.
+        self.single_item_display = None
+
+        # Will display item options for a selected item.
+        self.item_option_menu_display = None
+
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_inventory_label_display(self):
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_TOP_DISPLAY_FONT_ID
+            )
+        if font_obj:
+            self.top_inventory_label_display = display.Text_Display(
+                self.main_display_surface,
+                viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
+                font_obj,
+                background_color=viewingdata.COLOR_WHITE,
+                background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
+                side_padding=6,
+                vertical_padding=6,
+            )
+
+            if self.top_inventory_label_display:
+                self.displays[viewingdata.INVENTORY_TOP_DISPLAY_ID] = self.top_inventory_label_display
+            else:
+                logger.error("Failed to make top inventory display")
+        else:
+            logger.error("Top display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+
+    # Requires fonts to be loaded. see display.Display.init_fonts()
+    def create_displays(self):
+        #self.create_top_health_display()
+        #self.create_bottom_text_display()
+        #self.create_side_menu_display()
+        pass
+
+
+    ### GETTERS AND SETTERS ###
+
+    @property
+    def protagonist(self):
+        """Return protagonist."""
+        return self._protagonist
+
+    @protagonist.setter
+    def protagonist(self, value):
+        """Set protagonist for viewing."""
+        if value:
+            self._protagonist = value
+
+    # Refreshes self. Does not update display.
+    def refresh_self(self):
+        pass
+
+    # Does not update display.
+    def blit_self(self):
+        if self.background_image:
+            self.main_display_surface.blit(
+                self.background_image,
+                self.display_rect,
+            )
+
+    @classmethod
+    def create_inventory_viewing(
+                cls,
+                main_display_surface,
+                protagonist=None,
+                background_image_path=None,
+                background_color=viewingdata.COLOR_BLACK,
+            ):
+        ret_viewing = None
+
+        if main_display_surface:
+            ret_viewing = Inventory_Viewing(
+                main_display_surface,
+                protagonist=protagonist,
+                background_image_path=background_image_path,
+                background_color=background_color,
+            )
+
+            # Create displays for viewing.
+            ret_viewing.create_displays()
+
+        return ret_viewing
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

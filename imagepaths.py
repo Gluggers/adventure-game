@@ -29,6 +29,8 @@ OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
                                     + "ow_bottom_text_display_640x96_dk.png" # [0]
 OW_SIDE_MENU_BACKGROUND_PATH = DISPLAY_PATH \
                                     + "ow_side_menu_220x416_dk.png" # [0]
+INVENTORY_BACKGROUND_PATH = DISPLAY_PATH \
+                                    + "inventory_background_672x480_dk.png" # [0]
 
 BORDER_TOP_LEFT_IMAGE_PATH = DISPLAY_PATH \
                                 + ""

@@ -8,39 +8,7 @@ import sys
 import imagepaths
 import menuoptions
 import math
-
-### FONTS AND TEXT ###
-DEFAULT_FONT = None
-#TOP_DISPLAY_TEXT = None
-
-FONT_SIZE_DEFAULT = 16
-FONT_SIZE_TOP_DISPLAY = 18
-FONT_SIZE_BOTTOM_TEXT = 16
-FONT_SIZE_SIDE_MENU_TEXT = 16
-
-FONT_TYPE_DEFAULT = 'Comic Sans MS'
-FONT_TYPE_TOP_DISPLAY = 'Comic Sans MS'
-
-# For best results, use mono-spaced font
-FONT_PATH_DEFAULT = "/usr/share/fonts/truetype/liberation/" \
-                    + "LiberationSerif-Regular.ttf"
-FONT_PATH_TOP_DISPLAY = "/usr/share/fonts/truetype/dejavu/" \
-                    + "DejaVuSansMono.ttf"
-FONT_PATH_BOTTOM_TEXT_DISPLAY = "/usr/share/fonts/truetype/dejavu/" \
-                    + "DejaVuSansMono.ttf"
-FONT_PATH_SIDE_MENU_DISPLAY = "/usr/share/fonts/truetype/dejavu/" \
-                    + "DejaVuSansMono.ttf"
-
-FONT_COLOR_DEFAULT = viewingdata.COLOR_BLACK
-FONT_COLOR_TOP_DISPLAY = viewingdata.COLOR_BLACK
-FONT_COLOR_BOTTOM_TEXT_DISPLAY = viewingdata.COLOR_BLACK
-
-# For best results, use mono-spaced font
-FONT_PATH_DEFAULT = "/usr/share/fonts/truetype/liberation/" \
-                    + "LiberationSerif-Regular.ttf"
-FONT_PATH_TOP_DISPLAY = "/usr/share/fonts/truetype/dejavu/" \
-                    + "DejaVuSansMono.ttf"
-# "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"
+import fontinfo
 
 SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "1234567890" \
@@ -129,10 +97,8 @@ class Menu_Page():
         return self.option_id_list[index]
 
 class Display():
-    default_font = None
-    top_display_font = None
-    bottom_text_display_font = None
-    side_menu_display_font = None
+    # Will contain loaded fonts.
+    font_listing = {}
 
     # Background color is color to use in case of no background image.
     # If background image is provided, we will use that rather than
@@ -150,7 +116,7 @@ class Display():
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 border_image_path_dict={},
-                font_color=FONT_COLOR_DEFAULT,
+                font_color=fontinfo.FONT_COLOR_DEFAULT,
             ):
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
@@ -205,179 +171,30 @@ class Display():
                 )
 
     @classmethod
+    def add_font_to_listing(cls, font_id, font_obj):
+        if font_obj and (font_id is not None):
+            cls.font_listing[font_id] = font_obj
+
+    @classmethod
+    def get_font(cls, font_id):
+        return cls.font_listing.get(font_id, None)
+
+    @classmethod
     def init_fonts(cls):
-        Display.default_font = pygame.font.Font(
-            FONT_PATH_DEFAULT,
-            FONT_SIZE_DEFAULT
-        )
-        Display.top_display_font = pygame.font.Font(
-            FONT_PATH_TOP_DISPLAY,
-            FONT_SIZE_TOP_DISPLAY
-        )
-        Display.bottom_text_display_font = pygame.font.Font(
-            FONT_PATH_BOTTOM_TEXT_DISPLAY,
-            FONT_SIZE_BOTTOM_TEXT
-        )
-        Display.side_menu_display_font = pygame.font.Font(
-            FONT_PATH_SIDE_MENU_DISPLAY,
-            FONT_SIZE_SIDE_MENU_TEXT
-        )
-
-class Top_Display(Display):
-    def __init__(
-                self,
-                main_display_surface,
-                display_rect,
-                font_object,
-                background_image_path=None,
-                background_color=viewingdata.COLOR_WHITE,
-                border_image_path_dict={},
-                font_color=FONT_COLOR_DEFAULT,
-                protagonist=None,
-                curr_map=None,
-            ):
-        Display.__init__(
-            self,
-            main_display_surface,
-            display_rect,
-            font_object,
-            background_image_path=background_image_path,
-            background_color=background_color,
-            border_image_path_dict=border_image_path_dict,
-            font_color=font_color,
-        )
-
-        self._protagonist = protagonist
-        self.curr_map = curr_map
-
-        # Set up text
-        self.level_text_str = LEVEL_TEXT_PREFIX_INFO.get(
-                    language.Language.current_language_id,
-                    None
+        for font_id, font_info in fontinfo.FONT_INFO.items():
+            font_obj = pygame.font.Font(
+                font_info.get(
+                    fontinfo.FONT_PATH_FIELD,
+                    fontinfo.FONT_PATH_DEFAULT,
+                ),
+                font_info.get(
+                    fontinfo.FONT_SIZE_FIELD,
+                    fontinfo.FONT_SIZE_DEFAULT
                 )
-        self.health_text_str = HEALTH_TEXT_PREFIX_INFO.get(
-                    language.Language.current_language_id,
-                    None
-                )
-
-        self.level_text = None
-        self.health_text = None
-
-        if self.level_text_str:
-            self.level_text = Display.top_display_font.render(
-                self.level_text_str,
-                False,
-                self.font_color
             )
 
-        if self.health_text_str:
-            self.health_text = Display.top_display_font.render(
-                self.health_text_str,
-                False,
-                self.font_color
-            )
-
-        # Get top left positions for rendering each text.
-        text_height = max(
-            self.health_text.get_height(),
-            self.level_text.get_height()
-        )
-        vertical_offset = int(
-            (viewingdata.OW_TOP_DISPLAY_HEIGHT - text_height) / 2
-        )
-
-        self.level_text_top_left_pixel = (
-            viewingdata.TOP_DISPLAY_LOCATION[0] + TOP_DISPLAY_SIDE_PADDING,
-            viewingdata.TOP_DISPLAY_LOCATION[1]                             \
-                + self.pixel_height                                         \
-                - vertical_offset                                           \
-                - text_height                                               \
-        )
-
-        self.health_text_top_left_pixel = (
-            viewingdata.TOP_DISPLAY_LOCATION[0]                             \
-                + int(2 * viewingdata.OW_TOP_DISPLAY_WIDTH / 5),
-            viewingdata.TOP_DISPLAY_LOCATION[1]                             \
-                + self.pixel_height                                         \
-                - vertical_offset                                           \
-                - text_height                                               \
-        )
-
-        # TODO - call this after initialization?
-        # Update the text.
-        self.update_self()
-
-    # Updates the display text and text positioning
-    # with the current protagonist information.
-    def update_self(self):
-        if self._protagonist:
-            # Get protagonist level.
-            protag_level = skills.calculate_combat_level(
-                    self._protagonist.skill_info_mapping
-                )
-            self.level_text_str = LEVEL_TEXT_PREFIX_INFO.get(
-                                    language.Language.current_language_id,
-                                    "",
-                                ) + str(protag_level)
-
-            # Get protagonist health.
-            self.health_text_str = ''.join([
-                    HEALTH_TEXT_PREFIX_INFO.get(
-                        language.Language.current_language_id,
-                        ""
-                    ),
-                    str(self._protagonist.curr_health),
-                    ' / ',
-                    str(self._protagonist.max_health)
-                ])
-
-            # Render the texts.
-            if Display.top_display_font:
-                self.level_text = Display.top_display_font.render(
-                    self.level_text_str,
-                    False,
-                    self.font_color
-                )
-                self.health_text = Display.top_display_font.render(
-                    self.health_text_str,
-                    False,
-                    self.font_color
-                )
-
-    @property
-    def protagonist(self):
-        """Return protagonist."""
-        return self._protagonist
-
-    @protagonist.setter
-    def protagonist(self, value):
-        """Assign protagonist to Top Display."""
-        if value:
-            self._protagonist = value
-
-            # Update top display
-            self.update_self()
-
-    # Blits the top display onto the given surface.
-    # Uses self's top left pixel
-    def blit_onto_surface(self, surface):
-        if surface:
-            # Blit the background image/default fill color.
-            self.blit_background(surface)
-
-            # Blit the level text.
-            if self.level_text and self.level_text_top_left_pixel:
-                surface.blit(
-                    self.level_text,
-                    self.level_text_top_left_pixel
-                )
-
-            # Blit the healthl text.
-            if self.health_text and self.health_text_top_left_pixel:
-                surface.blit(
-                    self.health_text,
-                    self.health_text_top_left_pixel
-                )
+            if font_obj:
+                cls.add_font_to_listing(font_id, font_obj)
 
 class Text_Display(Display):
     # If no background image is specified, default to background_color.
@@ -394,7 +211,7 @@ class Text_Display(Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 border_image_path_dict={},
-                font_color=FONT_COLOR_DEFAULT,
+                font_color=fontinfo.FONT_COLOR_DEFAULT,
                 side_padding=TEXT_DISPLAY_SIDE_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
                 continue_icon_image_path=None,
@@ -917,7 +734,7 @@ class Menu_Display(Text_Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 border_image_path_dict={},
-                font_color=FONT_COLOR_DEFAULT,
+                font_color=fontinfo.FONT_COLOR_DEFAULT,
                 side_padding=OW_SIDE_MENU_SIDE_PADDING,
                 vertical_padding=OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,

@@ -16,7 +16,7 @@ LOAD_GAME_OPTION_ID = 0x17
 QUIT_GAME_OPTION_ID = 0x18
 CHARACTER_OPTION_ID = 0x19
 
-# ITEM OPTION IDS
+# ITEM OPTION IDS FOR INVENTORY
 #USE_OPTION_ID = 0x30 # For using an item with another.
 DISCARD_OPTION_ID = 0x31 # For discarding items.
 LIGHT_OPTION_ID = 0x32 # For lighting items like logs on fire.

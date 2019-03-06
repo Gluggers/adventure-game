@@ -20,6 +20,7 @@ import savefiledata
 import pprint
 import time
 import items
+import imagepaths
 import menuoptions
 
 logger = None
@@ -60,6 +61,8 @@ class Game():
                 viewing.Overworld_Viewing.create_overworld_viewing(
                     self.main_display_screen,
                 )
+
+            self.inventory_viewing = None
 
             if not self.overworld_viewing:
                 logger.error("Failed to create viewing object.")
@@ -105,6 +108,15 @@ class Game():
         # Associate protag with game and viewing.
         self.protagonist = protagonist
         self.overworld_viewing.protagonist = protagonist
+
+        # Create inventory viewing. TODO
+        self.inventory_viewing = \
+            viewing.Inventory_Viewing.create_inventory_viewing(
+                self.main_display_screen,
+                self.protagonist,
+                background_image_path=imagepaths.INVENTORY_BACKGROUND_PATH,
+                background_color=viewingdata.COLOR_BLACK,
+            )
 
     def set_protagonist_tile_position(self, new_position):
         if new_position and self.protagonist and self.curr_map:
@@ -358,6 +370,21 @@ class Game():
                         )
                     )
                     break
+            if self.inventory_viewing:
+                self.inventory_viewing.refresh_and_blit_self()
+                pygame.display.update()
+                exit = False
+                while not exit:
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key == pygame.K_ESCAPE:
+                                logger.info("Leaving inventory.")
+                                exit = True
+            else:
+                logger.warn("No inventory viewing set.")
 
     def toggle_language(self):
         # For now, just switch to other language
