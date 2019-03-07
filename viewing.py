@@ -1088,6 +1088,7 @@ class Inventory_Viewing(Viewing):
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_inventory_label_display(self):
+        logger.info("Creating inventory label display...")
         font_obj = display.Display.get_font(
                 fontinfo.INVENTORY_TOP_DISPLAY_FONT_ID
             )
@@ -1098,8 +1099,8 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                side_padding=6,
-                vertical_padding=6,
+                side_padding=16,
+                vertical_padding=16,
             )
 
             if self.top_inventory_label_display:

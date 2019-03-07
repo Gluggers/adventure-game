@@ -276,7 +276,7 @@ class Text_Display(Display):
             self.spacing_factor_between_lines
         )
 
-        logger.debug(
+        logger.info(
             "Char per line {0}, line per page {1}".format(
                 self.char_per_line,
                 self.lines_per_page
@@ -409,6 +409,8 @@ class Text_Display(Display):
         if text_string:
             word_list = Text_Display.convert_to_word_list(text_string)
 
+            logger.debug("Get text lines. Text: {0}\nWord List:{1}".format(text_string, word_list))
+
             text_lines = []
 
             curr_length = 0
@@ -466,7 +468,7 @@ class Text_Display(Display):
                             )
                         )
 
-            if start_index == (num_words - 1):
+            if start_index == (num_words - 1) and start_index > 0:
                 # We still need to add the last word.
                 str_to_add = word_list[start_index]
                 text_lines.append(str_to_add)
@@ -591,6 +593,8 @@ class Text_Display(Display):
         # Get lines of text to print.
         lines_to_print = self.get_text_lines(text_string)
 
+        logger.debug("Get text pages. Text: {0}\nLines:{1}".format(text_string, lines_to_print))
+
         if lines_to_print:
             num_lines = len(lines_to_print)
 
@@ -686,6 +690,10 @@ class Text_Display(Display):
                     self.text_center_x - int(text_width / 2),
                     self.text_top_left_pixel[1] + vertical_offset
                 )
+
+                #logger.info("Self top left: {0}".format(self.text_top_left_pixel))
+                #logger.info("Text horizontal space: {0}".format(self.text_space_horizontal))
+                #logger.info("Text start: {0}".format(text_top_left))
 
                 # Blit the text.
                 surface.blit(

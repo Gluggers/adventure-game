@@ -356,7 +356,7 @@ class Game():
     def display_inventory(self, target_entity):
         if target_entity:
             target_entity.inventory.print_self()
-            
+
             if self.inventory_viewing:
                 # Clear screen.
                 pygame.draw.rect(
@@ -625,6 +625,7 @@ class Game():
         elif option_id == menuoptions.INVENTORY_OPTION_ID:
             logger.info("Displaying inventory from menu.")
             self.display_inventory(self.protagonist)
+            self.overworld_viewing.refresh_and_blit_self()
         elif option_id == menuoptions.STATS_OPTION_ID:
             logger.info("Displaying stat levels from menu.")
             self.display_statistics(self.protagonist)
