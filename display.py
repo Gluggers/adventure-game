@@ -420,67 +420,71 @@ class Text_Display(Display):
 
             logger.debug("Max char in line: {0}".format(self.char_per_line))
 
-            for index in range(num_words):
-                sub_list = None
-                str_to_add = None
+            if num_words == 1:
+                # Simple case. Just 1 word.
+                ret_lines = [word_list[0]]
+            elif num_words > 1:
+                for index in range(num_words):
+                    sub_list = None
+                    str_to_add = None
 
-                word_length = len(word_list[index])
+                    word_length = len(word_list[index])
 
-                logger.debug(
-                    "Word length for {0} is {1}".format(
-                        word_list[index],
-                        word_length
-                    )
-                )
-
-                # Check if we can add this word or not.
-                if (curr_length + word_length) > self.char_per_line:
-                    # Adding this word would bring us over the limit.
-                    # Collect all the words from the last end point up
-                    # to the word before.
-                    if start_index < index:
-                        sub_list = word_list[start_index:index]
-                    else:
-                        sub_list = [word_list[index]]
-
-                    start_index = index
-
-                    # Reset counter, and throw in the length of the
-                    # overflow word.
-                    curr_length = word_length
-                else:
-                    if (index == (num_words - 1)):
-                        # We reached the end of the word list and
-                        # did not overpass to the next line.
-                        sub_list = word_list[start_index:]
-                    else:
-                        curr_length = curr_length + word_length
-
-                # Create line.
-                if sub_list:
-                    str_to_add = ''.join(sub_list).strip()
-
-                    if str_to_add:
-                        text_lines.append(str_to_add)
-                        logger.debug(
-                            "Adding string {0} to text lines".format(
-                                str_to_add
-                            )
+                    logger.debug(
+                        "Word length for {0} is {1}".format(
+                            word_list[index],
+                            word_length
                         )
+                    )
 
-            if start_index == (num_words - 1) and start_index > 0:
-                # We still need to add the last word.
-                str_to_add = word_list[start_index]
-                text_lines.append(str_to_add)
-                logger.debug(
-                    "Adding string {0} to text lines".format(str_to_add)
-                )
+                    # Check if we can add this word or not.
+                    if (curr_length + word_length) > self.char_per_line:
+                        # Adding this word would bring us over the limit.
+                        # Collect all the words from the last end point up
+                        # to the word before.
+                        if start_index < index:
+                            sub_list = word_list[start_index:index]
+                        else:
+                            sub_list = [word_list[index]]
 
-            if text_lines:
-                ret_lines = text_lines
-            else:
-                # Entire string fits on one line.
-                ret_lines = [''.join(word_list)]
+                        start_index = index
+
+                        # Reset counter, and throw in the length of the
+                        # overflow word.
+                        curr_length = word_length
+                    else:
+                        if (index == (num_words - 1)):
+                            # We reached the end of the word list and
+                            # did not overpass to the next line.
+                            sub_list = word_list[start_index:]
+                        else:
+                            curr_length = curr_length + word_length
+
+                    # Create line.
+                    if sub_list:
+                        str_to_add = ''.join(sub_list).strip()
+
+                        if str_to_add:
+                            text_lines.append(str_to_add)
+                            logger.debug(
+                                "Adding string {0} to text lines".format(
+                                    str_to_add
+                                )
+                            )
+
+                if start_index == (num_words - 1):
+                    # We still need to add the last word.
+                    str_to_add = word_list[start_index]
+                    text_lines.append(str_to_add)
+                    logger.debug(
+                        "Adding string {0} to text lines".format(str_to_add)
+                    )
+
+                if text_lines:
+                    ret_lines = text_lines
+                else:
+                    # Entire string fits on one line.
+                    ret_lines = [''.join(word_list)]
 
         logger.debug(
             "Converted text \n{0}\nto lines\n{1}\n".format(
