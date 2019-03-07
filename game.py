@@ -355,22 +355,16 @@ class Game():
     # TODO enhance once menus are set up.
     def display_inventory(self, target_entity):
         if target_entity:
-            for item_id, quantity in target_entity.inventory.items():
-                item_obj = items.Item.get_item(item_id)
-
-                if item_obj:
-                    item_name = item_obj.get_name(
-                        language.Language.current_language_id
-                    )
-                    logger.info("{0} x{1}".format(item_name, quantity))
-                else:
-                    logger.error(
-                        "Invalid item with ID {0} in inventory.".format(
-                            item_id
-                        )
-                    )
-                    break
+            target_entity.inventory.print_self()
+            
             if self.inventory_viewing:
+                # Clear screen.
+                pygame.draw.rect(
+                    self.main_display_screen,
+                    viewingdata.COLOR_BLACK,
+                    viewingdata.MAIN_DISPLAY_RECT
+                )
+
                 self.inventory_viewing.refresh_and_blit_self()
                 pygame.display.update()
                 exit = False

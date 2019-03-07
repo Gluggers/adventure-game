@@ -36,6 +36,9 @@ DEFAULT_LINE_SPACING_FACTOR = 1.1
 TEXT_BOX_LINE_SPACING_FACTOR = 1.1
 MENU_LINE_SPACING_FACTOR = 1.5
 
+# Number of pixels in between each item slot.
+ITEM_VIEWING_PIXEL_SPACING = 6
+
 # Number of milliseconds to wait in between each
 # text display.
 BOTTOM_TEXT_DELAY_MS = 500
@@ -112,11 +115,9 @@ class Display():
                 self,
                 main_display_surface,
                 display_rect,
-                font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 border_image_path_dict={},
-                font_color=fontinfo.FONT_COLOR_DEFAULT,
             ):
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
@@ -124,8 +125,6 @@ class Display():
                     self.display_rect[0],
                     self.display_rect[1]
                 )
-        self.font_object = font_object
-        self.font_color = font_color
         self.pixel_width = self.display_rect[2]
         self.pixel_height = self.display_rect[3]
         self.background_color = background_color
@@ -221,13 +220,13 @@ class Text_Display(Display):
             self,
             main_display_surface,
             display_rect,
-            font_object,
             background_image_path=background_image_path,
             background_color=background_color,
             border_image_path_dict=border_image_path_dict,
-            font_color=font_color,
         )
 
+        self.font_object = font_object
+        self.font_color = font_color
         self.side_padding = side_padding
         self.vertical_padding = vertical_padding
         self.spacing_factor_between_lines = spacing_factor_between_lines
@@ -250,7 +249,7 @@ class Text_Display(Display):
             self.text_space_vertical
         ))
 
-        self.text_space_rect = (
+        self.text_space_rect = pygame.Rect(
             self.text_top_left_pixel[0],
             self.text_top_left_pixel[1],
             self.text_space_horizontal,
@@ -1013,6 +1012,52 @@ class Menu_Display(Text_Display):
                     # Advance.
                     vertical_offset = vertical_offset \
                         + int(self.spacing_factor_between_lines * text_height)
+
+class Item_Listing_Display(Display):
+    def __init__(
+                self,
+                main_display_surface,
+                display_rect,
+                item_quantity_font_object,
+                background_image_path=None,
+                background_color=viewingdata.COLOR_WHITE,
+                item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
+                side_padding=TEXT_DISPLAY_SIDE_PADDING,
+                vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
+            ):
+        Display.__init__(
+            self,
+            main_display_surface,
+            display_rect,
+            background_image_path=background_image_path,
+            background_color=background_color,
+            border_image_path_dict=border_image_path_dict,
+        )
+
+        self.item_quantity_font_object = item_quantity_font_object
+        self.item_quantity_font_color = item_quantity_font_color
+
+        self.side_padding = side_padding
+        self.vertical_padding = vertical_padding
+        self.pixels_between_items = ITEM_VIEWING_PIXEL_SPACING
+
+        self.item_viewing_top_left = (
+                self.display_rect[0] + self.side_padding,
+                self.display_rect[1] + self.vertical_padding,
+            )
+        self.item_viewing_space_horizontal = self.display_rect[2]  \
+                                            - (2 * self.side_padding)
+        self.item_viewing_space_vertical = self.display_rect[3]  \
+                                            - (2 * self.vertical_padding)
+
+        self.item_viewing_space_rect = pygame.Rect(
+            self.item_viewing_top_left[0],
+            self.item_viewing_top_left[1],
+            self.item_viewing_space_horizontal,
+            self.item_viewing_space_vertical
+        )
+
+        # TODO set up rest
 
 # set up logger
 logging.basicConfig(level=logging.INFO)

@@ -4,6 +4,7 @@ import objdata
 import logging
 import interactiondata
 import imageids
+import language
 
 ### IMAGE FLAGS ###
 #IMAGE_F_OVERWORLD = 0x1 # sets overworld images
@@ -55,7 +56,7 @@ class Interactive_Object(pygame.sprite.Sprite):
 
         self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
 
-    def get_name(self, language_id):
+    def get_name(self, language_id=language.Language.current_language_id):
         ret_name = ""
         if language_id is not None:
             ret_name = self.name_info.get(language_id, "")

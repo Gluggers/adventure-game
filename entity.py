@@ -11,6 +11,7 @@ import language
 import imageids
 import items
 import currency
+import inventory
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -36,8 +37,8 @@ class Entity(interactiveobj.Interactive_Object):
     # calculate the experience required for the level and set it accordingly
     # for the entity.  Excluding the skill_levels dict or excluding individual
     # skill IDs will set default values.
-    # equipment_dict maps the equipment slot ID to the corresponding item ID
-    # that the Entity is wielding.
+    # equipment_dict maps the equipment slot ID to a length-3 list of form
+    # [equipped item ID, item object, quantity of item].
     # manual_hitpoints allows manually setting the number of hitpoints
     # for the entity. If None, hitpoints will be set according to
     # the default formula of 10*hitpoints level.
@@ -132,62 +133,37 @@ class Entity(interactiveobj.Interactive_Object):
 
         self.curr_health = self.max_health
 
-        # set up equipment
+        # Set up equipment. The equipment_dict will map equipment slot ID
+        # to length-2 list of [item object, quantity].
         self.equipment_dict = {}
-        for equipment_slot_id, item_id in equipment_dict.items():
-            self.equipment_dict[equipment_slot_id] = item_id
+        for equipment_slot_id, item_info_list in equipment_dict.items():
+            item_id = item_info_list[0]
+            quantity = item_info_list[1]
+
+            # Get item object.
+            item_obj = items.Item.get_item(item_id)
+
+            if item_obj and quantity > 0:
+                self.equipment_dict[equipment_slot_id] = [
+                        item_id,
+                        item_obj,
+                        quantity,
+                    ]
 
         # Maps Item IDs to the number of items held.
-        self.inventory = {}
+        self.inventory = inventory.Inventory.inventory_factory()
 
-    # Returns True if inventory is full, false otherwise.
     def inventory_full(self):
-        return False
+        return self.inventory.is_full()
 
-    # Adds items to inventory. Returns True upon success, False on failure.
-    def add_item_to_inventory(self, item_id):
-        success = False
-
-        if not self.inventory_full():
-            # Make sure item ID is valid.
-            if (items.Item.get_item(item_id)):
-                success = True
-                self.inventory[item_id] = self.inventory.get(item_id, 0) + 1
-                logger.info("Added item ID {0} to inventory.".format(
-                    item_id
-                ))
-            else:
-                logger.error(
-                    "Trying to add invalid item ID {0} to inventory.".format(
-                        item_id
-                    )
-                )
-        else:
-            logger.warn("Trying to add item to full inventory.")
-
-        return success
-
-    def remove_item_from_inventory(self, item_id):
-        item_quantity = self.inventory.get(item_id, 0)
-        if item_quantity:
-            self.inventory[item_id] = item_quantity - 1
-            if self.inventory.get(item_id, 0) <= 0:
-                self.inventory.pop(item_id, 0)
-
-    def get_item_quantity_from_inventory(self, item_id):
-        return self.inventory.get(item_id, 0)
-
-    def has_item_in_inventory(self, item_id):
-        if self.get_item_quantity_from_inventory(item_id):
-            return True
-        else:
-            return False
+    def add_item_to_inventory_by_id(self, item_id, quantity=1):
+        return self.inventory.add_item_by_id(item_id, quantity=quantity)
 
     def has_item_equipped(self, item_id):
         has_equipped = False
 
-        for equipment_slot_id, equipped_item_id in self.equipment_dict.items():
-            if equiped_item_id == item_id:
+        for equipment_slot_id, equipped_item_info in self.equipment_dict.items():
+            if equipped_item_info[0] == item_id:
                 has_equipped = True
 
         return has_equipped

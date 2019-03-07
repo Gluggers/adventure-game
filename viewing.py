@@ -13,6 +13,7 @@ import imagepaths
 import timekeeper
 import sys
 import fontinfo
+import inventory
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -994,12 +995,20 @@ class Overworld_Viewing(Viewing):
 class Inventory_Viewing(Viewing):
     # background color is fill color for background in case no
     # background image is available.
+    # bottom_text_display_height indicates the pixel height for the
+    # area where text will appear at the bottom of the viewing.
+    # bottom_text is the text to blit in the bottom_text_rect.
+    # item_option_restrictions is a set of allowed option IDs to show for
+    # items selected in this viewing. Set to None to allow all item options.
     def __init__(
                 self,
                 main_display_surface,
                 protagonist=None,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
+                bottom_text_display_height=0,
+                bottom_text=None,
+                item_option_restrictions=None,
             ):
         Viewing.__init__(
             self,
@@ -1008,7 +1017,57 @@ class Inventory_Viewing(Viewing):
 
         self._protagonist = protagonist
         self.background_image = None
+
         self.display_rect = viewingdata.INVENTORY_VIEWING_RECT
+        self.top_display_rect = viewingdata.INVENTORY_TOP_DISPLAY_RECT
+        self.item_details_rect = viewingdata.INVENTORY_ITEM_DETAILS_RECT
+
+        self.bottom_text = bottom_text
+        self.item_option_restrictions = item_option_restrictions
+
+        # Calculate item viewing rect.
+        item_viewing_top_left = (
+            self.display_rect[0],
+            self.top_display_rect[1],
+        )
+
+        item_viewing_height = max(
+                0,
+                self.display_rect[1] \
+                + self.display_rect[3] \
+                - item_viewing_top_left[1],
+            )
+        item_viewing_width = max(
+                0,
+                max(
+                    0,
+                    self.item_details_rect[0] - item_viewing_top_left[0],
+                )
+            )
+
+        # Calculate space for bottom text if needed.
+        self.bottom_text_display_rect = None
+        if bottom_text_display_height:
+            self.bottom_text_display_rect = pygame.Rect(
+                self.display_rect[0],
+                self.display_rect[1] \
+                    + self.display_rect[3] \
+                    - bottom_text_display_height,
+                max(0, self.item_details_rect[0] - self.display_rect[0]),
+                bottom_text_display_height
+            )
+
+            item_viewing_height = max(
+                    0,
+                    item_viewing_height - bottom_text_display_height
+                )
+
+        self.item_display_rect = None
+        if item_viewing_width > 0 and item_viewing_height > 0:
+            self.item_display_rect = pygame.Rect(
+                item_viewing_top_left,
+                (item_viewing_width, item_viewing_height)
+            )
 
         if background_image_path:
             self.background_image = pygame.image.load(
@@ -1035,10 +1094,10 @@ class Inventory_Viewing(Viewing):
         if font_obj:
             self.top_inventory_label_display = display.Text_Display(
                 self.main_display_surface,
-                viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
+                viewingdata.INVENTORY_TOP_DISPLAY_RECT,
                 font_obj,
-                background_color=viewingdata.COLOR_WHITE,
-                background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
+                background_color=None,
+                background_image_path=None,
                 side_padding=6,
                 vertical_padding=6,
             )
@@ -1054,7 +1113,7 @@ class Inventory_Viewing(Viewing):
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
-        #self.create_top_health_display()
+        self.create_inventory_label_display()
         #self.create_bottom_text_display()
         #self.create_side_menu_display()
         pass
@@ -1079,11 +1138,35 @@ class Inventory_Viewing(Viewing):
 
     # Does not update display.
     def blit_self(self):
+        # Handle background.
         if self.background_image:
             self.main_display_surface.blit(
                 self.background_image,
                 self.display_rect,
             )
+        elif self.background_color:
+            pygame.draw.rect(
+                self.main_display_surface,
+                self.background_color,
+                self.display_rect,
+            )
+
+        # Handle inventory label display.
+        if self.top_inventory_label_display:
+            # Get inventory text.
+            inventory_name = inventory.Inventory.get_inventory_name(
+                language.Language.get_current_language_id()
+            )
+
+            if inventory_name:
+                self.display_text_display_first_page(
+                    self.top_inventory_label_display,
+                    inventory_name,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=False,
+                    refresh_after=False,
+                )
 
     @classmethod
     def create_inventory_viewing(

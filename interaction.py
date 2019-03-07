@@ -74,9 +74,7 @@ class Interaction():
                     language.Language.current_language_id,
                     ""
                 ).format(
-                    target_object.get_name(
-                        language.Language.current_language_id
-                    )
+                    target_object.get_name()
                 )
 
             game_object.display_overworld_bottom_text(
@@ -214,9 +212,7 @@ class Interaction():
                             language.Language.current_language_id,
                             ""
                         ).format(
-                            gained_resource.get_name(
-                                language.Language.current_language_id
-                            ),
+                            gained_resource.get_name(),
                             resource_exp
                         )
 
@@ -273,7 +269,7 @@ class Interaction():
                             logger.info("Gathered resource!")
 
                             # TODO handle all the item stuff here.
-                            acting_object.add_item_to_inventory(
+                            acting_object.add_item_to_inventory_by_id(
                                     gained_resource.item_id
                                 )
 
@@ -380,9 +376,7 @@ class Interaction():
             ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
-            obj_name = target_object.get_name(
-                language.Language.current_language_id
-            )
+            obj_name = target_object.get_name()
 
             main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
                     interaction_id,

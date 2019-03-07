@@ -7,6 +7,7 @@ import battledata
 import logging
 import imageids
 import menuoptions
+import language
 
 class Item(pygame.sprite.Sprite):
     # Master dict mapping item IDs to item objects.
@@ -79,7 +80,7 @@ class Item(pygame.sprite.Sprite):
             for option_id in item_menu_option_ids:
                 self.item_menu_option_ids.append(option_id)
 
-    def get_name(self, language_id):
+    def get_name(self, language_id=language.Language.current_language_id):
         ret_name = ""
         if language_id is not None:
             ret_name = self.name_info.get(language_id, "")
@@ -88,7 +89,7 @@ class Item(pygame.sprite.Sprite):
 
     # Returns the appropriate language translation for the item's usage
     # info string.
-    def get_usage_info(self, language_id):
+    def get_usage_info(self, language_id=language.Language.current_language_id):
         ret_str = "?????"
 
         if (language_id is not None) and self.usage_info:
@@ -96,13 +97,16 @@ class Item(pygame.sprite.Sprite):
             if info:
                 ret_str = info
         elif self.name_info:
-            ret_str = self.get_name(language_id)
+            ret_str = self.get_name(language_id=langauge_id)
 
         return ret_str
 
     # Returns the appropriate language translation for the item's description
     # info string.
-    def get_description_info(self, language_id):
+    def get_description_info(
+                self,
+                language_id=language.Language.current_language_id
+            ):
         ret_str = "?????"
 
         if (language_id is not None) and self.description_info:
@@ -110,9 +114,15 @@ class Item(pygame.sprite.Sprite):
             if info:
                 ret_str = info
         elif self.name_info:
-            ret_str = ret_str = self.get_name(language_id)
+            ret_str = ret_str = self.get_name(language_id=langauge_id)
 
         return ret_str
+
+    def is_stackable(self):
+        if self.properties & itemdata.STACKABLE_F:
+            return True
+        else:
+            return False
 
     @classmethod
     def get_item(cls, item_id):
