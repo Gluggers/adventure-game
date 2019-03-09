@@ -264,7 +264,8 @@ class Interaction():
                         # implement function that determines generation based on
                         # resource required level and character level and
                         # character equipment)
-                        if random.randint(0,4) == 0:
+                        #if random.randint(0,4) == 0:
+                        if random.randint(0,1) == 0:
                             # We generated a resource.
                             logger.info("Gathered resource!")
 

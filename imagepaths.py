@@ -18,36 +18,25 @@ DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
 
 ### DISPLAY IMAGE PATHS ###
 DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
-                                + "text_continue_icon2_10x10_dk.png" # [0]
+                        + "text_continue_icon2_10x10_dk.png" # [0]
 DEFAULT_MENU_SELECTION_ICON_PATH = DISPLAY_PATH \
-                                + "menu_selection_icon2_10x10_dk.png" # [0]
+                        + "menu_selection_icon2_10x10_dk.png" # [0]
 OW_TOP_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
-                                + "ow_top_display_background_672x48_dk.png" # [0]
+                        + "ow_top_display_background_672x48_dk.png" # [0]
 OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
-                                    + "ow_top_health_display_264x56_dk.png" # [0]
+                        + "ow_top_health_display_264x56_dk.png" # [0]
 OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH = DISPLAY_PATH \
-                                    + "ow_bottom_text_display_640x96_dk.png" # [0]
+                        + "ow_bottom_text_display_640x96_dk.png" # [0]
 OW_SIDE_MENU_BACKGROUND_PATH = DISPLAY_PATH \
-                                    + "ow_side_menu_220x416_dk.png" # [0]
+                        + "ow_side_menu_220x416_dk.png" # [0]
 INVENTORY_BACKGROUND_PATH = DISPLAY_PATH \
-                                    + "inventory_background_672x480_dk.png" # [0]
-
-BORDER_TOP_LEFT_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_TOP_RIGHT_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_BOTTOM_LEFT_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_BOTTOM_RIGHT_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_TOP_SIDE_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_BOTTOM_SIDE_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_LEFT_SIDE_IMAGE_PATH = DISPLAY_PATH \
-                                + ""
-BORDER_RIGHT_SIDE_IMAGE_PATH = DISPLAY_PATH \
-                                +  ""
+                        + "inventory_background_672x480_dk.png" # [0]
+ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
+                        + "item_listing_selected_image_45x45_dk.png" # [0]
+ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
+                        + "item_listing_continue_up_icon_60x20.png" # [0]
+ITEM_LISTING_CONT_DOWN_PATH = DISPLAY_PATH \
+                        + "item_listing_continue_down_icon_60x20.png" # [0]
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_lz.png" # [1]

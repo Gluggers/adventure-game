@@ -63,6 +63,9 @@ class Viewing():
                 advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                alternative_top_left=None,
             ):
         if page and text_display and self.main_display_surface:
             text_display.blit_page(
@@ -86,6 +89,9 @@ class Viewing():
                     self.main_display_surface,
                     page,
                     show_continue_icon=True,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
                 )
 
                 pygame.display.update()
@@ -113,6 +119,9 @@ class Viewing():
                             self.main_display_surface,
                             page,
                             show_continue_icon=True,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
                         )
                         pygame.display.update()
 
@@ -137,6 +146,9 @@ class Viewing():
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                alternative_top_left=None,
             ):
         if self.main_display_surface and text_display and text_to_display:
             # Get the pages.
@@ -151,6 +163,9 @@ class Viewing():
                         advance_delay_ms=advance_delay_ms,
                         auto_advance=auto_advance,
                         refresh_during=refresh_during,
+                        horizontal_orientation=horizontal_orientation,
+                        vertical_orientation=vertical_orientation,
+                        alternative_top_left=alternative_top_left,
                     )
 
                     # Refresh and reblit self.
@@ -174,6 +189,9 @@ class Viewing():
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                alternative_top_left=None,
             ):
         if text_to_display and self.main_display_surface and text_display:
             # Get the pages.
@@ -192,6 +210,9 @@ class Viewing():
                     advance_delay_ms=advance_delay_ms,
                     auto_advance=auto_advance,
                     refresh_during=refresh_during,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
                 )
 
             if refresh_after:
@@ -203,11 +224,13 @@ class Viewing():
                 self,
                 menu_display,
                 option_id_list,
-                orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
                 load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
                 option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
                 refresh_during=True,
                 refresh_after=True,
+                alternative_top_left=None,
             ):
         ret_option_id = None
         menu_pages = []
@@ -240,7 +263,9 @@ class Viewing():
                     self.main_display_surface,
                     curr_page,
                     curr_selected_index,
-                    orientation=orientation,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
                 )
 
                 pygame.display.update()
@@ -256,7 +281,9 @@ class Viewing():
                         self.main_display_surface,
                         curr_page,
                         curr_selected_index,
-                        orientation=orientation,
+                        horizontal_orientation=horizontal_orientation,
+                        vertical_orientation=vertical_orientation,
+                        alternative_top_left=alternative_top_left,
                     )
                     pygame.display.update()
 
@@ -282,7 +309,9 @@ class Viewing():
                             self.main_display_surface,
                             curr_page,
                             curr_selected_index,
-                            orientation=orientation,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
                         )
                         pygame.display.update()
 
@@ -386,7 +415,9 @@ class Viewing():
                             self.main_display_surface,
                             curr_page,
                             curr_selected_index,
-                            orientation=orientation,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
                         )
                         pygame.display.update()
 
@@ -400,7 +431,9 @@ class Viewing():
                                 self.main_display_surface,
                                 curr_page,
                                 curr_selected_index,
-                                orientation=orientation,
+                                horizontal_orientation=horizontal_orientation,
+                                vertical_orientation=vertical_orientation,
+                                alternative_top_left=alternative_top_left,
                             )
                             pygame.display.update()
 
@@ -453,7 +486,7 @@ class Overworld_Viewing(Viewing):
                 top_display_font,
                 background_color=viewingdata.COLOR_WHITE,
                 background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
-                side_padding=6,
+                horizontal_padding=6,
                 vertical_padding=6,
             )
 
@@ -477,7 +510,7 @@ class Overworld_Viewing(Viewing):
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
                 background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
-                side_padding=display.TEXT_DISPLAY_SIDE_PADDING,
+                horizontal_padding=display.TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=display.TEXT_DISPLAY_VERTICAL_PADDING,
             )
             if self.bottom_text_display:
@@ -500,7 +533,7 @@ class Overworld_Viewing(Viewing):
                 background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_WHITE,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                side_padding=display.OW_SIDE_MENU_SIDE_PADDING,
+                horizontal_padding=display.OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=display.OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
@@ -683,7 +716,7 @@ class Overworld_Viewing(Viewing):
                 menu_option_ids,
                 refresh_after=True,
                 refresh_during=True,
-                #orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                #horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
                 #load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
                 #option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
             ):
@@ -694,7 +727,8 @@ class Overworld_Viewing(Viewing):
             ret_option_id = self.display_menu_display(
                 self.side_menu_display,
                 menu_option_ids,
-                orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
                 load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
                 option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
                 refresh_after=refresh_after,
@@ -1003,7 +1037,6 @@ class Inventory_Viewing(Viewing):
     def __init__(
                 self,
                 main_display_surface,
-                protagonist=None,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
                 bottom_text_display_height=0,
@@ -1015,7 +1048,6 @@ class Inventory_Viewing(Viewing):
             main_display_surface,
         )
 
-        self._protagonist = protagonist
         self.background_image = None
 
         self.display_rect = viewingdata.INVENTORY_VIEWING_RECT
@@ -1078,7 +1110,7 @@ class Inventory_Viewing(Viewing):
         self.top_inventory_label_display = None
 
         # Will display the items in the inventory.
-        self.main_inventory_display = None
+        self.item_listing_display = None
 
         # Will display details about a single item in the inventory.
         self.single_item_display = None
@@ -1099,7 +1131,7 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                side_padding=16,
+                horizontal_padding=16,
                 vertical_padding=16,
             )
 
@@ -1111,33 +1143,49 @@ class Inventory_Viewing(Viewing):
             logger.error("Top display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
+    def create_item_listing_display(self):
+        logger.info("Creating main inventory display...")
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_ITEM_ICON_QUANTITY_FONT_ID
+            )
+        if font_obj:
+            self.item_listing_display = display.Item_Listing_Display(
+                self.main_display_surface,
+                self.item_display_rect,
+                font_obj,
+                background_image_path=None,
+                background_color=None,
+                item_quantity_font_color=viewingdata.COLOR_WHITE,
+                horizontal_padding=display.ITEM_LISTING_HORIZONTAL_PADDING,
+                vertical_padding=display.ITEM_LISTING_VERTICAL_PADDING,
+                continue_up_icon_image_path=imagepaths.ITEM_LISTING_CONT_UP_PATH,
+                continue_down_icon_image_path=imagepaths.ITEM_LISTING_CONT_DOWN_PATH,
+                selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
+            )
+
+            if self.item_listing_display:
+                self.displays[viewingdata.INVENTORY_ITEM_LISTING_DISPLAY_ID] = \
+                    self.item_listing_display
+            else:
+                logger.error("Failed to make item listing display")
+        else:
+            logger.error("Item listing quantity font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
         self.create_inventory_label_display()
-        #self.create_bottom_text_display()
-        #self.create_side_menu_display()
+        self.create_item_listing_display()
+
         pass
-
-
-    ### GETTERS AND SETTERS ###
-
-    @property
-    def protagonist(self):
-        """Return protagonist."""
-        return self._protagonist
-
-    @protagonist.setter
-    def protagonist(self, value):
-        """Set protagonist for viewing."""
-        if value:
-            self._protagonist = value
 
     # Refreshes self. Does not update display.
     def refresh_self(self):
         pass
 
     # Does not update display.
+    # This method should be called before calling display_
     def blit_self(self):
         # Handle background.
         if self.background_image:
@@ -1169,11 +1217,36 @@ class Inventory_Viewing(Viewing):
                     refresh_after=False,
                 )
 
+        # TODO handle bottom text display
+
+    # Handles displaying the item listing and returns
+    # the selected item index and option as a tuple
+    # (None is no item or option are selected).
+    def handle_item_listing(self, inventory_obj):
+        ret_info = None
+
+        if inventory_obj:
+            # Start with the first item.
+            curr_index = 0
+            curr_viewable_row_index = 0
+
+            self.item_listing_display.blit_item_listing(
+                self.main_display_surface,
+                inventory_obj.inventory_data,
+                curr_viewable_row_index,
+                curr_index,
+                show_continue_icon=True,
+                alternative_top_left=None,
+            )
+
+
+
+        return ret_info
+
     @classmethod
     def create_inventory_viewing(
                 cls,
                 main_display_surface,
-                protagonist=None,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
             ):
@@ -1182,7 +1255,6 @@ class Inventory_Viewing(Viewing):
         if main_display_surface:
             ret_viewing = Inventory_Viewing(
                 main_display_surface,
-                protagonist=protagonist,
                 background_image_path=background_image_path,
                 background_color=background_color,
             )

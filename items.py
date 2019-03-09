@@ -51,7 +51,8 @@ class Item(pygame.sprite.Sprite):
         for image_type_id, image_path in image_path_dict.items():
             logger.debug("Loading image from path {0}".format(image_path))
             # convert alpha for transparency
-            self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
+            self.image_dict[image_type_id] = \
+                pygame.image.load(image_path).convert_alpha()
 
         self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
 
@@ -86,6 +87,12 @@ class Item(pygame.sprite.Sprite):
             ret_name = self.name_info.get(language_id, "")
 
         return ret_name
+
+    def get_image(self, image_id):
+        return self.image_dict.get(image_id, None)
+
+    def get_icon(self):
+        return self.get_image(imageids.ITEM_ICON_IMAGE_ID)
 
     # Returns the appropriate language translation for the item's usage
     # info string.

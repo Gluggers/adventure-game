@@ -17,36 +17,8 @@ from pygame.locals import *
 MAP_CLASS = 'Map'
 
 class Map:
-    # maps map IDs to map objects
+    # Maps map IDs to map objects.
     map_listing = {}
-
-    # Maps map IDs to dict that maps bottom left tile location tuples to
-    # a list of [original object ID, current object ID (None if no object
-    # currently on tile)]
-    #changed_bottom_left_tile_obj_mapping = {}
-
-    # Maps map IDs to dict that maps bottom left tile location tuples
-    # to the object ID of the original interactive obj on the tile
-    # (None if no obj on tile originally)
-    #original_bottom_left_tile_obj_mapping = {}
-
-    # Maps map IDs to dict that maps tile location tuples to
-    # a tile ID for the new tile at the location.
-    #changed_tile_mapping = {}
-
-    # Maps map IDs to timestamp of last refresh for the map ID.
-    # TODO - when saving game, refresh all maps. When loading game,
-    # set last refresh timestamp for all maps to be timestamp of game load,
-    # and then refresh all maps.
-    #last_refresh_timestamp_mapping = {}
-
-    # Dict that maps map IDs to dict that maps tile location tuple
-    # to list of [object ID for object to place on tile
-    # (None if removing object), entry time, and remaining time in
-    # milliseconds].
-    # TODO - when saving game, update everything. When loading game,
-    # set entry times to current loading time.
-    #pending_spawn_actions = {}
 
     ### INITIALIZER METHODS ###
 

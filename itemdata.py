@@ -2,26 +2,9 @@ import skills
 import language
 import currency
 import menuoptions
+import imageids
 
-### ITEM TYPE ID NUMBERS ###
-"""
-ITEM_TYPE_WEAPON = 0x1
-ITEM_TYPE_ARMOUR = 0x2
-ITEM_TYPE_CLOTHES = 0x3
-ITEM_TYPE_RESOURCE = 0x4
-ITEM_TYPE_FOOD = 0x5
-ITEM_TYPE_MISC = 0xF
-"""
-
-### ITEM TOOL TYPE ID NUMBERS ###
-"""
-TOOL_TYPE_NONE = 0x0 # Not a tool.
-TOOL_TYPE_PICKAXE = 0x1
-TOOL_TYPE_HATCHET = 0x2
-TOOL_TYPE_KNIFE = 0x3
-TOOL_TYPE_HAMMER = 0x4
-TOOL_TYPE_NEEDLE = 0x5
-"""
+ITEM_ICON_SIZE = 50
 
 ### ITEM PROPERTY FLAGS ###
 STACKABLE_F = 0x1

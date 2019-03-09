@@ -9,21 +9,12 @@ import imagepaths
 import menuoptions
 import math
 import fontinfo
+import itemdata
 
 SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "1234567890" \
                     + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                     + ":;[]{},./?<>-_=+~\`!@#$%^&*()\\|\"'"
-
-### BORDER IMAGE ID NUMBERS ###
-BORDER_TOP_LEFT_ID = 0x1
-BORDER_TOP_RIGHT_ID = 0x2
-BORDER_BOTTOM_LEFT_ID = 0x3
-BORDER_BOTTOM_RIGHT_ID = 0x4
-BORDER_TOP_SIDE_ID = 0x5
-BORDER_BOTTOM_SIDE_ID = 0x6
-BORDER_LEFT_SIDE_ID = 0x7
-BORDER_RIGHT_SIDE_ID = 0x8
 
 # Space between text and the continue icon.
 CONTINUE_ICON_HORIZ_SPACE = 6
@@ -37,7 +28,7 @@ TEXT_BOX_LINE_SPACING_FACTOR = 1.1
 MENU_LINE_SPACING_FACTOR = 1.5
 
 # Number of pixels in between each item slot.
-ITEM_VIEWING_PIXEL_SPACING = 6
+ITEM_VIEWING_PIXEL_SPACING = 10
 
 # Number of milliseconds to wait in between each
 # text display.
@@ -53,6 +44,9 @@ DEFAULT_MENU_OPTION_SWITCH_DELAY_MS = 750
 ### ORIENTATIONS FOR MENU OPTIONS ###
 ORIENTATION_CENTERED = 0x1
 ORIENTATION_LEFT_JUSTIFIED = 0x2
+ORIENTATION_RIGHT_JUSTIFIED = 0x3
+ORIENTATION_TOP_JUSTIFIED = 0x4
+ORIENTATION_BOTTOM_JUSTIFIED = 0x5
 
 
 MORE_OPTIONS_MENU_INFO = {
@@ -70,12 +64,15 @@ HEALTH_TEXT_PREFIX_INFO = {
 }
 
 ### PADDING ###
-TOP_DISPLAY_SIDE_PADDING = 20
-TEXT_DISPLAY_SIDE_PADDING = 28
+TOP_DISPLAY_HORIZONTAL_PADDING = 20
+TEXT_DISPLAY_HORIZONTAL_PADDING = 28
 TEXT_DISPLAY_VERTICAL_PADDING = 24
 
-OW_SIDE_MENU_SIDE_PADDING = 40
+OW_SIDE_MENU_HORIZONTAL_PADDING = 40
 OW_SIDE_MENU_VERTICAL_PADDING = 20
+
+ITEM_LISTING_HORIZONTAL_PADDING = 20
+ITEM_LISTING_VERTICAL_PADDING = 50
 
 class Text_Page():
     def __init__(self, line_list):
@@ -106,27 +103,16 @@ class Display():
     # Background color is color to use in case of no background image.
     # If background image is provided, we will use that rather than
     # background color. For best results, background image should be same
-    # size as display_rect dimensions.  If smaller than display_rect,
-    # the background image will repeat in a tile fashion (TODO)
-    # border_image_path_dict maps border image IDs to the filepath
-    # containing the image to use as a border. For best results,
-    # all border image IDs should be satisfied in the mapping.
+    # size as display_rect dimensions.
     def __init__(
                 self,
                 main_display_surface,
                 display_rect,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
-                border_image_path_dict={},
             ):
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
-        self.top_left_pixel_position = (
-                    self.display_rect[0],
-                    self.display_rect[1]
-                )
-        self.pixel_width = self.display_rect[2]
-        self.pixel_height = self.display_rect[3]
         self.background_color = background_color
 
         self.background_image = None
@@ -139,34 +125,31 @@ class Display():
 
             logger.info("Image size: {0}".format(self.background_image.get_size()))
 
-        # Maps border image IDs to rendered images.
-        self.border_images = {}
-
-        # Load border images.
-        if border_image_path_dict:
-            for border_id, image_path in border_image_path_dict.items():
-                border_image = pygame.image.load(
-                                        image_path
-                                    ).convert_alpha()
-                if border_image:
-                    self.border_images[border_id] = border_image
 
     # Does not update display, caller must do that.
-    def blit_background(self, surface):
+    def blit_background(self, surface, alternative_top_left=None):
         if surface:
+            target_rect = self.display_rect
+
+            if alternative_top_left:
+                target_rect = pygame.Rect(
+                    alternative_top_left,
+                    (self.display_rect.width, self.display_rect.height)
+                )
+
             # Blit the background image/default fill color.
             # TODO - add in blitting the borders?
             if self.background_image:
                 # TODO - tile repetition?
                 surface.blit(
                     self.background_image,
-                    self.display_rect,
+                    target_rect,
                 )
             elif self.background_color:
                 pygame.draw.rect(
                     surface,
                     self.background_color,
-                    self.display_rect
+                    target_rect,
                 )
 
     @classmethod
@@ -209,9 +192,8 @@ class Text_Display(Display):
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
-                border_image_path_dict={},
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                side_padding=TEXT_DISPLAY_SIDE_PADDING,
+                horizontal_padding=TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
                 continue_icon_image_path=None,
                 spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR,
@@ -222,42 +204,34 @@ class Text_Display(Display):
             display_rect,
             background_image_path=background_image_path,
             background_color=background_color,
-            border_image_path_dict=border_image_path_dict,
         )
 
         self.font_object = font_object
         self.font_color = font_color
-        self.side_padding = side_padding
+        self.horizontal_padding = horizontal_padding
         self.vertical_padding = vertical_padding
         self.spacing_factor_between_lines = spacing_factor_between_lines
 
-        # Define where text will start.
-        self.text_top_left_pixel = (
-            self.top_left_pixel_position[0] + self.side_padding,
-            self.top_left_pixel_position[1] + self.vertical_padding
+        # Define text space limits.
+        self.text_space_horizontal = self.display_rect.width \
+                                    - (2 * self.horizontal_padding)
+        self.text_space_vertical = self.display_rect.height \
+                                    - (2 * self.vertical_padding)
+        self.text_space_top_left = (
+            self.display_rect.x + self.horizontal_padding,
+            self.display_rect.y + self.vertical_padding
         )
 
-        # Define text space limits.
-        self.text_space_horizontal = self.pixel_width \
-                                    - (2 * self.side_padding)
-        self.text_space_vertical = self.pixel_height \
-                                    - (2 * self.vertical_padding)
-
-        logger.info("Text top left: {0}. Space {1} x {2}".format(
-            self.text_top_left_pixel,
+        logger.info("Text Space {0} x {1}. Top left: {2}".format(
             self.text_space_horizontal,
-            self.text_space_vertical
+            self.text_space_vertical,
+            self.text_space_top_left
         ))
 
         self.text_space_rect = pygame.Rect(
-            self.text_top_left_pixel[0],
-            self.text_top_left_pixel[1],
-            self.text_space_horizontal,
-            self.text_space_vertical
+            self.text_space_top_left,
+            (self.text_space_horizontal, self.text_space_vertical)
         )
-
-        self.text_center_x = self.text_space_rect[0] \
-                            + int(self.text_space_rect[2] / 2)
 
         self.text_height = self.font_object.get_linesize()
 
@@ -357,23 +331,6 @@ class Text_Display(Display):
                 / (text_height + pixels_between_lines)
             )
 
-            """
-            num_total_lines = int(vertical_pixel_height / text_height)
-
-            if (num_total_lines % 2) == 0:
-                # Even number of total lines. Divide by line space factor
-                # to account for space in between the lines.
-                num_lines = int(
-                        num_total_lines / spacing_factor_between_lines
-                    )
-            else:
-                # Odd number of total lines. We don't need space after
-                # the final line.
-                num_lines = 1 + int(
-                        num_total_lines / spacing_factor_between_lines
-                    )
-            """
-
         return num_lines
 
     @classmethod
@@ -400,91 +357,91 @@ class Text_Display(Display):
         return ret_list
 
     # Given a text string to display, returns a list of strings,
-    # where each string takes up one line of display space.
+    # where each string takes up at most one line of display space.
     def get_text_lines(self, text_string):
         # List of strings
         ret_lines = []
 
-        # Convert string to list of words to print.
+        # Convert string to list of words to print. Newlines in the
+        # string will carry over to a new text line.
         if text_string:
-            word_list = Text_Display.convert_to_word_list(text_string)
-
-            logger.debug("Get text lines. Text: {0}\nWord List:{1}".format(text_string, word_list))
-
             text_lines = []
 
-            curr_length = 0
-            start_index = 0
+            # Separate out the string based on newlines.
+            text_string_lines = [x.strip() for x in text_string.split('\n')]
 
-            num_words = len(word_list)
+            for line in text_string_lines:
+                word_list = Text_Display.convert_to_word_list(line)
 
-            logger.debug("Max char in line: {0}".format(self.char_per_line))
+                logger.debug("Get text lines. Text: {0}\nWord List:{1}".format(line, word_list))
 
-            if num_words == 1:
-                # Simple case. Just 1 word.
-                ret_lines = [word_list[0]]
-            elif num_words > 1:
-                for index in range(num_words):
-                    sub_list = None
-                    str_to_add = None
+                curr_length = 0
+                start_index = 0
 
-                    word_length = len(word_list[index])
+                num_words = len(word_list)
 
-                    logger.debug(
-                        "Word length for {0} is {1}".format(
-                            word_list[index],
-                            word_length
-                        )
-                    )
+                if num_words == 1:
+                    # Simple case. Just 1 word.
+                    text_lines.append(word_list[0])
+                elif num_words > 1:
+                    for index in range(num_words):
+                        sub_list = None
+                        str_to_add = None
 
-                    # Check if we can add this word or not.
-                    if (curr_length + word_length) > self.char_per_line:
-                        # Adding this word would bring us over the limit.
-                        # Collect all the words from the last end point up
-                        # to the word before.
-                        if start_index < index:
-                            sub_list = word_list[start_index:index]
-                        else:
-                            sub_list = [word_list[index]]
+                        word_length = len(word_list[index])
 
-                        start_index = index
-
-                        # Reset counter, and throw in the length of the
-                        # overflow word.
-                        curr_length = word_length
-                    else:
-                        if (index == (num_words - 1)):
-                            # We reached the end of the word list and
-                            # did not overpass to the next line.
-                            sub_list = word_list[start_index:]
-                        else:
-                            curr_length = curr_length + word_length
-
-                    # Create line.
-                    if sub_list:
-                        str_to_add = ''.join(sub_list).strip()
-
-                        if str_to_add:
-                            text_lines.append(str_to_add)
-                            logger.debug(
-                                "Adding string {0} to text lines".format(
-                                    str_to_add
-                                )
+                        logger.debug(
+                            "Word length for {0} is {1}".format(
+                                word_list[index],
+                                word_length
                             )
+                        )
 
-                if start_index == (num_words - 1):
-                    # We still need to add the last word.
-                    str_to_add = word_list[start_index]
-                    text_lines.append(str_to_add)
-                    logger.debug(
-                        "Adding string {0} to text lines".format(str_to_add)
-                    )
+                        # Check if we can add this word or not.
+                        if (curr_length + word_length) > self.char_per_line:
+                            # Adding this word would bring us over the limit.
+                            # Collect all the words from the last end point up
+                            # to the word before.
+                            if start_index < index:
+                                sub_list = word_list[start_index:index]
+                            else:
+                                sub_list = [word_list[index]]
 
-                if text_lines:
-                    ret_lines = text_lines
-                else:
-                    # Entire string fits on one line.
-                    ret_lines = [''.join(word_list)]
+                            start_index = index
+
+                            # Reset counter, and throw in the length of the
+                            # overflow word.
+                            curr_length = word_length
+                        else:
+                            if (index == (num_words - 1)):
+                                # We reached the end of the word list and
+                                # did not overpass to the next line.
+                                sub_list = word_list[start_index:]
+                            else:
+                                curr_length = curr_length + word_length
+
+                        # Create line.
+                        if sub_list:
+                            str_to_add = ''.join(sub_list).strip()
+
+                            if str_to_add:
+                                text_lines.append(str_to_add)
+                                logger.debug(
+                                    "Adding string {0} to text lines".format(
+                                        str_to_add
+                                    )
+                                )
+
+                    if start_index == (num_words - 1):
+                        # We still need to add the last word.
+                        str_to_add = word_list[start_index]
+                        text_lines.append(str_to_add)
+                        logger.debug(
+                            "Adding string {0} to text lines".format(str_to_add)
+                        )
+
+        if text_lines:
+            ret_lines = text_lines
 
         logger.debug(
             "Converted text \n{0}\nto lines\n{1}\n".format(
@@ -495,93 +452,101 @@ class Text_Display(Display):
         return ret_lines
 
     @classmethod
-    def get_text_lines_test(cls, text_string):
+    def get_text_lines_test(cls, text_string, char_per_line):
         # List of strings
         ret_lines = []
 
-        # Convert string to list of words to print.
+        # Convert string to list of words to print. Newlines in the
+        # string will carry over to a new text line.
         if text_string:
-            word_list = Text_Display.convert_to_word_list(text_string)
-
             text_lines = []
 
-            curr_length = 0
-            start_index = 0
+            # Separate out the string based on newlines.
+            text_string_lines = [x.strip() for x in text_string.split('\n')]
 
-            num_words = len(word_list)
-
-            for index in range(num_words):
-                sub_list = None
-                str_to_add = None
-
-                word_length = len(word_list[index])
+            for line in text_string_lines:
+                word_list = Text_Display.convert_to_word_list(line)
 
                 logger.debug(
-                    "Word length for {0} is {1}".format(
-                        word_list[index],
-                        word_length
+                    "Get text lines. Text: {0}\nWord List:{1}".format(
+                        line,
+                        word_list
                     )
                 )
 
-                # Check if we can add this word or not.
-                if (curr_length + word_length) > 52:
-                    # Adding this word would bring us over the limit.
-                    # Collect all the words from the last end point up
-                    # to the word before.
-                    if start_index < index:
-                        sub_list = word_list[start_index:index]
-                    else:
-                        sub_list = [word_list[index]]
+                curr_length = 0
+                start_index = 0
 
-                    start_index = index
+                num_words = len(word_list)
 
-                    # Reset length counter.
-                    curr_length = 0
-                else:
-                    if (index == (num_words - 1)):
-                        # We reached the end of the word list and
-                        # did not overpass to the next line.
-                        if start_index < index:
-                            sub_list = word_list[start_index:]
-                        else:
-                            sub_list = [word_list[index]]
+                logger.debug("Max char in line: {0}".format(char_per_line))
+
+                if num_words == 1:
+                    # Simple case. Just 1 word.
+                    text_lines.append(word_list[0])
+                elif num_words > 1:
+                    for index in range(num_words):
+                        sub_list = None
+                        str_to_add = None
+
+                        word_length = len(word_list[index])
 
                         logger.debug(
-                            "Adding single word to list: {0}".format(sub_list)
-                        )
-                    else:
-                        curr_length = curr_length + word_length
-
-                # Create line.
-                if sub_list:
-                    str_to_add = ''.join(sub_list)
-
-                    if str_to_add:
-                        text_lines.append(str_to_add)
-                        logger.debug(
-                            "Adding string {0} to text lines".format(
-                                str_to_add
+                            "Word length for {0} is {1}".format(
+                                word_list[index],
+                                word_length
                             )
                         )
 
-            if start_index == (num_words - 1):
-                # We still need to add the last word.
-                str_to_add = word_list[start_index]
-                text_lines.append(str_to_add)
-                logger.debug(
-                    "Adding string {0} to text lines".format(str_to_add)
-                )
+                        # Check if we can add this word or not.
+                        if (curr_length + word_length) > char_per_line:
+                            # Adding this word would bring us over the limit.
+                            # Collect all the words from the last end point up
+                            # to the word before.
+                            if start_index < index:
+                                sub_list = word_list[start_index:index]
+                            else:
+                                sub_list = [word_list[index]]
 
-            if text_lines:
-                ret_lines = text_lines
-            else:
-                # Entire string fits on one line.
-                ret_lines = [''.join(word_list)]
+                            start_index = index
+
+                            # Reset counter, and throw in the length of the
+                            # overflow word.
+                            curr_length = word_length
+                        else:
+                            if (index == (num_words - 1)):
+                                # We reached the end of the word list and
+                                # did not overpass to the next line.
+                                sub_list = word_list[start_index:]
+                            else:
+                                curr_length = curr_length + word_length
+
+                        # Create line.
+                        if sub_list:
+                            str_to_add = ''.join(sub_list).strip()
+
+                            if str_to_add:
+                                text_lines.append(str_to_add)
+                                logger.debug(
+                                    "Adding string {0} to text lines".format(
+                                        str_to_add
+                                    )
+                                )
+
+                    if start_index == (num_words - 1):
+                        # We still need to add the last word.
+                        str_to_add = word_list[start_index]
+                        text_lines.append(str_to_add)
+                        logger.debug(
+                            "Adding string {0} to text lines".format(str_to_add)
+                        )
+
+        if text_lines:
+            ret_lines = text_lines
 
         logger.debug(
             "Converted text \n{0}\nto lines\n{1}\n".format(
-                text_string,
-                ret_lines
+                text_string, ret_lines
             )
         )
 
@@ -597,7 +562,12 @@ class Text_Display(Display):
         # Get lines of text to print.
         lines_to_print = self.get_text_lines(text_string)
 
-        logger.debug("Get text pages. Text: {0}\nLines:{1}".format(text_string, lines_to_print))
+        logger.debug(
+            "Get text pages. Text: {0}\nLines:{1}".format(
+                text_string,
+                lines_to_print
+            )
+        )
 
         if lines_to_print:
             num_lines = len(lines_to_print)
@@ -636,12 +606,10 @@ class Text_Display(Display):
 
         return ret_page_list
 
-    def get_page_height(self, text_page):
+    def get_page_height(self, num_lines_in_page):
         ret_height = 0
 
-        if text_page:
-            num_lines = len(text_page.text_lines)
-
+        if num_lines_in_page:
             # Total height = n*(text_height) + (n - 1)*(pixels_between_lines),
             # where n is number of lines.
             # = n*(text_height + pixels_between_lines) - pixels_between_lines.
@@ -650,8 +618,9 @@ class Text_Display(Display):
                     text_height * max(0, self.spacing_factor_between_lines - 1)
                 )
 
-            ret_height = (num_lines * (text_height + pixels_between_lines)) \
-                        - pixels_between_lines
+            ret_height = \
+                (num_lines_in_page * (text_height + pixels_between_lines)) \
+                - pixels_between_lines
 
         return ret_height
 
@@ -664,19 +633,44 @@ class Text_Display(Display):
                 surface,
                 text_page,
                 show_continue_icon=False,
+                alternative_top_left=None,
+                horizontal_orientation=ORIENTATION_CENTERED,
+                vertical_orientation=ORIENTATION_CENTERED,
             ):
         if surface and text_page:
-            # Blit background
-            self.blit_background(surface)
+            text_space_rect = self.text_space_rect
 
-            # Center vertically.
-            page_height = self.get_page_height(text_page)
-            vertical_offset = int(
-                    max(0, self.text_space_vertical - page_height) / 2
+            if alternative_top_left:
+                text_space_rect = pygame.rect(
+                    alternative_top_left[0] + self.horizontal_padding,
+                    alternative_top_left[1] + self.vertical_padding,
+                    self.text_space_horizontal,
+                    self.text_space_vertical,
                 )
 
-            #for text_line in text_page.text_lines:
+            # Blit background
+            self.blit_background(
+                surface,
+                alternative_top_left=alternative_top_left,
+            )
+
             num_lines = len(text_page.text_lines)
+
+            page_height = self.get_page_height(num_lines)
+
+            # Determine offsets based on placement.
+            vertical_offset = 0
+            if vertical_orientation == ORIENTATION_CENTERED:
+                vertical_offset = int(
+                        max(0, self.text_space_vertical - page_height) / 2
+                    )
+            elif vertical_orientation == ORIENTATION_TOP_JUSTIFIED:
+                vertical_offset = 0
+            elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
+                vertical_offset = text_space_rect.bottom - page_height
+            else:
+                logger.error("Invalid vertical orientation.")
+
             for index in range(num_lines):
                 text_line = text_page.text_lines[index]
 
@@ -689,41 +683,52 @@ class Text_Display(Display):
                 rendered_text_dimensions = rendered_text.get_size()
                 text_width = rendered_text_dimensions[0]
 
-                # Center the text horizontally and vertically.
-                text_top_left = (
-                    self.text_center_x - int(text_width / 2),
-                    self.text_top_left_pixel[1] + vertical_offset
-                )
-
-                #logger.info("Self top left: {0}".format(self.text_top_left_pixel))
-                #logger.info("Text horizontal space: {0}".format(self.text_space_horizontal))
-                #logger.info("Text start: {0}".format(text_top_left))
-
-                # Blit the text.
-                surface.blit(
-                    rendered_text,
-                    text_top_left
-                )
-
-                # Blit the continue icon if we are on the last line.
-                if (index == (num_lines - 1)) \
-                        and self.continue_icon \
-                        and show_continue_icon:
-                    text_height = rendered_text_dimensions[1]
-                    icon_top_left = (
-                        text_top_left[0] \
-                            + text_width \
-                            + CONTINUE_ICON_HORIZ_SPACE,
-                        text_top_left[1] \
-                            + text_height \
-                            - self.continue_icon.get_height() \
-                            - 4
+                # Determine horizontal placement.
+                text_top_left = None
+                if horizontal_orientation == ORIENTATION_CENTERED:
+                    text_top_left = (
+                        text_space_rect.centerx - int(text_width / 2),
+                        text_space_rect.y + vertical_offset
                     )
+                elif horizontal_orientation == ORIENTATION_LEFT_JUSTIFIED:
+                    text_top_left = (
+                        text_space_rect.x,
+                        text_space_rect.y + vertical_offset
+                    )
+                elif horizontal_orientation == ORIENTATION_RIGHT_JUSTIFIED:
+                    text_top_left = (
+                        text_space_rect.right - text_width,
+                        text_space_rect.y + vertical_offset
+                    )
+                else:
+                    logger.error("Invalid horizontal orientation.")
 
+                if text_top_left:
+                    # Blit the text.
                     surface.blit(
-                        self.continue_icon,
-                        icon_top_left
+                        rendered_text,
+                        text_top_left
                     )
+
+                    # Blit the continue icon if we are on the last line.
+                    if (index == (num_lines - 1)) \
+                            and self.continue_icon \
+                            and show_continue_icon:
+                        text_height = rendered_text_dimensions[1]
+                        icon_top_left = (
+                            text_top_left[0] \
+                                + text_width \
+                                + CONTINUE_ICON_HORIZ_SPACE,
+                            text_top_left[1] \
+                                + text_height \
+                                - self.continue_icon.get_height() \
+                                - 4
+                        )
+
+                        surface.blit(
+                            self.continue_icon,
+                            icon_top_left
+                        )
 
                 # Move to spot for next line.
                 vertical_offset += int(
@@ -744,9 +749,8 @@ class Menu_Display(Text_Display):
                 font_object,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
-                border_image_path_dict={},
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                side_padding=OW_SIDE_MENU_SIDE_PADDING,
+                horizontal_padding=OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
@@ -758,9 +762,8 @@ class Menu_Display(Text_Display):
             font_object,
             background_image_path=background_image_path,
             background_color=background_color,
-            border_image_path_dict=border_image_path_dict,
             font_color=font_color,
-            side_padding=side_padding,
+            horizontal_padding=horizontal_padding,
             vertical_padding=vertical_padding,
             spacing_factor_between_lines=spacing_factor_between_lines,
         )
@@ -944,20 +947,49 @@ class Menu_Display(Text_Display):
         )
 
     # Does not update display.
-    # Orientation can be centered or left justified (default).
     def blit_menu_page(
                 self,
                 surface,
                 menu_page,
                 curr_selected_index,
-                orientation=ORIENTATION_LEFT_JUSTIFIED,
+                alternative_top_left=None,
+                horizontal_orientation=ORIENTATION_CENTERED,
+                vertical_orientation=ORIENTATION_CENTERED,
             ):
-        if surface and menu_page and (orientation is not None):
+        if surface and menu_page and curr_selected_index >= 0:
             num_options = menu_page.get_num_options()
 
             if num_options <= self.max_options_per_page:
                 # Blit background.
-                self.blit_background(surface)
+                self.blit_background(
+                    surface,
+                    alternative_top_left=alternative_top_left,
+                )
+
+                page_height = self.get_page_height(num_options)
+
+                # Determine space to blit text.
+                target_rect = self.text_space_rect
+                if alternative_top_left:
+                    text_space_rect = pygame.rect(
+                        alternative_top_left[0] + self.horizontal_padding,
+                        alternative_top_left[1] + self.vertical_padding,
+                        self.text_space_horizontal,
+                        self.text_space_vertical,
+                    )
+
+                # Determine offsets based on placement.
+                vertical_offset = 0
+                if vertical_orientation == ORIENTATION_CENTERED:
+                    vertical_offset = int(
+                            max(0, self.text_space_vertical - page_height) / 2
+                        )
+                elif vertical_orientation == ORIENTATION_TOP_JUSTIFIED:
+                    vertical_offset = 0
+                elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
+                    vertical_offset = text_space_rect.bottom - page_height
+                else:
+                    logger.error("Invalid vertical orientation.")
 
                 vertical_offset = 0
 
@@ -980,18 +1012,22 @@ class Menu_Display(Text_Display):
 
                         text_top_left = None
 
-                        if orientation == ORIENTATION_CENTERED:
+                        if horizontal_orientation == ORIENTATION_CENTERED:
                             # Get top left for centered option text.
                             # Center the text horizontally.
                             text_top_left = (
-                                self.text_center_x - int(text_width / 2),
-                                self.text_top_left_pixel[1] + vertical_offset
+                                target_rect.centerx - int(text_width / 2),
+                                target_rect.y + vertical_offset
                             )
-                        elif orientation == ORIENTATION_LEFT_JUSTIFIED:
-                            # Left justify the text.
+                        elif horizontal_orientation == ORIENTATION_LEFT_JUSTIFIED:
                             text_top_left = (
-                                self.text_top_left_pixel[0],
-                                self.text_top_left_pixel[1] + vertical_offset
+                                target_rect.x,
+                                target_rect.y + vertical_offset
+                            )
+                        elif horizontal_orientation == ORIENTATION_RIGHT_JUSTIFIED:
+                            text_top_left = (
+                                target_rect.right - text_width,
+                                target_rect.y + vertical_offset
                             )
 
                         if text_top_left:
@@ -1022,7 +1058,7 @@ class Menu_Display(Text_Display):
                                 )
 
                     # Advance.
-                    vertical_offset = vertical_offset \
+                    vertical_offset += \
                         + int(self.spacing_factor_between_lines * text_height)
 
 class Item_Listing_Display(Display):
@@ -1034,8 +1070,11 @@ class Item_Listing_Display(Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
-                side_padding=TEXT_DISPLAY_SIDE_PADDING,
+                horizontal_padding=TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
+                continue_up_icon_image_path=None,
+                continue_down_icon_image_path=None,
+                selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
             ):
         Display.__init__(
             self,
@@ -1043,23 +1082,23 @@ class Item_Listing_Display(Display):
             display_rect,
             background_image_path=background_image_path,
             background_color=background_color,
-            border_image_path_dict=border_image_path_dict,
         )
 
         self.item_quantity_font_object = item_quantity_font_object
         self.item_quantity_font_color = item_quantity_font_color
 
-        self.side_padding = side_padding
+        self.horizontal_padding = horizontal_padding
         self.vertical_padding = vertical_padding
         self.pixels_between_items = ITEM_VIEWING_PIXEL_SPACING
 
         self.item_viewing_top_left = (
-                self.display_rect[0] + self.side_padding,
-                self.display_rect[1] + self.vertical_padding,
+                self.display_rect.x + self.horizontal_padding,
+                self.display_rect.y + self.vertical_padding,
             )
-        self.item_viewing_space_horizontal = self.display_rect[2]  \
-                                            - (2 * self.side_padding)
-        self.item_viewing_space_vertical = self.display_rect[3]  \
+
+        self.item_viewing_space_horizontal = self.display_rect.width  \
+                                            - (2 * self.horizontal_padding)
+        self.item_viewing_space_vertical = self.display_rect.height  \
                                             - (2 * self.vertical_padding)
 
         self.item_viewing_space_rect = pygame.Rect(
@@ -1069,7 +1108,225 @@ class Item_Listing_Display(Display):
             self.item_viewing_space_vertical
         )
 
-        # TODO set up rest
+        # Row, col dimensions.
+        self.item_viewing_grid_dimensions = \
+            Item_Listing_Display.get_item_viewing_grid_dimensions(
+                self.item_viewing_space_horizontal,
+                self.item_viewing_space_vertical,
+            )
+        self.num_columns = \
+            self.item_viewing_grid_dimensions[0]
+        self.num_rows = \
+            self.item_viewing_grid_dimensions[1]
+
+        self.max_num_items = self.num_columns * self.num_rows
+
+        # Define continue icons if possible.
+        self.continue_up_icon = None
+        self.continue_down_icon = None
+
+        if continue_up_icon_image_path:
+            self.continue_up_icon = pygame.image.load(
+                    continue_up_icon_image_path
+                ).convert_alpha()
+
+        if continue_down_icon_image_path:
+            self.continue_down_icon = pygame.image.load(
+                    continue_down_icon_image_path
+                ).convert_alpha()
+
+        self.selection_image = None
+        if selection_image_path:
+            self.selection_image = pygame.image.load(
+                    selection_image_path
+                ).convert_alpha()
+
+    @classmethod
+    def get_item_viewing_grid_dimensions(
+                cls,
+                horizontal_space,
+                vertical_space,
+                item_icon_size=itemdata.ITEM_ICON_SIZE,
+                space_between_items=ITEM_VIEWING_PIXEL_SPACING,
+            ):
+        dimensions = (0,0)
+
+        if horizontal_space and vertical_space:
+            # Let n be number of items in the row,
+            # Let s be the space between items.
+            # Let h be the horizontal space available.
+            # Then (n * icon_size) + (n - 1) * s = h.
+            # n * (icon_size + s) - s = h.
+            # n = (h + s) / (icon_size + s).
+            num_row_items = int(
+                (horizontal_space + space_between_items)    \
+                / (item_icon_size + space_between_items)
+            )
+
+            num_column_items = int(
+                (vertical_space + space_between_items)  \
+                / (item_icon_size + space_between_items)
+            )
+
+            if num_row_items and num_column_items:
+                dimensions = (num_row_items, num_column_items)
+
+        return dimensions
+
+    # Item listing data must be list of length-2 lists of the form
+    # [item object, quantity].
+    # selected_index is teh index in item_listing_data for the
+    # item currently selected.
+    # first_viewable_row_index is the row index for the first row of items
+    # to be visible in the viewing.
+    def blit_item_listing(
+                self,
+                surface,
+                item_listing_data,
+                first_viewable_row_index,
+                selected_index,
+                show_continue_icon=True,
+                alternative_top_left=None,
+            ):
+        if surface and item_listing_data \
+                and selected_index >= 0 and first_viewable_row_index >= 0:
+            item_space_rect = self.item_viewing_space_rect
+
+            if alternative_top_left:
+                item_space_rect = pygame.rect(
+                    alternative_top_left[0] + self.horizontal_padding,
+                    alternative_top_left[1] + self.vertical_padding,
+                    self.item_viewing_space_rect.width,
+                    self.item_viewing_space_rect.height
+                )
+
+            # Blit background
+            self.blit_background(
+                surface,
+                alternative_top_left=alternative_top_left,
+            )
+
+            # Blit the items, starting with the first viewable row.
+            starting_index = \
+                first_viewable_row_index * self.num_columns
+
+            # Go until we run out of space or items.
+            total_items = len(item_listing_data)
+            num_remaining_items = min(
+                    self.max_num_items,
+                    total_items - starting_index
+                )
+
+            curr_index = starting_index
+            logger.info("Starting with item index {0}".format(curr_index))
+
+            horizontal_offset = 0
+            vertical_offset = 0
+
+            while curr_index < num_remaining_items:
+                curr_viewing_row = int(
+                        (curr_index - starting_index) / self.num_columns
+                    )
+                curr_viewing_col = \
+                    (curr_index - starting_index) % self.num_columns
+
+                horizontal_offset = \
+                    ((curr_index - starting_index) % self.num_columns) \
+                    * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
+
+                vertical_offset = \
+                    (curr_viewing_row - first_viewable_row_index) \
+                    * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
+
+                curr_item_info = item_listing_data[curr_index]
+                curr_item = curr_item_info[0]
+                item_name = curr_item.get_name()
+                item_quantity = curr_item_info[1]
+                item_image = curr_item.get_icon()
+
+                logger.info("Curr item {0} x{1} at {2}".format(
+                    item_name,
+                    item_quantity,
+                    (curr_viewing_row, curr_viewing_col)
+                ))
+
+                # Get rendered quantity text if item is stackable.
+                rendered_quantity_text = None
+                if curr_item.is_stackable():
+                    rendered_quantity_text = \
+                        self.item_quantity_font_object.render(
+                            str(quantity),
+                            False,
+                            self.item_quantity_font_color,
+                        )
+
+                # Blit item and quantity text if needed.
+                item_rect = pygame.Rect(
+                    item_space_rect.x + horizontal_offset,
+                    item_space_rect.y + vertical_offset,
+                    itemdata.ITEM_ICON_SIZE,
+                    itemdata.ITEM_ICON_SIZE,
+                )
+
+                # Check if this is the selected icon. If so,
+                # blit the selection background.
+                if (selected_index == curr_index) \
+                        and self.selection_image:
+                    # Center on the item icon.
+                    select_image_rect = self.selection_image.get_rect(
+                        center=item_rect.center
+                    )
+
+                    surface.blit(
+                        self.selection_image,
+                        select_image_rect,
+                    )
+
+                if item_image:
+                    surface.blit(
+                        item_image,
+                        item_rect,
+                    )
+
+                if rendered_quantity_text:
+                    text_top_left = item_rect.topleft
+                    surface.blit(
+                        item_image,
+                        text_top_left,
+                    )
+
+                curr_index += 1
+
+            # Blit the up and down arrows if there are items above/below.
+            if (starting_index >= self.num_columns):
+                # We have at least 1 row above us.
+
+                # Center and line with top of display.
+                continue_up_rect = self.continue_up_icon.get_rect(
+                    center=self.display_rect.center
+                )
+                #continue_up_rect.centerx = self.display_rect.centerx
+                continue_up.rect.top = self.display_rect.top
+
+                surface.blit(
+                    self.continue_up_icon,
+                    continue_up_rect
+                )
+
+            if (total_items - starting_index) > self.max_num_items:
+                # We have items after us.
+
+                # Center and line with bottom of display.
+                continue_down_rect = self.continue_down_icon.get_rect(
+                    center=self.display_rect.center
+                )
+                #continue_down_rect.centerx = self.display_rect.centerx
+                continue_down.rect.bottom = self.display_rect.bottom
+
+                surface.blit(
+                    self.continue_down_icon,
+                    continue_down_rect
+                )
 
 # set up logger
 logging.basicConfig(level=logging.INFO)

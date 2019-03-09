@@ -113,7 +113,6 @@ class Game():
         self.inventory_viewing = \
             viewing.Inventory_Viewing.create_inventory_viewing(
                 self.main_display_screen,
-                self.protagonist,
                 background_image_path=imagepaths.INVENTORY_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_BLACK,
             )
@@ -366,6 +365,9 @@ class Game():
                 )
 
                 self.inventory_viewing.refresh_and_blit_self()
+                self.inventory_viewing.handle_item_listing(
+                    self.protagonist.inventory
+                )
                 pygame.display.update()
                 exit = False
                 while not exit:
@@ -708,10 +710,6 @@ class Game():
                         # Load game.
                         logger.info("Loading game initiated.")
                         self.load_game()
-                    elif events.key == pygame.K_1:
-                        # Display inventory. # TESTING TODO.
-                        logger.info("Displaying inventory.")
-                        self.display_inventory(self.protagonist)
                     elif events.key == pygame.K_2:
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
