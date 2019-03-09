@@ -3,6 +3,7 @@ import language
 import currency
 import menuoptions
 import imageids
+import imagepaths
 
 ITEM_ICON_SIZE = 50
 
@@ -214,6 +215,9 @@ STANDARD_ITEM_DATA = {
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
         ITEM_OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_LOG_OPTION_ID_LIST,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.LOG_NORMAL_ICON_PATH,
+        },
     },
     LOG_OAK_ID: {
         NAME_INFO_FIELD: {

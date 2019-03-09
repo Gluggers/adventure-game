@@ -22,6 +22,7 @@ import time
 import items
 import imagepaths
 import menuoptions
+import itemdata
 
 logger = None
 
@@ -710,6 +711,9 @@ class Game():
                         # Load game.
                         logger.info("Loading game initiated.")
                         self.load_game()
+                    elif events.key == pygame.K_1:
+                        # Testing inventory.
+                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_TREE_ID, 10)
                     elif events.key == pygame.K_2:
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")

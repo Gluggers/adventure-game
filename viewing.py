@@ -1059,21 +1059,21 @@ class Inventory_Viewing(Viewing):
 
         # Calculate item viewing rect.
         item_viewing_top_left = (
-            self.display_rect[0],
-            self.top_display_rect[1],
+            self.display_rect.x,
+            self.top_display_rect.bottom,
         )
 
         item_viewing_height = max(
                 0,
-                self.display_rect[1] \
-                + self.display_rect[3] \
-                - item_viewing_top_left[1],
+                self.display_rect.bottom    \
+                - item_viewing_top_left[1]  \
+                - 10, # Leave room at bottom.
             )
         item_viewing_width = max(
                 0,
                 max(
                     0,
-                    self.item_details_rect[0] - item_viewing_top_left[0],
+                    self.item_details_rect.left - item_viewing_top_left[0],
                 )
             )
 
@@ -1081,11 +1081,9 @@ class Inventory_Viewing(Viewing):
         self.bottom_text_display_rect = None
         if bottom_text_display_height:
             self.bottom_text_display_rect = pygame.Rect(
-                self.display_rect[0],
-                self.display_rect[1] \
-                    + self.display_rect[3] \
-                    - bottom_text_display_height,
-                max(0, self.item_details_rect[0] - self.display_rect[0]),
+                self.display_rect.x,
+                self.display_rect.bottom - bottom_text_display_height,
+                max(0, self.item_details_rect.left - self.display_rect.left),
                 bottom_text_display_height
             )
 
@@ -1131,8 +1129,8 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                horizontal_padding=16,
-                vertical_padding=16,
+                horizontal_padding=0,
+                vertical_padding=0,
             )
 
             if self.top_inventory_label_display:

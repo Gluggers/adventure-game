@@ -72,7 +72,7 @@ OW_SIDE_MENU_HORIZONTAL_PADDING = 40
 OW_SIDE_MENU_VERTICAL_PADDING = 20
 
 ITEM_LISTING_HORIZONTAL_PADDING = 20
-ITEM_LISTING_VERTICAL_PADDING = 50
+ITEM_LISTING_VERTICAL_PADDING = 20
 
 class Text_Page():
     def __init__(self, line_list):
@@ -1141,6 +1141,28 @@ class Item_Listing_Display(Display):
                     selection_image_path
                 ).convert_alpha()
 
+        # Set up continue icon rects.
+        self.continue_up_rect = None
+        self.continue_down_rect = None
+
+        if self.continue_up_icon:
+            self.continue_up_rect = self.continue_up_icon.get_rect(
+                center=self.item_viewing_space_rect.center
+            )
+
+            self.continue_up_rect.centery = \
+                        self.item_viewing_space_rect.top \
+                        - int(self.vertical_padding / 2)
+
+        if self.continue_down_icon:
+            self.continue_down_rect = self.continue_down_icon.get_rect(
+                center=self.item_viewing_space_rect.center
+            )
+
+            self.continue_down_rect.centery = \
+                        self.item_viewing_space_rect.bottom \
+                        + int(self.vertical_padding / 2)
+
     @classmethod
     def get_item_viewing_grid_dimensions(
                 cls,
@@ -1206,6 +1228,10 @@ class Item_Listing_Display(Display):
                 alternative_top_left=alternative_top_left,
             )
 
+            logger.info("Item space top left: {0}".format(
+                item_space_rect.topleft
+            ))
+
             # Blit the items, starting with the first viewable row.
             starting_index = \
                 first_viewable_row_index * self.num_columns
@@ -1222,6 +1248,14 @@ class Item_Listing_Display(Display):
 
             horizontal_offset = 0
             vertical_offset = 0
+
+            # Blit item and quantity text if needed.
+            item_rect = pygame.Rect(
+                item_space_rect.x + horizontal_offset,
+                item_space_rect.y + vertical_offset,
+                itemdata.ITEM_ICON_SIZE,
+                itemdata.ITEM_ICON_SIZE,
+            )
 
             while curr_index < num_remaining_items:
                 curr_viewing_row = int(
@@ -1261,12 +1295,10 @@ class Item_Listing_Display(Display):
                         )
 
                 # Blit item and quantity text if needed.
-                item_rect = pygame.Rect(
-                    item_space_rect.x + horizontal_offset,
-                    item_space_rect.y + vertical_offset,
-                    itemdata.ITEM_ICON_SIZE,
-                    itemdata.ITEM_ICON_SIZE,
-                )
+                item_rect.topleft = (
+                        item_space_rect.x + horizontal_offset,
+                        item_space_rect.y + vertical_offset,
+                    )
 
                 # Check if this is the selected icon. If so,
                 # blit the selection background.
@@ -1300,32 +1332,16 @@ class Item_Listing_Display(Display):
             # Blit the up and down arrows if there are items above/below.
             if (starting_index >= self.num_columns):
                 # We have at least 1 row above us.
-
-                # Center and line with top of display.
-                continue_up_rect = self.continue_up_icon.get_rect(
-                    center=self.display_rect.center
-                )
-                #continue_up_rect.centerx = self.display_rect.centerx
-                continue_up.rect.top = self.display_rect.top
-
                 surface.blit(
                     self.continue_up_icon,
-                    continue_up_rect
+                    self.continue_up_rect
                 )
 
             if (total_items - starting_index) > self.max_num_items:
                 # We have items after us.
-
-                # Center and line with bottom of display.
-                continue_down_rect = self.continue_down_icon.get_rect(
-                    center=self.display_rect.center
-                )
-                #continue_down_rect.centerx = self.display_rect.centerx
-                continue_down.rect.bottom = self.display_rect.bottom
-
                 surface.blit(
                     self.continue_down_icon,
-                    continue_down_rect
+                    self.continue_down_rect
                 )
 
 # set up logger

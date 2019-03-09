@@ -15,6 +15,7 @@ INTER_OBJ_PATH = IMAGE_HOME_PATH + "interactive_objects/"
 CHARACTER_PATH = IMAGE_HOME_PATH + "characters/"
 PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
 DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
+ITEMS_PATH = IMAGE_HOME_PATH + "items/"
 
 ### DISPLAY IMAGE PATHS ###
 DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
@@ -32,7 +33,7 @@ OW_SIDE_MENU_BACKGROUND_PATH = DISPLAY_PATH \
 INVENTORY_BACKGROUND_PATH = DISPLAY_PATH \
                         + "inventory_background_672x480_dk.png" # [0]
 ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
-                        + "item_listing_selected_image_45x45_dk.png" # [0]
+                        + "item_listing_selected_image_55x55_dk.png" # [0]
 ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
                         + "item_listing_continue_up_icon_60x20.png" # [0]
 ITEM_LISTING_CONT_DOWN_PATH = DISPLAY_PATH \
@@ -58,6 +59,9 @@ ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz.png" # [1]
 TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
+
+### ITEMS ###
+LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

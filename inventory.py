@@ -2,7 +2,7 @@ import language
 import items
 import logging
 
-DEFAULT_MAX_INVENT_SIZE = 30
+DEFAULT_MAX_INVENT_SIZE = 120 #30
 
 class Inventory():
     inventory_name_info = {
@@ -34,6 +34,9 @@ class Inventory():
             return True
         else:
             return False
+
+    def current_size(self):
+        return len(self.inventory_data)
 
     # Given item_id, returns index for where the item ID first appears
     # in the inventory.
@@ -98,16 +101,20 @@ class Inventory():
                     success = True
             else:
                 # Not stackable. Make a new inventory entry for the item
-                # if we can.
+                # if we can. Number of new entries is number of items.
                 if self.is_full():
                     # Can't fit new slot.
                     logger.warn("Trying to add new item to full inventory.")
+                elif self.current_size() + quantity > self.max_size:
+                    # Can't fit all items.
+                    logger.warn("Can't add all items to inventory.")
                 else:
-                    # We can make a new inventory entry for this item.
-                    self.inventory_data.append([
-                        item_obj,
-                        quantity
-                    ])
+                    for i in range(quantity):
+                        # We can make a new inventory entry for this item.
+                        self.inventory_data.append([
+                            item_obj,
+                            1
+                        ])
                     success = True
 
         if success:
