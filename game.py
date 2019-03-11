@@ -355,6 +355,9 @@ class Game():
     # TODO enhance once menus are set up.
     def display_inventory(self, target_entity):
         if target_entity:
+            # Sort inventory first before displaying it.
+            target_entity.inventory.alphabetical_sort(reverse=False)
+
             target_entity.inventory.print_self()
 
             if self.inventory_viewing:
@@ -412,7 +415,7 @@ class Game():
     def display_overworld_bottom_text(
                 self,
                 text,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_after=True,
                 refresh_during=True,
@@ -432,7 +435,7 @@ class Game():
     def display_overworld_bottom_text_first_page(
                 self,
                 text,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_after=True,
                 refresh_during=True,
@@ -718,6 +721,14 @@ class Game():
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
                         self.display_statistics(self.protagonist)
+                    elif events.key == pygame.K_3:
+                        # Testing inventory.
+                        curr_money = self.protagonist.inventory.get_item_quantity_by_id(itemdata.CURRENCY_GOLD_COIN_ID)
+                        logger.info("Curr money: {0}".format(curr_money))
+                        self.protagonist.inventory.add_item_by_id(
+                            itemdata.CURRENCY_GOLD_COIN_ID,
+                            curr_money,
+                        )
                     elif events.key == pygame.K_t:
                         # Testing stuff.
                         logger.info("Testing.")

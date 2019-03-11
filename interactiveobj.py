@@ -56,10 +56,12 @@ class Interactive_Object(pygame.sprite.Sprite):
 
         self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
 
-    def get_name(self, language_id=language.Language.current_language_id):
+    def get_name(self, alternative_language_id=None):
         ret_name = ""
-        if language_id is not None:
-            ret_name = self.name_info.get(language_id, "")
+        if alternative_language_id is not None:
+            ret_name = self.name_info.get(alternative_language_id, "")
+        else:
+            ret_name = self.name_info.get(language.Language.current_language_id, "")
 
         return ret_name
 

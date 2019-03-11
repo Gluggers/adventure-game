@@ -81,10 +81,12 @@ class Item(pygame.sprite.Sprite):
             for option_id in item_menu_option_ids:
                 self.item_menu_option_ids.append(option_id)
 
-    def get_name(self, language_id=language.Language.current_language_id):
+    def get_name(self, alternative_language_id=None):
         ret_name = ""
-        if language_id is not None:
-            ret_name = self.name_info.get(language_id, "")
+        if alternative_language_id is not None:
+            ret_name = self.name_info.get(alternative_language_id, "")
+        else:
+            ret_name = self.name_info.get(language.Language.current_language_id, "")
 
         return ret_name
 
@@ -96,15 +98,18 @@ class Item(pygame.sprite.Sprite):
 
     # Returns the appropriate language translation for the item's usage
     # info string.
-    def get_usage_info(self, language_id=language.Language.current_language_id):
-        ret_str = "?????"
+    def get_usage_info(self, alternative_language_id=None):
+        ret_str = None
 
-        if (language_id is not None) and self.usage_info:
-            info = self.usage_info.get(language_id, None)
-            if info:
-                ret_str = info
+        if self.usage_info:
+            if alternative_language_id is not None:
+                ret_str = self.usage_info.get(alternative_language_id, None)
+            else:
+                ret_str = self.usage_info.get(language.Language.current_language_id, None)
         elif self.name_info:
-            ret_str = self.get_name(language_id=langauge_id)
+            ret_str = self.get_name(
+                alternative_language_id=alternative_language_id
+            )
 
         return ret_str
 
@@ -112,16 +117,25 @@ class Item(pygame.sprite.Sprite):
     # info string.
     def get_description_info(
                 self,
-                language_id=language.Language.current_language_id
+                alternative_language_id=None,
             ):
-        ret_str = "?????"
+        ret_str = None
 
-        if (language_id is not None) and self.description_info:
-            info = self.description_info.get(language_id, None)
-            if info:
-                ret_str = info
+        if self.description_info:
+            if alternative_language_id is not None:
+                ret_str = self.description_info.get(
+                        alternative_language_id,
+                        None
+                    )
+            else:
+                ret_str = self.description_info.get(
+                        language.Language.current_language_id,
+                        None
+                    )
         elif self.name_info:
-            ret_str = ret_str = self.get_name(language_id=langauge_id)
+            ret_str = ret_str = self.get_name(
+                alternative_language_id=alternative_langauge_id
+            )
 
         return ret_str
 
@@ -363,6 +377,7 @@ class Consumable_Item(Item):
         self.required_consume_quests = []
         for quest_id in required_consume_quests:
             self.required_consume_quests.append(quest_id)
+
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

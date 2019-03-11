@@ -109,7 +109,7 @@ class Interaction():
                     ""
                 ),
                 auto_advance=False,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 refresh_after=True,
             )
 
@@ -162,7 +162,7 @@ class Interaction():
                 game_object.display_overworld_bottom_text(
                     reject_message,
                     auto_advance=False,
-                    advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                    advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                     refresh_after=True,
                     refresh_during=True,
                 )
@@ -173,7 +173,7 @@ class Interaction():
                     game_object.display_overworld_bottom_text(
                         intro_skilling_text,
                         auto_advance=False,
-                        advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                        advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                         refresh_after=True,
                         refresh_during=True,
                     )

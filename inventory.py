@@ -60,9 +60,9 @@ class Inventory():
 
     # Sorts alphabetically according to the current set language.
     def alphabetical_sort(self, reverse=False):
-        self.sort(
+        self.inventory_data.sort(
             reverse=reverse,
-            key=lambda x: x[1].get_name()
+            key=lambda x: x[0].get_name()
         )
 
     # Adds item to inventory. Returns True upon success, False on failure.
@@ -77,17 +77,25 @@ class Inventory():
             # Check if the object is stackable.
             if item_obj.is_stackable():
                 # Check if we already have the object in the inventory.
-                obj_index = self.get_item_index(item_id)
+                obj_index = self.get_item_index(item_obj.item_id)
 
                 if obj_index >= 0:
                     # We have the object. Increase quantity.
                     inventory_entry = self.inventory_data[obj_index]
+                    old_quantity = inventory_entry[1]
 
-                    new_quantity = inventory_entry[1] + quantity
+                    new_quantity = old_quantity + quantity
                     self.inventory_data[obj_index] = [
                         inventory_entry[0],
                         new_quantity
                     ]
+
+                    logger.info("Prev {2} quantity: {0}. New quantity: {1}".format(
+                        old_quantity,
+                        self.inventory_data[obj_index][1],
+                        self.inventory_data[obj_index][0].get_name(),
+                    ))
+
                     success = True
                 elif self.is_full():
                     # Can't fit new slot.
@@ -166,13 +174,14 @@ class Inventory():
     def remove_item(self, item_obj, quantity=1):
         # Check if we have the item to begin with.
         if item_obj and quantity > 0:
-            entry_index = self.get_item_index(item_obj)
+            entry_index = self.get_item_index(item_obj.item_id)
 
-            if entry_index > 0:
+            if entry_index >= 0:
                 # We can reduce the item quantity.
                 inventory_entry = self.inventory_data[entry_index]
                 old_quantity = inventory_entry[1]
                 new_quantity = old_quantity - quantity
+
                 if new_quantity <= 0:
                     # Remove entry from inventory.
                     self.inventory_data.pop(entry_index)
@@ -213,11 +222,20 @@ class Inventory():
         quantity = 0
 
         if item_obj:
-            obj_index = self.get_item_index(item_obj)
+            if item_obj.is_stackable():
+                obj_index = self.get_item_index(item_obj.item_id)
 
-            if obj_index > 0:
-                entry = self.inventory_data[obj_index]
-                quantity = entry[1]
+                if obj_index >= 0:
+                    entry = self.inventory_data[obj_index]
+                    quantity = entry[1]
+            else:
+                num_found = 0
+                for entry in self.inventory_data:
+                    curr_obj = entry[0]
+                    if curr_obj and item_obj.item_id == curr_obj.item_id:
+                        num_found += entry[1]
+
+                quantity = num_found
 
         return quantity
 
@@ -249,6 +267,14 @@ class Inventory():
             return True
         else:
             return False
+
+    def get_item_entry(self, index):
+        ret_val = None
+
+        if index is not None:
+            ret_val = self.inventory_data[index]
+
+        return ret_val
 
     # initial_item_dict is mapping of item IDs to quantity. Used to
     # create initial inventory.

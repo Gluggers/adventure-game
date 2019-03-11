@@ -10,8 +10,8 @@ import interactiondata
 import language
 import imageids
 import items
-import currency
 import inventory
+import itemdata
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -396,10 +396,13 @@ class Protagonist(Character):
         self.quest_journal = {}
 
         # Maps currency IDs to the number of units of currency.
-        self.money_pouch = {}
+        # DEPRECATED?
+        #self.money_pouch = {}
 
         # TODO FILL IN REST
 
+    # DEPRECATED?
+    """
     def init_money_pouch(self):
         self.money_pouch = {}
 
@@ -408,6 +411,7 @@ class Protagonist(Character):
 
         # Set default gold value.
         self.money_pouch[currency.CURRENCY_GOLD_COIN] = START_NUM_GOLD_COINS
+    """
 
     @classmethod
     def protagonist_factory(
@@ -447,8 +451,12 @@ class Protagonist(Character):
         logger.debug("Protagonist gender: {0}".format(protagonist.gender))
         logger.debug("Protagonist race: {0}".format(protagonist.race))
 
-        # Set money pouch.
-        protagonist.init_money_pouch()
+        # Set initial money.
+        #protagonist.init_money_pouch()
+        protagonist.add_item_to_inventory_by_id(
+            itemdata.CURRENCY_GOLD_COIN_ID,
+            quantity=START_NUM_GOLD_COINS,
+        )
 
         # TODO rest of setup
 

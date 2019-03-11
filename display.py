@@ -30,49 +30,12 @@ MENU_LINE_SPACING_FACTOR = 1.5
 # Number of pixels in between each item slot.
 ITEM_VIEWING_PIXEL_SPACING = 10
 
-# Number of milliseconds to wait in between each
-# text display.
-BOTTOM_TEXT_DELAY_MS = 500
-DEFAULT_ADVANCE_DELAY_MS = 1500
-
-# Number of milliseconds to wait when loading menu.
-DEFAULT_MENU_LOAD_DELAY_MS = 750
-
-# Number of milliseconds to wait after changing selected options.
-DEFAULT_MENU_OPTION_SWITCH_DELAY_MS = 750
-
 ### ORIENTATIONS FOR MENU OPTIONS ###
 ORIENTATION_CENTERED = 0x1
 ORIENTATION_LEFT_JUSTIFIED = 0x2
 ORIENTATION_RIGHT_JUSTIFIED = 0x3
 ORIENTATION_TOP_JUSTIFIED = 0x4
 ORIENTATION_BOTTOM_JUSTIFIED = 0x5
-
-
-MORE_OPTIONS_MENU_INFO = {
-    language.LANG_ENGLISH: "More Options",
-    language.LANG_ESPANOL: "Mas Opciones",
-}
-
-LEVEL_TEXT_PREFIX_INFO = {
-    language.LANG_ENGLISH: "LEVEL: ",
-    language.LANG_ESPANOL: "NIVEL: ",
-}
-HEALTH_TEXT_PREFIX_INFO = {
-    language.LANG_ENGLISH: "HEALTH: ",
-    language.LANG_ESPANOL: "SALUD: ",
-}
-
-### PADDING ###
-TOP_DISPLAY_HORIZONTAL_PADDING = 20
-TEXT_DISPLAY_HORIZONTAL_PADDING = 28
-TEXT_DISPLAY_VERTICAL_PADDING = 24
-
-OW_SIDE_MENU_HORIZONTAL_PADDING = 40
-OW_SIDE_MENU_VERTICAL_PADDING = 20
-
-ITEM_LISTING_HORIZONTAL_PADDING = 20
-ITEM_LISTING_VERTICAL_PADDING = 20
 
 class Text_Page():
     def __init__(self, line_list):
@@ -153,6 +116,35 @@ class Display():
                 )
 
     @classmethod
+    def get_abbreviated_quantity(cls, quantity):
+        """ Returns abbreviated string for the quantity.
+
+        Abbreviates the given quantity and returns the string
+        representation. Abbrevations are as follows:
+            0 - 9999: as is.
+            10,000 - 9,999,999: displays only the thousands. For example,
+                10,982 becomes "10K", 918,999 becomes "918K", and
+                5,691,192 becomes "5691K".
+            10,000,000 - 9,999,999,999: displays only the millions. For
+                example, 20,128,281 becomes "20M", and 5,291,289,291 becomes
+                "5291M".
+            10 billion and beyond: displays only the billions (B).
+        """
+        ret_string = "0"
+
+        if quantity and quantity > 0:
+            if quantity < 10000:
+                ret_string = str(quantity)
+            elif quantity < 10000000:
+                ret_string = str(int(quantity / 1000)) + "K"
+            elif quantity < 10000000000:
+                ret_string = str(int(quantity / 1000000)) + "M"
+            else:
+                ret_string = str(int(quantity / 1000000000)) + "B"
+
+        return ret_string
+
+    @classmethod
     def add_font_to_listing(cls, font_id, font_obj):
         if font_obj and (font_id is not None):
             cls.font_listing[font_id] = font_obj
@@ -193,8 +185,8 @@ class Text_Display(Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                horizontal_padding=TEXT_DISPLAY_HORIZONTAL_PADDING,
-                vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
+                horizontal_padding=0,
+                vertical_padding=0,
                 continue_icon_image_path=None,
                 spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR,
             ):
@@ -686,11 +678,13 @@ class Text_Display(Display):
                 # Determine horizontal placement.
                 text_top_left = None
                 if horizontal_orientation == ORIENTATION_CENTERED:
+                    logger.info("Using centered horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.centerx - int(text_width / 2),
                         text_space_rect.y + vertical_offset
                     )
                 elif horizontal_orientation == ORIENTATION_LEFT_JUSTIFIED:
+                    logger.info("Using left justified horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.x,
                         text_space_rect.y + vertical_offset
@@ -750,8 +744,8 @@ class Menu_Display(Text_Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                horizontal_padding=OW_SIDE_MENU_HORIZONTAL_PADDING,
-                vertical_padding=OW_SIDE_MENU_VERTICAL_PADDING,
+                horizontal_padding=0,
+                vertical_padding=0,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
             ):
@@ -1070,8 +1064,10 @@ class Item_Listing_Display(Display):
                 background_image_path=None,
                 background_color=viewingdata.COLOR_WHITE,
                 item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
-                horizontal_padding=TEXT_DISPLAY_HORIZONTAL_PADDING,
-                vertical_padding=TEXT_DISPLAY_VERTICAL_PADDING,
+                horizontal_padding=0,
+                vertical_padding=0,
+                item_icon_size=itemdata.ITEM_ICON_SIZE,
+                space_between_items=ITEM_VIEWING_PIXEL_SPACING,
                 continue_up_icon_image_path=None,
                 continue_down_icon_image_path=None,
                 selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
@@ -1089,7 +1085,8 @@ class Item_Listing_Display(Display):
 
         self.horizontal_padding = horizontal_padding
         self.vertical_padding = vertical_padding
-        self.pixels_between_items = ITEM_VIEWING_PIXEL_SPACING
+        self.pixels_between_items = space_between_items
+        self.item_icon_size = item_icon_size
 
         self.item_viewing_top_left = (
                 self.display_rect.x + self.horizontal_padding,
@@ -1113,6 +1110,7 @@ class Item_Listing_Display(Display):
             Item_Listing_Display.get_item_viewing_grid_dimensions(
                 self.item_viewing_space_horizontal,
                 self.item_viewing_space_vertical,
+                item_icon_size=self.item_icon_size,
             )
         self.num_columns = \
             self.item_viewing_grid_dimensions[0]
@@ -1120,6 +1118,16 @@ class Item_Listing_Display(Display):
             self.item_viewing_grid_dimensions[1]
 
         self.max_num_items = self.num_columns * self.num_rows
+
+        # Get vertical space to blit max number of rows.
+        required_vertical_item_space = \
+            self.num_rows * (self.item_icon_size + self.pixels_between_items) \
+            - self.pixels_between_items
+
+        required_item_space_rect = pygame.Rect(
+            self.item_viewing_space_rect.topleft,
+            (self.item_viewing_space_rect.width, required_vertical_item_space)
+        )
 
         # Define continue icons if possible.
         self.continue_up_icon = None
@@ -1154,14 +1162,20 @@ class Item_Listing_Display(Display):
                         self.item_viewing_space_rect.top \
                         - int(self.vertical_padding / 2)
 
+        # TODO make this in between last possible item row
+        # and the bottom of the self.display_rect
         if self.continue_down_icon:
             self.continue_down_rect = self.continue_down_icon.get_rect(
                 center=self.item_viewing_space_rect.center
             )
 
             self.continue_down_rect.centery = \
-                        self.item_viewing_space_rect.bottom \
-                        + int(self.vertical_padding / 2)
+                        required_item_space_rect.bottom \
+                        + int(
+                            (self.display_rect.bottom \
+                            - required_item_space_rect.bottom) \
+                            / 2
+                        )
 
     @classmethod
     def get_item_viewing_grid_dimensions(
@@ -1289,7 +1303,9 @@ class Item_Listing_Display(Display):
                 if curr_item.is_stackable():
                     rendered_quantity_text = \
                         self.item_quantity_font_object.render(
-                            str(quantity),
+                            Display.get_abbreviated_quantity(
+                                item_quantity
+                            ),
                             False,
                             self.item_quantity_font_color,
                         )
@@ -1323,7 +1339,7 @@ class Item_Listing_Display(Display):
                 if rendered_quantity_text:
                     text_top_left = item_rect.topleft
                     surface.blit(
-                        item_image,
+                        rendered_quantity_text,
                         text_top_left,
                     )
 

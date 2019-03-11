@@ -31,6 +31,18 @@ EQUIP_SLOT_RING = 0x9 # Rings.
 ### ITEM ID NUMBERS ###
 
 # SPECIAL ITEMS 1 TO 9999
+CURRENCY_GOLD_COIN_ID = 101
+CURRENCY_SILVER_COIN_ID = 102
+CURRENCY_TRADING_STICKS_ID = 103
+CURRENCY_YEN_ID = 104
+
+# Maps currency IDs to the number of units equivalent to 1 Base Value
+CURRENCY_VALUE_MAPPING = {
+    CURRENCY_GOLD_COIN_ID: 1,
+    CURRENCY_SILVER_COIN_ID: 3,
+    CURRENCY_TRADING_STICKS_ID: 5,
+    CURRENCY_YEN_ID: 2,
+}
 
 # TOOLS 10000 TO 19999
 KNIFE_ID = 10001
@@ -197,6 +209,94 @@ EQUIP_QUEST_REQ_FIELD = 0x407 # List of quest IDs required to equip.
 
 # For items that are not consumable nor equippable.
 STANDARD_ITEM_DATA = {
+    CURRENCY_GOLD_COIN_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Gold Coins",
+            language.LANG_ESPANOL: "Monedas de Oro",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Shiny gold coins!",
+            language.LANG_ESPANOL: "Brillante monedas de oro!",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I can use this to buy items.",
+            language.LANG_ESPANOL: "Se sirven para comprar cosas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: STACKABLE_F,
+        ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.GOLD_COINS_ICON_PATH,
+        },
+    },
+    CURRENCY_SILVER_COIN_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Silver Coins",
+            language.LANG_ESPANOL: "Monedas de Plata",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Not worth as much as gold, but they'll do.",
+            language.LANG_ESPANOL: "Valen menos que oro, pero son suficientes.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I can use this to buy items.",
+            language.LANG_ESPANOL: "Se sirven para comprar cosas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: STACKABLE_F,
+        ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        IMAGE_PATH_DICT_FIELD: {
+
+        },
+    },
+    CURRENCY_TRADING_STICKS_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Trading Sticks",
+            language.LANG_ESPANOL: "Palos de Comercio",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "People still use this for trading?",
+            language.LANG_ESPANOL: "Todavia se usan estos para el comercio?",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I can use this to buy items.",
+            language.LANG_ESPANOL: "Se sirven para comprar cosas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: STACKABLE_F,
+        ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        IMAGE_PATH_DICT_FIELD: {
+
+        },
+    },
+    CURRENCY_YEN_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Yen",
+            language.LANG_ESPANOL: "Yen",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Some foreign currency.",
+            language.LANG_ESPANOL: "Moneda extranjera.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I can use this to buy items.",
+            language.LANG_ESPANOL: "Se sirven para comprar cosas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: STACKABLE_F,
+        ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        IMAGE_PATH_DICT_FIELD: {
+
+        },
+    },
     LOG_TREE_ID: {
         NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "LOG",

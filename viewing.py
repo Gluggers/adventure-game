@@ -14,6 +14,7 @@ import timekeeper
 import sys
 import fontinfo
 import inventory
+import itemdata
 
 ### WALKING CONSTANTS ###
 WALK1_FRAME_END = (tile.TILE_SIZE / 4)
@@ -60,7 +61,7 @@ class Viewing():
                 self,
                 text_display,
                 page,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
                 horizontal_orientation=display.ORIENTATION_CENTERED,
@@ -71,7 +72,12 @@ class Viewing():
             text_display.blit_page(
                 self.main_display_surface,
                 page,
+                show_continue_icon=False,
+                horizontal_orientation=horizontal_orientation,
+                vertical_orientation=vertical_orientation,
+                alternative_top_left=alternative_top_left,
             )
+
             pygame.display.update()
 
             # Pause if needed.
@@ -142,7 +148,7 @@ class Viewing():
                 self,
                 text_display,
                 text_to_display,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
@@ -185,7 +191,7 @@ class Viewing():
                 self,
                 text_display,
                 text_to_display,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
@@ -226,8 +232,8 @@ class Viewing():
                 option_id_list,
                 horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_CENTERED,
-                load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
-                option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
                 refresh_during=True,
                 refresh_after=True,
                 alternative_top_left=None,
@@ -510,8 +516,8 @@ class Overworld_Viewing(Viewing):
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
                 background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
-                horizontal_padding=display.TEXT_DISPLAY_HORIZONTAL_PADDING,
-                vertical_padding=display.TEXT_DISPLAY_VERTICAL_PADDING,
+                horizontal_padding=viewingdata.TEXT_DISPLAY_HORIZONTAL_PADDING,
+                vertical_padding=viewingdata.TEXT_DISPLAY_VERTICAL_PADDING,
             )
             if self.bottom_text_display:
                 self.displays[viewingdata.OW_BOTTOM_TEXT_DISPLAY_ID] = self.bottom_text_display
@@ -533,8 +539,8 @@ class Overworld_Viewing(Viewing):
                 background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_WHITE,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
-                horizontal_padding=display.OW_SIDE_MENU_HORIZONTAL_PADDING,
-                vertical_padding=display.OW_SIDE_MENU_VERTICAL_PADDING,
+                horizontal_padding=viewingdata.OW_SIDE_MENU_HORIZONTAL_PADDING,
+                vertical_padding=viewingdata.OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
             )
@@ -614,7 +620,7 @@ class Overworld_Viewing(Viewing):
     def display_bottom_text(
                 self,
                 text,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
@@ -634,7 +640,7 @@ class Overworld_Viewing(Viewing):
     def display_bottom_text_first_page(
                 self,
                 text,
-                advance_delay_ms=display.DEFAULT_ADVANCE_DELAY_MS,
+                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
                 auto_advance=False,
                 refresh_during=True,
                 refresh_after=True,
@@ -717,8 +723,8 @@ class Overworld_Viewing(Viewing):
                 refresh_after=True,
                 refresh_during=True,
                 #horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
-                #load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
-                #option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                #load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+                #option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
             ):
         ret_option_id = None
         if menu_option_ids:
@@ -729,8 +735,8 @@ class Overworld_Viewing(Viewing):
                 menu_option_ids,
                 horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
                 vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
-                load_delay_ms=display.DEFAULT_MENU_LOAD_DELAY_MS,
-                option_switch_delay_ms=display.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
                 refresh_after=refresh_after,
                 refresh_during=refresh_during,
             )
@@ -1042,6 +1048,7 @@ class Inventory_Viewing(Viewing):
                 bottom_text_display_height=0,
                 bottom_text=None,
                 item_option_restrictions=None,
+                item_icon_size=itemdata.ITEM_ICON_SIZE,
             ):
         Viewing.__init__(
             self,
@@ -1053,6 +1060,9 @@ class Inventory_Viewing(Viewing):
         self.display_rect = viewingdata.INVENTORY_VIEWING_RECT
         self.top_display_rect = viewingdata.INVENTORY_TOP_DISPLAY_RECT
         self.item_details_rect = viewingdata.INVENTORY_ITEM_DETAILS_RECT
+
+        self.item_icon_size = item_icon_size
+        self.enlarged_icon_size = 2 * self.item_icon_size
 
         self.bottom_text = bottom_text
         self.item_option_restrictions = item_option_restrictions
@@ -1110,11 +1120,53 @@ class Inventory_Viewing(Viewing):
         # Will display the items in the inventory.
         self.item_listing_display = None
 
+        # Will display item name of selected item.
+        self.item_name_display = None
+        self.item_name_rect = pygame.Rect(
+            self.item_details_rect.x,
+            self.item_details_rect.y + 20,
+            self.item_details_rect.width,
+            60,
+        )
+        self.item_name_rect.centerx = self.item_details_rect.centerx
+
+        # Will display quantity of selected item.
+        self.item_quantity_display = None
+        self.item_quantity_rect = pygame.Rect(
+            self.item_details_rect.x,
+            self.item_name_rect.bottom,
+            self.item_details_rect.width,
+            45,
+        )
+        self.item_quantity_rect.centerx = self.item_details_rect.centerx
+
+        # Will display enlarged image icon of selected item.
+        self.item_enlarged_display = None
+        self.item_enlarged_rect = pygame.Rect(
+            self.item_details_rect.x,
+            self.item_quantity_rect.bottom + 20,
+            self.enlarged_icon_size,
+            self.enlarged_icon_size
+        )
+        self.item_enlarged_rect.centerx = self.item_details_rect.centerx
+
         # Will display details about a single item in the inventory.
-        self.single_item_display = None
+        self.item_description_display = None
+        self.item_description_rect = pygame.Rect(
+            self.item_details_rect.x,
+            self.item_enlarged_rect.bottom,
+            self.item_details_rect.width,
+            self.item_details_rect.bottom - self.item_enlarged_rect.bottom
+        )
 
         # Will display item options for a selected item.
         self.item_option_menu_display = None
+        self.item_option_menu_rect = pygame.Rect(
+            self.item_details_rect.x,
+            self.item_enlarged_rect.bottom,
+            self.item_details_rect.width,
+            self.item_details_rect.bottom - self.item_enlarged_rect.bottom
+        )
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_inventory_label_display(self):
@@ -1134,7 +1186,8 @@ class Inventory_Viewing(Viewing):
             )
 
             if self.top_inventory_label_display:
-                self.displays[viewingdata.INVENTORY_TOP_DISPLAY_ID] = self.top_inventory_label_display
+                self.displays[viewingdata.INVENTORY_TOP_DISPLAY_ID] = \
+                    self.top_inventory_label_display
             else:
                 logger.error("Failed to make top inventory display")
         else:
@@ -1154,8 +1207,8 @@ class Inventory_Viewing(Viewing):
                 background_image_path=None,
                 background_color=None,
                 item_quantity_font_color=viewingdata.COLOR_WHITE,
-                horizontal_padding=display.ITEM_LISTING_HORIZONTAL_PADDING,
-                vertical_padding=display.ITEM_LISTING_VERTICAL_PADDING,
+                horizontal_padding=viewingdata.ITEM_LISTING_HORIZONTAL_PADDING,
+                vertical_padding=viewingdata.ITEM_LISTING_VERTICAL_PADDING,
                 continue_up_icon_image_path=imagepaths.ITEM_LISTING_CONT_UP_PATH,
                 continue_down_icon_image_path=imagepaths.ITEM_LISTING_CONT_DOWN_PATH,
                 selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
@@ -1170,11 +1223,91 @@ class Inventory_Viewing(Viewing):
             logger.error("Item listing quantity font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
+    def create_item_name_display(self):
+        logger.info("Creating inventory item name display...")
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_ITEM_NAME_FONT_ID,
+            )
+        if font_obj:
+            self.item_name_display = display.Text_Display(
+                self.main_display_surface,
+                self.item_name_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                horizontal_padding=5,
+                vertical_padding=0,
+            )
+
+            if self.item_name_display:
+                self.displays[viewingdata.INVENTORY_ITEM_NAME_DISPLAY_ID] = \
+                    self.item_name_display
+            else:
+                logger.error("Failed to make inventory item name display")
+        else:
+            logger.error("Font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+    def create_item_quantity_display(self):
+        logger.info("Creating inventory item quantity display...")
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_ITEM_DESCRIPTION_QUANTITY_FONT_ID
+            )
+        if font_obj:
+            self.item_quantity_display = display.Text_Display(
+                self.main_display_surface,
+                self.item_quantity_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                horizontal_padding=5,
+                vertical_padding=0,
+            )
+
+            if self.item_quantity_display:
+                self.displays[viewingdata.INVENTORY_ITEM_QUANTITY_DISPLAY_ID] = \
+                    self.item_quantity_display
+            else:
+                logger.error("Failed to make inventory item quantity display")
+        else:
+            logger.error("Font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+
+    # TODO
+    def create_item_description_display(self):
+        logger.info("Creating inventory items description display...")
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_ITEM_DESCRIPTION_FONT_ID,
+            )
+        if font_obj:
+            self.item_description_display = display.Text_Display(
+                self.main_display_surface,
+                self.item_description_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                horizontal_padding=6,
+                vertical_padding=6,
+            )
+
+            if self.item_description_display:
+                self.displays[viewingdata.INVENTORY_ITEM_DESCRIPTION_DISPLAY_ID] \
+                    = self.item_description_display
+            else:
+                logger.error("Failed to make inventory item description display")
+        else:
+            logger.error("Display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
         self.create_inventory_label_display()
         self.create_item_listing_display()
+        self.create_item_name_display()
+        self.create_item_quantity_display()
+        self.create_item_description_display()
 
         pass
 
@@ -1227,6 +1360,13 @@ class Inventory_Viewing(Viewing):
             # Start with the first item.
             curr_index = 0
             curr_viewable_row_index = 0
+            curr_obj = None
+            curr_quantity = 0
+            curr_obj_info = inventory_obj.get_item_entry(curr_index)
+
+            if curr_obj_info:
+                curr_obj = curr_obj_info[0]
+                curr_quantity = curr_obj_info[1]
 
             self.item_listing_display.blit_item_listing(
                 self.main_display_surface,
@@ -1237,6 +1377,52 @@ class Inventory_Viewing(Viewing):
                 alternative_top_left=None,
             )
 
+            if curr_obj:
+                # Blit object name.
+                obj_name = curr_obj.get_name()
+                self.display_text_display_first_page(
+                    self.item_name_display,
+                    obj_name,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=False,
+                    refresh_after=False,
+                    horizontal_orientation=display.ORIENTATION_CENTERED,
+                    vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                    alternative_top_left=None,
+                )
+
+                if curr_quantity:
+                    # Blit quantity.
+                    quantity_text = "x" + str(curr_quantity)
+                    self.display_text_display_first_page(
+                        self.item_quantity_display,
+                        quantity_text,
+                        advance_delay_ms=0,
+                        auto_advance=True,
+                        refresh_during=False,
+                        refresh_after=False,
+                        horizontal_orientation=display.ORIENTATION_CENTERED,
+                        vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                        alternative_top_left=None,
+                    )
+
+                # Blit item description and usage info.
+                item_info = "\n".join([
+                    curr_obj.get_description_info(),
+                    curr_obj.get_usage_info()
+                ])
+                self.display_text_display_first_page(
+                    self.item_description_display,
+                    item_info,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=False,
+                    refresh_after=False,
+                    horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                    vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                    alternative_top_left=None,
+                )
 
 
         return ret_info

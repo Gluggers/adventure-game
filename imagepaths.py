@@ -61,6 +61,7 @@ TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
 
 ### ITEMS ###
+GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50.png" # [0]
 LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
