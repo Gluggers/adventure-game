@@ -361,28 +361,11 @@ class Game():
             target_entity.inventory.print_self()
 
             if self.inventory_viewing:
-                # Clear screen.
-                pygame.draw.rect(
-                    self.main_display_screen,
-                    viewingdata.COLOR_BLACK,
-                    viewingdata.MAIN_DISPLAY_RECT
-                )
-
-                self.inventory_viewing.refresh_and_blit_self()
                 self.inventory_viewing.handle_item_listing(
                     self.protagonist.inventory
                 )
-                pygame.display.update()
-                exit = False
-                while not exit:
-                    for events in pygame.event.get():
-                        if events.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit(0)
-                        elif events.type == pygame.KEYDOWN:
-                            if events.key == pygame.K_ESCAPE:
-                                logger.info("Leaving inventory.")
-                                exit = True
+                # TODO
+
             else:
                 logger.warn("No inventory viewing set.")
 

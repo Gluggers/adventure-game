@@ -1089,14 +1089,23 @@ class Item_Listing_Display(Display):
         self.item_icon_size = item_icon_size
 
         self.item_viewing_top_left = (
-                self.display_rect.x + self.horizontal_padding,
+                # TODO space for the continue icon
+                self.display_rect.x \
+                    + self.horizontal_padding \
+                    + 50 \
+                    + self.horizontal_padding,
                 self.display_rect.y + self.vertical_padding,
             )
 
-        self.item_viewing_space_horizontal = self.display_rect.width  \
-                                            - (2 * self.horizontal_padding)
+        self.item_viewing_space_horizontal = self.display_rect.right \
+                                            - self.item_viewing_top_left[0] \
+                                            - self.horizontal_padding
         self.item_viewing_space_vertical = self.display_rect.height  \
                                             - (2 * self.vertical_padding)
+        logger.info("Item viewing space: {0}x{1}".format(
+            self.item_viewing_space_horizontal,
+            self.item_viewing_space_vertical
+        ))
 
         self.item_viewing_space_rect = pygame.Rect(
             self.item_viewing_top_left[0],
@@ -1158,9 +1167,11 @@ class Item_Listing_Display(Display):
                 center=self.item_viewing_space_rect.center
             )
 
-            self.continue_up_rect.centery = \
-                        self.item_viewing_space_rect.top \
-                        - int(self.vertical_padding / 2)
+            self.continue_up_rect.centery -= 60
+
+            self.continue_up_rect.centerx = \
+                        self.item_viewing_space_rect.left \
+                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2)
 
         # TODO make this in between last possible item row
         # and the bottom of the self.display_rect
@@ -1169,13 +1180,11 @@ class Item_Listing_Display(Display):
                 center=self.item_viewing_space_rect.center
             )
 
-            self.continue_down_rect.centery = \
-                        required_item_space_rect.bottom \
-                        + int(
-                            (self.display_rect.bottom \
-                            - required_item_space_rect.bottom) \
-                            / 2
-                        )
+            self.continue_down_rect.centery += 60
+
+            self.continue_down_rect.centerx = \
+                        self.item_viewing_space_rect.left \
+                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2)
 
     @classmethod
     def get_item_viewing_grid_dimensions(

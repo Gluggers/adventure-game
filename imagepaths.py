@@ -32,12 +32,22 @@ OW_SIDE_MENU_BACKGROUND_PATH = DISPLAY_PATH \
                         + "ow_side_menu_220x416_dk.png" # [0]
 INVENTORY_BACKGROUND_PATH = DISPLAY_PATH \
                         + "inventory_background_672x480_dk.png" # [0]
+INVENTORY_BASIC_TITLE_BACKGROUND_PATH = DISPLAY_PATH \
+                        + "" # [0]
+INVENTORY_BASIC_ITEM_LISTING_FULL_BACKGROUND_PATH = DISPLAY_PATH \
+                        + "" # [0]
+INVENTORY_BASIC_ITEM_LISTING_SHORT_BACKGROUND_PATH = DISPLAY_PATH \
+                        + "" # [0]
+INVENTORY_BASIC_ITEM_DETAILS_BACKGROUND_PATH = DISPLAY_PATH \
+                        + "" # [0]
+INVENTORY_BASIC_INSTRUCTIONS_BACKGROUND_PATH = DISPLAY_PATH \
+                        + "" # [0]
 ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
                         + "item_listing_selected_image_55x55_dk.png" # [0]
 ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
-                        + "item_listing_continue_up_icon_60x20.png" # [0]
+                        + "item_listing_continue_up_icon_50x50_dk.png" # [0]
 ITEM_LISTING_CONT_DOWN_PATH = DISPLAY_PATH \
-                        + "item_listing_continue_down_icon_60x20.png" # [0]
+                        + "item_listing_continue_down_icon_50x50_dk.png" # [0]
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_lz.png" # [1]
@@ -61,7 +71,7 @@ TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
 
 ### ITEMS ###
-GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50.png" # [0]
+GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50_dk.png" # [0]
 LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES

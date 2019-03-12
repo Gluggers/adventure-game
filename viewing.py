@@ -1045,7 +1045,6 @@ class Inventory_Viewing(Viewing):
                 main_display_surface,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
-                bottom_text_display_height=0,
                 bottom_text=None,
                 item_option_restrictions=None,
                 item_icon_size=itemdata.ITEM_ICON_SIZE,
@@ -1057,62 +1056,79 @@ class Inventory_Viewing(Viewing):
 
         self.background_image = None
 
-        self.display_rect = viewingdata.INVENTORY_VIEWING_RECT
-        self.top_display_rect = viewingdata.INVENTORY_TOP_DISPLAY_RECT
-        self.item_details_rect = viewingdata.INVENTORY_ITEM_DETAILS_RECT
-
+        self.display_rect = viewingdata.INVENTORY_BASIC_VIEWING_RECT
         self.item_icon_size = item_icon_size
         self.enlarged_icon_size = 2 * self.item_icon_size
-
         self.bottom_text = bottom_text
         self.item_option_restrictions = item_option_restrictions
 
-        # Calculate item viewing rect.
-        item_viewing_top_left = (
+        # Calculate the various viewing rects for the inventory.
+        top_display_width = int(0.6 * self.display_rect.width)
+        top_display_height = 50
+
+        self.top_display_rect = pygame.Rect(
             self.display_rect.x,
-            self.top_display_rect.bottom,
+            self.display_rect.y,
+            top_display_width,
+            top_display_height,
         )
 
-        item_viewing_height = max(
-                0,
-                self.display_rect.bottom    \
-                - item_viewing_top_left[1]  \
-                - 10, # Leave room at bottom.
-            )
-        item_viewing_width = max(
-                0,
-                max(
-                    0,
-                    self.item_details_rect.left - item_viewing_top_left[0],
-                )
-            )
+        item_details_width = self.display_rect.width \
+                            - top_display_width \
+                            - viewingdata.INVENTORY_IN_BETWEEN_PADDING
+        item_details_height = self.display_rect.height
+        self.item_details_rect = pygame.Rect(
+            self.top_display_rect.right \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            self.display_rect.y,
+            item_details_width,
+            item_details_height
+        )
 
-        # Calculate space for bottom text if needed.
-        self.bottom_text_display_rect = None
-        if bottom_text_display_height:
-            self.bottom_text_display_rect = pygame.Rect(
+        item_listing_width = top_display_width
+        item_listing_height = self.display_rect.height \
+                            - self.top_display_rect.height \
+                            - viewingdata.INVENTORY_IN_BETWEEN_PADDING
+        bottom_text_width = top_display_width
+        bottom_text_height = 0
+
+        self.bottom_text_rect = None
+
+        if self.bottom_text:
+            # Make room for bottom text.
+            bottom_text_height = int(self.display_rect.height / 3) \
+                                - viewingdata.INVENTORY_IN_BETWEEN_PADDING
+            item_listing_height -= (
+                    bottom_text_height \
+                    + viewingdata.INVENTORY_IN_BETWEEN_PADDING
+                )
+            self.bottom_text_rect = pygame.Rect(
                 self.display_rect.x,
-                self.display_rect.bottom - bottom_text_display_height,
-                max(0, self.item_details_rect.left - self.display_rect.left),
-                bottom_text_display_height
+                self.display_rect.bottom - bottom_text_height,
+                bottom_text_width,
+                bottom_text_height,
             )
 
-            item_viewing_height = max(
-                    0,
-                    item_viewing_height - bottom_text_display_height
-                )
-
-        self.item_display_rect = None
-        if item_viewing_width > 0 and item_viewing_height > 0:
-            self.item_display_rect = pygame.Rect(
-                item_viewing_top_left,
-                (item_viewing_width, item_viewing_height)
-            )
+        self.item_listing_rect = pygame.Rect(
+            self.display_rect.x,
+            self.top_display_rect.bottom \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            item_listing_width,
+            item_listing_height
+        )
 
         if background_image_path:
             self.background_image = pygame.image.load(
                                         background_image_path
                                     ).convert_alpha()
+
+        # Load item details background image.
+        self.details_background_image = None
+        """
+        self.details_background_image = pygame.image.load(
+                imagepaths.INVENTORY_BASIC_ITEM_DETAILS_BACKGROUND_PATH
+            ).convert_alpha()
+        """
 
         # Will display the word "Inventory".
         self.top_inventory_label_display = None
@@ -1124,7 +1140,8 @@ class Inventory_Viewing(Viewing):
         self.item_name_display = None
         self.item_name_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_details_rect.y + 20,
+            self.item_details_rect.y \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.item_details_rect.width,
             60,
         )
@@ -1134,7 +1151,8 @@ class Inventory_Viewing(Viewing):
         self.item_quantity_display = None
         self.item_quantity_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_name_rect.bottom,
+            self.item_name_rect.bottom \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.item_details_rect.width,
             45,
         )
@@ -1144,7 +1162,8 @@ class Inventory_Viewing(Viewing):
         self.item_enlarged_display = None
         self.item_enlarged_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_quantity_rect.bottom + 20,
+            self.item_quantity_rect.bottom \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.enlarged_icon_size,
             self.enlarged_icon_size
         )
@@ -1154,18 +1173,24 @@ class Inventory_Viewing(Viewing):
         self.item_description_display = None
         self.item_description_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_enlarged_rect.bottom,
+            self.item_enlarged_rect.bottom \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.item_details_rect.width,
-            self.item_details_rect.bottom - self.item_enlarged_rect.bottom
+            self.item_details_rect.bottom \
+                - (self.item_enlarged_rect.bottom \
+                    + viewingdata.INVENTORY_IN_BETWEEN_PADDING)
         )
 
         # Will display item options for a selected item.
         self.item_option_menu_display = None
         self.item_option_menu_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_enlarged_rect.bottom,
+            self.item_enlarged_rect.bottom \
+                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.item_details_rect.width,
-            self.item_details_rect.bottom - self.item_enlarged_rect.bottom
+            self.item_details_rect.bottom \
+                - (self.item_enlarged_rect.bottom \
+                    + viewingdata.INVENTORY_IN_BETWEEN_PADDING)
         )
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
@@ -1177,9 +1202,10 @@ class Inventory_Viewing(Viewing):
         if font_obj:
             self.top_inventory_label_display = display.Text_Display(
                 self.main_display_surface,
-                viewingdata.INVENTORY_TOP_DISPLAY_RECT,
+                self.top_display_rect,
                 font_obj,
                 background_color=None,
+                #background_image_path=imagepaths.INVENTORY_BASIC_TITLE_BACKGROUND_PATH,
                 background_image_path=None,
                 horizontal_padding=0,
                 vertical_padding=0,
@@ -1200,10 +1226,20 @@ class Inventory_Viewing(Viewing):
                 fontinfo.INVENTORY_ITEM_ICON_QUANTITY_FONT_ID
             )
         if font_obj:
+            background_path = None
+
+            if self.bottom_text:
+                background_path = \
+                    imagepaths.INVENTORY_BASIC_ITEM_LISTING_SHORT_BACKGROUND_PATH
+            else:
+                background_path = \
+                    imagepaths.INVENTORY_BASIC_ITEM_LISTING_FULL_BACKGROUND_PATH
+
             self.item_listing_display = display.Item_Listing_Display(
                 self.main_display_surface,
-                self.item_display_rect,
+                self.item_listing_rect,
                 font_obj,
+                #background_image_path=background_path,
                 background_image_path=None,
                 background_color=None,
                 item_quantity_font_color=viewingdata.COLOR_WHITE,
@@ -1274,7 +1310,6 @@ class Inventory_Viewing(Viewing):
             logger.error("Must init fonts through display.Display.init_fonts.")
 
 
-    # TODO
     def create_item_description_display(self):
         logger.info("Creating inventory items description display...")
         font_obj = display.Display.get_font(
@@ -1300,6 +1335,9 @@ class Inventory_Viewing(Viewing):
             logger.error("Display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
+    # TODO
+    def create_bottom_text_display(self):
+        pass
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
@@ -1308,6 +1346,7 @@ class Inventory_Viewing(Viewing):
         self.create_item_name_display()
         self.create_item_quantity_display()
         self.create_item_description_display()
+        self.create_bottom_text_display()
 
         pass
 
@@ -1331,6 +1370,13 @@ class Inventory_Viewing(Viewing):
                 self.display_rect,
             )
 
+        # Blit details background.
+        if self.details_background_image:
+            self.main_display_surface.blit(
+                self.details_background_image,
+                self.item_details_rect
+            )
+
         # Handle inventory label display.
         if self.top_inventory_label_display:
             # Get inventory text.
@@ -1351,53 +1397,55 @@ class Inventory_Viewing(Viewing):
         # TODO handle bottom text display
 
     # Handles displaying the item listing and returns
-    # the selected item index and option as a tuple
-    # (None is no item or option are selected).
-    def handle_item_listing(self, inventory_obj):
+    # the selected option and item index as a tuple
+    # (None is option is selected).
+    def handle_item_listing(self, inventory_obj, start_index=0):
         ret_info = None
 
         if inventory_obj:
-            # Start with the first item.
-            curr_index = 0
-            curr_viewable_row_index = 0
-            curr_obj = None
-            curr_quantity = 0
-            curr_obj_info = inventory_obj.get_item_entry(curr_index)
-
-            if curr_obj_info:
-                curr_obj = curr_obj_info[0]
-                curr_quantity = curr_obj_info[1]
-
-            self.item_listing_display.blit_item_listing(
+            # Clear screen.
+            pygame.draw.rect(
                 self.main_display_surface,
-                inventory_obj.inventory_data,
-                curr_viewable_row_index,
-                curr_index,
-                show_continue_icon=True,
-                alternative_top_left=None,
+                viewingdata.COLOR_BLACK,
+                viewingdata.MAIN_DISPLAY_RECT
             )
 
-            if curr_obj:
-                # Blit object name.
-                obj_name = curr_obj.get_name()
-                self.display_text_display_first_page(
-                    self.item_name_display,
-                    obj_name,
-                    advance_delay_ms=0,
-                    auto_advance=True,
-                    refresh_during=False,
-                    refresh_after=False,
-                    horizontal_orientation=display.ORIENTATION_CENTERED,
-                    vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+            self.refresh_and_blit_self()
+            pygame.display.update()
+
+            # Start with the first item.
+            curr_index = 0
+            done = False
+
+            while not done:
+                received_input = False
+                curr_viewable_row_index = int(
+                        curr_index / self.item_listing_display.num_columns
+                    )
+                curr_obj = None
+                curr_quantity = 0
+                curr_obj_info = inventory_obj.get_item_entry(curr_index)
+
+
+                if curr_obj_info:
+                    curr_obj = curr_obj_info[0]
+                    curr_quantity = curr_obj_info[1]
+
+                self.item_listing_display.blit_item_listing(
+                    self.main_display_surface,
+                    inventory_obj.inventory_data,
+                    curr_viewable_row_index,
+                    curr_index,
+                    show_continue_icon=True,
                     alternative_top_left=None,
                 )
 
-                if curr_quantity:
-                    # Blit quantity.
-                    quantity_text = "x" + str(curr_quantity)
+                if curr_obj:
+                    # Blit object name.
+                    obj_name = curr_obj.get_name()
                     self.display_text_display_first_page(
-                        self.item_quantity_display,
-                        quantity_text,
+                        self.item_name_display,
+                        obj_name,
                         advance_delay_ms=0,
                         auto_advance=True,
                         refresh_during=False,
@@ -1407,23 +1455,50 @@ class Inventory_Viewing(Viewing):
                         alternative_top_left=None,
                     )
 
-                # Blit item description and usage info.
-                item_info = "\n".join([
-                    curr_obj.get_description_info(),
-                    curr_obj.get_usage_info()
-                ])
-                self.display_text_display_first_page(
-                    self.item_description_display,
-                    item_info,
-                    advance_delay_ms=0,
-                    auto_advance=True,
-                    refresh_during=False,
-                    refresh_after=False,
-                    horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
-                    vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
-                    alternative_top_left=None,
-                )
+                    if curr_quantity:
+                        # Blit quantity.
+                        quantity_text = "x" + str(curr_quantity)
+                        self.display_text_display_first_page(
+                            self.item_quantity_display,
+                            quantity_text,
+                            advance_delay_ms=0,
+                            auto_advance=True,
+                            refresh_during=False,
+                            refresh_after=False,
+                            horizontal_orientation=display.ORIENTATION_CENTERED,
+                            vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                            alternative_top_left=None,
+                        )
 
+                    # Blit item description and usage info.
+                    item_info = "\n".join([
+                        curr_obj.get_description_info(),
+                        curr_obj.get_usage_info()
+                    ])
+                    self.display_text_display_first_page(
+                        self.item_description_display,
+                        item_info,
+                        advance_delay_ms=0,
+                        auto_advance=True,
+                        refresh_during=False,
+                        refresh_after=False,
+                        horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+                        vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                        alternative_top_left=None,
+                    )
+
+                while not received_input:
+                    timekeeper.Timekeeper.tick()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key == pygame.K_ESCAPE:
+                                logger.info("Leaving inventory.")
+                                received_input = True
+                                done = True
 
         return ret_info
 
