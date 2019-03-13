@@ -38,6 +38,9 @@ class Inventory():
     def current_size(self):
         return len(self.inventory_data)
 
+    def get_last_index(self):
+        return len(self.inventory_data) - 1
+
     # Given item_id, returns index for where the item ID first appears
     # in the inventory.
     # Returns -1 if item ID doesn't appear in inventory.

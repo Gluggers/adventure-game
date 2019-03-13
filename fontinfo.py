@@ -41,7 +41,7 @@ FONT_INFO = {
                             + "DejaVuSansMono.ttf"
     },
     INVENTORY_TOP_DISPLAY_FONT_ID: {
-        FONT_SIZE_FIELD: 20,
+        FONT_SIZE_FIELD: 22,
         FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
                             + "DejaVuSansMono.ttf"
     },

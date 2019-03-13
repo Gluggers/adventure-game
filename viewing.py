@@ -1048,6 +1048,7 @@ class Inventory_Viewing(Viewing):
                 bottom_text=None,
                 item_option_restrictions=None,
                 item_icon_size=itemdata.ITEM_ICON_SIZE,
+                enlarged_selection_background_path=imagepaths.ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH,
             ):
         Viewing.__init__(
             self,
@@ -1061,6 +1062,13 @@ class Inventory_Viewing(Viewing):
         self.enlarged_icon_size = 2 * self.item_icon_size
         self.bottom_text = bottom_text
         self.item_option_restrictions = item_option_restrictions
+
+        self.enlarged_selection_background = None
+        if enlarged_selection_background_path:
+            self.enlarged_selection_background = pygame.image.load(
+                    enlarged_selection_background_path
+                ).convert_alpha()
+
 
         # Calculate the various viewing rects for the inventory.
         top_display_width = int(0.6 * self.display_rect.width)
@@ -1154,7 +1162,7 @@ class Inventory_Viewing(Viewing):
             self.item_name_rect.bottom \
                 + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
             self.item_details_rect.width,
-            45,
+            30,
         )
         self.item_quantity_rect.centerx = self.item_details_rect.centerx
 
@@ -1396,96 +1404,196 @@ class Inventory_Viewing(Viewing):
 
         # TODO handle bottom text display
 
+    def blit_selected_object_name(self, selected_obj):
+        if selected_obj:
+            # Blit object name.
+            obj_name = selected_obj.get_name()
+            self.display_text_display_first_page(
+                self.item_name_display,
+                obj_name,
+                advance_delay_ms=0,
+                auto_advance=True,
+                refresh_during=False,
+                refresh_after=False,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                alternative_top_left=None,
+            )
+
+    def blit_selected_object_quantity(self, quantity):
+        if quantity:
+            # Blit quantity.
+            quantity_text = "x" + str(quantity)
+            self.display_text_display_first_page(
+                self.item_quantity_display,
+                quantity_text,
+                advance_delay_ms=0,
+                auto_advance=True,
+                refresh_during=False,
+                refresh_after=False,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                alternative_top_left=None,
+            )
+
+    def blit_selected_object_enlarged_icon(self, selected_obj):
+        if selected_obj:
+            # Blit enlarged icon and background.
+            enlarged_icon = selected_obj.get_enlarged_icon()
+            if enlarged_icon:
+                if self.enlarged_selection_background:
+                    enlarged_background_rect = \
+                        self.enlarged_selection_background.get_rect(
+                            center=self.item_enlarged_rect.center
+                        )
+                    self.main_display_surface.blit(
+                        self.enlarged_selection_background,
+                        enlarged_background_rect
+                    )
+
+                enlarged_icon_rect = enlarged_icon.get_rect(
+                    center=self.item_enlarged_rect.center
+                )
+                self.main_display_surface.blit(
+                    enlarged_icon,
+                    enlarged_icon_rect,
+                )
+
+    def blit_selected_object_description(self, selected_obj):
+        # Blit item description and usage info.
+        item_info = "\n".join([
+            selected_obj.get_description_info(),
+            '--------',
+            selected_obj.get_usage_info()
+        ])
+        self.display_text_display_first_page(
+            self.item_description_display,
+            item_info,
+            advance_delay_ms=0,
+            auto_advance=True,
+            refresh_during=False,
+            refresh_after=False,
+            horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
+            vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+            alternative_top_left=None,
+        )
+
+    def blit_selected_object_details(self, selected_obj, quantity):
+        self.blit_selected_object_name(selected_obj)
+        self.blit_selected_object_quantity(quantity)
+        self.blit_selected_object_enlarged_icon(selected_obj)
+        self.blit_selected_object_description(selected_obj)
+
+    # TODO figure out and change
+    def blit_selected_object_options(
+                self,
+                selected_obj,
+                option_list,
+                curr_selected_option_index):
+        self.blit_selected_object_name(selected_obj)
+        self.blit_selected_object_quantity(quantity)
+        self.blit_selected_object_enlarged_icon(selected_obj)
+
     # Handles displaying the item listing and returns
     # the selected option and item index as a tuple
     # (None is option is selected).
-    def handle_item_listing(self, inventory_obj, start_index=0):
+    def handle_item_listing(
+                self,
+                inventory_obj,
+                starting_selected_index=0,
+                preselected_index_list=[],
+            ):
         ret_info = None
+        max_index = inventory_obj.get_last_index()
 
         if inventory_obj:
-            # Clear screen.
-            pygame.draw.rect(
-                self.main_display_surface,
-                viewingdata.COLOR_BLACK,
-                viewingdata.MAIN_DISPLAY_RECT
-            )
-
-            self.refresh_and_blit_self()
-            pygame.display.update()
-
             # Start with the first item.
-            curr_index = 0
+            curr_index = starting_selected_index
+            first_viewable_row_index = \
+                self.item_listing_display.get_row_index(curr_index)
+            last_viewable_row_index = \
+                first_viewable_row_index \
+                + self.item_listing_display.num_rows \
+                - 1
+
             done = False
 
+            new_index = False
+            changed_index = True
+
             while not done:
-                received_input = False
-                curr_viewable_row_index = int(
-                        curr_index / self.item_listing_display.num_columns
+                curr_selected_row = self.item_listing_display.get_row_index(
+                        curr_index
                     )
+
+                if curr_selected_row < first_viewable_row_index:
+                    # Scroll down.
+                    first_viewable_row_index = curr_selected_row
+                    last_viewable_row_index = \
+                        first_viewable_row_index \
+                        + self.item_listing_display.num_rows \
+                        - 1
+                elif curr_selected_row > last_viewable_row_index:
+                    # Scroll up.
+                    last_viewable_row_index = curr_selected_row
+                    first_viewable_row_index = max(
+                            0,
+                            last_viewable_row_index \
+                            - self.item_listing_display.num_rows \
+                            + 1
+                        )
+
+                logger.info("Curr row index {0}. First viewable: {1}. Last viewable: {2}".format(
+                    curr_selected_row,
+                    first_viewable_row_index,
+                    last_viewable_row_index
+                ))
+
+                if changed_index:
+                    # Clear screen.
+                    pygame.draw.rect(
+                        self.main_display_surface,
+                        viewingdata.COLOR_BLACK,
+                        viewingdata.MAIN_DISPLAY_RECT
+                    )
+
+                    self.refresh_and_blit_self()
+                    pygame.display.update()
+
+                go_down = False
+                go_up = False
+                go_left = False
+                go_right = False
+                open_options = False
+
+                received_input = False
+
                 curr_obj = None
                 curr_quantity = 0
                 curr_obj_info = inventory_obj.get_item_entry(curr_index)
-
 
                 if curr_obj_info:
                     curr_obj = curr_obj_info[0]
                     curr_quantity = curr_obj_info[1]
 
-                self.item_listing_display.blit_item_listing(
-                    self.main_display_surface,
-                    inventory_obj.inventory_data,
-                    curr_viewable_row_index,
-                    curr_index,
-                    show_continue_icon=True,
-                    alternative_top_left=None,
-                )
-
-                if curr_obj:
-                    # Blit object name.
-                    obj_name = curr_obj.get_name()
-                    self.display_text_display_first_page(
-                        self.item_name_display,
-                        obj_name,
-                        advance_delay_ms=0,
-                        auto_advance=True,
-                        refresh_during=False,
-                        refresh_after=False,
-                        horizontal_orientation=display.ORIENTATION_CENTERED,
-                        vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                if changed_index:
+                    self.item_listing_display.blit_item_listing(
+                        self.main_display_surface,
+                        inventory_obj.inventory_data,
+                        first_viewable_row_index,
+                        curr_index,
+                        preselected_index_list=preselected_index_list,
+                        show_continue_icon=True,
                         alternative_top_left=None,
                     )
 
-                    if curr_quantity:
-                        # Blit quantity.
-                        quantity_text = "x" + str(curr_quantity)
-                        self.display_text_display_first_page(
-                            self.item_quantity_display,
-                            quantity_text,
-                            advance_delay_ms=0,
-                            auto_advance=True,
-                            refresh_during=False,
-                            refresh_after=False,
-                            horizontal_orientation=display.ORIENTATION_CENTERED,
-                            vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
-                            alternative_top_left=None,
+                    if curr_obj:
+                        self.blit_selected_object_details(
+                            curr_obj,
+                            curr_quantity,
                         )
 
-                    # Blit item description and usage info.
-                    item_info = "\n".join([
-                        curr_obj.get_description_info(),
-                        curr_obj.get_usage_info()
-                    ])
-                    self.display_text_display_first_page(
-                        self.item_description_display,
-                        item_info,
-                        advance_delay_ms=0,
-                        auto_advance=True,
-                        refresh_during=False,
-                        refresh_after=False,
-                        horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
-                        vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
-                        alternative_top_left=None,
-                    )
+                    pygame.display.update()
 
                 while not received_input:
                     timekeeper.Timekeeper.tick()
@@ -1499,6 +1607,78 @@ class Inventory_Viewing(Viewing):
                                 logger.info("Leaving inventory.")
                                 received_input = True
                                 done = True
+                            elif events.key == pygame.K_DOWN:
+                                logger.info("Going down in listing.")
+                                go_down = True
+                                go_up = False
+                                go_left = False
+                                go_right = False
+                                open_options = False
+                                received_input = True
+                            elif events.key == pygame.K_UP:
+                                logger.info("Going up in listing.")
+                                go_down = False
+                                go_up = True
+                                go_left = False
+                                go_right = False
+                                open_options = False
+                                received_input = True
+                            elif events.key == pygame.K_LEFT:
+                                logger.info("Going left in listing.")
+                                go_down = False
+                                go_up = False
+                                go_left = True
+                                go_right = False
+                                open_options = False
+                                received_input = True
+                            elif events.key == pygame.K_RIGHT:
+                                logger.info("Going right in listing.")
+                                go_down = False
+                                go_up = False
+                                go_left = False
+                                go_right = True
+                                open_options = False
+                                received_input = True
+                            elif events.key == pygame.K_RETURN:
+                                logger.info("Opening menu")
+                                go_down = False
+                                go_up = False
+                                go_left = False
+                                go_right = False
+                                open_options = True
+                                received_input = True
+
+                if received_input:
+                    new_index = None
+                    if go_down:
+                        new_index = min(
+                            max_index,
+                            curr_index + self.item_listing_display.num_columns
+                        )
+                    elif go_up:
+                        new_index = max(
+                            0,
+                            curr_index - self.item_listing_display.num_columns
+                        )
+                    elif go_right:
+                        new_index = min(
+                            max_index,
+                            curr_index + 1
+                        )
+                    elif go_left:
+                        new_index = max(
+                            0,
+                            curr_index - 1
+                        )
+
+                    if new_index != curr_index:
+                        changed_index = True
+                        curr_index = new_index
+                    else:
+                        changed_index = False
+
+                    logger.info("Curr index now: {0}".format(curr_index))
+                    # TODO rest
 
         return ret_info
 

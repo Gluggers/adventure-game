@@ -28,7 +28,7 @@ TEXT_BOX_LINE_SPACING_FACTOR = 1.1
 MENU_LINE_SPACING_FACTOR = 1.5
 
 # Number of pixels in between each item slot.
-ITEM_VIEWING_PIXEL_SPACING = 10
+ITEM_VIEWING_PIXEL_SPACING = 15
 
 ### ORIENTATIONS FOR MENU OPTIONS ###
 ORIENTATION_CENTERED = 0x1
@@ -36,6 +36,8 @@ ORIENTATION_LEFT_JUSTIFIED = 0x2
 ORIENTATION_RIGHT_JUSTIFIED = 0x3
 ORIENTATION_TOP_JUSTIFIED = 0x4
 ORIENTATION_BOTTOM_JUSTIFIED = 0x5
+
+# TODO - just have pages be lists of the rendered texts...
 
 class Text_Page():
     def __init__(self, line_list):
@@ -678,13 +680,13 @@ class Text_Display(Display):
                 # Determine horizontal placement.
                 text_top_left = None
                 if horizontal_orientation == ORIENTATION_CENTERED:
-                    logger.info("Using centered horizontal for {0}".format(text_line))
+                    #logger.info("Using centered horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.centerx - int(text_width / 2),
                         text_space_rect.y + vertical_offset
                     )
                 elif horizontal_orientation == ORIENTATION_LEFT_JUSTIFIED:
-                    logger.info("Using left justified horizontal for {0}".format(text_line))
+                    #logger.info("Using left justified horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.x,
                         text_space_rect.y + vertical_offset
@@ -1088,12 +1090,36 @@ class Item_Listing_Display(Display):
         self.pixels_between_items = space_between_items
         self.item_icon_size = item_icon_size
 
+        # Define continue icons if possible.
+        self.continue_up_icon = None
+        self.continue_down_icon = None
+        continue_icon_width = 0
+
+        if continue_up_icon_image_path:
+            self.continue_up_icon = pygame.image.load(
+                    continue_up_icon_image_path
+                ).convert_alpha()
+            continue_icon_width = max(
+                    continue_icon_width,
+                    self.continue_up_icon.get_width()
+                )
+
+        if continue_down_icon_image_path:
+            self.continue_down_icon = pygame.image.load(
+                    continue_down_icon_image_path
+                ).convert_alpha()
+
+            continue_icon_width = max(
+                    continue_icon_width,
+                    self.continue_down_icon.get_width()
+                )
+
         self.item_viewing_top_left = (
                 # TODO space for the continue icon
                 self.display_rect.x \
-                    + self.horizontal_padding \
-                    + 50 \
-                    + self.horizontal_padding,
+                    + 15 \
+                    + continue_icon_width \
+                    + 15,
                 self.display_rect.y + self.vertical_padding,
             )
 
@@ -1138,20 +1164,6 @@ class Item_Listing_Display(Display):
             (self.item_viewing_space_rect.width, required_vertical_item_space)
         )
 
-        # Define continue icons if possible.
-        self.continue_up_icon = None
-        self.continue_down_icon = None
-
-        if continue_up_icon_image_path:
-            self.continue_up_icon = pygame.image.load(
-                    continue_up_icon_image_path
-                ).convert_alpha()
-
-        if continue_down_icon_image_path:
-            self.continue_down_icon = pygame.image.load(
-                    continue_down_icon_image_path
-                ).convert_alpha()
-
         self.selection_image = None
         if selection_image_path:
             self.selection_image = pygame.image.load(
@@ -1167,11 +1179,12 @@ class Item_Listing_Display(Display):
                 center=self.item_viewing_space_rect.center
             )
 
-            self.continue_up_rect.centery -= 60
+            self.continue_up_rect.centery -= 40
 
             self.continue_up_rect.centerx = \
                         self.item_viewing_space_rect.left \
-                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2)
+                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2) \
+                        + 4
 
         # TODO make this in between last possible item row
         # and the bottom of the self.display_rect
@@ -1180,11 +1193,12 @@ class Item_Listing_Display(Display):
                 center=self.item_viewing_space_rect.center
             )
 
-            self.continue_down_rect.centery += 60
+            self.continue_down_rect.centery += 40
 
             self.continue_down_rect.centerx = \
                         self.item_viewing_space_rect.left \
-                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2)
+                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2) \
+                        + 4
 
     @classmethod
     def get_item_viewing_grid_dimensions(
@@ -1218,9 +1232,15 @@ class Item_Listing_Display(Display):
 
         return dimensions
 
+    def get_row_index(self, item_listing_index):
+        return int(item_listing_index / self.num_columns)
+
+    def get_column_index(self, item_listing_index):
+        return item_listing_index % self.num_columns
+
     # Item listing data must be list of length-2 lists of the form
     # [item object, quantity].
-    # selected_index is teh index in item_listing_data for the
+    # selected_index is the index in item_listing_data for the
     # item currently selected.
     # first_viewable_row_index is the row index for the first row of items
     # to be visible in the viewing.
@@ -1230,6 +1250,7 @@ class Item_Listing_Display(Display):
                 item_listing_data,
                 first_viewable_row_index,
                 selected_index,
+                preselected_index_list=[],
                 show_continue_icon=True,
                 alternative_top_left=None,
             ):
@@ -1261,9 +1282,9 @@ class Item_Listing_Display(Display):
 
             # Go until we run out of space or items.
             total_items = len(item_listing_data)
-            num_remaining_items = min(
-                    self.max_num_items,
-                    total_items - starting_index
+            last_index = min(
+                    starting_index + self.max_num_items - 1,
+                    total_items - 1
                 )
 
             curr_index = starting_index
@@ -1280,7 +1301,7 @@ class Item_Listing_Display(Display):
                 itemdata.ITEM_ICON_SIZE,
             )
 
-            while curr_index < num_remaining_items:
+            while curr_index <= last_index:
                 curr_viewing_row = int(
                         (curr_index - starting_index) / self.num_columns
                     )
@@ -1292,7 +1313,7 @@ class Item_Listing_Display(Display):
                     * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
 
                 vertical_offset = \
-                    (curr_viewing_row - first_viewable_row_index) \
+                    curr_viewing_row \
                     * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
 
                 curr_item_info = item_listing_data[curr_index]
@@ -1300,6 +1321,7 @@ class Item_Listing_Display(Display):
                 item_name = curr_item.get_name()
                 item_quantity = curr_item_info[1]
                 item_image = curr_item.get_icon()
+
 
                 logger.info("Curr item {0} x{1} at {2}".format(
                     item_name,
@@ -1327,7 +1349,8 @@ class Item_Listing_Display(Display):
 
                 # Check if this is the selected icon. If so,
                 # blit the selection background.
-                if (selected_index == curr_index) \
+                if ((selected_index == curr_index) \
+                    or (selected_index in preselected_index_list)) \
                         and self.selection_image:
                     # Center on the item icon.
                     select_image_rect = self.selection_image.get_rect(

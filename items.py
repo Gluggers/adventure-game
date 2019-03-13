@@ -54,6 +54,14 @@ class Item(pygame.sprite.Sprite):
             self.image_dict[image_type_id] = \
                 pygame.image.load(image_path).convert_alpha()
 
+        self.enlarged_icon = None
+        icon_image = self.image_dict.get(imageids.ITEM_ICON_IMAGE_ID, None)
+        if icon_image:
+            self.enlarged_icon = pygame.transform.scale(
+                icon_image,
+                (icon_image.get_width() * 2, icon_image.get_height() * 2)
+            )
+
         self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
 
         self.equipment_slot_id = itemdata.EQUIP_SLOT_NONE
@@ -92,6 +100,9 @@ class Item(pygame.sprite.Sprite):
 
     def get_image(self, image_id):
         return self.image_dict.get(image_id, None)
+
+    def get_enlarged_icon(self):
+        return self.enlarged_icon
 
     def get_icon(self):
         return self.get_image(imageids.ITEM_ICON_IMAGE_ID)
