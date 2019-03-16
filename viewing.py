@@ -1243,7 +1243,7 @@ class Inventory_Viewing(Viewing):
                 background_path = \
                     imagepaths.INVENTORY_BASIC_ITEM_LISTING_FULL_BACKGROUND_PATH
 
-            self.item_listing_display = display.Item_Listing_Display(
+            self.item_listing_display = display.ItemListingDisplay(
                 self.main_display_surface,
                 self.item_listing_rect,
                 font_obj,

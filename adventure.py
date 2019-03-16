@@ -40,8 +40,9 @@ def main():
     # init interactions
     interaction.Interaction.init_interactions()
 
-    # load fonts
+    # Load display information.
     display.Display.init_fonts()
+    display.Display.init_background_patterns()
 
     # Init spawn handler queues.
     #spawnhandler.Spawn_Handler.init_spawn_queues()

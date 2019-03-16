@@ -1,12 +1,16 @@
+# -*- coding: utf-8 -*-
+"""This module contains constants and data for Tile objects."""
+
 import imagepaths
 
 ### TRANSPORTATION FLAGS ###
-NO_TRANSPORT_F = 0x0
-WALKABLE_F = 0x1
-CANOEABLE_F = 0x2
-SAILABLE_F = 0x4
-FLYABLE_F = 0x8
+NO_TRANSPORT_F = 0x0  # To indicate no type of transportation.
+WALKABLE_F = 0x1  # For walking.
+CANOEABLE_F = 0x2  # For canoeing.
+SAILABLE_F = 0x4  # For sailing.
+FLYABLE_F = 0x8  # For flying.
 
+# By default, Tiles can be walked on or flown on.
 DEFAULT_TRANSPORTATION = (WALKABLE_F | FLYABLE_F)
 
 ### TILE ID NUMBERS ###
@@ -20,10 +24,13 @@ TILE_WATER_NORMAL_2_ID = 201
 TILE_WATER_NORMAL_3_ID = 202
 TILE_SAND_ID = 300
 
-### TILE FACTORY DATA ###
+### TILE DATA FOR CREATING TILES ###
 TILE_IMAGE_PATH_FIELD = 1
 TILE_ALLOWED_TRANSPORT_FIELD = 2
 
+# This dict contains Tile object values used to create Tile objects.
+# To create a new Tile object, add a new Tile ID and enter
+# the field values in the dict.
 TILE_DATA = {
     TILE_DEFAULT_ID: {
         TILE_IMAGE_PATH_FIELD: imagepaths.TILE_DEFAULT_PATH,

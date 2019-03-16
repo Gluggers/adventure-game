@@ -1,20 +1,17 @@
+import logging
+import math
 import pygame
 import viewingdata
-import skills
 import language
-import timekeeper
-import logging
-import sys
 import imagepaths
 import menuoptions
-import math
 import fontinfo
 import itemdata
 
 SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "1234567890" \
                     + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-                    + ":;[]{},./?<>-_=+~\`!@#$%^&*()\\|\"'"
+                    + ":;[]{},./?<>-_=+~`!@#$%^&*()\\|\"'"
 
 # Space between text and the continue icon.
 CONTINUE_ICON_HORIZ_SPACE = 6
@@ -39,73 +36,199 @@ ORIENTATION_BOTTOM_JUSTIFIED = 0x5
 
 # TODO - just have pages be lists of the rendered texts...
 
-class Text_Page():
+class TextPage(object):
+    """A class used to represent a single text page for a text display.
+
+    Each TextPage object will contain a list of strings that make up
+    the text for one text box.
+
+    This class is a helper class for Display classes. Non-Display classes
+    should not be directly creating TextPage objects except through
+    using Display methods.
+
+    Attributes:
+        text_lines: list of Strings, where each String is a single text line
+            for the text page.
+    """
+
     def __init__(self, line_list):
-        self.text_lines = []
+        """Creates a TextPage object with the given text lines.
+
+        Args
+            line_list: list of Strings representing the text lines for the
+                TextPage object to hold.
+        """
+        self._text_lines = []
 
         if line_list:
             for item in line_list:
-                self.text_lines.append(item)
+                self._text_lines.append(item)
 
-class Menu_Page():
+    @property
+    def text_lines(self):
+        """Returns the array of text lines for the page."""
+        return self._text_lines
+
+class MenuPage(object):
+    """A class used to represent a single menu page for a menu display.
+
+    Each MenuPage object will contain a list of option ID numbers that make up
+    the options for one menu page. The order of the option IDs in the list
+    determine the order in which the options are shown.
+
+    One option ID corresponds to one line in the menu page.
+
+    This class is a helper class for Display classes. Non-Display classes
+    should not be directly creating MenuPage objects except through
+    using Display methods.
+
+    Attributes:
+        option_id_list: list of integers, where each integer represents the
+            option ID for the option to show on the menu page.
+    """
+
     def __init__(self, option_id_list):
-        self.option_id_list = []
+        """Creates a MenuPage object with the given option IDs.
+
+        Args:
+            option_id_list: list of integers representing the options for the
+                MenuPage object to hold.
+        """
+        self._option_id_list = []
 
         if option_id_list:
             for item in option_id_list:
-                self.option_id_list.append(item)
+                self._option_id_list.append(item)
 
     def get_num_options(self):
-        return len(self.option_id_list)
+        """Returns the number of options for this menu page."""
+
+        return len(self._option_id_list)
 
     def get_option_id(self, index):
-        return self.option_id_list[index]
+        """Returns the option ID at the given index.
 
-class Display():
+        The method assumes that the index is within bounds.
+
+        Args:
+            self: calling object.
+            index: array index for the option ID.
+        """
+
+        return self._option_id_list[index]
+
+    @property
+    def option_id_list(self):
+        """Returns the array of option IDs for the page."""
+
+        return self._option_id_list
+
+class Display(object):
     # Will contain loaded fonts.
     font_listing = {}
 
-    # Background color is color to use in case of no background image.
-    # If background image is provided, we will use that rather than
-    # background color. For best results, background image should be same
-    # size as display_rect dimensions.
     def __init__(
-                self,
-                main_display_surface,
-                display_rect,
-                background_image_path=None,
-                background_color=viewingdata.COLOR_WHITE,
-            ):
+            self,
+            main_display_surface,
+            display_rect,
+            background_pattern=None,
+            background_image_path=None,
+            background_color=viewingdata.COLOR_WHITE,
+        ):
+        """ Initializes the base Display object.
+
+        Args:
+            self: self object.
+            main_display_surface: pygame Surface object to use for blitting
+                text and other display elements on.
+            display_rect: pygame Rect object to define the dimensions of
+                the Display object.
+            background_pattern: integer representing the background pattern
+                ID for the Display. Set to None to avoid using a background
+                pattern.
+            background_image_path: String for the file path leading to
+                the image for the Display's background. Set to None to
+                avoid giving the Display a background image.
+                If no background image is assigned, the Display will use
+                the background_color as a fill color if applicable.
+                For best results, the background image should be the same
+                size the as display_rect dimensions.
+            background_color: length-3 tuple for the color representation
+                (e.g. (255, 255, 255) for black) to use in the case of
+                no background image. The color will be the fill color
+                for the Display. Defaults to white (0, 0, 0).
+                Can set to None to skip using any background fill color.
+        """
+
         self.main_display_surface = main_display_surface
         self.display_rect = display_rect
         self.background_color = background_color
+        self.background_pattern_id = background_pattern
 
         self.background_image = None
-
         if background_image_path:
             # Load image if path is provided.
             self.background_image = pygame.image.load(
-                                        background_image_path
-                                    ).convert_alpha()
+                background_image_path
+            ).convert_alpha()
 
-            logger.info("Image size: {0}".format(self.background_image.get_size()))
+        # TODO handle background pattern.
+        self.fixed_background_pattern = None
 
+        if self.background_pattern_id is not None:
+            pass
 
     # Does not update display, caller must do that.
-    def blit_background(self, surface, alternative_top_left=None):
+    def blit_background(
+            self,
+            surface,
+            alternative_top_left=None,
+            alternative_height=None,
+        ):
+        """Blits the Display background.
+
+        Does not update the display. Caller must do that.
+        If a background pattern is set, the pattern will determine
+        the background. Otherwise, if no background pattern is set, and if
+        a background image is set, image will get blitted.
+        If no background image is set and no pattern is set, the
+        background color will be used to fill the background.
+        If neither a pattern nor an image nor fill color are set,
+        no background work will be done.
+
+        By default, the method will blit the background according to the
+        Display object's Rect dimensions. If the caller wishes to change
+        the location of where the blit the background, then the caller
+        can specify a new top left coordinate using the
+        alternative_top_left parameter.
+
+        Args:
+            self: calling object.
+            surface: pygame Surface object to blit the Display background on.
+            alternative_top_left: Optional parameter to change the top-left
+                pixel location to start blitting the Display background.
+                The format is a tuple of the x,y pixel coordinates.
+            alternative_height: Optional parameter to change the height of
+                the blitted background.
+        """
+
         if surface:
             target_rect = self.display_rect
 
-            if alternative_top_left:
+            # Change top left starting point if needed.
+            if alternative_top_left is not None:
                 target_rect = pygame.Rect(
                     alternative_top_left,
                     (self.display_rect.width, self.display_rect.height)
                 )
 
+            # Change height of rect if needed.
+            if alternative_height is not None:
+                target_rect.height = alternative_height
+
             # Blit the background image/default fill color.
-            # TODO - add in blitting the borders?
+            # TODO handle background.
             if self.background_image:
-                # TODO - tile repetition?
                 surface.blit(
                     self.background_image,
                     target_rect,
@@ -116,6 +239,13 @@ class Display():
                     self.background_color,
                     target_rect,
                 )
+
+    @classmethod
+    def blit_background_pattern(cls, surface, target_rect, pattern_id):
+        """Blits background pattern onto target rect for surface."""
+        if surface and target_rect and pattern_id is not None:
+            # TODO
+            pass
 
     @classmethod
     def get_abbreviated_quantity(cls, quantity):
@@ -131,7 +261,16 @@ class Display():
                 example, 20,128,281 becomes "20M", and 5,291,289,291 becomes
                 "5291M".
             10 billion and beyond: displays only the billions (B).
+
+        Args:
+            cls: class object.
+            quantity: integer for which to create an abbreviated
+                representation.
+
+        Returns:
+            String representation of the abbreviated quantity.
         """
+
         ret_string = "0"
 
         if quantity and quantity > 0:
@@ -154,6 +293,13 @@ class Display():
     @classmethod
     def get_font(cls, font_id):
         return cls.font_listing.get(font_id, None)
+
+    @classmethod
+    def init_background_patterns(cls):
+        """Initializes the background patterns for displays."""
+
+        # TODO.
+        pass
 
     @classmethod
     def init_fonts(cls):
@@ -180,22 +326,24 @@ class Text_Display(Display):
     # to blit after the last line of a page if needed. The icon should be
     # small.
     def __init__(
-                self,
-                main_display_surface,
-                display_rect,
-                font_object,
-                background_image_path=None,
-                background_color=viewingdata.COLOR_WHITE,
-                font_color=fontinfo.FONT_COLOR_DEFAULT,
-                horizontal_padding=0,
-                vertical_padding=0,
-                continue_icon_image_path=None,
-                spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR,
-            ):
+            self,
+            main_display_surface,
+            display_rect,
+            font_object,
+            background_pattern=None,
+            background_image_path=None,
+            background_color=viewingdata.COLOR_WHITE,
+            font_color=fontinfo.FONT_COLOR_DEFAULT,
+            horizontal_padding=0,
+            vertical_padding=0,
+            continue_icon_image_path=None,
+            spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR,
+        ):
         Display.__init__(
             self,
             main_display_surface,
             display_rect,
+            background_pattern=background_pattern,
             background_image_path=background_image_path,
             background_color=background_color,
         )
@@ -256,16 +404,16 @@ class Text_Display(Display):
         if background_image_path:
             # Load image if path is provided.
             self.background_image = pygame.image.load(
-                                        background_image_path
-                                    ).convert_alpha()
+                background_image_path
+            ).convert_alpha()
 
         # Define continuation icon if possible.
         self.continue_icon = None
         if continue_icon_image_path:
             # Load image if path is provided.
             self.continue_icon = pygame.image.load(
-                    continue_icon_image_path
-                ).convert_alpha()
+                continue_icon_image_path
+            ).convert_alpha()
 
     @classmethod
     def get_char_per_line(cls, horizontal_pixels, font_object):
@@ -299,10 +447,11 @@ class Text_Display(Display):
     # as spacing in between lines)
     @classmethod
     def get_num_lines_per_page(
-                cls,
-                vertical_pixel_height,
-                font_object,
-                spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR):
+            cls,
+            vertical_pixel_height,
+            font_object,
+            spacing_factor_between_lines=DEFAULT_LINE_SPACING_FACTOR
+        ):
         num_lines = 0
 
         if vertical_pixel_height \
@@ -317,8 +466,8 @@ class Text_Display(Display):
             # x(text_height + p) - p = v.
             # x = (v + p) / (text_height + p).
             pixels_between_lines = int(
-                    text_height * max(0, spacing_factor_between_lines - 1)
-                )
+                text_height * max(0, spacing_factor_between_lines - 1)
+            )
 
             num_lines = int(
                 (vertical_pixel_height + pixels_between_lines) \
@@ -407,7 +556,7 @@ class Text_Display(Display):
                             # overflow word.
                             curr_length = word_length
                         else:
-                            if (index == (num_words - 1)):
+                            if index == (num_words - 1):
                                 # We reached the end of the word list and
                                 # did not overpass to the next line.
                                 sub_list = word_list[start_index:]
@@ -508,7 +657,7 @@ class Text_Display(Display):
                             # overflow word.
                             curr_length = word_length
                         else:
-                            if (index == (num_words - 1)):
+                            if index == (num_words - 1):
                                 # We reached the end of the word list and
                                 # did not overpass to the next line.
                                 sub_list = word_list[start_index:]
@@ -546,7 +695,7 @@ class Text_Display(Display):
 
         return ret_lines
 
-    # Returns list of Text_Page objects, each containing
+    # Returns list of TextPage objects, each containing
     # a list of strings, where each string represents one line of text
     # to place on display.
     def get_text_pages(self, text_string):
@@ -580,14 +729,14 @@ class Text_Display(Display):
 
                     # Create page and add to page list.
                     page_list.append(
-                        Text_Page(lines_to_print[start_index:end_index])
+                        TextPage(lines_to_print[start_index:end_index])
                     )
 
                     num_lines_processed = num_lines_processed + lines_to_add
                     remaining_lines = remaining_lines - lines_to_add
             else:
                 # All lines can fit on a single page.
-                page_list.append(Text_Page(lines_to_print))
+                page_list.append(TextPage(lines_to_print))
 
         if page_list:
             ret_page_list = page_list
@@ -609,8 +758,8 @@ class Text_Display(Display):
             # = n*(text_height + pixels_between_lines) - pixels_between_lines.
             text_height = self.font_object.get_linesize()
             pixels_between_lines = int(
-                    text_height * max(0, self.spacing_factor_between_lines - 1)
-                )
+                text_height * max(0, self.spacing_factor_between_lines - 1)
+            )
 
             ret_height = \
                 (num_lines_in_page * (text_height + pixels_between_lines)) \
@@ -623,19 +772,19 @@ class Text_Display(Display):
     # If continue_icon is set to True, we will blit the object's continue
     # icon after the last line of the page.
     def blit_page(
-                self,
-                surface,
-                text_page,
-                show_continue_icon=False,
-                alternative_top_left=None,
-                horizontal_orientation=ORIENTATION_CENTERED,
-                vertical_orientation=ORIENTATION_CENTERED,
-            ):
+            self,
+            surface,
+            text_page,
+            show_continue_icon=False,
+            alternative_top_left=None,
+            horizontal_orientation=ORIENTATION_CENTERED,
+            vertical_orientation=ORIENTATION_CENTERED,
+        ):
         if surface and text_page:
             text_space_rect = self.text_space_rect
 
             if alternative_top_left:
-                text_space_rect = pygame.rect(
+                text_space_rect = pygame.Rect(
                     alternative_top_left[0] + self.horizontal_padding,
                     alternative_top_left[1] + self.vertical_padding,
                     self.text_space_horizontal,
@@ -656,8 +805,8 @@ class Text_Display(Display):
             vertical_offset = 0
             if vertical_orientation == ORIENTATION_CENTERED:
                 vertical_offset = int(
-                        max(0, self.text_space_vertical - page_height) / 2
-                    )
+                    max(0, self.text_space_vertical - page_height) / 2
+                )
             elif vertical_orientation == ORIENTATION_TOP_JUSTIFIED:
                 vertical_offset = 0
             elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
@@ -728,9 +877,9 @@ class Text_Display(Display):
 
                 # Move to spot for next line.
                 vertical_offset += int(
-                            self.spacing_factor_between_lines \
-                            * self.text_height
-                        )
+                    self.spacing_factor_between_lines \
+                    * self.text_height
+                )
 
 class Menu_Display(Text_Display):
     # If no background image is specified, default to background_color.
@@ -739,23 +888,25 @@ class Menu_Display(Text_Display):
     # For best results, ensure that selection_icon_image_path points to an
     # image of small enough size.
     def __init__(
-                self,
-                main_display_surface,
-                display_rect,
-                font_object,
-                background_image_path=None,
-                background_color=viewingdata.COLOR_WHITE,
-                font_color=fontinfo.FONT_COLOR_DEFAULT,
-                horizontal_padding=0,
-                vertical_padding=0,
-                selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
-                spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
-            ):
+            self,
+            main_display_surface,
+            display_rect,
+            font_object,
+            background_pattern=None,
+            background_image_path=None,
+            background_color=viewingdata.COLOR_WHITE,
+            font_color=fontinfo.FONT_COLOR_DEFAULT,
+            horizontal_padding=0,
+            vertical_padding=0,
+            selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
+            spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
+        ):
         Text_Display.__init__(
             self,
             main_display_surface,
             display_rect,
             font_object,
+            background_pattern=background_pattern,
             background_image_path=background_image_path,
             background_color=background_color,
             font_color=font_color,
@@ -769,8 +920,8 @@ class Menu_Display(Text_Display):
         if selection_icon_image_path:
             # Load image if path is provided.
             self.selection_icon = pygame.image.load(
-                    selection_icon_image_path
-                ).convert_alpha()
+                selection_icon_image_path
+            ).convert_alpha()
 
         if not self.selection_icon:
             logger.error("Error setting up selection icon for menu.")
@@ -778,10 +929,10 @@ class Menu_Display(Text_Display):
         # determine max number of options (one option per line)
         # that can be blitted per page.
         self.max_options_per_page = Text_Display.get_num_lines_per_page(
-                self.text_space_vertical,
-                self.font_object,
-                self.spacing_factor_between_lines
-            )
+            self.text_space_vertical,
+            self.font_object,
+            self.spacing_factor_between_lines
+        )
 
         logger.info(
             "Max options per menu page: {0}".format(self.max_options_per_page)
@@ -820,9 +971,9 @@ class Menu_Display(Text_Display):
     # additional options on a subsequent menu page.
     # max_options_per_page indicates how many options (lines) fit on one page.
     def get_menu_page_list(
-                self,
-                option_id_list,
-            ):
+            self,
+            option_id_list,
+        ):
         ret_pages = []
 
         if option_id_list and self.max_options_per_page:
@@ -854,7 +1005,7 @@ class Menu_Display(Text_Display):
                     # Options will carry on to next page.
                     options_to_add = \
                         remaining_options[0:self.max_options_per_page - 1]
-                    options_to_add.append(MORE_OPTIONS_OPTION_ID)
+                    options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
                     logger.debug(
                         ("Adding {0} options plus \"more options\" " \
                         + "to menu page: {1}").format(
@@ -870,20 +1021,20 @@ class Menu_Display(Text_Display):
                     )
 
                 if options_to_add:
-                    curr_page = Menu_Page(options_to_add)
+                    curr_page = MenuPage(options_to_add)
                     ret_pages.append(curr_page)
 
         return ret_pages
 
     @classmethod
     def get_menu_page_list_test(
-                cls,
-                option_list,
-                max_options_per_page
-            ):
+            cls,
+            option_list,
+            max_options_per_page
+        ):
         ret_pages = []
 
-        if option_list and max_options_per_page and more_options_str:
+        if option_list and max_options_per_page:
             logger.debug(
                 ("Adding {0} options to page with max of {1}" \
                 + " options per page").format(
@@ -912,7 +1063,7 @@ class Menu_Display(Text_Display):
                     # Options will carry on to next page.
                     options_to_add = \
                         remaining_options[0:max_options_per_page - 1]
-                    options_to_add.append(more_options_str)
+                    options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
                     logger.debug(
                         ("Adding {0} options plus \"more options\" " \
                         + "to menu page: {1}").format(
@@ -928,7 +1079,7 @@ class Menu_Display(Text_Display):
                     )
 
                 if options_to_add:
-                    curr_page = Menu_Page(options_to_add)
+                    curr_page = MenuPage(options_to_add)
                     ret_pages.append(curr_page)
 
         return ret_pages
@@ -944,14 +1095,14 @@ class Menu_Display(Text_Display):
 
     # Does not update display.
     def blit_menu_page(
-                self,
-                surface,
-                menu_page,
-                curr_selected_index,
-                alternative_top_left=None,
-                horizontal_orientation=ORIENTATION_CENTERED,
-                vertical_orientation=ORIENTATION_CENTERED,
-            ):
+            self,
+            surface,
+            menu_page,
+            curr_selected_index,
+            alternative_top_left=None,
+            horizontal_orientation=ORIENTATION_CENTERED,
+            vertical_orientation=ORIENTATION_CENTERED,
+        ):
         if surface and menu_page and curr_selected_index >= 0:
             num_options = menu_page.get_num_options()
 
@@ -967,7 +1118,7 @@ class Menu_Display(Text_Display):
                 # Determine space to blit text.
                 target_rect = self.text_space_rect
                 if alternative_top_left:
-                    text_space_rect = pygame.rect(
+                    text_space_rect = pygame.Rect(
                         alternative_top_left[0] + self.horizontal_padding,
                         alternative_top_left[1] + self.vertical_padding,
                         self.text_space_horizontal,
@@ -978,8 +1129,8 @@ class Menu_Display(Text_Display):
                 vertical_offset = 0
                 if vertical_orientation == ORIENTATION_CENTERED:
                     vertical_offset = int(
-                            max(0, self.text_space_vertical - page_height) / 2
-                        )
+                        max(0, self.text_space_vertical - page_height) / 2
+                    )
                 elif vertical_orientation == ORIENTATION_TOP_JUSTIFIED:
                     vertical_offset = 0
                 elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
@@ -992,14 +1143,14 @@ class Menu_Display(Text_Display):
                 for index in range(num_options):
                     curr_option_id = menu_page.get_option_id(index)
                     curr_option = menuoptions.get_option_name(
-                            curr_option_id,
-                            language.Language.current_language_id
-                        )
+                        curr_option_id,
+                        language.Language.current_language_id
+                    )
 
                     # Get rendered text and dimensions.
                     rendered_text = self.get_rendered_menu_option_text(
-                            curr_option_id
-                        )
+                        curr_option_id
+                    )
 
                     if rendered_text:
                         rendered_text_dimensions = rendered_text.get_size()
@@ -1041,11 +1192,11 @@ class Menu_Display(Text_Display):
                                 # icon with the option.
                                 icon_top_left = (
                                     text_top_left[0] \
-                                        - self.selection_icon.get_width()
-                                        - SELECTION_ICON_HORIZ_SPACE,
+                                    - self.selection_icon.get_width()
+                                    - SELECTION_ICON_HORIZ_SPACE,
                                     text_top_left[1] \
-                                        + int(text_height / 2) \
-                                        - int(self.selection_icon.get_height() / 2)
+                                    + int(text_height / 2) \
+                                    - int(self.selection_icon.get_height() / 2)
                                 )
 
                                 surface.blit(
@@ -1057,27 +1208,29 @@ class Menu_Display(Text_Display):
                     vertical_offset += \
                         + int(self.spacing_factor_between_lines * text_height)
 
-class Item_Listing_Display(Display):
+class ItemListingDisplay(Display):
     def __init__(
-                self,
-                main_display_surface,
-                display_rect,
-                item_quantity_font_object,
-                background_image_path=None,
-                background_color=viewingdata.COLOR_WHITE,
-                item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
-                horizontal_padding=0,
-                vertical_padding=0,
-                item_icon_size=itemdata.ITEM_ICON_SIZE,
-                space_between_items=ITEM_VIEWING_PIXEL_SPACING,
-                continue_up_icon_image_path=None,
-                continue_down_icon_image_path=None,
-                selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
-            ):
+            self,
+            main_display_surface,
+            display_rect,
+            item_quantity_font_object,
+            background_pattern=None,
+            background_image_path=None,
+            background_color=viewingdata.COLOR_WHITE,
+            item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
+            horizontal_padding=0,
+            vertical_padding=0,
+            item_icon_size=itemdata.ITEM_ICON_SIZE,
+            space_between_items=ITEM_VIEWING_PIXEL_SPACING,
+            continue_up_icon_image_path=None,
+            continue_down_icon_image_path=None,
+            selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
+        ):
         Display.__init__(
             self,
             main_display_surface,
             display_rect,
+            background_pattern=background_pattern,
             background_image_path=background_image_path,
             background_color=background_color,
         )
@@ -1097,31 +1250,31 @@ class Item_Listing_Display(Display):
 
         if continue_up_icon_image_path:
             self.continue_up_icon = pygame.image.load(
-                    continue_up_icon_image_path
-                ).convert_alpha()
+                continue_up_icon_image_path
+            ).convert_alpha()
+
             continue_icon_width = max(
-                    continue_icon_width,
-                    self.continue_up_icon.get_width()
-                )
+                continue_icon_width,
+                self.continue_up_icon.get_width()
+            )
 
         if continue_down_icon_image_path:
             self.continue_down_icon = pygame.image.load(
-                    continue_down_icon_image_path
-                ).convert_alpha()
+                continue_down_icon_image_path
+            ).convert_alpha()
 
             continue_icon_width = max(
-                    continue_icon_width,
-                    self.continue_down_icon.get_width()
-                )
+                continue_icon_width,
+                self.continue_down_icon.get_width()
+            )
 
         self.item_viewing_top_left = (
-                # TODO space for the continue icon
-                self.display_rect.x \
-                    + 15 \
-                    + continue_icon_width \
-                    + 15,
-                self.display_rect.y + self.vertical_padding,
-            )
+            self.display_rect.x \
+                + 15 \
+                + continue_icon_width \
+                + 15,
+            self.display_rect.y + self.vertical_padding,
+        )
 
         self.item_viewing_space_horizontal = self.display_rect.right \
                                             - self.item_viewing_top_left[0] \
@@ -1142,7 +1295,7 @@ class Item_Listing_Display(Display):
 
         # Row, col dimensions.
         self.item_viewing_grid_dimensions = \
-            Item_Listing_Display.get_item_viewing_grid_dimensions(
+            ItemListingDisplay.get_item_viewing_grid_dimensions(
                 self.item_viewing_space_horizontal,
                 self.item_viewing_space_vertical,
                 item_icon_size=self.item_icon_size,
@@ -1167,8 +1320,8 @@ class Item_Listing_Display(Display):
         self.selection_image = None
         if selection_image_path:
             self.selection_image = pygame.image.load(
-                    selection_image_path
-                ).convert_alpha()
+                selection_image_path
+            ).convert_alpha()
 
         # Set up continue icon rects.
         self.continue_up_rect = None
@@ -1176,7 +1329,7 @@ class Item_Listing_Display(Display):
 
         if self.continue_up_icon:
             self.continue_up_rect = self.continue_up_icon.get_rect(
-                center=self.item_viewing_space_rect.center
+                center=required_item_space_rect.center
             )
 
             self.continue_up_rect.centery -= 40
@@ -1190,7 +1343,7 @@ class Item_Listing_Display(Display):
         # and the bottom of the self.display_rect
         if self.continue_down_icon:
             self.continue_down_rect = self.continue_down_icon.get_rect(
-                center=self.item_viewing_space_rect.center
+                center=required_item_space_rect.center
             )
 
             self.continue_down_rect.centery += 40
@@ -1202,13 +1355,13 @@ class Item_Listing_Display(Display):
 
     @classmethod
     def get_item_viewing_grid_dimensions(
-                cls,
-                horizontal_space,
-                vertical_space,
-                item_icon_size=itemdata.ITEM_ICON_SIZE,
-                space_between_items=ITEM_VIEWING_PIXEL_SPACING,
-            ):
-        dimensions = (0,0)
+            cls,
+            horizontal_space,
+            vertical_space,
+            item_icon_size=itemdata.ITEM_ICON_SIZE,
+            space_between_items=ITEM_VIEWING_PIXEL_SPACING,
+        ):
+        dimensions = (0, 0)
 
         if horizontal_space and vertical_space:
             # Let n be number of items in the row,
@@ -1245,21 +1398,21 @@ class Item_Listing_Display(Display):
     # first_viewable_row_index is the row index for the first row of items
     # to be visible in the viewing.
     def blit_item_listing(
-                self,
-                surface,
-                item_listing_data,
-                first_viewable_row_index,
-                selected_index,
-                preselected_index_list=[],
-                show_continue_icon=True,
-                alternative_top_left=None,
-            ):
+            self,
+            surface,
+            item_listing_data,
+            first_viewable_row_index,
+            selected_index,
+            preselected_index_list=None,
+            show_continue_icon=True,
+            alternative_top_left=None,
+        ):
         if surface and item_listing_data \
                 and selected_index >= 0 and first_viewable_row_index >= 0:
             item_space_rect = self.item_viewing_space_rect
 
             if alternative_top_left:
-                item_space_rect = pygame.rect(
+                item_space_rect = pygame.Rect(
                     alternative_top_left[0] + self.horizontal_padding,
                     alternative_top_left[1] + self.vertical_padding,
                     self.item_viewing_space_rect.width,
@@ -1283,9 +1436,9 @@ class Item_Listing_Display(Display):
             # Go until we run out of space or items.
             total_items = len(item_listing_data)
             last_index = min(
-                    starting_index + self.max_num_items - 1,
-                    total_items - 1
-                )
+                starting_index + self.max_num_items - 1,
+                total_items - 1
+            )
 
             curr_index = starting_index
             logger.info("Starting with item index {0}".format(curr_index))
@@ -1303,8 +1456,8 @@ class Item_Listing_Display(Display):
 
             while curr_index <= last_index:
                 curr_viewing_row = int(
-                        (curr_index - starting_index) / self.num_columns
-                    )
+                    (curr_index - starting_index) / self.num_columns
+                )
                 curr_viewing_col = \
                     (curr_index - starting_index) % self.num_columns
 
@@ -1343,15 +1496,16 @@ class Item_Listing_Display(Display):
 
                 # Blit item and quantity text if needed.
                 item_rect.topleft = (
-                        item_space_rect.x + horizontal_offset,
-                        item_space_rect.y + vertical_offset,
-                    )
+                    item_space_rect.x + horizontal_offset,
+                    item_space_rect.y + vertical_offset,
+                )
 
                 # Check if this is the selected icon. If so,
                 # blit the selection background.
                 if ((selected_index == curr_index) \
-                    or (selected_index in preselected_index_list)) \
-                        and self.selection_image:
+                    or (preselected_index_list is not None \
+                        and selected_index in preselected_index_list)) \
+                    and self.selection_image:
                     # Center on the item icon.
                     select_image_rect = self.selection_image.get_rect(
                         center=item_rect.center
@@ -1378,14 +1532,15 @@ class Item_Listing_Display(Display):
                 curr_index += 1
 
             # Blit the up and down arrows if there are items above/below.
-            if (starting_index >= self.num_columns):
+            if (starting_index >= self.num_columns) and show_continue_icon:
                 # We have at least 1 row above us.
                 surface.blit(
                     self.continue_up_icon,
                     self.continue_up_rect
                 )
 
-            if (total_items - starting_index) > self.max_num_items:
+            if ((total_items - starting_index) > self.max_num_items) \
+                and show_continue_icon:
                 # We have items after us.
                 surface.blit(
                     self.continue_down_icon,

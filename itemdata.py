@@ -250,7 +250,7 @@ STANDARD_ITEM_DATA = {
         PROPERTIES_FIELD: STACKABLE_F,
         ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
         IMAGE_PATH_DICT_FIELD: {
-
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.SILVER_COINS_ICON_PATH,
         },
     },
     CURRENCY_TRADING_STICKS_ID: {
@@ -337,6 +337,31 @@ STANDARD_ITEM_DATA = {
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
         ITEM_OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_LOG_OPTION_ID_LIST,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.LOG_OAK_ICON_PATH,
+        },
+    },
+    LOG_WILLOW_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "WILLOW LOG",
+            language.LANG_ESPANOL: "LENA DE SAUCE",
+        },
+        BASE_VALUE_LOW_FIELD: 15,
+        BASE_VALUE_HIGH_FIELD: 30,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Some willow logs.",
+            language.LANG_ESPANOL: "Lena de un sauce.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to make a fire or for crafting.",
+            language.LANG_ESPANOL: "Puede servir para una fogata o para la artesania.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        ITEM_OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_LOG_OPTION_ID_LIST,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.LOG_WILLOW_ICON_PATH,
+        },
     },
 }
 

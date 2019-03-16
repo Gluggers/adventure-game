@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Contains functions and constants for Tile objects."""
+
 import logging
 import pygame
 import imagepaths
@@ -7,10 +10,12 @@ import tiledata
 TILE_SIZE = 32
 TILE_CLASS = 'Tile'
 
-class Tile:
+LOGGER = None
+
+class Tile(object):
     """A class used to represent map tiles for the overworld.
 
-    Each Tile ID as defined in tiledata should map to a single Tile object
+    Each Tile ID as defined in tiledata.py should map to a single Tile object
     that should not change.
 
     To create Tiles at the initial game loading, call the class method
@@ -30,12 +35,12 @@ class Tile:
     tile_listing = {}
 
     def __init__(
-                self,
-                tile_id,
-                image_path=imagepaths.TILE_DEFAULT_PATH,
-                allowed_transport=tiledata.DEFAULT_TRANSPORTATION,
-            ):
-        """Create and return a Tile object.
+            self,
+            tile_id,
+            image_path=imagepaths.TILE_DEFAULT_PATH,
+            allowed_transport=tiledata.DEFAULT_TRANSPORTATION,
+        ):
+        """Creates and returns a Tile object.
 
         Args:
             tile_id: integer representing the unique ID number of the
@@ -60,60 +65,55 @@ class Tile:
                 bitwise ORed flags, such as WALKABLE_F | CANOEABLE_F.
                 The default value is WALKABLE_F | FLYABLE_F.
         """
-
         # Each tile_id should map to a distinct Tile.
-        self.tile_id = tile_id
+        self._tile_id = tile_id
 
         # Represents the base terrain image (e.g. grass, water).
-        logger.debug("Loading tile image from path {0}".format(image_path))
         self._image = pygame.image.load(image_path).convert_alpha()
 
         self._allowed_transport = allowed_transport
 
     @property
+    def tile_id(self):
+        """Returns tile ID number for Tile."""
+        return self._tile_id
+
+    @property
     def image(self):
-        """Return Tile image."""
+        """Returns Tile image."""
         return self._image
-
-    @image.setter
-    def image(self, value):
-        """Set Tile image."""
-        self._image = value
-
-    @image.deleter
-    def image(self):
-        """Delete Tile image."""
-        del self._image
 
     @property
     def allowed_transport(self):
-        """Return the allowed transportation for the Tile."""
+        """Returns the allowed transportation for the Tile."""
         return self._allowed_transport
 
-    @allowed_transport.setter
-    def allowed_transport(self, value):
-        """Set the allowed transportation for the Tile."""
-        self._allowed_transport = value
-
-    @allowed_transport.deleter
-    def allowed_transport(self):
-        """Delete the allowed transportation for the Tile."""
-        del self._allowed_transport
-
     def valid_transportation(self, transportation_flag):
-        """Checks if the transportation method is allowed."""
+        """Checks if the transportation method is allowed.
 
-        if transportation_flag & self._allowed_transport:
-            return True
-        else:
-            return False
+        Args:
+            self: calling object.
+            transportation_flag: integer flag representing the
+                transportation method to check.
+
+        Returns:
+            True if the transportation method is allowed for the calling
+            Tile, False otherwise.
+        """
+        return bool(transportation_flag & self._allowed_transport) \
+            or (transportation_flag == self._allowed_transport)
 
     def blit_onto_surface(self, surface, top_left_pixel_tuple):
-        """Blit Tile at the provided top left pixel.
+        """Blits Tile at the provided top left pixel.
 
         Does not update the surface display - caller will have to do that.
-        """
 
+        Args:
+            self: calling object.
+            surface: pygame Surface object to blit the Tile onto.
+            top_left_pixel_tuple: tuple containing the x,y pixel coordinates
+                to place the top left corner of the Tile.
+        """
         if self and surface and top_left_pixel_tuple:
             surface.blit(self._image, top_left_pixel_tuple)
 
@@ -125,8 +125,15 @@ class Tile:
         class tile listing if a new valid tile was created.
         If the corresponding tile already exists, the method
         will simply return the original Tile rather than creating a new one.
-        """
 
+        Args:
+            cls: calling Class.
+            tile_id: Tile ID number corresponding to the Tile to create.
+
+        Returns:
+            Tile object for the corresponding Tile ID.
+            Returns None if something went wrong.
+        """
         ret_tile = None
 
         # Check if the corresponding Tile has already been made.
@@ -137,7 +144,7 @@ class Tile:
         else:
             # We need to make Tile. Grab tile data.
             ret_tile_data = tiledata.TILE_DATA.get(tile_id, None)
-            if (ret_tile_data):
+            if ret_tile_data:
                 tile_image_path = ret_tile_data.get(
                     tiledata.TILE_IMAGE_PATH_FIELD,
                     imagepaths.TILE_DEFAULT_PATH
@@ -154,22 +161,30 @@ class Tile:
                     allowed_transport=tile_transport_flag,
                 )
 
-                # Add tile to the class tile listing.
+                # Record the Tile in the class listing.
                 if ret_tile:
                     Tile.tile_listing[tile_id] = ret_tile
                 else:
-                    logger.warn("Could not get tile for id {0}".format(tile_id))
+                    LOGGER.warn("Could not get tile for id %d.", tile_id)
 
         return ret_tile
 
     @classmethod
     def get_tile(cls, tile_id):
-        """Get the Tile corresponding to the given ID.
+        """Gets the Tile corresponding to the given ID.
 
-        Get the Tile corresponding to the given ID. Returns None if such
+        Gets the Tile corresponding to the given ID. Returns None if such
         a tile does not exist.
 
         Does not create a new Tile. Use Tile.tile_factory to create a Tile.
+
+        Args:
+            cls: calling Class.
+            tile_id: Tile ID number for the Tile to fetch.
+
+        Returns:
+            Tile object for the corresponding Tile ID.
+            Returns None if something went wrong.
         """
 
         return Tile.tile_listing.get(tile_id, None)
@@ -182,13 +197,13 @@ class Tile:
         to the tile listing.
         """
 
-        logger.debug("Building tiles")
+        LOGGER.debug("Building tiles")
 
         for tile_id in tiledata.TILE_DATA:
             if not Tile.tile_factory(tile_id):
-                logger.error("Could not construct tile with ID {0}".format(tile_id))
+                LOGGER.error("Could not construct tile with ID %d", tile_id)
 
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
