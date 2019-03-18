@@ -1556,7 +1556,7 @@ class ItemListingDisplay(Display):
                 alternative_top_left=alternative_top_left,
             )
 
-            logger.info("Item space top left: {0}".format(
+            logger.debug("Item space top left: {0}".format(
                 item_space_rect.topleft
             ))
 
@@ -1572,7 +1572,7 @@ class ItemListingDisplay(Display):
             )
 
             curr_index = starting_index
-            logger.info("Starting with item index {0}".format(curr_index))
+            logger.debug("Starting with item index {0}".format(curr_index))
 
             horizontal_offset = 0
             vertical_offset = 0
@@ -1607,7 +1607,7 @@ class ItemListingDisplay(Display):
                 item_image = curr_item.get_icon()
 
 
-                logger.info("Curr item {0} x{1} at {2}".format(
+                logger.debug("Curr item {0} x{1} at {2}".format(
                     item_name,
                     item_quantity,
                     (curr_viewing_row, curr_viewing_col)

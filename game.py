@@ -107,8 +107,8 @@ class Game():
         self.inventory_viewing = \
             viewing.Inventory_Viewing.create_inventory_viewing(
                 self.main_display_screen,
-                #background_image_path=imagepaths.INVENTORY_BACKGROUND_PATH,
-                background_color=viewingdata.COLOR_BLACK,
+                background_pattern=display.PATTERN_1_ID,
+                bottom_text=None,
             )
 
     def set_protagonist_tile_position(self, new_position):
@@ -354,6 +354,8 @@ class Game():
             target_entity.inventory.print_self()
 
             if self.inventory_viewing:
+                self.inventory_viewing.blit_background()
+
                 self.inventory_viewing.handle_item_listing(
                     self.protagonist.inventory
                 )

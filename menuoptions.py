@@ -15,6 +15,8 @@ SAVE_GAME_OPTION_ID = 0x16
 LOAD_GAME_OPTION_ID = 0x17
 QUIT_GAME_OPTION_ID = 0x18
 CHARACTER_OPTION_ID = 0x19
+SPELLS_OPTION_ID = 0x1A
+TOOLS_OPTION_ID = 0x1B
 
 # ITEM OPTION IDS FOR INVENTORY
 #USE_OPTION_ID = 0x30 # For using an item with another.
@@ -81,6 +83,14 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Character",
         language.LANG_ESPANOL: "Caracter",
     },
+    SPELLS_OPTION_ID: {
+        language.LANG_ENGLISH: "Spells",
+        language.LANG_ESPANOL: "Hechizos",
+    },
+    TOOLS_OPTION_ID: {
+        language.LANG_ENGLISH: "Tools",
+        language.LANG_ESPANOL: "Herramientas",
+    },
     MORE_OPTIONS_OPTION_ID: {
         language.LANG_ENGLISH: "More Options...",
         language.LANG_ESPANOL: "Mas Opciones...",
@@ -136,6 +146,8 @@ OVERWORLD_MENU_OPTION_IDS = [
     INVENTORY_OPTION_ID,
     EQUIPMENT_OPTION_ID,
     STATS_OPTION_ID,
+    SPELLS_OPTION_ID,
+    TOOLS_OPTION_ID,
     QUESTS_OPTION_ID,
     CONFIGURATION_OPTION_ID,
     CHARACTER_OPTION_ID,

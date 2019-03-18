@@ -13,6 +13,7 @@ INVENTORY_ITEM_DESCRIPTION_FONT_ID = 0x12
 INVENTORY_ITEM_DESCRIPTION_QUANTITY_FONT_ID = 0x13
 INVENTORY_ITEM_ICON_QUANTITY_FONT_ID = 0x14
 INVENTORY_ITEM_MENU_FONT_ID = 0x15
+INVENTORY_BOTTOM_TEXT_FONT_ID = 0x16
 
 ### FONT INFO FIELDS ###
 FONT_SIZE_FIELD = 0x1
@@ -22,53 +23,47 @@ FONT_PATH_FIELD = 0x2
 FONT_INFO = {
     DEFAULT_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/liberation/" \
-                            + "LiberationSerif-Regular.ttf",
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
     },
     OW_HEALTH_DISPLAY_FONT_ID: {
         FONT_SIZE_FIELD: 18,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     OW_BOTTOM_TEXT_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     OW_SIDE_MENU_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_TOP_DISPLAY_FONT_ID: {
         FONT_SIZE_FIELD: 22,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_ITEM_NAME_FONT_ID: {
         FONT_SIZE_FIELD: 22,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_ITEM_DESCRIPTION_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_ITEM_DESCRIPTION_QUANTITY_FONT_ID: {
         FONT_SIZE_FIELD: 18,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_ITEM_ICON_QUANTITY_FONT_ID: {
         FONT_SIZE_FIELD: 11,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     INVENTORY_ITEM_MENU_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/" \
-                            + "DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    },
+    INVENTORY_BOTTOM_TEXT_FONT_ID: {
+        FONT_SIZE_FIELD: 16,
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
 }
 

@@ -466,6 +466,7 @@ class Overworld_Viewing(Viewing):
                 main_display_surface,
                 protagonist=None,
                 curr_map=None,
+                background_pattern=display.PATTERN_1_ID,
             ):
         Viewing.__init__(
             self,
@@ -474,6 +475,7 @@ class Overworld_Viewing(Viewing):
 
         self._protagonist = protagonist
         self.curr_map = curr_map
+        self.background_pattern = background_pattern
 
         self.top_display = None
         self.bottom_text_display = None
@@ -490,7 +492,7 @@ class Overworld_Viewing(Viewing):
                 self.main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
-                background_pattern=display.PATTERN_1_ID,
+                background_pattern=self.background_pattern,
                 #background_color=viewingdata.COLOR_WHITE,
                 #background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
                 horizontal_padding=6,
@@ -515,7 +517,7 @@ class Overworld_Viewing(Viewing):
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
-                background_pattern=display.PATTERN_1_ID,
+                background_pattern=self.background_pattern,
                 #background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
                 horizontal_padding=viewingdata.TEXT_DISPLAY_HORIZONTAL_PADDING,
@@ -540,7 +542,7 @@ class Overworld_Viewing(Viewing):
                 font_obj,
                 #background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 #background_color=viewingdata.COLOR_WHITE,
-                background_pattern=display.PATTERN_1_ID,
+                background_pattern=self.background_pattern,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
                 horizontal_padding=viewingdata.OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.OW_SIDE_MENU_VERTICAL_PADDING,
@@ -1048,6 +1050,7 @@ class Inventory_Viewing(Viewing):
                 main_display_surface,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
+                background_pattern=display.PATTERN_1_ID,
                 bottom_text=None,
                 item_option_restrictions=None,
                 item_icon_size=itemdata.ITEM_ICON_SIZE,
@@ -1060,12 +1063,16 @@ class Inventory_Viewing(Viewing):
 
         self.background_image = None
         self.background_color = background_color
+        self.background_pattern = background_pattern
 
         self.display_rect = viewingdata.INVENTORY_BASIC_VIEWING_RECT
         self.item_icon_size = item_icon_size
         self.enlarged_icon_size = 2 * self.item_icon_size
         self.bottom_text = bottom_text
-        self.item_option_restrictions = item_option_restrictions
+        self.item_option_restrictions = []
+        if item_option_restrictions:
+            for restricted_option in item_option_restrictions:
+                self.item_option_restrictions.append(restricted_option)
 
         self.enlarged_selection_background = None
         if enlarged_selection_background_path:
@@ -1105,10 +1112,11 @@ class Inventory_Viewing(Viewing):
         bottom_text_height = 0
 
         self.bottom_text_rect = None
+        self.bottom_text_display = None
 
         if self.bottom_text:
             # Make room for bottom text.
-            bottom_text_height = int(self.display_rect.height / 3) \
+            bottom_text_height = int(self.display_rect.height / 4) \
                                 - viewingdata.INVENTORY_IN_BETWEEN_PADDING
             item_listing_height -= (
                     bottom_text_height \
@@ -1146,7 +1154,7 @@ class Inventory_Viewing(Viewing):
         self.item_details_side_display = display.Display(
             self.main_display_surface,
             self.item_details_rect,
-            background_pattern = display.PATTERN_1_ID,
+            background_pattern=self.background_pattern,
         )
 
         # Will display item name of selected item.
@@ -1195,10 +1203,12 @@ class Inventory_Viewing(Viewing):
         self.item_option_menu_rect = pygame.Rect(
             self.item_details_rect.x,
             self.item_enlarged_rect.bottom + 15,
-            self.item_details_rect.width,
+            self.item_details_rect.width - 30,
             self.item_details_rect.bottom \
-                - (self.item_enlarged_rect.bottom + 15)
+                - (self.item_enlarged_rect.bottom + 15) \
+                - 30
         )
+        self.item_option_menu_rect.center = self.item_description_rect.center
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_inventory_label_display(self):
@@ -1213,7 +1223,7 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 #background_image_path=imagepaths.INVENTORY_BASIC_TITLE_BACKGROUND_PATH,
-                background_pattern=display.PATTERN_1_ID,
+                background_pattern=self.background_pattern,
                 background_image_path=None,
                 horizontal_padding=0,
                 vertical_padding=0,
@@ -1248,7 +1258,7 @@ class Inventory_Viewing(Viewing):
                 self.item_listing_rect,
                 font_obj,
                 #background_image_path=background_path,
-                background_pattern=display.PATTERN_1_ID,
+                background_pattern=self.background_pattern,
                 background_image_path=None,
                 background_color=None,
                 item_quantity_font_color=viewingdata.COLOR_WHITE,
@@ -1344,9 +1354,59 @@ class Inventory_Viewing(Viewing):
             logger.error("Display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
-    # TODO
+
+    def create_item_options_display(self):
+        logger.info("Creating inventory item options display...")
+        font_obj = display.Display.get_font(
+                fontinfo.INVENTORY_ITEM_MENU_FONT_ID
+            )
+        if font_obj:
+            self.item_option_menu_display = display.Menu_Display(
+                self.main_display_surface,
+                self.item_option_menu_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=self.background_pattern,
+                horizontal_padding=20,
+                vertical_padding=20,
+            )
+
+            if self.item_option_menu_display:
+                self.displays[viewingdata.INVENTORY_ITEM_OPTIONS_DISPLAY_ID] \
+                    = self.item_option_menu_display
+            else:
+                logger.error("Failed to make inventory item options display")
+        else:
+            logger.error("Display font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
     def create_bottom_text_display(self):
-        pass
+        if self.bottom_text and self.bottom_text_rect:
+            logger.info("Creating inventory bottom text display...")
+            font_obj = display.Display.get_font(
+                    fontinfo.INVENTORY_BOTTOM_TEXT_FONT_ID
+                )
+            if font_obj:
+                self.bottom_text_display = display.Text_Display(
+                    self.main_display_surface,
+                    self.bottom_text_rect,
+                    font_obj,
+                    background_color=None,
+                    background_image_path=None,
+                    background_pattern=self.background_pattern,
+                    horizontal_padding=20,
+                    vertical_padding=20,
+                )
+
+                if self.bottom_text_display:
+                    self.displays[viewingdata.INVENTORY_BOTTOM_TEXT_DISPLAY_ID] \
+                        = self.bottom_text_display
+                else:
+                    logger.error("Failed to make inventory bottom text display")
+            else:
+                logger.error("Display font not found.")
+                logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
@@ -1355,9 +1415,8 @@ class Inventory_Viewing(Viewing):
         self.create_item_name_display()
         self.create_item_quantity_display()
         self.create_item_description_display()
+        self.create_item_options_display()
         self.create_bottom_text_display()
-
-        pass
 
     # Refreshes self. Does not update display.
     def refresh_self(self):
@@ -1412,7 +1471,16 @@ class Inventory_Viewing(Viewing):
                     refresh_after=False,
                 )
 
-        # TODO handle bottom text display
+        # Handle bottom text display.
+        if self.bottom_text_display:
+            self.display_text_display_first_page(
+                self.bottom_text_display,
+                self.bottom_text,
+                advance_delay_ms=0,
+                auto_advance=True,
+                refresh_during=False,
+                refresh_after=False,
+            )
 
     # Does not update display.
     # This method should be called before calling display_
@@ -1501,18 +1569,44 @@ class Inventory_Viewing(Viewing):
         self.blit_selected_object_description(selected_obj)
 
     # TODO figure out and change
-    def blit_selected_object_options(
-                self,
-                selected_obj,
-                option_list,
-                curr_selected_option_index):
+    def display_selected_object_options(
+            self,
+            selected_obj,
+            quantity,
+            #option_list,
+            #curr_selected_option_index
+        ):
+        ret_option = None
+
         self.blit_selected_object_name(selected_obj)
         self.blit_selected_object_quantity(quantity)
         self.blit_selected_object_enlarged_icon(selected_obj)
 
+        # Get valid options.
+        option_list = selected_obj.item_menu_option_ids
+        options_to_show = []
+        for option in option_list:
+            if option not in self.item_option_restrictions:
+                options_to_show.append(option)
+
+        if options_to_show:
+            ret_option = self.display_menu_display(
+                self.item_option_menu_display,
+                options_to_show,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                refresh_during=False,
+                refresh_after=False,
+                alternative_top_left=None,
+            )
+
+        return ret_option
+
     # Handles displaying the item listing and returns
     # the selected option and item index as a tuple
-    # (None is option is selected).
+    # (None if no option is selected).
     def handle_item_listing(
                 self,
                 inventory_obj,
@@ -1521,8 +1615,6 @@ class Inventory_Viewing(Viewing):
             ):
         ret_info = None
         max_index = inventory_obj.get_last_index()
-
-        self.blit_background()
 
         if inventory_obj:
             # Start with the first item.
@@ -1561,7 +1653,7 @@ class Inventory_Viewing(Viewing):
                             + 1
                         )
 
-                logger.info("Curr row index {0}. First viewable: {1}. Last viewable: {2}".format(
+                logger.debug("Curr row index {0}. First viewable: {1}. Last viewable: {2}".format(
                     curr_selected_row,
                     first_viewable_row_index,
                     last_viewable_row_index
@@ -1660,7 +1752,7 @@ class Inventory_Viewing(Viewing):
                                 received_input = True
 
                 if received_input:
-                    new_index = None
+                    new_index = curr_index
                     if go_down:
                         new_index = min(
                             max_index,
@@ -1681,6 +1773,24 @@ class Inventory_Viewing(Viewing):
                             0,
                             curr_index - 1
                         )
+                    elif open_options:
+                        # Show item options.
+                        self.refresh_and_blit_self_no_background()
+                        ret_option = self.display_selected_object_options(
+                            curr_obj,
+                            curr_quantity,
+                        )
+
+                        if ret_option:
+                            done = True
+                            ret_info = (ret_option, curr_index)
+                        else:
+                            self.refresh_and_blit_self_no_background()
+                            self.blit_selected_object_details(
+                                curr_obj,
+                                curr_quantity,
+                            )
+                            pygame.display.update()
 
                     if new_index != curr_index:
                         changed_index = True
@@ -1691,14 +1801,17 @@ class Inventory_Viewing(Viewing):
                     logger.info("Curr index now: {0}".format(curr_index))
                     # TODO rest
 
+        logger.info("Returning inventory selection: {0}".format(ret_info))
         return ret_info
 
     @classmethod
     def create_inventory_viewing(
                 cls,
                 main_display_surface,
+                bottom_text=None,
                 background_image_path=None,
                 background_color=viewingdata.COLOR_BLACK,
+                background_pattern=display.PATTERN_1_ID,
             ):
         ret_viewing = None
 
@@ -1707,6 +1820,8 @@ class Inventory_Viewing(Viewing):
                 main_display_surface,
                 background_image_path=background_image_path,
                 background_color=background_color,
+                background_pattern=background_pattern,
+                bottom_text=bottom_text,
             )
 
             # Create displays for viewing.
