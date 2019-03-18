@@ -34,6 +34,15 @@ ORIENTATION_RIGHT_JUSTIFIED = 0x3
 ORIENTATION_TOP_JUSTIFIED = 0x4
 ORIENTATION_BOTTOM_JUSTIFIED = 0x5
 
+### PATTERN ID NUMBERS ###
+PATTERN_DEFAULT_ID = 0x1
+PATTERN_1_ID = 0x2
+
+NW_CORNER_ID = 0x1
+NE_CORNER_ID = 0x2
+SE_CORNER_ID = 0x3
+SW_CORNER_ID = 0x4
+
 # TODO - just have pages be lists of the rendered texts...
 
 class TextPage(object):
@@ -127,6 +136,9 @@ class Display(object):
     # Will contain loaded fonts.
     font_listing = {}
 
+    # Maps pattern IDs to dicts that map pattern portion IDs to images.
+    pattern_data = {}
+
     def __init__(
             self,
             main_display_surface,
@@ -164,19 +176,10 @@ class Display(object):
         self.display_rect = display_rect
         self.background_color = background_color
         self.background_pattern_id = background_pattern
+        self.background_image_path = background_image_path
 
         self.background_image = None
-        if background_image_path:
-            # Load image if path is provided.
-            self.background_image = pygame.image.load(
-                background_image_path
-            ).convert_alpha()
-
-        # TODO handle background pattern.
-        self.fixed_background_pattern = None
-
-        if self.background_pattern_id is not None:
-            pass
+        self.get_background_image()
 
     # Does not update display, caller must do that.
     def blit_background(
@@ -227,7 +230,7 @@ class Display(object):
                 target_rect.height = alternative_height
 
             # Blit the background image/default fill color.
-            # TODO handle background.
+            # TODO handle background pattern.
             if self.background_image:
                 surface.blit(
                     self.background_image,
@@ -240,12 +243,129 @@ class Display(object):
                     target_rect,
                 )
 
-    @classmethod
-    def blit_background_pattern(cls, surface, target_rect, pattern_id):
-        """Blits background pattern onto target rect for surface."""
-        if surface and target_rect and pattern_id is not None:
-            # TODO
-            pass
+    def get_background_image(self):
+        """Builds background image for display object."""
+        background = pygame.Surface(
+            (self.display_rect.width,
+            self.display_rect.height),
+            flags=pygame.SRCALPHA,
+            depth=32,
+        ).convert_alpha()
+
+        if self.background_pattern_id is not None:
+            if self.background_pattern_id == PATTERN_DEFAULT_ID:
+                background.fill(viewingdata.COLOR_WHITE)
+            elif self.background_pattern_id == PATTERN_1_ID:
+                # Add pattern 1 corners.
+                nw_corner = Display.pattern_data.get(
+                    PATTERN_1_ID,
+                    {}
+                ).get(
+                    NW_CORNER_ID,
+                    None
+                )
+                ne_corner = Display.pattern_data.get(
+                    PATTERN_1_ID,
+                    {}
+                ).get(
+                    NE_CORNER_ID,
+                    None
+                )
+                se_corner = Display.pattern_data.get(
+                    PATTERN_1_ID,
+                    {}
+                ).get(
+                    SE_CORNER_ID,
+                    None
+                )
+                sw_corner = Display.pattern_data.get(
+                    PATTERN_1_ID,
+                    {}
+                ).get(
+                    SW_CORNER_ID,
+                    None
+                )
+
+                first_rect = pygame.Rect(
+                    3,
+                    3,
+                    self.display_rect.width - 6,
+                    self.display_rect.height - 6
+                )
+
+                second_rect = pygame.Rect(
+                    5,
+                    5,
+                    self.display_rect.width - 10,
+                    self.display_rect.height - 10
+                )
+
+                third_rect = pygame.Rect(
+                    9,
+                    9,
+                    self.display_rect.width - 18,
+                    self.display_rect.height - 18
+                )
+
+                background.fill(
+                    (0x68, 0x30, 0x03),
+                    rect=first_rect,
+                )
+                background.fill(
+                    (0xa2, 0x4d, 0x08),
+                    rect=second_rect
+                )
+                background.fill(
+                    (0xef, 0x87, 0x33),
+                    rect=third_rect
+                )
+
+                if nw_corner:
+                    result = background.blit(
+                        nw_corner,
+                        (0, 0)
+                    )
+                    logger.info(result)
+                else:
+                    logger.warn("No NW Corner for pattern 1.")
+
+                if ne_corner:
+                    result = background.blit(
+                        ne_corner,
+                        (background.get_width() - ne_corner.get_width(), 0)
+                    )
+                    logger.info(result)
+                else:
+                    logger.warn("No NE Corner for pattern 1.")
+
+                if se_corner:
+                    result = background.blit(
+                        se_corner,
+                        (background.get_width() - se_corner.get_width(),
+                        background.get_height() - se_corner.get_height())
+                    )
+                    logger.info(result)
+                else:
+                    logger.warn("No SE Corner for pattern 1.")
+
+                if sw_corner:
+                    result = background.blit(
+                        sw_corner,
+                        (0,
+                        background.get_height() - sw_corner.get_height())
+                    )
+                    logger.info(result)
+                else:
+                    logger.warn("No SW Corner for pattern 1.")
+        elif self.background_image_path:
+            # Load image if path is provided.
+            background = pygame.image.load(
+                self.background_image_path
+            ).convert_alpha()
+        elif self.background_color:
+            background.fill(self.background_color)
+
+        self.background_image = background
 
     @classmethod
     def get_abbreviated_quantity(cls, quantity):
@@ -286,6 +406,22 @@ class Display(object):
         return ret_string
 
     @classmethod
+    def init_background_patterns(cls):
+        cls.pattern_data[PATTERN_1_ID] = {}
+        cls.pattern_data[PATTERN_1_ID][NW_CORNER_ID] = pygame.image.load(
+            imagepaths.PATTERN_1_CORNER_NW_PATH
+        ).convert_alpha()
+        cls.pattern_data[PATTERN_1_ID][NE_CORNER_ID] = pygame.image.load(
+            imagepaths.PATTERN_1_CORNER_NE_PATH
+        ).convert_alpha()
+        cls.pattern_data[PATTERN_1_ID][SE_CORNER_ID] = pygame.image.load(
+            imagepaths.PATTERN_1_CORNER_SE_PATH
+        ).convert_alpha()
+        cls.pattern_data[PATTERN_1_ID][SW_CORNER_ID] = pygame.image.load(
+            imagepaths.PATTERN_1_CORNER_SW_PATH
+        ).convert_alpha()
+
+    @classmethod
     def add_font_to_listing(cls, font_id, font_obj):
         if font_obj and (font_id is not None):
             cls.font_listing[font_id] = font_obj
@@ -293,13 +429,6 @@ class Display(object):
     @classmethod
     def get_font(cls, font_id):
         return cls.font_listing.get(font_id, None)
-
-    @classmethod
-    def init_background_patterns(cls):
-        """Initializes the background patterns for displays."""
-
-        # TODO.
-        pass
 
     @classmethod
     def init_fonts(cls):
@@ -400,12 +529,14 @@ class Text_Display(Display):
         )
 
         # Define background image if possible.
+        """
         self.background_image = None
         if background_image_path:
             # Load image if path is provided.
             self.background_image = pygame.image.load(
                 background_image_path
             ).convert_alpha()
+        """
 
         # Define continuation icon if possible.
         self.continue_icon = None

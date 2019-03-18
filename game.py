@@ -38,24 +38,17 @@ DEFAULT_SAVE_FILE_NAME = "savegame.pkl"
 class Game():
     def __init__(
                 self,
-                game_name,
+                display_surface,
                 game_language=language.DEFAULT_LANGUAGE,
             ):
-        if game_name and game_name:
+        if display_surface:
             # will change as game progresses
             self.protagonist = None
             self.curr_map = None
             language.Language.set_current_language_id(game_language)
 
             # create main display screen
-            self.main_display_screen = pygame.display.set_mode(
-                (
-                    viewingdata.MAIN_DISPLAY_WIDTH,
-                    viewingdata.MAIN_DISPLAY_HEIGHT
-                )
-            )
-
-            pygame.display.set_caption(game_name)
+            self.main_display_screen = display_surface
 
             # create initial viewing object
             self.overworld_viewing = \
@@ -114,7 +107,7 @@ class Game():
         self.inventory_viewing = \
             viewing.Inventory_Viewing.create_inventory_viewing(
                 self.main_display_screen,
-                background_image_path=imagepaths.INVENTORY_BACKGROUND_PATH,
+                #background_image_path=imagepaths.INVENTORY_BACKGROUND_PATH,
                 background_color=viewingdata.COLOR_BLACK,
             )
 
@@ -699,7 +692,11 @@ class Game():
                         self.load_game()
                     elif events.key == pygame.K_1:
                         # Testing inventory.
-                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_TREE_ID, 10)
+                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_TREE_ID, 2)
+                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_OAK_ID, 2)
+                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_WILLOW_ID, 2)
+                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_MAPLE_ID, 2)
+                        self.protagonist.inventory.add_item_by_id(itemdata.CURRENCY_SILVER_COIN_ID, 500)
                     elif events.key == pygame.K_2:
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
@@ -712,6 +709,17 @@ class Game():
                             itemdata.CURRENCY_GOLD_COIN_ID,
                             curr_money,
                         )
+                    elif events.key == pygame.K_4:
+                        # Testing stuff.
+                        test_display = display.Display(
+                            self.main_display_screen,
+                            pygame.Rect(100, 100, 50, 150),
+                            background_pattern=display.PATTERN_1_ID
+                        )
+                        test_display.blit_background(
+                            self.main_display_screen
+                        )
+                        pygame.display.update()
                     elif events.key == pygame.K_t:
                         # Testing stuff.
                         logger.info("Testing.")

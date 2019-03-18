@@ -34,8 +34,15 @@ def main():
     # init clock
     timekeeper.Timekeeper.init_clock()
 
-    # init locked logging
-    #lockedlogging.Locked_Logger.init_locked_loggers()
+    game_name = game.GAME_TITLE
+    game_surface = pygame.display.set_mode(
+        (
+            viewingdata.MAIN_DISPLAY_WIDTH,
+            viewingdata.MAIN_DISPLAY_HEIGHT
+        )
+    )
+
+    pygame.display.set_caption(game_name)
 
     # init interactions
     interaction.Interaction.init_interactions()
@@ -48,7 +55,8 @@ def main():
     #spawnhandler.Spawn_Handler.init_spawn_queues()
 
     # create game
-    game_obj = game.Game(game.GAME_TITLE, language.LANG_ESPANOL)
+    game_obj = game.Game(game_surface, game_language=language.LANG_ESPANOL)
+
 
     # load tiles
     tile.Tile.build_tiles()

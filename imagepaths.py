@@ -15,6 +15,7 @@ INTER_OBJ_PATH = IMAGE_HOME_PATH + "interactive_objects/"
 CHARACTER_PATH = IMAGE_HOME_PATH + "characters/"
 PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
 DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
+DISPLAY_PATTERN_PATH = DISPLAY_PATH + "patterns/"
 ITEMS_PATH = IMAGE_HOME_PATH + "items/"
 
 ### DISPLAY IMAGE PATHS ###
@@ -51,6 +52,16 @@ ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
 ITEM_LISTING_CONT_DOWN_PATH = DISPLAY_PATH \
                         + "item_listing_continue_down_icon_30x30_dk.png" # [0]
 
+### DISPLAY PATTERN PATHS ###
+PATTERN_1_CORNER_NW_PATH = DISPLAY_PATTERN_PATH \
+                        + "background_1_corner_nw_11x11_dk.png" # [0]
+PATTERN_1_CORNER_NE_PATH = DISPLAY_PATTERN_PATH \
+                        + "background_1_corner_ne_11x11_dk.png" # [0]
+PATTERN_1_CORNER_SE_PATH = DISPLAY_PATTERN_PATH \
+                        + "background_1_corner_se_11x11_dk.png" # [0]
+PATTERN_1_CORNER_SW_PATH = DISPLAY_PATTERN_PATH \
+                        + "background_1_corner_sw_11x11_dk.png" # [0]
+
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_32x32_dk.png" # [0]
 TILE_GRASS_PLAIN_PATH = TILE_IMAGE_PATH + "tile_grass_plain_32x32_dk.png" # [0]
@@ -78,6 +89,7 @@ SILVER_COINS_ICON_PATH = ITEMS_PATH + "silver_coins_icon_50x50_dk.png" # [0]
 LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 LOG_OAK_ICON_PATH = ITEMS_PATH + "log_oak_icon_50x50_dk.png" # [0]
 LOG_WILLOW_ICON_PATH = ITEMS_PATH + "log_willow_icon_50x50_dk.png" # [0]
+LOG_MAPLE_ICON_PATH = ITEMS_PATH + "log_maple_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

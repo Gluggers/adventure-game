@@ -490,8 +490,9 @@ class Overworld_Viewing(Viewing):
                 self.main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
-                background_color=viewingdata.COLOR_WHITE,
-                background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
+                background_pattern=display.PATTERN_1_ID,
+                #background_color=viewingdata.COLOR_WHITE,
+                #background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
                 horizontal_padding=6,
                 vertical_padding=6,
             )
@@ -514,7 +515,8 @@ class Overworld_Viewing(Viewing):
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
-                background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
+                background_pattern=display.PATTERN_1_ID,
+                #background_image_path=imagepaths.OW_BOTTOM_TEXT_DISPLAY_BACKGROUND_PATH,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
                 horizontal_padding=viewingdata.TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.TEXT_DISPLAY_VERTICAL_PADDING,
@@ -536,8 +538,9 @@ class Overworld_Viewing(Viewing):
                 self.main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
                 font_obj,
-                background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
-                background_color=viewingdata.COLOR_WHITE,
+                #background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
+                #background_color=viewingdata.COLOR_WHITE,
+                background_pattern=display.PATTERN_1_ID,
                 font_color=fontinfo.FONT_COLOR_DEFAULT,
                 horizontal_padding=viewingdata.OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.OW_SIDE_MENU_VERTICAL_PADDING,
@@ -1056,6 +1059,7 @@ class Inventory_Viewing(Viewing):
         )
 
         self.background_image = None
+        self.background_color = background_color
 
         self.display_rect = viewingdata.INVENTORY_BASIC_VIEWING_RECT
         self.item_icon_size = item_icon_size
@@ -1132,11 +1136,6 @@ class Inventory_Viewing(Viewing):
 
         # Load item details background image.
         self.details_background_image = None
-        """
-        self.details_background_image = pygame.image.load(
-                imagepaths.INVENTORY_BASIC_ITEM_DETAILS_BACKGROUND_PATH
-            ).convert_alpha()
-        """
 
         # Will display the word "Inventory".
         self.top_inventory_label_display = None
@@ -1144,14 +1143,19 @@ class Inventory_Viewing(Viewing):
         # Will display the items in the inventory.
         self.item_listing_display = None
 
+        self.item_details_side_display = display.Display(
+            self.main_display_surface,
+            self.item_details_rect,
+            background_pattern = display.PATTERN_1_ID,
+        )
+
         # Will display item name of selected item.
         self.item_name_display = None
         self.item_name_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_details_rect.y \
-                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            self.item_details_rect.y + 15,
             self.item_details_rect.width,
-            60,
+            80,
         )
         self.item_name_rect.centerx = self.item_details_rect.centerx
 
@@ -1160,7 +1164,7 @@ class Inventory_Viewing(Viewing):
         self.item_quantity_rect = pygame.Rect(
             self.item_details_rect.x,
             self.item_name_rect.bottom \
-                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+                + 10,
             self.item_details_rect.width,
             30,
         )
@@ -1170,8 +1174,7 @@ class Inventory_Viewing(Viewing):
         self.item_enlarged_display = None
         self.item_enlarged_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_quantity_rect.bottom \
-                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            self.item_quantity_rect.bottom + 10,
             self.enlarged_icon_size,
             self.enlarged_icon_size
         )
@@ -1181,24 +1184,20 @@ class Inventory_Viewing(Viewing):
         self.item_description_display = None
         self.item_description_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_enlarged_rect.bottom \
-                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            self.item_enlarged_rect.bottom,
             self.item_details_rect.width,
             self.item_details_rect.bottom \
-                - (self.item_enlarged_rect.bottom \
-                    + viewingdata.INVENTORY_IN_BETWEEN_PADDING)
+                - (self.item_enlarged_rect.bottom)
         )
 
         # Will display item options for a selected item.
         self.item_option_menu_display = None
         self.item_option_menu_rect = pygame.Rect(
             self.item_details_rect.x,
-            self.item_enlarged_rect.bottom \
-                + viewingdata.INVENTORY_IN_BETWEEN_PADDING,
+            self.item_enlarged_rect.bottom + 15,
             self.item_details_rect.width,
             self.item_details_rect.bottom \
-                - (self.item_enlarged_rect.bottom \
-                    + viewingdata.INVENTORY_IN_BETWEEN_PADDING)
+                - (self.item_enlarged_rect.bottom + 15)
         )
 
     # Requires fonts to be loaded. see display.Display.init_fonts()
@@ -1214,6 +1213,7 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 #background_image_path=imagepaths.INVENTORY_BASIC_TITLE_BACKGROUND_PATH,
+                background_pattern=display.PATTERN_1_ID,
                 background_image_path=None,
                 horizontal_padding=0,
                 vertical_padding=0,
@@ -1248,6 +1248,7 @@ class Inventory_Viewing(Viewing):
                 self.item_listing_rect,
                 font_obj,
                 #background_image_path=background_path,
+                background_pattern=display.PATTERN_1_ID,
                 background_image_path=None,
                 background_color=None,
                 item_quantity_font_color=viewingdata.COLOR_WHITE,
@@ -1279,7 +1280,7 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                horizontal_padding=5,
+                horizontal_padding=20,
                 vertical_padding=0,
             )
 
@@ -1304,7 +1305,7 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                horizontal_padding=5,
+                horizontal_padding=20,
                 vertical_padding=0,
             )
 
@@ -1330,8 +1331,8 @@ class Inventory_Viewing(Viewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
-                horizontal_padding=6,
-                vertical_padding=6,
+                horizontal_padding=20,
+                vertical_padding=20,
             )
 
             if self.item_description_display:
@@ -1362,9 +1363,11 @@ class Inventory_Viewing(Viewing):
     def refresh_self(self):
         pass
 
-    # Does not update display.
-    # This method should be called before calling display_
-    def blit_self(self):
+    def refresh_and_blit_self_no_background(self):
+        self.refresh_self()
+        self.blit_self_no_background()
+
+    def blit_background(self):
         # Handle background.
         if self.background_image:
             self.main_display_surface.blit(
@@ -1378,11 +1381,18 @@ class Inventory_Viewing(Viewing):
                 self.display_rect,
             )
 
+    # Blits self without reblitting background.
+    def blit_self_no_background(self):
         # Blit details background.
         if self.details_background_image:
             self.main_display_surface.blit(
                 self.details_background_image,
                 self.item_details_rect
+            )
+
+        if self.item_details_side_display:
+            self.item_details_side_display.blit_background(
+                self.main_display_surface
             )
 
         # Handle inventory label display.
@@ -1403,6 +1413,12 @@ class Inventory_Viewing(Viewing):
                 )
 
         # TODO handle bottom text display
+
+    # Does not update display.
+    # This method should be called before calling display_
+    def blit_self(self):
+        self.blit_background()
+        self.blit_self_no_background()
 
     def blit_selected_object_name(self, selected_obj):
         if selected_obj:
@@ -1506,6 +1522,8 @@ class Inventory_Viewing(Viewing):
         ret_info = None
         max_index = inventory_obj.get_last_index()
 
+        self.blit_background()
+
         if inventory_obj:
             # Start with the first item.
             curr_index = starting_selected_index
@@ -1550,14 +1568,7 @@ class Inventory_Viewing(Viewing):
                 ))
 
                 if changed_index:
-                    # Clear screen.
-                    pygame.draw.rect(
-                        self.main_display_surface,
-                        viewingdata.COLOR_BLACK,
-                        viewingdata.MAIN_DISPLAY_RECT
-                    )
-
-                    self.refresh_and_blit_self()
+                    self.refresh_and_blit_self_no_background()
                     pygame.display.update()
 
                 go_down = False
