@@ -5,7 +5,9 @@ import menuoptions
 import imageids
 import imagepaths
 
-ITEM_ICON_SIZE = 50
+ITEM_ICON_WIDTH = 50
+ITEM_ICON_HEIGHT = 50
+ITEM_ICON_DIMENSIONS = (ITEM_ICON_WIDTH, ITEM_ICON_HEIGHT)
 
 ### ITEM PROPERTY FLAGS ###
 STACKABLE_F = 0x1

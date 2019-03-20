@@ -4,6 +4,7 @@ import language
 MORE_OPTIONS_OPTION_ID = 0xFFFF
 YES_OPTION_ID = 0x1
 NO_OPTION_ID = 0x2
+CANCEL_OPTION_ID = 0x3
 
 # OVERWORLD SIDE MENU OPTIONS #
 INVENTORY_OPTION_ID = 0x11
@@ -31,8 +32,18 @@ EAT_OPTION_ID = 0x38
 DRINK_OPTION_ID = 0x39
 
 # STORE OPTION IDS
-BUY_OPTION_ID = 0x41 # For buying items in stores.
-SELL_OPTION_ID = 0x42 # For selling items in stores.
+BUY_1_OPTION_ID = 0x41 # For buying items in stores.
+BUY_5_OPTION_ID = 0x42
+BUY_10_OPTION_ID = 0x43
+SELL_1_OPTION_ID = 0x51 # For selling items in stores.
+SELL_5_OPTION_ID = 0x52
+SELL_10_OPTION_ID = 0x53
+
+# LOOT OPTION IDS
+TAKE_1_OPTION_ID = 0x61
+TAKE_5_OPTION_ID = 0x62
+TAKE_10_OPTION_ID = 0x63
+TAKE_ALL_OPTION_ID = 0x64
 
 # Some convenient option ID lists for common items.
 DEFAULT_LOG_OPTION_ID_LIST = [
@@ -47,6 +58,18 @@ DEFAULT_ITEM_MENU_OPTION_IDS = [
 
 # Maps option ID to dict that maps language ID to the option name.
 OPTION_NAME_INFO = {
+    CANCEL_OPTION_ID:{
+        language.LANG_ENGLISH: "Cancel",
+        language.LANG_ESPANOL: "Cancelar",
+    },
+    YES_OPTION_ID: {
+        language.LANG_ENGLISH: "Yes",
+        language.LANG_ESPANOL: "Si",
+    },
+    NO_OPTION_ID: {
+        language.LANG_ENGLISH: "No",
+        language.LANG_ESPANOL: "No",
+    },
     INVENTORY_OPTION_ID: {
         language.LANG_ENGLISH: "Inventory",
         language.LANG_ESPANOL: "Inventario",
@@ -131,13 +154,45 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Drink",
         language.LANG_ESPANOL: "Tomar",
     },
-    BUY_OPTION_ID: {
-        language.LANG_ENGLISH: "Buy",
-        language.LANG_ESPANOL: "Comprar",
+    BUY_1_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy 1",
+        language.LANG_ESPANOL: "Comprar 1",
     },
-    SELL_OPTION_ID: {
-        language.LANG_ENGLISH: "Sell",
-        language.LANG_ESPANOL: "Vender",
+    SELL_1_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell 1",
+        language.LANG_ESPANOL: "Vender 1",
+    },
+    BUY_5_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy 5",
+        language.LANG_ESPANOL: "Comprar 5",
+    },
+    SELL_5_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell 5",
+        language.LANG_ESPANOL: "Vender 5",
+    },
+    BUY_10_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy 10",
+        language.LANG_ESPANOL: "Comprar 10",
+    },
+    SELL_10_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell 10",
+        language.LANG_ESPANOL: "Vender 10",
+    },
+    TAKE_1_OPTION_ID: {
+        language.LANG_ENGLISH: "Take 1",
+        language.LANG_ESPANOL: "Tomar 1",
+    },
+    TAKE_5_OPTION_ID: {
+        language.LANG_ENGLISH: "Take 5",
+        language.LANG_ESPANOL: "Tomar 5",
+    },
+    TAKE_10_OPTION_ID: {
+        language.LANG_ENGLISH: "Take 10",
+        language.LANG_ESPANOL: "Tomar 10",
+    },
+    TAKE_ALL_OPTION_ID: {
+        language.LANG_ENGLISH: "Take All",
+        language.LANG_ESPANOL: "Tomar Todos",
     },
 }
 
@@ -154,7 +209,62 @@ OVERWORLD_MENU_OPTION_IDS = [
     SAVE_GAME_OPTION_ID,
     LOAD_GAME_OPTION_ID,
     QUIT_GAME_OPTION_ID,
+    CANCEL_OPTION_ID,
 ]
+
+COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
+    DISCARD_OPTION_ID,
+    LIGHT_OPTION_ID,
+    EQUIP_OPTION_ID,
+    CRAFT_OPTION_ID,
+    IDENTIFY_OPTION_ID,
+    READ_OPTION_ID,
+    EAT_OPTION_ID,
+    DRINK_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
+
+OVERWORLD_INVENTORY_ITEM_OPTION_SET = set([
+    DISCARD_OPTION_ID,
+    LIGHT_OPTION_ID,
+    EQUIP_OPTION_ID,
+    CRAFT_OPTION_ID,
+    IDENTIFY_OPTION_ID,
+    READ_OPTION_ID,
+    EAT_OPTION_ID,
+    DRINK_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
+
+SHOP_ITEM_OPTION_SET = set([
+    BUY_1_OPTION_ID,
+    BUY_5_OPTION_ID,
+    BUY_10_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
+
+SHOP_MODE_INVENTORY_ITEM_OPTION_SET = set([
+    SELL_1_OPTION_ID,
+    SELL_5_OPTION_ID,
+    SELL_10_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
+
+BATTLE_MODE_INVENTORY_ITEM_OPTION_SET = set([
+    DISCARD_OPTION_ID,
+    EQUIP_OPTION_ID,
+    EAT_OPTION_ID,
+    DRINK_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
+
+BATTLE_LOOT_ITEM_OPTION_SET = set([
+    TAKE_1_OPTION_ID,
+    TAKE_5_OPTION_ID,
+    TAKE_10_OPTION_ID,
+    TAKE_ALL_OPTION_ID,
+    CANCEL_OPTION_ID,
+])
 
 def get_option_name(option_id, language_id):
     return OPTION_NAME_INFO.get(option_id, {}).get(

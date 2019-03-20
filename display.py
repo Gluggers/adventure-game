@@ -24,8 +24,8 @@ DEFAULT_LINE_SPACING_FACTOR = 1.1
 TEXT_BOX_LINE_SPACING_FACTOR = 1.1
 MENU_LINE_SPACING_FACTOR = 1.5
 
-# Number of pixels in between each item slot.
-ITEM_VIEWING_PIXEL_SPACING = 15
+# Number of pixels in between each icon slot.
+ICON_VIEWING_PIXEL_SPACING = 15
 
 ### ORIENTATIONS FOR MENU OPTIONS ###
 ORIENTATION_CENTERED = 0x1
@@ -36,12 +36,17 @@ ORIENTATION_BOTTOM_JUSTIFIED = 0x5
 
 ### PATTERN ID NUMBERS ###
 PATTERN_DEFAULT_ID = 0x1
-PATTERN_1_ID = 0x2
+PATTERN_1_ID = 0x11
+PATTERN_2_ID = 0x12
 
 NW_CORNER_ID = 0x1
 NE_CORNER_ID = 0x2
 SE_CORNER_ID = 0x3
 SW_CORNER_ID = 0x4
+
+P1_BG_1_COLOR = (0x68, 0x30, 0x03)
+P1_BG_2_COLOR = (0xa2, 0x4d, 0x08)
+P1_BG_3_COLOR = (0xef, 0x87, 0x33)
 
 # TODO - just have pages be lists of the rendered texts...
 
@@ -243,129 +248,224 @@ class Display(object):
                     target_rect,
                 )
 
+    @classmethod
+    def get_background_pattern_default(cls, width, height):
+        background = None
+
+        if width and height:
+            background = pygame.Surface(
+                (width, height),
+                flags=pygame.SRCALPHA,
+                depth=32,
+            ).convert_alpha()
+
+            background.fill(viewingdata.COLOR_WHITE)
+
+        return background
+
+    @classmethod
+    def get_background_pattern_1(cls, width, height):
+        background = None
+
+        if width and height:
+            background = pygame.Surface(
+                (width, height),
+                flags=pygame.SRCALPHA,
+                depth=32,
+            ).convert_alpha()
+
+            # Add pattern 1 corners.
+            nw_corner = Display.pattern_data.get(
+                PATTERN_1_ID,
+                {}
+            ).get(
+                NW_CORNER_ID,
+                None
+            )
+            ne_corner = Display.pattern_data.get(
+                PATTERN_1_ID,
+                {}
+            ).get(
+                NE_CORNER_ID,
+                None
+            )
+            se_corner = Display.pattern_data.get(
+                PATTERN_1_ID,
+                {}
+            ).get(
+                SE_CORNER_ID,
+                None
+            )
+            sw_corner = Display.pattern_data.get(
+                PATTERN_1_ID,
+                {}
+            ).get(
+                SW_CORNER_ID,
+                None
+            )
+
+            first_rect = pygame.Rect(
+                3,
+                3,
+                width - 6,
+                height - 6
+            )
+
+            second_rect = pygame.Rect(
+                5,
+                5,
+                width - 10,
+                height - 10
+            )
+
+            third_rect = pygame.Rect(
+                9,
+                9,
+                width - 18,
+                height - 18
+            )
+
+            background.fill(
+                P1_BG_1_COLOR,
+                rect=first_rect,
+            )
+            background.fill(
+                P1_BG_2_COLOR,
+                rect=second_rect
+            )
+            background.fill(
+                P1_BG_3_COLOR,
+                rect=third_rect
+            )
+
+            if nw_corner:
+                result = background.blit(
+                    nw_corner,
+                    (0, 0)
+                )
+                logger.info(result)
+            else:
+                logger.warn("No NW Corner for pattern 1.")
+
+            if ne_corner:
+                result = background.blit(
+                    ne_corner,
+                    (background.get_width() - ne_corner.get_width(), 0)
+                )
+                logger.info(result)
+            else:
+                logger.warn("No NE Corner for pattern 1.")
+
+            if se_corner:
+                result = background.blit(
+                    se_corner,
+                    (background.get_width() - se_corner.get_width(),
+                    background.get_height() - se_corner.get_height())
+                )
+                logger.info(result)
+            else:
+                logger.warn("No SE Corner for pattern 1.")
+
+            if sw_corner:
+                result = background.blit(
+                    sw_corner,
+                    (0,
+                    background.get_height() - sw_corner.get_height())
+                )
+                logger.info(result)
+            else:
+                logger.warn("No SW Corner for pattern 1.")
+
+        return background
+
+    @classmethod
+    def get_background_pattern_2(cls, width, height):
+        background = None
+
+        if width and height:
+            background = pygame.Surface(
+                (width, height),
+                flags=pygame.SRCALPHA,
+                depth=32,
+            ).convert_alpha()
+
+            first_rect = pygame.Rect(
+                0,
+                0,
+                width,
+                height
+            )
+
+            second_rect = pygame.Rect(
+                2,
+                2,
+                width - 4,
+                height - 4
+            )
+
+            third_rect = pygame.Rect(
+                6,
+                6,
+                width - 12,
+                height - 12
+            )
+
+            background.fill(
+                P1_BG_1_COLOR,
+                rect=first_rect,
+            )
+            background.fill(
+                P1_BG_2_COLOR,
+                rect=second_rect
+            )
+            background.fill(
+                P1_BG_3_COLOR,
+                rect=third_rect
+            )
+
+        return background
+
     def get_background_image(self):
         """Builds background image for display object."""
-        background = pygame.Surface(
-            (self.display_rect.width,
-            self.display_rect.height),
-            flags=pygame.SRCALPHA,
-            depth=32,
-        ).convert_alpha()
+        background = None
 
         if self.background_pattern_id is not None:
             if self.background_pattern_id == PATTERN_DEFAULT_ID:
-                background.fill(viewingdata.COLOR_WHITE)
+                background = Display.get_background_pattern_default(
+                    self.display_rect.width,
+                    self.display_rect.height,
+                )
             elif self.background_pattern_id == PATTERN_1_ID:
-                # Add pattern 1 corners.
-                nw_corner = Display.pattern_data.get(
-                    PATTERN_1_ID,
-                    {}
-                ).get(
-                    NW_CORNER_ID,
-                    None
+                background = Display.get_background_pattern_1(
+                    self.display_rect.width,
+                    self.display_rect.height,
                 )
-                ne_corner = Display.pattern_data.get(
-                    PATTERN_1_ID,
-                    {}
-                ).get(
-                    NE_CORNER_ID,
-                    None
+            elif self.background_pattern_id == PATTERN_2_ID:
+                background = Display.get_background_pattern_2(
+                    self.display_rect.width,
+                    self.display_rect.height,
                 )
-                se_corner = Display.pattern_data.get(
-                    PATTERN_1_ID,
-                    {}
-                ).get(
-                    SE_CORNER_ID,
-                    None
-                )
-                sw_corner = Display.pattern_data.get(
-                    PATTERN_1_ID,
-                    {}
-                ).get(
-                    SW_CORNER_ID,
-                    None
-                )
-
-                first_rect = pygame.Rect(
-                    3,
-                    3,
-                    self.display_rect.width - 6,
-                    self.display_rect.height - 6
-                )
-
-                second_rect = pygame.Rect(
-                    5,
-                    5,
-                    self.display_rect.width - 10,
-                    self.display_rect.height - 10
-                )
-
-                third_rect = pygame.Rect(
-                    9,
-                    9,
-                    self.display_rect.width - 18,
-                    self.display_rect.height - 18
-                )
-
-                background.fill(
-                    (0x68, 0x30, 0x03),
-                    rect=first_rect,
-                )
-                background.fill(
-                    (0xa2, 0x4d, 0x08),
-                    rect=second_rect
-                )
-                background.fill(
-                    (0xef, 0x87, 0x33),
-                    rect=third_rect
-                )
-
-                if nw_corner:
-                    result = background.blit(
-                        nw_corner,
-                        (0, 0)
-                    )
-                    logger.info(result)
-                else:
-                    logger.warn("No NW Corner for pattern 1.")
-
-                if ne_corner:
-                    result = background.blit(
-                        ne_corner,
-                        (background.get_width() - ne_corner.get_width(), 0)
-                    )
-                    logger.info(result)
-                else:
-                    logger.warn("No NE Corner for pattern 1.")
-
-                if se_corner:
-                    result = background.blit(
-                        se_corner,
-                        (background.get_width() - se_corner.get_width(),
-                        background.get_height() - se_corner.get_height())
-                    )
-                    logger.info(result)
-                else:
-                    logger.warn("No SE Corner for pattern 1.")
-
-                if sw_corner:
-                    result = background.blit(
-                        sw_corner,
-                        (0,
-                        background.get_height() - sw_corner.get_height())
-                    )
-                    logger.info(result)
-                else:
-                    logger.warn("No SW Corner for pattern 1.")
+            else:
+                logger.error("Unrecognized pattern {0}".format(
+                    self.background_pattern_id,
+                ))
         elif self.background_image_path:
             # Load image if path is provided.
             background = pygame.image.load(
                 self.background_image_path
             ).convert_alpha()
         elif self.background_color:
+            background = pygame.Surface(
+                (self.display_rect.width,
+                self.display_rect.height),
+                flags=pygame.SRCALPHA,
+                depth=32,
+            ).convert_alpha()
+
             background.fill(self.background_color)
 
-        self.background_image = background
+        if background:
+            self.background_image = background
 
     @classmethod
     def get_abbreviated_quantity(cls, quantity):
@@ -1269,8 +1369,6 @@ class Menu_Display(Text_Display):
                 else:
                     logger.error("Invalid vertical orientation.")
 
-                vertical_offset = 0
-
                 for index in range(num_options):
                     curr_option_id = menu_page.get_option_id(index)
                     curr_option = menuoptions.get_option_name(
@@ -1339,20 +1437,18 @@ class Menu_Display(Text_Display):
                     vertical_offset += \
                         + int(self.spacing_factor_between_lines * text_height)
 
-class ItemListingDisplay(Display):
+class IconGridDisplay(Display):
     def __init__(
             self,
             main_display_surface,
             display_rect,
-            item_quantity_font_object,
+            icon_dimensions,
             background_pattern=None,
             background_image_path=None,
             background_color=viewingdata.COLOR_WHITE,
-            item_quantity_font_color=fontinfo.FONT_COLOR_DEFAULT, # TODO change
             horizontal_padding=0,
             vertical_padding=0,
-            item_icon_size=itemdata.ITEM_ICON_SIZE,
-            space_between_items=ITEM_VIEWING_PIXEL_SPACING,
+            space_between_icons=ICON_VIEWING_PIXEL_SPACING,
             continue_up_icon_image_path=None,
             continue_down_icon_image_path=None,
             selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
@@ -1365,14 +1461,10 @@ class ItemListingDisplay(Display):
             background_image_path=background_image_path,
             background_color=background_color,
         )
-
-        self.item_quantity_font_object = item_quantity_font_object
-        self.item_quantity_font_color = item_quantity_font_color
-
         self.horizontal_padding = horizontal_padding
         self.vertical_padding = vertical_padding
-        self.pixels_between_items = space_between_items
-        self.item_icon_size = item_icon_size
+        self.pixels_between_icons = space_between_icons
+        self.icon_dimensions = icon_dimensions
 
         # Define continue icons if possible.
         self.continue_up_icon = None
@@ -1399,7 +1491,7 @@ class ItemListingDisplay(Display):
                 self.continue_down_icon.get_width()
             )
 
-        self.item_viewing_top_left = (
+        self.icon_viewing_top_left = (
             self.display_rect.x \
                 + 15 \
                 + continue_icon_width \
@@ -1407,45 +1499,45 @@ class ItemListingDisplay(Display):
             self.display_rect.y + self.vertical_padding,
         )
 
-        self.item_viewing_space_horizontal = self.display_rect.right \
-                                            - self.item_viewing_top_left[0] \
+        self.icon_viewing_space_horizontal = self.display_rect.right \
+                                            - self.icon_viewing_top_left[0] \
                                             - self.horizontal_padding
-        self.item_viewing_space_vertical = self.display_rect.height  \
+        self.icon_viewing_space_vertical = self.display_rect.height  \
                                             - (2 * self.vertical_padding)
-        logger.info("Item viewing space: {0}x{1}".format(
-            self.item_viewing_space_horizontal,
-            self.item_viewing_space_vertical
+        logger.info("icon viewing space: {0}x{1}".format(
+            self.icon_viewing_space_horizontal,
+            self.icon_viewing_space_vertical
         ))
 
-        self.item_viewing_space_rect = pygame.Rect(
-            self.item_viewing_top_left[0],
-            self.item_viewing_top_left[1],
-            self.item_viewing_space_horizontal,
-            self.item_viewing_space_vertical
+        self.icon_viewing_space_rect = pygame.Rect(
+            self.icon_viewing_top_left[0],
+            self.icon_viewing_top_left[1],
+            self.icon_viewing_space_horizontal,
+            self.icon_viewing_space_vertical
         )
 
         # Row, col dimensions.
-        self.item_viewing_grid_dimensions = \
-            ItemListingDisplay.get_item_viewing_grid_dimensions(
-                self.item_viewing_space_horizontal,
-                self.item_viewing_space_vertical,
-                item_icon_size=self.item_icon_size,
+        self.icon_viewing_grid_dimensions = \
+            IconGridDisplay.get_icon_viewing_grid_dimensions(
+                self.icon_viewing_space_horizontal,
+                self.icon_viewing_space_vertical,
+                self.icon_dimensions,
             )
         self.num_columns = \
-            self.item_viewing_grid_dimensions[0]
+            self.icon_viewing_grid_dimensions[0]
         self.num_rows = \
-            self.item_viewing_grid_dimensions[1]
+            self.icon_viewing_grid_dimensions[1]
 
-        self.max_num_items = self.num_columns * self.num_rows
+        self.max_num_icons = self.num_columns * self.num_rows
 
         # Get vertical space to blit max number of rows.
-        required_vertical_item_space = \
-            self.num_rows * (self.item_icon_size + self.pixels_between_items) \
-            - self.pixels_between_items
+        required_vertical_icon_space = \
+            self.num_rows * (self.icon_dimensions[1] + self.pixels_between_icons) \
+            - self.pixels_between_icons
 
-        required_item_space_rect = pygame.Rect(
-            self.item_viewing_space_rect.topleft,
-            (self.item_viewing_space_rect.width, required_vertical_item_space)
+        required_icon_space_rect = pygame.Rect(
+            self.icon_viewing_space_rect.topleft,
+            (self.icon_viewing_space_rect.width, required_vertical_icon_space)
         )
 
         self.selection_image = None
@@ -1460,94 +1552,94 @@ class ItemListingDisplay(Display):
 
         if self.continue_up_icon:
             self.continue_up_rect = self.continue_up_icon.get_rect(
-                center=required_item_space_rect.center
+                center=required_icon_space_rect.center
             )
 
             self.continue_up_rect.centery -= 40
 
             self.continue_up_rect.centerx = \
-                        self.item_viewing_space_rect.left \
-                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2) \
+                        self.icon_viewing_space_rect.left \
+                        - int((self.icon_viewing_space_rect.left - self.display_rect.left) / 2) \
                         + 4
 
-        # TODO make this in between last possible item row
+        # TODO make this in between last possible icon row
         # and the bottom of the self.display_rect
         if self.continue_down_icon:
             self.continue_down_rect = self.continue_down_icon.get_rect(
-                center=required_item_space_rect.center
+                center=required_icon_space_rect.center
             )
 
             self.continue_down_rect.centery += 40
 
             self.continue_down_rect.centerx = \
-                        self.item_viewing_space_rect.left \
-                        - int((self.item_viewing_space_rect.left - self.display_rect.left) / 2) \
+                        self.icon_viewing_space_rect.left \
+                        - int((self.icon_viewing_space_rect.left - self.display_rect.left) / 2) \
                         + 4
 
     @classmethod
-    def get_item_viewing_grid_dimensions(
+    def get_icon_viewing_grid_dimensions(
             cls,
             horizontal_space,
             vertical_space,
-            item_icon_size=itemdata.ITEM_ICON_SIZE,
-            space_between_items=ITEM_VIEWING_PIXEL_SPACING,
+            icon_dimensions,
+            space_between_icons=ICON_VIEWING_PIXEL_SPACING,
         ):
         dimensions = (0, 0)
 
-        if horizontal_space and vertical_space:
-            # Let n be number of items in the row,
-            # Let s be the space between items.
+        if horizontal_space and vertical_space and icon_dimensions:
+            # Let n be number of icons in the row,
+            # Let s be the space between icons.
             # Let h be the horizontal space available.
-            # Then (n * icon_size) + (n - 1) * s = h.
-            # n * (icon_size + s) - s = h.
-            # n = (h + s) / (icon_size + s).
-            num_row_items = int(
-                (horizontal_space + space_between_items)    \
-                / (item_icon_size + space_between_items)
+            # Then (n * icon_width) + (n - 1) * s = h.
+            # n * (icon_width + s) - s = h.
+            # n = (h + s) / (icon_width + s).
+            num_row_icons = int(
+                (horizontal_space + space_between_icons)    \
+                / (icon_dimensions[0] + space_between_icons)
             )
 
-            num_column_items = int(
-                (vertical_space + space_between_items)  \
-                / (item_icon_size + space_between_items)
+            num_column_icons = int(
+                (vertical_space + space_between_icons)  \
+                / (icon_dimensions[1] + space_between_icons)
             )
 
-            if num_row_items and num_column_items:
-                dimensions = (num_row_items, num_column_items)
+            if num_row_icons and num_column_icons:
+                dimensions = (num_row_icons, num_column_icons)
 
         return dimensions
 
-    def get_row_index(self, item_listing_index):
-        return int(item_listing_index / self.num_columns)
+    def get_row_index(self, icon_listing_index):
+        return int(icon_listing_index / self.num_columns)
 
-    def get_column_index(self, item_listing_index):
-        return item_listing_index % self.num_columns
+    def get_column_index(self, icon_listing_index):
+        return icon_listing_index % self.num_columns
 
-    # Item listing data must be list of length-2 lists of the form
-    # [item object, quantity].
-    # selected_index is the index in item_listing_data for the
-    # item currently selected.
-    # first_viewable_row_index is the row index for the first row of items
+    # Icon listing data must be list of length-2 lists of the form
+    # [icon image, rendered supertext].
+    # selected_index is the index in icon_data_list for the
+    # icon currently selected.
+    # first_viewable_row_index is the row index for the first row of icons
     # to be visible in the viewing.
-    def blit_item_listing(
+    def blit_icon_listing(
             self,
             surface,
-            item_listing_data,
+            icon_data_list,
             first_viewable_row_index,
             selected_index,
             preselected_index_list=None,
             show_continue_icon=True,
             alternative_top_left=None,
         ):
-        if surface and item_listing_data \
+        if surface and icon_data_list \
                 and selected_index >= 0 and first_viewable_row_index >= 0:
-            item_space_rect = self.item_viewing_space_rect
+            icon_space_rect = self.icon_viewing_space_rect
 
             if alternative_top_left:
-                item_space_rect = pygame.Rect(
+                icon_space_rect = pygame.Rect(
                     alternative_top_left[0] + self.horizontal_padding,
                     alternative_top_left[1] + self.vertical_padding,
-                    self.item_viewing_space_rect.width,
-                    self.item_viewing_space_rect.height
+                    self.icon_viewing_space_rect.width,
+                    self.icon_viewing_space_rect.height
                 )
 
             # Blit background
@@ -1556,33 +1648,33 @@ class ItemListingDisplay(Display):
                 alternative_top_left=alternative_top_left,
             )
 
-            logger.debug("Item space top left: {0}".format(
-                item_space_rect.topleft
+            logger.debug("Icon space top left: {0}".format(
+                icon_space_rect.topleft
             ))
 
-            # Blit the items, starting with the first viewable row.
+            # Blit the icons, starting with the first viewable row.
             starting_index = \
                 first_viewable_row_index * self.num_columns
 
-            # Go until we run out of space or items.
-            total_items = len(item_listing_data)
+            # Go until we run out of space or icons.
+            total_icons = len(icon_data_list)
             last_index = min(
-                starting_index + self.max_num_items - 1,
-                total_items - 1
+                starting_index + self.max_num_icons - 1,
+                total_icons - 1
             )
 
             curr_index = starting_index
-            logger.debug("Starting with item index {0}".format(curr_index))
+            logger.debug("Starting with icon index {0}".format(curr_index))
 
             horizontal_offset = 0
             vertical_offset = 0
 
-            # Blit item and quantity text if needed.
-            item_rect = pygame.Rect(
-                item_space_rect.x + horizontal_offset,
-                item_space_rect.y + vertical_offset,
-                itemdata.ITEM_ICON_SIZE,
-                itemdata.ITEM_ICON_SIZE,
+            # Blit icon and quantity text if needed.
+            icon_rect = pygame.Rect(
+                icon_space_rect.x + horizontal_offset,
+                icon_space_rect.y + vertical_offset,
+                self.icon_dimensions[0],
+                self.icon_dimensions[1],
             )
 
             while curr_index <= last_index:
@@ -1594,41 +1686,20 @@ class ItemListingDisplay(Display):
 
                 horizontal_offset = \
                     ((curr_index - starting_index) % self.num_columns) \
-                    * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
+                    * (self.icon_dimensions[0] + self.pixels_between_icons)
 
                 vertical_offset = \
                     curr_viewing_row \
-                    * (itemdata.ITEM_ICON_SIZE + self.pixels_between_items)
+                    * (self.icon_dimensions[1] + self.pixels_between_icons)
 
-                curr_item_info = item_listing_data[curr_index]
-                curr_item = curr_item_info[0]
-                item_name = curr_item.get_name()
-                item_quantity = curr_item_info[1]
-                item_image = curr_item.get_icon()
+                curr_icon_info = icon_data_list[curr_index]
+                icon_image = curr_icon_info[0]
+                rendered_supertext = curr_icon_info[1]
 
-
-                logger.debug("Curr item {0} x{1} at {2}".format(
-                    item_name,
-                    item_quantity,
-                    (curr_viewing_row, curr_viewing_col)
-                ))
-
-                # Get rendered quantity text if item is stackable.
-                rendered_quantity_text = None
-                if curr_item.is_stackable():
-                    rendered_quantity_text = \
-                        self.item_quantity_font_object.render(
-                            Display.get_abbreviated_quantity(
-                                item_quantity
-                            ),
-                            False,
-                            self.item_quantity_font_color,
-                        )
-
-                # Blit item and quantity text if needed.
-                item_rect.topleft = (
-                    item_space_rect.x + horizontal_offset,
-                    item_space_rect.y + vertical_offset,
+                # Blit icon image and quantity text if needed.
+                icon_rect.topleft = (
+                    icon_space_rect.x + horizontal_offset,
+                    icon_space_rect.y + vertical_offset,
                 )
 
                 # Check if this is the selected icon. If so,
@@ -1637,9 +1708,9 @@ class ItemListingDisplay(Display):
                     or (preselected_index_list is not None \
                         and selected_index in preselected_index_list)) \
                     and self.selection_image:
-                    # Center on the item icon.
+                    # Center on the icon.
                     select_image_rect = self.selection_image.get_rect(
-                        center=item_rect.center
+                        center=icon_rect.center
                     )
 
                     surface.blit(
@@ -1647,22 +1718,22 @@ class ItemListingDisplay(Display):
                         select_image_rect,
                     )
 
-                if item_image:
+                if icon_image:
                     surface.blit(
-                        item_image,
-                        item_rect,
+                        icon_image,
+                        icon_rect,
                     )
 
-                if rendered_quantity_text:
-                    text_top_left = item_rect.topleft
+                if rendered_supertext:
+                    text_top_left = icon_rect.topleft
                     surface.blit(
-                        rendered_quantity_text,
+                        rendered_supertext,
                         text_top_left,
                     )
 
                 curr_index += 1
 
-            # Blit the up and down arrows if there are items above/below.
+            # Blit the up and down arrows if there are icons above/below.
             if (starting_index >= self.num_columns) and show_continue_icon:
                 # We have at least 1 row above us.
                 surface.blit(
@@ -1670,9 +1741,9 @@ class ItemListingDisplay(Display):
                     self.continue_up_rect
                 )
 
-            if ((total_items - starting_index) > self.max_num_items) \
+            if ((total_icons - starting_index) > self.max_num_icons) \
                 and show_continue_icon:
-                # We have items after us.
+                # We have icons after us.
                 surface.blit(
                     self.continue_down_icon,
                     self.continue_down_rect

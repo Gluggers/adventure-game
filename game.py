@@ -3,8 +3,10 @@ import language
 import logging
 import viewing
 import viewingdata
+import selectiongridviewing
 import entity
 import map
+import inventory
 import mapdata
 import tile
 import tiledata
@@ -56,7 +58,7 @@ class Game():
                     self.main_display_screen,
                 )
 
-            self.inventory_viewing = None
+            self.overworld_inventory_viewing = None
 
             if not self.overworld_viewing:
                 logger.error("Failed to create viewing object.")
@@ -104,11 +106,14 @@ class Game():
         self.overworld_viewing.protagonist = protagonist
 
         # Create inventory viewing. TODO
-        self.inventory_viewing = \
-            viewing.Inventory_Viewing.create_inventory_viewing(
+        self.overworld_inventory_viewing = \
+            selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                inventory.Inventory.inventory_name_info,
                 self.main_display_screen,
-                background_pattern=display.PATTERN_1_ID,
+                itemdata.ITEM_ICON_DIMENSIONS,
+                display_pattern=display.PATTERN_2_ID,
                 bottom_text=None,
+                allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
             )
 
     def set_protagonist_tile_position(self, new_position):
@@ -353,11 +358,11 @@ class Game():
 
             target_entity.inventory.print_self()
 
-            if self.inventory_viewing:
-                self.inventory_viewing.blit_background()
+            if self.overworld_inventory_viewing:
+                self.overworld_inventory_viewing.blit_background()
 
-                self.inventory_viewing.handle_item_listing(
-                    self.protagonist.inventory
+                self.overworld_inventory_viewing.handle_selection_grid(
+                    target_entity.inventory.inventory_data
                 )
                 # TODO
 

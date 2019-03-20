@@ -395,6 +395,9 @@ class Protagonist(Character):
         )
         self.quest_journal = {}
 
+        # TODO make max_size constant. Add items here?
+        self.tool_inventory = inventory.Inventory.inventory_factory(max_size=10)
+
         # Maps currency IDs to the number of units of currency.
         # DEPRECATED?
         #self.money_pouch = {}
@@ -453,10 +456,14 @@ class Protagonist(Character):
 
         # Set initial money.
         #protagonist.init_money_pouch()
+        """
         protagonist.add_item_to_inventory_by_id(
             itemdata.CURRENCY_GOLD_COIN_ID,
             quantity=START_NUM_GOLD_COINS,
         )
+        """ # TODO Switch back. testing blank inventory.
+
+        # TODO set tool inventory.
 
         # TODO rest of setup
 
