@@ -108,7 +108,7 @@ SKILL_ID_NAME_MAPPING = {
     },
     SKILL_ID_SMITHING: {
           language.LANG_ENGLISH: "SMITHING",
-          language.LANG_ESPANOL: "METALISTERIA"",
+          language.LANG_ESPANOL: "METALISTERIA",
     },
     SKILL_ID_HERBLORE: {
           language.LANG_ENGLISH: "HERBLORE",
