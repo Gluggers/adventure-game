@@ -111,7 +111,7 @@ OPTION_NAME_INFO = {
         language.LANG_ESPANOL: "Hechizos",
     },
     TOOLS_OPTION_ID: {
-        language.LANG_ENGLISH: "Tools",
+        language.LANG_ENGLISH: "Toolbelt",
         language.LANG_ESPANOL: "Herramientas",
     },
     MORE_OPTIONS_OPTION_ID: {

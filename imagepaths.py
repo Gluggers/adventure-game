@@ -1,6 +1,7 @@
 ### CREDITS ###
 # [1] Lanea Zimmerman - https://sharm.itch.io/
 #      https://sharm.itch.io/tiny16
+#           https://creativecommons.org/licenses/by/3.0/
 # [2] 0x72 - https://0x72.itch.io/dungeontileset-ii
 # [3] Antifarea, opengameart -
 #       https://opengameart.org/content/twelve-16x18-rpg-sprites-plus-base
@@ -68,20 +69,22 @@ TILE_GRASS_PLAIN_PATH = TILE_IMAGE_PATH + "tile_grass_plain_32x32_dk.png" # [0]
 TILE_GRASS_FLOWERS_PATH = TILE_IMAGE_PATH + "tile_grass_flowers_1_32x32_dk.png" # [1]
 TILE_GRASS_1_PATH = TILE_IMAGE_PATH + "tile_grass_1_32x32_dk.png" # [0]
 TILE_GRASS_2_PATH = TILE_IMAGE_PATH + "tile_grass_2_32x32_dk.png" # [1]
-TILE_SAND_PATH = TILE_IMAGE_PATH + "tile_sand_32x32_lz.png" # [1]
-#TILE_FOREST_OAK_PATH = TILE_IMAGE_PATH + "tile_forest_oak_32x32_lz.png"  # [1]
-TILE_WATER_NORMAL_1_PATH = TILE_IMAGE_PATH + "tile_water_normal_1_32x32_lz.png" # [1]
-TILE_WATER_NORMAL_2_PATH = TILE_IMAGE_PATH + "tile_water_normal_2_32x32_lz.png" # [1]
-TILE_WATER_NORMAL_3_PATH = TILE_IMAGE_PATH + "tile_water_normal_3_32x32_lz.png" # [1]
+TILE_SAND_PATH = TILE_IMAGE_PATH + "tile_sand_32x32_dk.png" # [1]
+TILE_WATER_NORMAL_1_PATH = TILE_IMAGE_PATH + "tile_water_normal_1_32x32_dk.png" # [1]
+TILE_WATER_NORMAL_2_PATH = TILE_IMAGE_PATH + "tile_water_normal_2_32x32_dk.png" # [1]
+TILE_WATER_NORMAL_3_PATH = TILE_IMAGE_PATH + "tile_water_normal_3_32x32_dk.png" # [1]
 
 ### INTERACTIVE OBJECTS
 HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32_lz.png" # [1]
 #ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
 ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
 #ORE_COPPER_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_copper_32x32_dk.png" # [0]
-TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz.png" # [1]
-TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
-TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
+#TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz.png" # [1]
+#TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
+#TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
+TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_2_64x64_lz_dk.png" # [1] modified by DK
+TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz_dk.png" # [1] modified by DK
+TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz_dk.png" # [1] modified by DK
 
 ### ITEMS ###
 GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50_dk.png" # [0]
@@ -90,6 +93,7 @@ LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 LOG_OAK_ICON_PATH = ITEMS_PATH + "log_oak_icon_50x50_dk.png" # [0]
 LOG_WILLOW_ICON_PATH = ITEMS_PATH + "log_willow_icon_50x50_dk.png" # [0]
 LOG_MAPLE_ICON_PATH = ITEMS_PATH + "log_maple_icon_50x50_dk.png" # [0]
+HAMMER_NORMAL_ICON_PATH = ITEMS_PATH + "hammer_normal_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

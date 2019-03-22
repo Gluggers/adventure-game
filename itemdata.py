@@ -15,8 +15,9 @@ SELLABLE_F = 0x2
 CONSUMABLE_F = 0x4
 QUEST_ITEM_F = 0x8 # Special quest-related item that shouldn't be sold or destroyed.
 ALCHABLE_F = 0x10
-COOKABLE_FIRE = 0x20
-COOKABLE_RANGE = 0x40
+COOKABLE_FIRE_F = 0x20
+COOKABLE_RANGE_F = 0x40
+TOOL_ITEM_F = 0x80
 
 ### EQUIPMENT SLOT ID VALUES ###
 EQUIP_SLOT_NONE = 0x0 # Not equippable
@@ -50,7 +51,14 @@ CURRENCY_VALUE_MAPPING = {
 KNIFE_ID = 10001
 TINDERBOX_ID = 10002
 NEEDLE_ID = 10003
-HAMMER_STONE_ID = 10102
+HAMMER_NORMAL_ID = 10102 # For metals up to steel.
+HAMMER_TITANIUM_ID = 10106 # For metals up to titanium.
+HAMMER_MITHRIL_ID = 10107 # For metals up to mithril.
+HAMMER_ADAMANT_ID = 10108 # For metals up to adamant.
+HAMMER_ANCIENT_ID = 10109 # For metals up to ancient.
+HAMMER_ASTRAL_ID = 10110 # For metals up to astral.
+HAMMER_DRAGONITE_ID = 10111 # For metals up to dragonite.
+HAMMER_CELESTIAL_ID = 10112 # For all metals.
 HATCHET_STONE_ID = 10202
 HATCHET_BRONZE_ID = 10203
 HATCHET_IRON_ID = 10204
@@ -301,6 +309,28 @@ STANDARD_ITEM_DATA = {
         ITEM_OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
         IMAGE_PATH_DICT_FIELD: {
 
+        },
+    },
+    HAMMER_NORMAL_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Hammer",
+            language.LANG_ESPANOL: "Martillo",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "A normal hammer.",
+            language.LANG_ESPANOL: "Un martillo tipico.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this for smithing.",
+            language.LANG_ESPANOL: "Puede servir para la metalisteria.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: TOOL_ITEM_F,
+        ITEM_OPTION_ID_LIST_FIELD: [],
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.HAMMER_NORMAL_ICON_PATH,
         },
     },
     LOG_TREE_ID: {

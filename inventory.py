@@ -2,12 +2,16 @@ import language
 import items
 import logging
 
-DEFAULT_MAX_INVENT_SIZE = 120 #30
+DEFAULT_MAX_INVENT_SIZE = 120 #30 #40?
 
 class Inventory():
     inventory_name_info = {
         language.LANG_ENGLISH: "Inventory",
         language.LANG_ESPANOL: "Inventario",
+    }
+    toolbelt_name_info = {
+        language.LANG_ENGLISH: "Toolbelt",
+        language.LANG_ESPANOL: "Herramientas",
     }
 
     def __init__(
@@ -67,6 +71,34 @@ class Inventory():
             reverse=reverse,
             key=lambda x: x[0].get_name()
         )
+
+    # Sorts stackable items first in order from least to greatest
+    # item ID number. Then sorts non-stackable items together in order from
+    # least to greatest item ID number.
+    def standard_sort(self):
+        stackables = []
+        nonstackables = []
+        final_list = []
+
+        for data in self.inventory_data:
+            if data[0].is_stackable():
+                stackables.append(data)
+            else:
+                nonstackables.append(data)
+
+        stackables.sort(
+            key=lambda x: x[0].item_id
+        )
+        nonstackables.sort(
+            key=lambda x: x[0].item_id
+        )
+
+        for data in stackables:
+            final_list.append(data)
+        for data in nonstackables:
+            final_list.append(data)
+
+        self.inventory_data = final_list
 
     # Adds item to inventory. Returns True upon success, False on failure.
     def add_item(

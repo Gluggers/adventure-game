@@ -331,12 +331,18 @@ class SelectionGridViewing(viewing.Viewing):
     # Handles displaying the item listing and returns
     # the selected option and item index as a tuple
     # (None if no option is selected).
+    # custom_actions is a dict that maps pygame keys to
+    # option IDs to return (will return the tuple of (option ID, curr_index)).
+    # Used for custom actions like having
+    # the user switch from this selection grid to a different one
+    # by pressing a certain key.
     # Inherited method.
     def handle_selection_grid(
             self,
             selection_data_list, # list of [selection object, supertext]
             starting_selected_index=0,
             preselected_index_list=[],
+            custom_actions=None,
         ):
         ret_info = None
         max_index = len(selection_data_list) - 1
@@ -432,6 +438,11 @@ class SelectionGridViewing(viewing.Viewing):
                                 logger.info("Leaving selection viewing.")
                                 received_input = True
                                 done = True
+                                go_down = False
+                                go_up = False
+                                go_left = False
+                                go_right = False
+                                open_options = False
                             elif events.key == pygame.K_DOWN:
                                 logger.info("Going down in grid.")
                                 go_down = True
@@ -472,6 +483,27 @@ class SelectionGridViewing(viewing.Viewing):
                                 go_right = False
                                 open_options = True
                                 received_input = True
+                            elif custom_actions and events.key in custom_actions:
+                                ret_option_id = custom_actions.get(
+                                    events.key,
+                                    None
+                                )
+
+                                if ret_option_id:
+                                    logger.info("Activating custom action {0}".format(
+                                        ret_option_id
+                                    ))
+                                    received_input = True
+                                    ret_info = (ret_option_id, curr_index)
+                                    done = True
+                                else:
+                                    received_input = False
+
+                                go_down = False
+                                go_up = False
+                                go_left = False
+                                go_right = False
+                                open_options = False
 
                 if received_input:
                     new_index = curr_index
@@ -521,6 +553,28 @@ class SelectionGridViewing(viewing.Viewing):
 
                     logger.info("Curr index now: {0}".format(curr_index))
                     # TODO rest
+
+        # Handle blank selection data.
+        elif len(selection_data_list) == 0:
+            self.refresh_and_blit_self_no_background()
+            self.selection_grid_display.blit_background(
+                self.main_display_surface,
+            )
+            pygame.display.update()
+
+            received_input = False
+
+            while not received_input:
+                timekeeper.Timekeeper.tick()
+
+                for events in pygame.event.get():
+                    if events.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit(0)
+                    elif events.type == pygame.KEYDOWN:
+                        if events.key == pygame.K_ESCAPE:
+                            logger.info("Leaving selection viewing.")
+                            received_input = True
 
         logger.info("Returning selection: {0}".format(ret_info))
         return ret_info

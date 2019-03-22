@@ -159,6 +159,9 @@ class Entity(interactiveobj.Interactive_Object):
     def add_item_to_inventory_by_id(self, item_id, quantity=1):
         return self.inventory.add_item_by_id(item_id, quantity=quantity)
 
+    def add_item_to_tool_inventory_by_id(self, item_id, quantity=1):
+        return self.tool_inventory.add_item_by_id(item_id, quantity=quantity)
+
     def has_item_equipped(self, item_id):
         has_equipped = False
 
@@ -168,8 +171,14 @@ class Entity(interactiveobj.Interactive_Object):
 
         return has_equipped
 
+    def has_tool_id(self, item_id):
+        return self.tool_inventory.has_item_id_in_inventory(item_id)
+
+    # TODO test this.
     def has_item(self, item_id):
-        return has_item_in_inventory(item_id) or has_item_equipped(item_id)
+        return self.inventory.has_item_id_in_inventory(item_id) \
+            or self.has_item_equipped(item_id) \
+            or self.has_tool_id(item_id)
 
     def get_skill_level(self, skill_id):
         ret_level = None
@@ -455,15 +464,16 @@ class Protagonist(Character):
         logger.debug("Protagonist race: {0}".format(protagonist.race))
 
         # Set initial money.
-        #protagonist.init_money_pouch()
-        """
         protagonist.add_item_to_inventory_by_id(
             itemdata.CURRENCY_GOLD_COIN_ID,
             quantity=START_NUM_GOLD_COINS,
         )
-        """ # TODO Switch back. testing blank inventory.
 
-        # TODO set tool inventory.
+        # Set tool inventory. TESTING
+        protagonist.add_item_to_tool_inventory_by_id(
+            itemdata.CURRENCY_SILVER_COIN_ID,
+            quantity=5618274,
+        )
 
         # TODO rest of setup
 

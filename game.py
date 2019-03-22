@@ -59,6 +59,28 @@ class Game():
                 )
 
             self.overworld_inventory_viewing = None
+            self.overworld_toolbelt_viewing = None
+
+            # Create inventory viewing and toolbelt viewings for overworld..
+            self.overworld_inventory_viewing = \
+                selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                    inventory.Inventory.inventory_name_info,
+                    self.main_display_screen,
+                    itemdata.ITEM_ICON_DIMENSIONS,
+                    display_pattern=display.PATTERN_2_ID,
+                    bottom_text=None,
+                    allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
+                )
+
+            self.overworld_toolbelt_viewing = \
+                selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                    inventory.Inventory.toolbelt_name_info,
+                    self.main_display_screen,
+                    itemdata.ITEM_ICON_DIMENSIONS,
+                    display_pattern=display.PATTERN_2_ID,
+                    bottom_text=None,
+                    allowed_selection_option_set=None,
+                )
 
             if not self.overworld_viewing:
                 logger.error("Failed to create viewing object.")
@@ -104,17 +126,6 @@ class Game():
         # Associate protag with game and viewing.
         self.protagonist = protagonist
         self.overworld_viewing.protagonist = protagonist
-
-        # Create inventory viewing. TODO
-        self.overworld_inventory_viewing = \
-            selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
-                inventory.Inventory.inventory_name_info,
-                self.main_display_screen,
-                itemdata.ITEM_ICON_DIMENSIONS,
-                display_pattern=display.PATTERN_2_ID,
-                bottom_text=None,
-                allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
-            )
 
     def set_protagonist_tile_position(self, new_position):
         if new_position and self.protagonist and self.curr_map:
@@ -351,23 +362,43 @@ class Game():
                     )
 
     # TODO enhance once menus are set up.
-    def display_inventory(self, target_entity):
-        if target_entity:
+    def handle_overworld_inventory(self):
+        if self.overworld_inventory_viewing and self.protagonist:
             # Sort inventory first before displaying it.
-            target_entity.inventory.alphabetical_sort(reverse=False)
+            #self.protagonist.inventory.alphabetical_sort(reverse=False)
+            self.protagonist.inventory.standard_sort()
+            #self.protagonist.inventory.print_self()
 
-            target_entity.inventory.print_self()
+            self.overworld_inventory_viewing.blit_background()
 
-            if self.overworld_inventory_viewing:
-                self.overworld_inventory_viewing.blit_background()
+            ret_info = self.overworld_inventory_viewing.handle_selection_grid(
+                self.protagonist.inventory.inventory_data
+            )
+            logger.info("Ret info from inventory viewing: {0}".format(ret_info))
+            # TODO handle ret_info.
 
-                self.overworld_inventory_viewing.handle_selection_grid(
-                    target_entity.inventory.inventory_data
-                )
-                # TODO
+            #self.overworld_viewing.refresh_and_blit_self()
+        else:
+            logger.warn("No overworld inventory viewing or protagonist set.")
 
-            else:
-                logger.warn("No inventory viewing set.")
+    def handle_overworld_toolbelt(self):
+        if self.overworld_toolbelt_viewing and self.protagonist:
+            # Sort inventory first before displaying it.
+            #self.protagonist.tool_inventory.alphabetical_sort(reverse=False)
+            self.protagonist.tool_inventory.standard_sort()
+
+            self.protagonist.tool_inventory.print_self()
+            self.overworld_toolbelt_viewing.blit_background()
+
+            ret_info = self.overworld_toolbelt_viewing.handle_selection_grid(
+                self.protagonist.tool_inventory.inventory_data
+            )
+            logger.info("Ret info from inventory viewing: {0}".format(ret_info))
+            # TODO handle ret_info.
+
+            #self.overworld_viewing.refresh_and_blit_self()
+        else:
+            logger.warn("No overworld toolbelt viewing or protagonist set.")
 
     def toggle_language(self):
         # For now, just switch to other language
@@ -613,11 +644,15 @@ class Game():
             sys.exit(0)
         elif option_id == menuoptions.INVENTORY_OPTION_ID:
             logger.info("Displaying inventory from menu.")
-            self.display_inventory(self.protagonist)
+            self.handle_overworld_inventory()
             self.overworld_viewing.refresh_and_blit_self()
         elif option_id == menuoptions.STATS_OPTION_ID:
             logger.info("Displaying stat levels from menu.")
             self.display_statistics(self.protagonist)
+        elif option_id == menuoptions.TOOLS_OPTION_ID:
+            logger.info("Displaying toolbelt from menu.")
+            self.handle_overworld_toolbelt()
+            self.overworld_viewing.refresh_and_blit_self()
 
     def handle_overworld_loop(self):
         continue_playing = True

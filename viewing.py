@@ -87,7 +87,6 @@ class Viewing():
                 # Refresh and reblit self.
                 if refresh_during:
                     self.refresh_and_blit_self()
-                    pygame.display.update()
 
                 # Reblit page but with continue icon if available.
                 text_display.blit_page(

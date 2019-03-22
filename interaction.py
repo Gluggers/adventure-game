@@ -8,6 +8,7 @@ import display
 import timekeeper
 import random
 import skills
+import viewingdata
 import sys
 import items
 import logging
