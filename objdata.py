@@ -31,13 +31,38 @@ MAX_MONSTER_ID = 299999
 # RESOURCE IDS ARE 300000 TO 399999
 MIN_RESOURCE_ID = 300000
 MAX_RESOURCE_ID = 399999
+
+# 301000 for harvestable plants.
 HERB_BASIC_ID = 301001
-TREE_BASIC_ID = 302001
-TREE_BASIC_2_ID = 302002
-TREE_BASIC_3_ID = 302003
-TREE_OAK_ID = 302010
-TREE_WILLOW_ID = 302011
-TREE_MAPLE_ID = 302012
+PALM_WITH_COCONUT_ID = 301101 # turn into standard palm tree after?
+
+# 302000 for Trees.
+
+# Standard trees.
+TREE_BASIC_ID = 302001 # 1 woodcutting.
+TREE_BAMBOO_ID = 302005 # 5 woodcutting.
+TREE_OAK_ID = 302010 # 10 woodcutting?
+TREE_WILLOW_ID = 302015 # 25 woodcutting?
+TREE_MAPLE_ID = 302020 # 40 woodcutting?
+TREE_YEW_ID = 302025 # 55 woodcutting?
+TREE_ANCIENT_ID = 302030 # 70 woodcutting?
+TREE_ASTRAL_ID = 302035 # 85 woodcutting?
+TREE_CELESTIAL_ID = 302040 # 95 woodcutting.
+TREE_TEAK_ID = 302045 # 30 woodcutting?
+TREE_MAHOGANY_ID = 302050 # 45 woodcutting?
+TREE_EUCALYPTUS_ID = 302055 # 60 woodcutting?
+
+# Winter region trees.
+TREE_PINE_ID = 302101 # 1 woodcutting.
+
+# Tropical region trees.
+TREE_PALM_ID = 302201 # 20 woodcutting.
+
+# Other trees.
+TREE_SPIRIT_ID = 302301
+TREE_DARK_ID = 302305
+
+# 303000 for ore rocks.
 ORE_COPPER_ID = 303001
 ORE_COPPER_2_ID = 303002
 ORE_TIN_ID = 303011
@@ -79,6 +104,7 @@ MAX_CHEST_ID = 699999
 MIN_MISC_ID = 700000
 ORE_EMPTY_ID = 700001
 TREE_STUMP_ID = 700002
+WILLOW_STUMP_ID = 700003
 MAX_MISC_ID = 799999
 
 ### OBJECT DATA FIELDS ###
@@ -156,6 +182,23 @@ MISC_OBJECT_DATA = {
             language.LANG_ESPANOL: "Solia haber un arbol aqui.",
         },
     },
+    WILLOW_STUMP_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "WILLOW STUMP",
+            language.LANG_ESPANOL: "TOCON DE SAUCE",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.IMAGE_ID_DEFAULT: imagepaths.WILLOW_STUMP_PATH,
+            imageids.OW_IMAGE_ID_DEFAULT: imagepaths.WILLOW_STUMP_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 2,
+        COLLISION_HEIGHT_FIELD: 1,
+        RESPAWN_TIME_S_FIELD:  None,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There used to be a willow here.",
+            language.LANG_ESPANOL: "Solia haber un sauce aqui.",
+        },
+    },
 }
 
 ### RESOURCE DATA ###
@@ -230,5 +273,29 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,
         REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
+    },
+    TREE_WILLOW_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "WILLOW TREE",
+            language.LANG_ESPANOL: "SAUCE",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.IMAGE_ID_DEFAULT: imagepaths.TREE_WILLOW_PATH,
+            imageids.OW_IMAGE_ID_DEFAULT: imagepaths.TREE_WILLOW_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 2,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
+        REQUIRED_LEVEL_FIELD: 25,
+        GAINED_XP_FIELD: 200, #70?
+        RESOURCE_ITEM_FIELD: itemdata.LOG_WILLOW_ID,
+        RESPAWN_TIME_S_FIELD:  120,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "What a magnificent willow. These grow by water.",
+            language.LANG_ESPANOL: "Que sauce tan maravilloso! Estos crecen cerca de agua.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 0.2,
+        REPLACEMENT_OBJECT_ID_FIELD: WILLOW_STUMP_ID,
     },
 }

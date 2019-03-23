@@ -159,7 +159,7 @@ class Entity(interactiveobj.Interactive_Object):
     def add_item_to_inventory_by_id(self, item_id, quantity=1):
         return self.inventory.add_item_by_id(item_id, quantity=quantity)
 
-    def add_item_to_tool_inventory_by_id(self, item_id, quantity=1):
+    def add_item_to_toolbelt_by_id(self, item_id, quantity=1):
         return self.tool_inventory.add_item_by_id(item_id, quantity=quantity)
 
     def has_item_equipped(self, item_id):
@@ -407,24 +407,6 @@ class Protagonist(Character):
         # TODO make max_size constant. Add items here?
         self.tool_inventory = inventory.Inventory.inventory_factory(max_size=10)
 
-        # Maps currency IDs to the number of units of currency.
-        # DEPRECATED?
-        #self.money_pouch = {}
-
-        # TODO FILL IN REST
-
-    # DEPRECATED?
-    """
-    def init_money_pouch(self):
-        self.money_pouch = {}
-
-        for currency_id in currency.CURRENCY_VALUE_MAPPING:
-            self.money_pouch[currency_id] = 0
-
-        # Set default gold value.
-        self.money_pouch[currency.CURRENCY_GOLD_COIN] = START_NUM_GOLD_COINS
-    """
-
     @classmethod
     def protagonist_factory(
                 cls,
@@ -469,10 +451,19 @@ class Protagonist(Character):
             quantity=START_NUM_GOLD_COINS,
         )
 
-        # Set tool inventory. TESTING
-        protagonist.add_item_to_tool_inventory_by_id(
-            itemdata.CURRENCY_SILVER_COIN_ID,
-            quantity=5618274,
+        # Set tool belt.
+        protagonist.add_item_to_toolbelt_by_id(
+            itemdata.HAMMER_NORMAL_ID,
+            quantity=1,
+        )
+        protagonist.add_item_to_toolbelt_by_id(
+            itemdata.KNIFE_ID,
+        )
+        protagonist.add_item_to_toolbelt_by_id(
+            itemdata.NEEDLE_ID,
+        )
+        protagonist.add_item_to_toolbelt_by_id(
+            itemdata.TINDERBOX_ID,
         )
 
         # TODO rest of setup

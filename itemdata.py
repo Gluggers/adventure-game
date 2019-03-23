@@ -70,6 +70,7 @@ HATCHET_ANCIENT_ID = 10209
 HATCHET_ASTRAL_ID = 10210
 HATCHET_DRAGONITE_ID = 10211
 HATCHET_CELESTIAL_ID = 10212
+# TODO pickaxe
 
 # WEAPONS 50000 TO 0x59999
 DAGGER_WOODEN_ID = 50001
@@ -323,14 +324,80 @@ STANDARD_ITEM_DATA = {
             language.LANG_ESPANOL: "Un martillo tipico.",
         },
         USAGE_INFO_FIELD: {
-            language.LANG_ENGLISH: "I could use this for smithing.",
-            language.LANG_ESPANOL: "Puede servir para la metalisteria.",
+            language.LANG_ENGLISH: "I could use this to build things.",
+            language.LANG_ESPANOL: "Puede servir para construir cosas.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: TOOL_ITEM_F,
         ITEM_OPTION_ID_LIST_FIELD: [],
         IMAGE_PATH_DICT_FIELD: {
             imageids.ITEM_ICON_IMAGE_ID: imagepaths.HAMMER_NORMAL_ICON_PATH,
+        },
+    },
+    KNIFE_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Knife",
+            language.LANG_ESPANOL: "Cuchillo",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "A normal knife.",
+            language.LANG_ESPANOL: "Un cuchillo tipico.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to cut things.",
+            language.LANG_ESPANOL: "Puede servir para cortar cosas.",
+        },
+        WEIGHT_POINT_FIELD: 5,
+        PROPERTIES_FIELD: TOOL_ITEM_F,
+        ITEM_OPTION_ID_LIST_FIELD: [],
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.KNIFE_NORMAL_ICON_PATH,
+        },
+    },
+    TINDERBOX_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Tinderbox",
+            language.LANG_ESPANOL: "Fosforos",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "A box of matches.",
+            language.LANG_ESPANOL: "Una caja de fosforos.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to make fire.",
+            language.LANG_ESPANOL: "Puede servir para prender una hoguera.",
+        },
+        WEIGHT_POINT_FIELD: 2,
+        PROPERTIES_FIELD: TOOL_ITEM_F,
+        ITEM_OPTION_ID_LIST_FIELD: [],
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.TINDERBOX_ICON_PATH,
+        },
+    },
+    NEEDLE_ID: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Needle",
+            language.LANG_ESPANOL: "Aguja",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "It's pointy!",
+            language.LANG_ESPANOL: "Que puntiaguda!.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to sew fabric.",
+            language.LANG_ESPANOL: "Puede servir para coser teijdo.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: TOOL_ITEM_F,
+        ITEM_OPTION_ID_LIST_FIELD: [],
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.NEEDLE_ICON_PATH,
         },
     },
     LOG_TREE_ID: {

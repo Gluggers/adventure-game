@@ -64,22 +64,16 @@ class Game():
             # Create inventory viewing and toolbelt viewings for overworld..
             self.overworld_inventory_viewing = \
                 selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
-                    inventory.Inventory.inventory_name_info,
                     self.main_display_screen,
                     itemdata.ITEM_ICON_DIMENSIONS,
                     display_pattern=display.PATTERN_2_ID,
-                    bottom_text=None,
-                    allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
                 )
 
             self.overworld_toolbelt_viewing = \
                 selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
-                    inventory.Inventory.toolbelt_name_info,
                     self.main_display_screen,
                     itemdata.ITEM_ICON_DIMENSIONS,
                     display_pattern=display.PATTERN_2_ID,
-                    bottom_text=None,
-                    allowed_selection_option_set=None,
                 )
 
             if not self.overworld_viewing:
@@ -369,10 +363,19 @@ class Game():
             self.protagonist.inventory.standard_sort()
             #self.protagonist.inventory.print_self()
 
-            self.overworld_inventory_viewing.blit_background()
+            self.overworld_inventory_viewing.blit_selection_background(
+                inventory.Inventory.inventory_name_info,
+                bottom_text=None,
+            )
 
             ret_info = self.overworld_inventory_viewing.handle_selection_grid(
-                self.protagonist.inventory.inventory_data
+                inventory.Inventory.inventory_name_info,
+                self.protagonist.inventory.inventory_data,
+                starting_selected_index=0,
+                preselected_index_list=None,
+                custom_actions=None,
+                bottom_text=None,
+                allowed_selection_option_set=menuoptions.OVERWORLD_MENU_OPTION_IDS,
             )
             logger.info("Ret info from inventory viewing: {0}".format(ret_info))
             # TODO handle ret_info.
@@ -388,10 +391,16 @@ class Game():
             self.protagonist.tool_inventory.standard_sort()
 
             self.protagonist.tool_inventory.print_self()
-            self.overworld_toolbelt_viewing.blit_background()
+            self.overworld_toolbelt_viewing.blit_selection_background(
+                inventory.Inventory.toolbelt_name_info,
+                bottom_text=None,
+            )
 
             ret_info = self.overworld_toolbelt_viewing.handle_selection_grid(
-                self.protagonist.tool_inventory.inventory_data
+                inventory.Inventory.toolbelt_name_info,
+                self.protagonist.tool_inventory.inventory_data,
+                bottom_text=None,
+                allowed_selection_option_set=None,
             )
             logger.info("Ret info from inventory viewing: {0}".format(ret_info))
             # TODO handle ret_info.

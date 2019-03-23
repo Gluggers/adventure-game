@@ -83,8 +83,10 @@ ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
 #TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
 #TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_2_64x64_lz_dk.png" # [1] modified by DK
+WILLOW_STUMP_PATH = INTER_OBJ_PATH + "willow_stump_64x64_dk.png" # [0]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz_dk.png" # [1] modified by DK
 TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz_dk.png" # [1] modified by DK
+TREE_WILLOW_PATH = INTER_OBJ_PATH + "tree_willow_64x64_dk.png" # [0]
 
 ### ITEMS ###
 GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50_dk.png" # [0]
@@ -94,6 +96,9 @@ LOG_OAK_ICON_PATH = ITEMS_PATH + "log_oak_icon_50x50_dk.png" # [0]
 LOG_WILLOW_ICON_PATH = ITEMS_PATH + "log_willow_icon_50x50_dk.png" # [0]
 LOG_MAPLE_ICON_PATH = ITEMS_PATH + "log_maple_icon_50x50_dk.png" # [0]
 HAMMER_NORMAL_ICON_PATH = ITEMS_PATH + "hammer_normal_icon_50x50_dk.png" # [0]
+KNIFE_NORMAL_ICON_PATH = ITEMS_PATH + "knife_normal_icon_50x50_dk.png" # [0]
+NEEDLE_ICON_PATH = ITEMS_PATH + "needle_icon_50x50_dk.png" # [0]
+TINDERBOX_ICON_PATH = ITEMS_PATH + "tinderbox_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

@@ -10,6 +10,7 @@ import timekeeper
 import inventory
 import itemdata
 import logging
+import sys
 
 class SelectionGridViewing(viewing.Viewing):
     # TODO update documentation
@@ -23,22 +24,20 @@ class SelectionGridViewing(viewing.Viewing):
     # no options.
     def __init__(
             self,
-            title_info,
             main_display_surface,
             selection_icon_dimensions,
             display_pattern=display.PATTERN_2_ID,
-            bottom_text=None,
-            allowed_selection_option_set=None,
             enlarged_selection_background_path=imagepaths.ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH,
         ):
+        # TODO make title_info, bottom_text, and allowed_selection_option_set be
+        # passed in on blit methods rather than initializer.
+
         viewing.Viewing.__init__(
             self,
             main_display_surface,
         )
         #$$ TODO handle when inventory length = 0.
 
-        self.title_info = title_info
-        self.background_image = None
         self.display_pattern = display_pattern
 
         self.icon_supertext_font_object = None
@@ -50,11 +49,6 @@ class SelectionGridViewing(viewing.Viewing):
             2 * selection_icon_dimensions[0],
             2 * selection_icon_dimensions[1]
         )
-        self.bottom_text = bottom_text
-        self.allowed_selection_option_set = set()
-        if allowed_selection_option_set:
-            for allowed_option in allowed_selection_option_set:
-                self.allowed_selection_option_set.add(allowed_option)
 
         self.enlarged_selection_background = None
         if enlarged_selection_background_path:
@@ -89,12 +83,25 @@ class SelectionGridViewing(viewing.Viewing):
         selection_listing_height = self.display_rect.height \
                             - self.top_display_rect.height \
                             - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
-        bottom_text_width = top_display_width
-        bottom_text_height = 0
 
-        self.bottom_text_rect = None
+        bottom_text_width = top_display_width
+        bottom_text_height = int(self.display_rect.height / 4) \
+                            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+
+        truncated_selection_listing_height = selection_listing_height \
+            - bottom_text_height \
+            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+
+        self.bottom_text_rect = pygame.Rect(
+            self.display_rect.x,
+            self.display_rect.bottom - bottom_text_height,
+            bottom_text_width,
+            bottom_text_height,
+        )
+
         self.bottom_text_display = None
 
+        """
         if self.bottom_text:
             # Make room for bottom text.
             bottom_text_height = int(self.display_rect.height / 4) \
@@ -109,6 +116,7 @@ class SelectionGridViewing(viewing.Viewing):
                 bottom_text_width,
                 bottom_text_height,
             )
+        """
 
         self.selection_grid_rect = pygame.Rect(
             self.display_rect.x,
@@ -118,11 +126,21 @@ class SelectionGridViewing(viewing.Viewing):
             selection_listing_height
         )
 
+        # In case of bottom text.
+        self.truncated_selection_grid_rect = pygame.Rect(
+            self.display_rect.x,
+            self.top_display_rect.bottom \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            selection_listing_width,
+            truncated_selection_listing_height
+        )
+
         # Will display the title.
         self.title_display = None
 
         # Will display the selections in the inventory.
         self.selection_grid_display = None
+        self.truncated_selection_grid_display = None
 
         self.selection_details_side_display = display.Display(
             self.main_display_surface,
@@ -186,8 +204,37 @@ class SelectionGridViewing(viewing.Viewing):
             logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Inherited method.
+    def create_truncated_selection_grid_display(self):
+        logger.info("Creating truncated selection grid display...")
+        font_obj = display.Display.get_font(
+                fontinfo.SELECTION_SUPERTEXT_FONT_ID
+            )
+        if font_obj:
+            self.icon_supertext_font_object = font_obj
+            self.icon_supertext_font_color = viewingdata.COLOR_WHITE
+            self.truncated_selection_grid_display = display.IconGridDisplay(
+                self.main_display_surface,
+                self.truncated_selection_grid_rect,
+                self.selection_icon_dimensions,
+                background_pattern=self.display_pattern,
+                background_image_path=None,
+                background_color=None,
+                horizontal_padding=viewingdata.ITEM_LISTING_HORIZONTAL_PADDING,
+                vertical_padding=viewingdata.ITEM_LISTING_VERTICAL_PADDING,
+                continue_up_icon_image_path=imagepaths.ITEM_LISTING_CONT_UP_PATH,
+                continue_down_icon_image_path=imagepaths.ITEM_LISTING_CONT_DOWN_PATH,
+                selection_image_path=imagepaths.ITEM_LISTING_SELECTED_DEFAULT_PATH,
+            )
+
+            if not self.truncated_selection_grid_display:
+                logger.error("Failed to make truncated selection grid display")
+        else:
+            logger.error("Selection grid supertext font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+    # Inherited method.
     def create_bottom_text_display(self):
-        if self.bottom_text and self.bottom_text_rect:
+        if self.bottom_text_rect:
             logger.info("Creating iselection bottom text display...")
             font_obj = display.Display.get_font(
                     fontinfo.SELECTION_BOTTOM_TEXT_FONT_ID
@@ -214,6 +261,7 @@ class SelectionGridViewing(viewing.Viewing):
     # Inherited method.
     def create_base_displays(self):
         self.create_title_display()
+        self.create_truncated_selection_grid_display()
         self.create_selection_grid_display()
         self.create_bottom_text_display()
 
@@ -222,23 +270,17 @@ class SelectionGridViewing(viewing.Viewing):
     def refresh_self(self):
         pass
 
-    # Inherited method.
-    def refresh_and_blit_self_no_background(self):
+    def refresh_and_blit_self(self):
         self.refresh_self()
-        self.blit_self_no_background()
+        self.blit_self()
 
+    # Blits self.
     # Inherited method.
-    def blit_background(self):
-        # Handle background.
-        if self.background_image:
-            self.main_display_surface.blit(
-                self.background_image,
-                self.display_rect,
-            )
-
-    # Blits self without reblitting background.
-    # Inherited method.
-    def blit_self_no_background(self):
+    def blit_selection_background(
+            self,
+            title_info,
+            bottom_text=None,
+        ):
         # Blit details background.
         if self.selection_details_side_display:
             self.selection_details_side_display.blit_background(
@@ -248,10 +290,7 @@ class SelectionGridViewing(viewing.Viewing):
         # Handle selection title display.
         if self.title_display:
             # Get title text.
-            #inventory_name = inventory.Inventory.get_inventory_name(
-            #    #language.Language.get_current_language_id()
-            #)
-            title_text = self.title_info.get(
+            title_text = title_info.get(
                 language.Language.get_current_language_id(),
                 None
             )
@@ -267,7 +306,7 @@ class SelectionGridViewing(viewing.Viewing):
                 )
 
         # Handle bottom text display.
-        if self.bottom_text_display:
+        if bottom_text:
             self.display_text_display_first_page(
                 self.bottom_text_display,
                 self.bottom_text,
@@ -276,12 +315,18 @@ class SelectionGridViewing(viewing.Viewing):
                 refresh_during=False,
                 refresh_after=False,
             )
+            self.truncated_selection_grid_display.blit_background(
+                self.main_display_surface
+            )
+        else:
+            self.selection_grid_display.blit_background(
+                self.main_display_surface
+            )
 
     # Does not update display.
     # This method should be called before calling display_
     def blit_self(self):
-        self.blit_background()
-        self.blit_self_no_background()
+        pass
 
     # Overridable by child.
     def blit_main_selection_details(self, selection_info):
@@ -292,13 +337,14 @@ class SelectionGridViewing(viewing.Viewing):
         pass
 
     # Overridable by child.
-    def get_selection_options(self, selection_info):
+    def get_selection_options(self, selection_info, allowed_option_set=None):
         return None
 
     # Inherited method.
     def display_selection_options(
             self,
-            selection_info
+            selection_info,
+            allowed_selection_option_set=None,
         ):
         ret_option = None
 
@@ -306,7 +352,8 @@ class SelectionGridViewing(viewing.Viewing):
 
         # Get valid options.
         options_to_show = self.get_selection_options(
-            selection_info
+            selection_info,
+            allowed_selection_option_set=allowed_selection_option_set,
         )
 
         if options_to_show:
@@ -339,10 +386,13 @@ class SelectionGridViewing(viewing.Viewing):
     # Inherited method.
     def handle_selection_grid(
             self,
+            title_info,
             selection_data_list, # list of [selection object, supertext]
             starting_selected_index=0,
-            preselected_index_list=[],
+            preselected_index_list=None,
             custom_actions=None,
+            bottom_text=None,
+            allowed_selection_option_set=None,
         ):
         ret_info = None
         max_index = len(selection_data_list) - 1
@@ -395,7 +445,10 @@ class SelectionGridViewing(viewing.Viewing):
                 ))
 
                 if changed_index:
-                    self.refresh_and_blit_self_no_background()
+                    self.blit_selection_background(
+                        title_info,
+                        bottom_text=bottom_text,
+                    )
                     pygame.display.update()
 
                 go_down = False
@@ -529,7 +582,11 @@ class SelectionGridViewing(viewing.Viewing):
                         )
                     elif open_options:
                         # Show item options.
-                        self.refresh_and_blit_self_no_background()
+                        self.blit_selection_background(
+                            title_info,
+                            bottom_text=bottom_text,
+                        )
+
                         ret_option = self.display_selection_options(
                             curr_selection_info
                         )
@@ -539,10 +596,15 @@ class SelectionGridViewing(viewing.Viewing):
                             done = True
                             ret_info = (ret_option, curr_index)
                         else:
-                            self.refresh_and_blit_self_no_background()
+                            self.blit_selection_background(
+                                title_info,
+                                bottom_text=bottom_text,
+                            )
+
                             self.blit_selection_details(
                                 curr_selection_info
                             )
+
                             pygame.display.update()
 
                     if new_index != curr_index:
@@ -556,10 +618,11 @@ class SelectionGridViewing(viewing.Viewing):
 
         # Handle blank selection data.
         elif len(selection_data_list) == 0:
-            self.refresh_and_blit_self_no_background()
-            self.selection_grid_display.blit_background(
-                self.main_display_surface,
+            self.blit_selection_background(
+                title_info,
+                bottom_text=bottom_text,
             )
+
             pygame.display.update()
 
             received_input = False
@@ -582,22 +645,16 @@ class SelectionGridViewing(viewing.Viewing):
 class ItemSelectionGridViewing(SelectionGridViewing):
     def __init__(
             self,
-            title_info,
             main_display_surface,
             item_icon_dimensions,
             display_pattern=display.PATTERN_2_ID,
-            bottom_text=None,
-            allowed_selection_option_set=menuoptions.COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET,
             enlarged_selection_background_path=imagepaths.ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH,
         ):
         SelectionGridViewing.__init__(
             self,
-            title_info,
             main_display_surface,
             item_icon_dimensions,
             display_pattern=display_pattern,
-            bottom_text=bottom_text,
-            allowed_selection_option_set=allowed_selection_option_set,
             enlarged_selection_background_path=enlarged_selection_background_path,
         )
 
@@ -837,7 +894,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         self.blit_main_selection_details(selection_info)
         self.blit_selection_description(selection_info[0])
 
-    def get_selection_options(self, selection_info):
+    # Overridden.
+    def get_selection_options(self, selection_info, allowed_option_set=None):
         selection_options = []
 
         selection_obj = selection_info[0]
@@ -846,8 +904,9 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             + [menuoptions.CANCEL_OPTION_ID]
 
         for option in option_list:
-            if option in self.allowed_selection_option_set:
-                selection_options.append(option)
+            if allowed_option_set:
+                if option in allowed_selection_option_set:
+                    selection_options.append(option)
 
         return selection_options
 
@@ -889,23 +948,17 @@ class ItemSelectionGridViewing(SelectionGridViewing):
     @classmethod
     def create_item_selection_grid_viewing(
                 cls,
-                title_info,
                 main_display_surface,
                 item_icon_dimensions,
-                bottom_text=None,
                 display_pattern=display.PATTERN_2_ID,
-                allowed_selection_option_set=None,
             ):
         ret_viewing = None
 
         if main_display_surface:
             ret_viewing = ItemSelectionGridViewing(
-                title_info,
                 main_display_surface,
                 item_icon_dimensions,
                 display_pattern=display_pattern,
-                bottom_text=bottom_text,
-                allowed_selection_option_set=allowed_selection_option_set,
             )
 
             # Create displays for viewing.

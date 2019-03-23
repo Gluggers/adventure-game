@@ -106,6 +106,7 @@ MAP_DATA = {
             (16,13):  objdata.TREE_BASIC_ID,
             (11,14):  objdata.TREE_OAK_ID,
             (11,16):  objdata.TREE_OAK_ID,
+            (10,23):  objdata.TREE_WILLOW_ID,
         },
         MAP_CONNECTOR_TILE_DICT_FIELD: {},
         MAP_ADJ_MAP_DICT_FIELD: {}
