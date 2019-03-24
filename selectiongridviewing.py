@@ -398,6 +398,11 @@ class SelectionGridViewing(viewing.Viewing):
         max_index = len(selection_data_list) - 1
         icon_data_list = []
 
+        display_to_use = self.selection_grid_display
+
+        if bottom_text:
+            display_to_use = self.truncated_selection_grid_display
+
         if selection_data_list:
             icon_data_list = self.convert_to_icon_data_list(selection_data_list)
 
@@ -405,10 +410,10 @@ class SelectionGridViewing(viewing.Viewing):
             # Start with the first item.
             curr_index = starting_selected_index
             first_viewable_row_index = \
-                self.selection_grid_display.get_row_index(curr_index)
+                display_to_use.get_row_index(curr_index)
             last_viewable_row_index = \
                 first_viewable_row_index \
-                + self.selection_grid_display.num_rows \
+                + display_to_use.num_rows \
                 - 1
 
             done = False
@@ -417,7 +422,7 @@ class SelectionGridViewing(viewing.Viewing):
             changed_index = True
 
             while not done:
-                curr_selected_row = self.selection_grid_display.get_row_index(
+                curr_selected_row = display_to_use.get_row_index(
                         curr_index
                     )
 
@@ -426,7 +431,7 @@ class SelectionGridViewing(viewing.Viewing):
                     first_viewable_row_index = curr_selected_row
                     last_viewable_row_index = \
                         first_viewable_row_index \
-                        + self.selection_grid_display.num_rows \
+                        + display_to_use.num_rows \
                         - 1
                 elif curr_selected_row > last_viewable_row_index:
                     # Scroll up.
@@ -434,7 +439,7 @@ class SelectionGridViewing(viewing.Viewing):
                     first_viewable_row_index = max(
                             0,
                             last_viewable_row_index \
-                            - self.selection_grid_display.num_rows \
+                            - display_to_use.num_rows \
                             + 1
                         )
 
@@ -462,7 +467,7 @@ class SelectionGridViewing(viewing.Viewing):
                 curr_selection_info = selection_data_list[curr_index]
 
                 if changed_index:
-                    self.selection_grid_display.blit_icon_listing(
+                    display_to_use.blit_icon_listing(
                         self.main_display_surface,
                         icon_data_list,
                         first_viewable_row_index,
@@ -563,12 +568,12 @@ class SelectionGridViewing(viewing.Viewing):
                     if go_down:
                         new_index = min(
                             max_index,
-                            curr_index + self.selection_grid_display.num_columns
+                            curr_index + display_to_use.num_columns
                         )
                     elif go_up:
                         new_index = max(
                             0,
-                            curr_index - self.selection_grid_display.num_columns
+                            curr_index - display_to_use.num_columns
                         )
                     elif go_right:
                         new_index = min(

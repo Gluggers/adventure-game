@@ -65,7 +65,7 @@ class TextPage(object):
             for the text page.
     """
 
-    def __init__(self, line_list):
+    def __init__(self, line_list, font_object, font_color):
         """Creates a TextPage object with the given text lines.
 
         Args
@@ -73,15 +73,27 @@ class TextPage(object):
                 TextPage object to hold.
         """
         self._text_lines = []
+        self._rendered_text_lines = []
 
-        if line_list:
+        if line_list and font_object and font_color:
             for item in line_list:
+                rendered_text = font_object.render(
+                    item,
+                    False,
+                    font_color,
+                )
+                self._rendered_text_lines.append(rendered_text)
                 self._text_lines.append(item)
 
     @property
     def text_lines(self):
         """Returns the array of text lines for the page."""
         return self._text_lines
+
+    @property
+    def rendered_text_lines(self):
+        """Returns the array of rendered text lines for the page."""
+        return self._rendered_text_lines
 
 class MenuPage(object):
     """A class used to represent a single menu page for a menu display.
@@ -101,23 +113,55 @@ class MenuPage(object):
             option ID for the option to show on the menu page.
     """
 
-    def __init__(self, option_id_list):
+    def __init__(
+            self,
+            option_id_list,
+            font_object,
+            font_color=viewingdata.COLOR_BLACK,
+        ):
         """Creates a MenuPage object with the given option IDs.
 
         Args:
             option_id_list: list of integers representing the options for the
                 MenuPage object to hold.
         """
-        self._option_id_list = []
+        # List of tuples of (option ID, rendered option text).
+        self._option_list = []
+        self.font_object = font_object
 
         if option_id_list:
-            for item in option_id_list:
-                self._option_id_list.append(item)
+            for option_id in option_id_list:
+                #$$
+                option_text = menuoptions.get_option_name(
+                    option_id,
+                    language.Language.current_language_id,
+                )
+
+                if option_text:
+                    rendered_text = self.font_object.render(
+                        option_text,
+                        False,
+                        font_color,
+                    )
+                    if rendered_text:
+                        self._option_list.append((option_id, rendered_text))
 
     def get_num_options(self):
         """Returns the number of options for this menu page."""
 
-        return len(self._option_id_list)
+        return len(self._option_list)
+
+    def get_option_info(self, index):
+        """Returns the option info at the given index.
+
+        The method assumes that the index is within bounds.
+
+        Args:
+            self: calling object.
+            index: array index for the option ID.
+        """
+
+        return self._option_list[index]
 
     def get_option_id(self, index):
         """Returns the option ID at the given index.
@@ -129,13 +173,13 @@ class MenuPage(object):
             index: array index for the option ID.
         """
 
-        return self._option_id_list[index]
+        return self._option_list[index][0]
 
     @property
-    def option_id_list(self):
+    def option_list(self):
         """Returns the array of option IDs for the page."""
 
-        return self._option_id_list
+        return self._option_list
 
 class Display(object):
     # Will contain loaded fonts.
@@ -562,7 +606,6 @@ class Text_Display(Display):
             background_pattern=None,
             background_image_path=None,
             background_color=viewingdata.COLOR_WHITE,
-            font_color=fontinfo.FONT_COLOR_DEFAULT,
             horizontal_padding=0,
             vertical_padding=0,
             continue_icon_image_path=None,
@@ -578,7 +621,6 @@ class Text_Display(Display):
         )
 
         self.font_object = font_object
-        self.font_color = font_color
         self.horizontal_padding = horizontal_padding
         self.vertical_padding = vertical_padding
         self.spacing_factor_between_lines = spacing_factor_between_lines
@@ -929,7 +971,7 @@ class Text_Display(Display):
     # Returns list of TextPage objects, each containing
     # a list of strings, where each string represents one line of text
     # to place on display.
-    def get_text_pages(self, text_string):
+    def get_text_pages(self, text_string, font_color=viewingdata.COLOR_BLACK):
         ret_page_list = []
         page_list = []
 
@@ -952,22 +994,30 @@ class Text_Display(Display):
 
                 while remaining_lines > 0:
                     # Get number of lines to add to page.
-                    lines_to_add = min(self.lines_per_page, remaining_lines)
+                    num_lines_to_add = min(self.lines_per_page, remaining_lines)
 
                     # Get indices for list slicing.
                     start_index = num_lines_processed
-                    end_index = start_index + lines_to_add
+                    end_index = start_index + num_lines_to_add
+
+                    page_lines = lines_to_print[start_index:end_index]
 
                     # Create page and add to page list.
                     page_list.append(
-                        TextPage(lines_to_print[start_index:end_index])
+                        TextPage(page_lines, self.font_object, font_color)
                     )
 
-                    num_lines_processed = num_lines_processed + lines_to_add
-                    remaining_lines = remaining_lines - lines_to_add
+                    num_lines_processed = num_lines_processed + num_lines_to_add
+                    remaining_lines = remaining_lines - num_lines_to_add
             else:
                 # All lines can fit on a single page.
-                page_list.append(TextPage(lines_to_print))
+                page_list.append(
+                    TextPage(
+                        lines_to_print,
+                        self.font_object,
+                        font_color,
+                    )
+                )
 
         if page_list:
             ret_page_list = page_list
@@ -1028,7 +1078,7 @@ class Text_Display(Display):
                 alternative_top_left=alternative_top_left,
             )
 
-            num_lines = len(text_page.text_lines)
+            num_lines = len(text_page.rendered_text_lines)
 
             page_height = self.get_page_height(num_lines)
 
@@ -1046,13 +1096,7 @@ class Text_Display(Display):
                 logger.error("Invalid vertical orientation.")
 
             for index in range(num_lines):
-                text_line = text_page.text_lines[index]
-
-                rendered_text = self.font_object.render(
-                    text_line,
-                    False,
-                    self.font_color,
-                )
+                rendered_text = text_page.rendered_text_lines[index]
 
                 rendered_text_dimensions = rendered_text.get_size()
                 text_width = rendered_text_dimensions[0]
@@ -1060,13 +1104,11 @@ class Text_Display(Display):
                 # Determine horizontal placement.
                 text_top_left = None
                 if horizontal_orientation == ORIENTATION_CENTERED:
-                    #logger.info("Using centered horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.centerx - int(text_width / 2),
                         text_space_rect.y + vertical_offset
                     )
                 elif horizontal_orientation == ORIENTATION_LEFT_JUSTIFIED:
-                    #logger.info("Using left justified horizontal for {0}".format(text_line))
                     text_top_left = (
                         text_space_rect.x,
                         text_space_rect.y + vertical_offset
@@ -1126,7 +1168,6 @@ class Menu_Display(Text_Display):
             background_pattern=None,
             background_image_path=None,
             background_color=viewingdata.COLOR_WHITE,
-            font_color=fontinfo.FONT_COLOR_DEFAULT,
             horizontal_padding=0,
             vertical_padding=0,
             selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
@@ -1140,7 +1181,6 @@ class Menu_Display(Text_Display):
             background_pattern=background_pattern,
             background_image_path=background_image_path,
             background_color=background_color,
-            font_color=font_color,
             horizontal_padding=horizontal_padding,
             vertical_padding=vertical_padding,
             spacing_factor_between_lines=spacing_factor_between_lines,
@@ -1169,28 +1209,6 @@ class Menu_Display(Text_Display):
             "Max options per menu page: {0}".format(self.max_options_per_page)
         )
 
-        # Maps option ID to dict that maps language ID to the rendered
-        # text image for the option text.
-        self.rendered_menu_option_mapping = self.get_menu_option_rendered_text()
-
-    def get_menu_option_rendered_text(self):
-        ret_dict = {}
-        for option_id, option_info in menuoptions.OPTION_NAME_INFO.items():
-            ret_dict[option_id] = {}
-
-            for lang_id in language.Language.valid_language_ids:
-                option_text = option_info.get(lang_id, None)
-
-                if option_text:
-                    ret_dict[option_id][lang_id] = self.font_object.render(
-                        option_text,
-                        False,
-                        self.font_color,
-                    )
-
-        return ret_dict
-
-
     # Returns list of Menu Pages containing the menu option names.
     # If the returned list contains multiple Menu Pages, then each
     # Menu Page (including the final one) will have its last
@@ -1204,6 +1222,7 @@ class Menu_Display(Text_Display):
     def get_menu_page_list(
             self,
             option_id_list,
+            font_color=viewingdata.COLOR_BLACK,
         ):
         ret_pages = []
 
@@ -1252,65 +1271,11 @@ class Menu_Display(Text_Display):
                     )
 
                 if options_to_add:
-                    curr_page = MenuPage(options_to_add)
-                    ret_pages.append(curr_page)
-
-        return ret_pages
-
-    @classmethod
-    def get_menu_page_list_test(
-            cls,
-            option_list,
-            max_options_per_page
-        ):
-        ret_pages = []
-
-        if option_list and max_options_per_page:
-            logger.debug(
-                ("Adding {0} options to page with max of {1}" \
-                + " options per page").format(
-                    len(option_list),
-                    max_options_per_page
-                )
-            )
-
-            done = False
-            remaining_options = option_list
-
-            while not done:
-                options_to_add = []
-
-                if len(remaining_options) <= max_options_per_page:
-                    # We can add all remaining options to this page.
-                    options_to_add = remaining_options
-                    logger.debug(
-                        "Adding remaining {0} pages to menu page: {1}".format(
-                            len(options_to_add),
-                            options_to_add
-                        )
+                    curr_page = MenuPage(
+                        options_to_add,
+                        self.font_object,
+                        font_color=font_color,
                     )
-                    done = True
-                else:
-                    # Options will carry on to next page.
-                    options_to_add = \
-                        remaining_options[0:max_options_per_page - 1]
-                    options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
-                    logger.debug(
-                        ("Adding {0} options plus \"more options\" " \
-                        + "to menu page: {1}").format(
-                            len(options_to_add) - 1,
-                            options_to_add
-                        )
-                    )
-
-                    remaining_options = \
-                        remaining_options[max_options_per_page - 1:]
-                    logger.debug(
-                        "Remaining options: {0}".format(remaining_options)
-                    )
-
-                if options_to_add:
-                    curr_page = MenuPage(options_to_add)
                     ret_pages.append(curr_page)
 
         return ret_pages
@@ -1370,16 +1335,11 @@ class Menu_Display(Text_Display):
                     logger.error("Invalid vertical orientation.")
 
                 for index in range(num_options):
-                    curr_option_id = menu_page.get_option_id(index)
-                    curr_option = menuoptions.get_option_name(
-                        curr_option_id,
-                        language.Language.current_language_id
-                    )
+                    curr_option_info = menu_page.get_option_info(index)
+                    curr_option_id = curr_option_info[0]
 
                     # Get rendered text and dimensions.
-                    rendered_text = self.get_rendered_menu_option_text(
-                        curr_option_id
-                    )
+                    rendered_text = curr_option_info[1]
 
                     if rendered_text:
                         rendered_text_dimensions = rendered_text.get_size()

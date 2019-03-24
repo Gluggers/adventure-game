@@ -161,7 +161,7 @@ MISC_OBJECT_DATA = {
         RESPAWN_TIME_S_FIELD:  None,
         EXAMINE_INFO_FIELD: {
             #language.LANG_ENGLISH: "This ore is empty.",
-            language.LANG_ENGLISH: "This ore is empty. I am also testing out this really long message so we can test the pages and see what happens blah blah blah hola como estas soy un guerrero y estoy buscando mi tesoro! Creo que puedes ayudarme, no? Tienes un poco de tiempo para darme algunos consejos para que avance en este mundo?",
+            language.LANG_ENGLISH: "This ore is empty.",
             language.LANG_ESPANOL: "Esta vena esta agotada.",
         },
     },

@@ -57,16 +57,16 @@ class Viewing():
         self.blit_self()
 
     def display_single_text_page(
-                self,
-                text_display,
-                page,
-                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False,
-                refresh_during=True,
-                horizontal_orientation=display.ORIENTATION_CENTERED,
-                vertical_orientation=display.ORIENTATION_CENTERED,
-                alternative_top_left=None,
-            ):
+            self,
+            text_display,
+            page,
+            advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            auto_advance=False,
+            refresh_during=True,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            alternative_top_left=None,
+        ):
         if page and text_display and self.main_display_surface:
             text_display.blit_page(
                 self.main_display_surface,
@@ -143,20 +143,24 @@ class Viewing():
     # If refresh_during is True, refreshes and blits self and updates display
     # while waiting for advancement and in between pages.
     def display_text_display(
-                self,
-                text_display,
-                text_to_display,
-                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False,
-                refresh_during=True,
-                refresh_after=True,
-                horizontal_orientation=display.ORIENTATION_CENTERED,
-                vertical_orientation=display.ORIENTATION_CENTERED,
-                alternative_top_left=None,
-            ):
+            self,
+            text_display,
+            text_to_display,
+            font_color=viewingdata.COLOR_BLACK,
+            advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            auto_advance=False,
+            refresh_during=True,
+            refresh_after=True,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            alternative_top_left=None,
+        ):
         if self.main_display_surface and text_display and text_to_display:
             # Get the pages.
-            page_list = text_display.get_text_pages(text_to_display)
+            page_list = text_display.get_text_pages(
+                text_to_display,
+                font_color=font_color,
+            )
 
             if page_list:
                 # Display each text page.
@@ -186,20 +190,24 @@ class Viewing():
     # If refresh_during is True, refreshes and blits self and updates display
     # while waiting for advancement and in between pages.
     def display_text_display_first_page(
-                self,
-                text_display,
-                text_to_display,
-                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False,
-                refresh_during=True,
-                refresh_after=True,
-                horizontal_orientation=display.ORIENTATION_CENTERED,
-                vertical_orientation=display.ORIENTATION_CENTERED,
-                alternative_top_left=None,
-            ):
+            self,
+            text_display,
+            text_to_display,
+            font_color=viewingdata.COLOR_BLACK,
+            advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            auto_advance=False,
+            refresh_during=True,
+            refresh_after=True,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            alternative_top_left=None,
+        ):
         if text_to_display and self.main_display_surface and text_display:
             # Get the pages.
-            page_list = text_display.get_text_pages(text_to_display)
+            page_list = text_display.get_text_pages(
+                text_to_display,
+                font_color=font_color,
+            )
             num_pages = len(page_list)
 
             if num_pages > 1:
@@ -225,17 +233,18 @@ class Viewing():
 
     # Returns option ID for selected option, None if no option selected.
     def display_menu_display(
-                self,
-                menu_display,
-                option_id_list,
-                horizontal_orientation=display.ORIENTATION_CENTERED,
-                vertical_orientation=display.ORIENTATION_CENTERED,
-                load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
-                option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
-                refresh_during=True,
-                refresh_after=True,
-                alternative_top_left=None,
-            ):
+            self,
+            menu_display,
+            option_id_list,
+            font_color=viewingdata.COLOR_BLACK,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+            option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+            refresh_during=True,
+            refresh_after=True,
+            alternative_top_left=None,
+        ):
         ret_option_id = None
         menu_pages = []
 
@@ -243,7 +252,10 @@ class Viewing():
                 and menu_display \
                 and option_id_list:
             # Get list of menu pages.
-            menu_pages = menu_display.get_menu_page_list(option_id_list)
+            menu_pages = menu_display.get_menu_page_list(
+                option_id_list,
+                font_color=font_color,
+            )
 
         if menu_pages:
              # Start at top of menu.
@@ -259,7 +271,7 @@ class Viewing():
 
             while not done:
                 curr_page = menu_pages[curr_page_index]
-                num_options = len(curr_page.option_id_list)
+                num_options = curr_page.get_num_options()
                 curr_option_id = None
 
                 # Blit the current menu page.
@@ -543,7 +555,6 @@ class Overworld_Viewing(Viewing):
                 #background_image_path=imagepaths.OW_SIDE_MENU_BACKGROUND_PATH,
                 #background_color=viewingdata.COLOR_WHITE,
                 background_pattern=self.background_pattern,
-                font_color=fontinfo.FONT_COLOR_DEFAULT,
                 horizontal_padding=viewingdata.OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
@@ -609,11 +620,12 @@ class Overworld_Viewing(Viewing):
 
     # Blits the top health display onto the main display screen.
     # Does not update the main display - caller will have to do that
-    def blit_top_health_display(self):
+    def blit_top_health_display(self, font_color=viewingdata.COLOR_BLACK):
         if self.main_display_surface and self.top_health_display:
             self.display_text_display_first_page(
                 self.top_health_display,
                 self.get_health_text(),
+                font_color=font_color,
                 advance_delay_ms=0,
                 auto_advance=True,
                 refresh_during=False,
@@ -623,17 +635,19 @@ class Overworld_Viewing(Viewing):
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
     def display_bottom_text(
-                self,
-                text,
-                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False,
-                refresh_during=True,
-                refresh_after=True,
-            ):
+            self,
+            text,
+            font_color=viewingdata.COLOR_BLACK,
+            advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            auto_advance=False,
+            refresh_during=True,
+            refresh_after=True,
+        ):
         if text and self.bottom_text_display:
             self.display_text_display(
                 self.bottom_text_display,
                 text,
+                font_color=font_color,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
                 refresh_during=refresh_during,
@@ -643,17 +657,19 @@ class Overworld_Viewing(Viewing):
     # If refresh_after is True, refreshes
     # overworld and blits and updates display
     def display_bottom_text_first_page(
-                self,
-                text,
-                advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
-                auto_advance=False,
-                refresh_during=True,
-                refresh_after=True,
-            ):
+            self,
+            text,
+            font_color=viewingdata.COLOR_BLACK,
+            advance_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            auto_advance=False,
+            refresh_during=True,
+            refresh_after=True,
+        ):
         if text and self.main_display_surface and self.bottom_text_display:
             self.display_text_display_first_page(
                 self.bottom_text_display,
                 text,
+                font_color=font_color,
                 advance_delay_ms=advance_delay_ms,
                 auto_advance=auto_advance,
                 refresh_during=refresh_during,
