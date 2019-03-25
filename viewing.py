@@ -5,6 +5,7 @@ import mapdata
 import tile
 import display
 import objdata
+import directions
 import language
 import imageids
 import menuoptions
@@ -833,7 +834,7 @@ class Overworld_Viewing(Viewing):
                 image_type_id = imageids.OW_IMAGE_ID_DEFAULT
                 offset = i % tile.TILE_SIZE
 
-                if direction == mapdata.DIR_SOUTH:
+                if direction == directions.DIR_SOUTH:
                     # map scrolls south, character walks north
                     if offset < WALK1_FRAME_END:
                         image_type_id = imageids.OW_IMAGE_ID_WALK1_NORTH
@@ -841,21 +842,21 @@ class Overworld_Viewing(Viewing):
                         image_type_id = imageids.OW_IMAGE_ID_WALK2_NORTH
                     else:
                         image_type_id = imageids.OW_IMAGE_ID_FACE_NORTH
-                elif direction == mapdata.DIR_WEST:
+                elif direction == directions.DIR_WEST:
                     if offset < WALK1_FRAME_END:
                         image_type_id = imageids.OW_IMAGE_ID_WALK1_EAST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
                         image_type_id = imageids.OW_IMAGE_ID_WALK2_EAST
                     else:
                         image_type_id = imageids.OW_IMAGE_ID_FACE_EAST
-                elif direction == mapdata.DIR_NORTH:
+                elif direction == directions.DIR_NORTH:
                     if offset < WALK1_FRAME_END:
                         image_type_id = imageids.OW_IMAGE_ID_WALK1_SOUTH
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
                         image_type_id = imageids.OW_IMAGE_ID_WALK2_SOUTH
                     else:
                         image_type_id = imageids.OW_IMAGE_ID_FACE_SOUTH
-                elif direction == mapdata.DIR_EAST:
+                elif direction == directions.DIR_EAST:
                     if offset < WALK1_FRAME_END:
                         image_type_id = imageids.OW_IMAGE_ID_WALK1_WEST
                     elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):

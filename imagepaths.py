@@ -46,6 +46,8 @@ INVENTORY_BASIC_INSTRUCTIONS_BACKGROUND_PATH = DISPLAY_PATH \
                         + "" # [0]
 ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
                         + "item_listing_selected_image_60x60_dk.png" # [0]
+ITEM_LISTING_UNSELECTED_DEFAULT_PATH = DISPLAY_PATH \
+                        + "item_listing_unselected_image_60x60_dk.png" # [0]
 ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH = DISPLAY_PATH \
                         + "item_listing_selected_image_background_enlarged_120x120_dk.png" # [0]
 ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
@@ -79,9 +81,6 @@ HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32_lz.png" # [1]
 #ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
 ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
 #ORE_COPPER_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_copper_32x32_dk.png" # [0]
-#TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz.png" # [1]
-#TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz.png" # [1]
-#TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_64x64_lz_dk.png" # [1] modified by DK
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_2_64x64_lz_dk.png" # [1] modified by DK
 WILLOW_STUMP_PATH = INTER_OBJ_PATH + "willow_stump_64x64_dk.png" # [0]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz_dk.png" # [1] modified by DK

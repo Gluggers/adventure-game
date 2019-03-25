@@ -1,12 +1,7 @@
 import tile
 import tiledata
 import objdata
-
-### DIRECTION CONSTANTS ###
-DIR_NORTH = 0x1
-DIR_EAST = 0x2
-DIR_SOUTH = 0x3
-DIR_WEST = 0x4
+import directions
 
 ### MAP ID CONSTANTS ###
 R0_A0_ID = 10

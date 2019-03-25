@@ -19,18 +19,6 @@ COOKABLE_FIRE_F = 0x20
 COOKABLE_RANGE_F = 0x40
 TOOL_ITEM_F = 0x80
 
-### EQUIPMENT SLOT ID VALUES ###
-EQUIP_SLOT_NONE = 0x0 # Not equippable
-EQUIP_SLOT_HEAD = 0x1 # Helmets, hats, etc.
-EQUIP_SLOT_MAIN_HAND = 0x2 # Weapons.
-EQUIP_SLOT_OFF_HAND = 0x3 # Shields.
-EQUIP_SLOT_MAIN_BODY = 0x4 # Plate armour, chainmail, etc.
-EQUIP_SLOT_NECK = 0x5 # Amulets, necklaces, etc.
-EQUIP_SLOT_AMMO = 0x6 # Arrows, etc.
-EQUIP_SLOT_HANDS = 0x7 # Gloves, bracelets, etc.
-EQUIP_SLOT_FEET = 0x8 # Boots, etc.
-EQUIP_SLOT_RING = 0x9 # Rings.
-
 ### ITEM ID NUMBERS ###
 
 # SPECIAL ITEMS 1 TO 9999

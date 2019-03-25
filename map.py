@@ -7,6 +7,7 @@ import objdata
 import tile
 import tiledata
 import mapdata
+import directions
 import imageids
 import viewingdata
 import time
@@ -372,16 +373,16 @@ class Map:
             if self.location_within_bounds(tile_position):
                 adj_tile_pos = None
 
-                if adjacent_direction == mapdata.DIR_NORTH:
+                if adjacent_direction == directions.DIR_NORTH:
                     # Adjacent tile position is above.
                     adj_tile_pos = (tile_position[0], tile_position[1] - 1)
-                elif adjacent_direction == mapdata.DIR_SOUTH:
+                elif adjacent_direction == directions.DIR_SOUTH:
                     # Adjacent tile position is below.
                     adj_tile_pos = (tile_position[0], tile_position[1] + 1)
-                elif adjacent_direction == mapdata.DIR_EAST:
+                elif adjacent_direction == directions.DIR_EAST:
                     # Adjacent tile position is to the right.
                     adj_tile_pos = (tile_position[0] + 1, tile_position[1])
-                elif adjacent_direction == mapdata.DIR_WEST:
+                elif adjacent_direction == directions.DIR_WEST:
                     # Adjacent tile position is to the left.
                     adj_tile_pos = (tile_position[0] - 1, tile_position[1])
 
@@ -684,15 +685,15 @@ class Map:
             new_pixel_location = None
             curr_top_left = self.top_left_position
 
-            if scroll_direction == mapdata.DIR_NORTH:
+            if scroll_direction == directions.DIR_NORTH:
                 # scroll up
                 new_pixel_location = (curr_top_left[0], curr_top_left[1] - distance)
-            elif scroll_direction == mapdata.DIR_EAST:
+            elif scroll_direction == directions.DIR_EAST:
                 # scroll right
                 new_pixel_location = (curr_top_left[0] + distance, curr_top_left[1])
-            elif scroll_direction == mapdata.DIR_SOUTH:
+            elif scroll_direction == directions.DIR_SOUTH:
                 new_pixel_location = (curr_top_left[0], curr_top_left[1] + distance)
-            elif scroll_direction == mapdata.DIR_WEST:
+            elif scroll_direction == directions.DIR_WEST:
                 # scroll left
                 new_pixel_location = (curr_top_left[0] - distance, curr_top_left[1])
             else:

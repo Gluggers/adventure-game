@@ -12,6 +12,7 @@ import imageids
 import items
 import inventory
 import itemdata
+import directions
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -43,20 +44,20 @@ class Entity(interactiveobj.Interactive_Object):
     # for the entity. If None, hitpoints will be set according to
     # the default formula of 10*hitpoints level.
     def __init__(
-                    self,
-                    id,
-                    name_info,
-                    image_path_dict,
-                    collision_width=1,
-                    collision_height=1,
-                    skill_levels={},
-                    equipment_dict={},
-                    gender=GENDER_NEUTRAL,
-                    race=RACE_HUMAN,
-                    examine_info=None,
-                    interaction_id=interactiondata.DEFAULT_ID,
-                    manual_hitpoints=None,
-                ):
+            self,
+            id,
+            name_info,
+            image_path_dict,
+            collision_width=1,
+            collision_height=1,
+            skill_levels={},
+            equipment_dict={},
+            gender=GENDER_NEUTRAL,
+            race=RACE_HUMAN,
+            examine_info=None,
+            interaction_id=interactiondata.DEFAULT_ID,
+            manual_hitpoints=None,
+        ):
         interactiveobj.Interactive_Object.__init__(
             self,
             objdata.TYPE_CHARACTER,
@@ -73,7 +74,7 @@ class Entity(interactiveobj.Interactive_Object):
         self.race = race
 
         # By default, face south.
-        self.facing_direction = mapdata.DIR_SOUTH
+        self.facing_direction = directions.DIR_SOUTH
         self.curr_image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
 
         # Set up skills. self.skill_info_mapping maps skill IDs to
@@ -134,7 +135,7 @@ class Entity(interactiveobj.Interactive_Object):
         self.curr_health = self.max_health
 
         # Set up equipment. The equipment_dict will map equipment slot ID
-        # to length-2 list of [item object, quantity].
+        # to length-3 list of [item_id, item object, quantity].
         self.equipment_dict = {}
         for equipment_slot_id, item_info_list in equipment_dict.items():
             item_id = item_info_list[0]
@@ -280,16 +281,16 @@ class Entity(interactiveobj.Interactive_Object):
         image_id = None
 
         if self and surface and (bottom_left_pixel or top_left_pixel):
-            if direction == mapdata.DIR_NORTH:
+            if direction == directions.DIR_NORTH:
                 image_id = imageids.OW_IMAGE_ID_FACE_NORTH
                 logger.debug("Facing NORTH")
-            elif direction == mapdata.DIR_EAST:
+            elif direction == directions.DIR_EAST:
                 image_id = imageids.OW_IMAGE_ID_FACE_EAST
                 logger.debug("Facing EAST")
-            elif direction == mapdata.DIR_SOUTH:
+            elif direction == directions.DIR_SOUTH:
                 image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
                 logger.debug("Facing SOUTH")
-            elif direction == mapdata.DIR_WEST:
+            elif direction == directions.DIR_WEST:
                 image_id = imageids.OW_IMAGE_ID_FACE_WEST
                 logger.debug("Facing WEST")
 
@@ -380,15 +381,15 @@ class Character(Entity):
 
 class Protagonist(Character):
     def __init__(
-                    self,
-                    id,
-                    name_info,
-                    image_path_dict,
-                    skill_levels={},
-                    equipment_dict={},
-                    gender=GENDER_NEUTRAL,
-                    race=RACE_HUMAN,
-                ):
+            self,
+            id,
+            name_info,
+            image_path_dict,
+            skill_levels={},
+            equipment_dict={},
+            gender=GENDER_NEUTRAL,
+            race=RACE_HUMAN,
+        ):
 
         Character.__init__(
             self,

@@ -4,6 +4,7 @@ import logging
 import viewing
 import viewingdata
 import selectiongridviewing
+import directions
 import entity
 import map
 import inventory
@@ -177,18 +178,18 @@ class Game():
         intended_dest_tile_loc = None
         real_dest_tile_loc = None
 
-        if protag_move_dir == mapdata.DIR_NORTH:
+        if protag_move_dir == directions.DIR_NORTH:
             intended_dest_tile_loc = (curr_tile_loc[0], curr_tile_loc[1]-1)
-            map_scroll_dir = mapdata.DIR_SOUTH
-        elif protag_move_dir == mapdata.DIR_SOUTH:
+            map_scroll_dir = directions.DIR_SOUTH
+        elif protag_move_dir == directions.DIR_SOUTH:
             intended_dest_tile_loc = (curr_tile_loc[0], curr_tile_loc[1]+1)
-            map_scroll_dir = mapdata.DIR_NORTH
-        elif protag_move_dir == mapdata.DIR_EAST:
+            map_scroll_dir = directions.DIR_NORTH
+        elif protag_move_dir == directions.DIR_EAST:
             intended_dest_tile_loc = (curr_tile_loc[0]+1, curr_tile_loc[1])
-            map_scroll_dir = mapdata.DIR_WEST
-        elif protag_move_dir == mapdata.DIR_WEST:
+            map_scroll_dir = directions.DIR_WEST
+        elif protag_move_dir == directions.DIR_WEST:
             intended_dest_tile_loc = (curr_tile_loc[0]-1, curr_tile_loc[1])
-            map_scroll_dir = mapdata.DIR_EAST
+            map_scroll_dir = directions.DIR_EAST
 
         # Check for out of bounds destination.
         if self.curr_map.location_within_bounds(intended_dest_tile_loc):
@@ -702,22 +703,22 @@ class Game():
                 elif events.type == pygame.KEYDOWN:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = True
-                        protag_move_dir = mapdata.DIR_EAST
+                        protag_move_dir = directions.DIR_EAST
                         #move_right = True
                         logger.debug("Right pressed down")
                     elif events.key == pygame.K_LEFT:
                         pressed_left = True
-                        protag_move_dir = mapdata.DIR_WEST
+                        protag_move_dir = directions.DIR_WEST
                         #move_left = True
                         logger.debug("Left pressed down")
                     elif events.key == pygame.K_UP:
                         pressed_up = True
-                        protag_move_dir = mapdata.DIR_NORTH
+                        protag_move_dir = directions.DIR_NORTH
                         #move_up = True
                         logger.debug("Up pressed down")
                     elif events.key == pygame.K_DOWN:
                         pressed_down = True
-                        protag_move_dir = mapdata.DIR_SOUTH
+                        protag_move_dir = directions.DIR_SOUTH
                         #move_down = True
                         logger.debug("Down pressed down")
                     elif events.key == pygame.K_SPACE:

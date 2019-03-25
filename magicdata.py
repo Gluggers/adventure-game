@@ -35,5 +35,50 @@ SPELL_DESCRIPTION_PATH_FIELD = 0x16
 SPELL_REQUIRED_QUESTS_FIELD = 0x17 # List of quest IDs required to cast spell.
 
 ### SPELL ID NUMBERS ###
-SPELL_WATER_BASIC_ID = 0x1
-SPELL_EARTH_BASIC_ID = 0x2
+SPELL_WATER_PULSE_ID = 0x1
+SPELL_EARTH_PULSE_ID = 0x2
+
+"""
+NORMAL SPELLBOOK
+    APPRENTICE LEVEL SPELL
+    1   water pulse
+    4   earth pulse
+    7   air pulse
+    10  fire pulse
+
+    LOW LEVEL SPELL
+    18  water burst
+    22  earth burst
+    26  air burst
+    30  fire burst
+
+    MEDIUM LEVEL SPELL
+    40  water beam
+    45  earth beam
+    50  air beam
+    55  fire beam
+
+    HIGH LEVEL SPELL
+    67  water surge
+    73  earth surge
+    79  air surge
+    85  fire surge
+
+    MASTER SPELLS
+    97  tsunami
+    98  earthquake
+    99  tornado
+    100 eruption
+
+FORBIDDEN SPELLBOOK
+
+
+
+ARCANE SPELLBOOK
+
+
+GAIA SPELLBOOK
+
+
+DIVINE SPELLBOOK
+"""

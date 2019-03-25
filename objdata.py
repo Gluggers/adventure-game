@@ -160,7 +160,6 @@ MISC_OBJECT_DATA = {
         COLLISION_HEIGHT_FIELD: 1,
         RESPAWN_TIME_S_FIELD:  None,
         EXAMINE_INFO_FIELD: {
-            #language.LANG_ENGLISH: "This ore is empty.",
             language.LANG_ENGLISH: "This ore is empty.",
             language.LANG_ESPANOL: "Esta vena esta agotada.",
         },
