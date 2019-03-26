@@ -11,6 +11,7 @@ import objdata
 import resources
 import interactiveobj
 import display
+import equipmentdata
 import timekeeper
 import interaction
 import imageids
@@ -69,6 +70,9 @@ def main():
 
     # Load items.
     items.Item.build_standard_items()
+
+    # Load equipment slot icons.
+    #equipmentdata.EquipmentSlot.init_equipment_slot_icons()
 
     # load characters
 

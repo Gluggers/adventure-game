@@ -18,6 +18,7 @@ PROTAGONIST_PATH = CHARACTER_PATH + "protagonist/"
 DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
 DISPLAY_PATTERN_PATH = DISPLAY_PATH + "patterns/"
 ITEMS_PATH = IMAGE_HOME_PATH + "items/"
+EQUIPMENT_ICON_PATH = DISPLAY_PATH + "equipment_icons/"
 
 ### DISPLAY IMAGE PATHS ###
 DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
@@ -64,6 +65,32 @@ PATTERN_1_CORNER_SE_PATH = DISPLAY_PATTERN_PATH \
                         + "background_1_corner_se_11x11_dk.png" # [0]
 PATTERN_1_CORNER_SW_PATH = DISPLAY_PATTERN_PATH \
                         + "background_1_corner_sw_11x11_dk.png" # [0]
+
+### EQUIPMENT ICON PATHS ###
+EQUIPMENT_ICON_HEAD_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_NECK_PATH = EQUIPMENT_ICON_PATH \
+                        + "neck_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_BODY_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_LEGS_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_FEET_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_AMMO_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_BACK_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_MAIN_HAND_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_OFF_HAND_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_HANDS_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_WRIST_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
+EQUIPMENT_ICON_RING_PATH = EQUIPMENT_ICON_PATH \
+                        + "head_icon_50x50_dk.png" #[0]
 
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_32x32_dk.png" # [0]

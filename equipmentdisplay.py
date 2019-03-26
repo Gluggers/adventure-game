@@ -1,7 +1,8 @@
 import display
 import viewingdata
-import equipmentdata
+import itemdata
 import imagepaths
+import items
 import language
 
 # SELECTION DIRECTION CONSTANTS
@@ -9,27 +10,6 @@ MOVE_UP = 0x1
 MOVE_RIGHT = 0x2
 MOVE_DOWN = 0x3
 MOVE_LEFT = 0x4
-
-class EquipmentInfo(object):
-    # Maps equipment slot IDs to icon images.
-    equipment_slot_icon_mapping = {}
-
-    def __init__(
-            self
-        ):
-        pass
-
-    @classmethod
-    def get_equipment_slot_description(self, equipment_id):
-        return equipmentdata.EQUIPMENT_SLOT_DESCRIPTION_INFO.get(
-            language.Language.current_language_id,
-            None
-        )
-
-    @classmethod
-    def init_equipment_slot_icons(self):
-        # TODO initialize.
-        pass
 
 class EquipmentDisplay(display.Display):
     def __init__(
@@ -114,62 +94,62 @@ class EquipmentDisplay(display.Display):
             + horizontal_pixels_between_icons \
             + icon_width
 
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_HEAD] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_HEAD] = (
             second_column_center_x,
             first_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_NECK] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_NECK] = (
             second_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_MAIN_BODY] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_MAIN_BODY] = (
             second_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_LEGS] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_LEGS] = (
             second_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_FEET] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_FEET] = (
             second_column_center_x,
             fifth_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_AMMO] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_AMMO] = (
             first_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_MAIN_HAND] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_MAIN_HAND] = (
             first_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_HANDS] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_HANDS] = (
             first_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_BACK] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_BACK] = (
             third_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_EQUIP_SLOT_OFF_HAND] = (
+        self.equipment_icon_center[itemdata.EQUIP_EQUIP_SLOT_OFF_HAND] = (
             third_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_WRIST] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_WRIST] = (
             third_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_RING] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_RING] = (
             third_column_center_x,
             fifth_row_center_y
         )
 
     # equipment_info_dict is dict that maps equipment slot ID
-    # to 3-list of form [item_icon, rendered_supertext]
+    # to 2-list of form [item_icon, rendered_supertext]
     def blit_equipment_icons(
             self,
             surface,
             equipment_info_dict,
-            selected_equipment_id,
+            selected_slot_id=itemdata.EQUIP_SLOT_HEAD,
             alternative_top_left=None,
         ):
         if surface and equipment_info_dict \
@@ -195,90 +175,54 @@ class EquipmentDisplay(display.Display):
             ))
 
             # Blit the icons.
+            for slot_id in itemdata.EQUIPMENT_SLOT_ID_LIST:
+                # Check if we have info in the argument dict.
+                equipped_info = equipment_info_dict.get(slot_id, None)
 
+                icon_background = None
+                icon_to_blit = None
+                rendered_supertext = None
+                icon_rect = None
+                icon_background_rect = None
 
-            curr_index = starting_index
-            logger.debug("Starting with icon index {0}".format(curr_index))
+                if equipped_info:
+                    # This slot is equipped.
+                    icon_to_blit = equipped_info[0]
+                    rendered_supertext = equipped_info[1]
+                else:
+                    equipment_slot_obj = items.Item.get_item(slot_id)
+                    if equipment_slot_obj:
+                        icon_to_blit = \
+                            equipment_slot_obj.get_icon()
 
-            horizontal_offset = 0
-            vertical_offset = 0
+                if slot_id == selected_slot_id:
+                    # This slot is selected.
+                    icon_background = self.selection_image
+                else:
+                    icon_background = self.non_selection_image
 
-            # Blit icon and quantity text if needed.
-            icon_rect = pygame.Rect(
-                icon_space_rect.x + horizontal_offset,
-                icon_space_rect.y + vertical_offset,
-                self.icon_dimensions[0],
-                self.icon_dimensions[1],
-            )
+                icon_rect_center = self.equipment_icon_center.get(slot_id, None)
+                if icon_rect_center:
+                    if icon_background:
+                        icon_background_rect = icon_background.get_rect(
+                            center=icon_rect_center
+                        )
+                        surface.blit(
+                            icon_background,
+                            icon_background_rect,
+                        )
 
-            while curr_index <= last_index:
-                curr_viewing_row = int(
-                    (curr_index - starting_index) / self.num_columns
-                )
-                curr_viewing_col = \
-                    (curr_index - starting_index) % self.num_columns
+                    if icon_to_blit:
+                        icon_rect = icon_to_blit.get_rect(
+                            center=icon_rect_center
+                        )
+                        surface.blit(
+                            icon_to_blit,
+                            icon_rect,
+                        )
 
-                horizontal_offset = \
-                    ((curr_index - starting_index) % self.num_columns) \
-                    * (self.icon_dimensions[0] + self.pixels_between_icons)
-
-                vertical_offset = \
-                    curr_viewing_row \
-                    * (self.icon_dimensions[1] + self.pixels_between_icons)
-
-                curr_icon_info = icon_data_list[curr_index]
-                icon_image = curr_icon_info[0]
-                rendered_supertext = curr_icon_info[1]
-
-                # Blit icon image and quantity text if needed.
-                icon_rect.topleft = (
-                    icon_space_rect.x + horizontal_offset,
-                    icon_space_rect.y + vertical_offset,
-                )
-
-                # Check if this is the selected icon. If so,
-                # blit the selection background.
-                if ((selected_index == curr_index) \
-                    or (preselected_index_list is not None \
-                        and selected_index in preselected_index_list)) \
-                    and self.selection_image:
-                    # Center on the icon.
-                    select_image_rect = self.selection_image.get_rect(
-                        center=icon_rect.center
-                    )
-
-                    surface.blit(
-                        self.selection_image,
-                        select_image_rect,
-                    )
-
-                if icon_image:
-                    surface.blit(
-                        icon_image,
-                        icon_rect,
-                    )
-
-                if rendered_supertext:
-                    text_top_left = icon_rect.topleft
-                    surface.blit(
-                        rendered_supertext,
-                        text_top_left,
-                    )
-
-                curr_index += 1
-
-            # Blit the up and down arrows if there are icons above/below.
-            if (starting_index >= self.num_columns) and show_continue_icon:
-                # We have at least 1 row above us.
-                surface.blit(
-                    self.continue_up_icon,
-                    self.continue_up_rect
-                )
-
-            if ((total_icons - starting_index) > self.max_num_icons) \
-                and show_continue_icon:
-                # We have icons after us.
-                surface.blit(
-                    self.continue_down_icon,
-                    self.continue_down_rect
-                )
+                        if rendered_supertext:
+                            surface.blit(
+                                rendered_supertext,
+                                icon_rect.topleft,
+                            )

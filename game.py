@@ -61,6 +61,7 @@ class Game():
 
             self.overworld_inventory_viewing = None
             self.overworld_toolbelt_viewing = None
+            self.overworld_equipment_viewing = None
 
             # Create inventory viewing and toolbelt viewings for overworld..
             self.overworld_inventory_viewing = \
@@ -72,6 +73,13 @@ class Game():
 
             self.overworld_toolbelt_viewing = \
                 selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                    self.main_display_screen,
+                    itemdata.ITEM_ICON_DIMENSIONS,
+                    display_pattern=display.PATTERN_2_ID,
+                )
+
+            self.overworld_equipment_viewing = \
+                equipmentviewing.EquipmentViewing.create_equipment_viewing(
                     self.main_display_screen,
                     itemdata.ITEM_ICON_DIMENSIONS,
                     display_pattern=display.PATTERN_2_ID,
@@ -369,7 +377,7 @@ class Game():
                 bottom_text=None,
             )
 
-            ret_info = self.overworld_inventory_viewing.handle_selection_grid(
+            ret_info = self.overworld_inventory_viewing.handle_selection_area(
                 inventory.Inventory.inventory_name_info,
                 self.protagonist.inventory.inventory_data,
                 starting_selected_index=0,
@@ -397,7 +405,7 @@ class Game():
                 bottom_text=None,
             )
 
-            ret_info = self.overworld_toolbelt_viewing.handle_selection_grid(
+            ret_info = self.overworld_toolbelt_viewing.handle_selection_area(
                 inventory.Inventory.toolbelt_name_info,
                 self.protagonist.tool_inventory.inventory_data,
                 bottom_text=None,

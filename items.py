@@ -14,22 +14,22 @@ class Item(pygame.sprite.Sprite):
     item_listing = {}
 
     def __init__(
-                self,
-                item_id,
-                name_info,
-                description_info,
-                usage_info={},
-                image_path_dict={},
-                base_value_low=0,
-                base_value_high=0,
-                weight_points=0,
-                properties=(itemdata.SELLABLE_F | itemdata.ALCHABLE_F),
-                interaction_id=None,
-                required_creation_items={},
-                required_creation_levels={},
-                required_creation_quests=[],
-                item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
-            ):
+            self,
+            item_id,
+            name_info,
+            description_info,
+            usage_info={},
+            image_path_dict={},
+            base_value_low=0,
+            base_value_high=0,
+            weight_points=0,
+            properties=(itemdata.SELLABLE_F | itemdata.ALCHABLE_F),
+            interaction_id=None,
+            required_creation_items={},
+            required_creation_levels={},
+            required_creation_quests=[],
+            item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
+        ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
 
