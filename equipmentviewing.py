@@ -14,45 +14,46 @@ import itemdata
 import logging
 import sys
 
-# Maps equipment IDs to the directions one can traverse in the display.
+# Maps equipment IDs to the dict that maps directions one can
+# traverse in the display to the adjacent equipment slot ID.
 ALLOWED_MOVEMENT_MAPPING = {
 # TODO
-    EQUIP_SLOT_HEAD: [
+    EQUIP_SLOT_HEAD: {
+        equipmentdisplay.MOVE_DOWN: itemdata.EQUIP_SLOT_NECK
+    },
+    EQUIP_SLOT_MAIN_HAND: {
 
-    ],
-    EQUIP_SLOT_MAIN_HAND: [
+    },
+    EQUIP_SLOT_OFF_HAND: {
 
-    ],
-    EQUIP_SLOT_OFF_HAND: [
+    },
+    EQUIP_SLOT_MAIN_BODY: {
 
-    ],
-    EQUIP_SLOT_MAIN_BODY: [
+    },
+    EQUIP_SLOT_LEGS: {
 
-    ],
-    EQUIP_SLOT_LEGS: [
+    },
+    EQUIP_SLOT_NECK: {
 
-    ],
-    EQUIP_SLOT_NECK: [
+    },
+    EQUIP_SLOT_AMMO: {
 
-    ],
-    EQUIP_SLOT_AMMO: [
+    },
+    EQUIP_SLOT_HANDS: {
 
-    ],
-    EQUIP_SLOT_HANDS: [
+    },
+    EQUIP_SLOT_FEET: {
 
-    ],
-    EQUIP_SLOT_FEET: [
+    },
+    EQUIP_SLOT_RING: {
 
-    ],
-    EQUIP_SLOT_RING: [
+    },
+    EQUIP_SLOT_BACK: {
 
-    ],
-    EQUIP_SLOT_BACK: [
+    },
+    EQUIP_SLOT_WRIST: {
 
-    ],
-    EQUIP_SLOT_WRIST: [
-
-    ],
+    },
 }
 
 class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
