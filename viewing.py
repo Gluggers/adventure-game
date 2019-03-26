@@ -67,6 +67,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
+            no_display_update=False,
         ):
         if page and text_display and self.main_display_surface:
             text_display.blit_page(
@@ -78,7 +79,8 @@ class Viewing():
                 alternative_top_left=alternative_top_left,
             )
 
-            pygame.display.update()
+            if not no_display_update:
+                pygame.display.update()
 
             # Pause if needed.
             if advance_delay_ms:
@@ -99,7 +101,8 @@ class Viewing():
                     alternative_top_left=alternative_top_left,
                 )
 
-                pygame.display.update()
+                if not no_display_update:
+                    pygame.display.update()
 
                 # Clear event queue to prevent premature advancement.
                 pygame.event.clear()
@@ -128,7 +131,9 @@ class Viewing():
                             vertical_orientation=vertical_orientation,
                             alternative_top_left=alternative_top_left,
                         )
-                        pygame.display.update()
+
+                        if not no_display_update:
+                            pygame.display.update()
 
                     for events in pygame.event.get():
                         if events.type == pygame.QUIT:
@@ -155,6 +160,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
+            no_display_update=False,
         ):
         if self.main_display_surface and text_display and text_to_display:
             # Get the pages.
@@ -175,16 +181,20 @@ class Viewing():
                         horizontal_orientation=horizontal_orientation,
                         vertical_orientation=vertical_orientation,
                         alternative_top_left=alternative_top_left,
+                        no_display_update=no_display_update,
                     )
 
                     # Refresh and reblit self.
                     if refresh_during:
                         self.refresh_and_blit_self()
-                        pygame.display.update()
+
+                        if not no_display_update:
+                            pygame.display.update()
 
             if refresh_after:
                 self.refresh_and_blit_self()
-                pygame.display.update()
+                if not no_display_update:
+                    pygame.display.update()
 
     # If refresh_after is True, refreshes
     # and blits self and updates display after all pages.
@@ -202,6 +212,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
+            no_display_update=False,
         ):
         if text_to_display and self.main_display_surface and text_display:
             # Get the pages.
@@ -226,11 +237,14 @@ class Viewing():
                     horizontal_orientation=horizontal_orientation,
                     vertical_orientation=vertical_orientation,
                     alternative_top_left=alternative_top_left,
+                    no_display_update=no_display_update,
                 )
 
             if refresh_after:
                 self.refresh_and_blit_self()
-                pygame.display.update()
+
+                if no_display_update:
+                    pygame.display.update()
 
     # Returns option ID for selected option, None if no option selected.
     def display_menu_display(
@@ -631,6 +645,7 @@ class Overworld_Viewing(Viewing):
                 auto_advance=True,
                 refresh_during=False,
                 refresh_after=False,
+                no_display_update=False,
             )
 
     # If refresh_after is True, refreshes
@@ -665,6 +680,7 @@ class Overworld_Viewing(Viewing):
             auto_advance=False,
             refresh_during=True,
             refresh_after=True,
+            no_display_update=False,
         ):
         if text and self.main_display_surface and self.bottom_text_display:
             self.display_text_display_first_page(
@@ -675,6 +691,7 @@ class Overworld_Viewing(Viewing):
                 auto_advance=auto_advance,
                 refresh_during=refresh_during,
                 refresh_after=refresh_after,
+                no_display_update=no_display_update,
             )
 
 

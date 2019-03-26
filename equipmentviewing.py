@@ -1,6 +1,7 @@
 import pygame
 import viewing
 import viewingdata
+import items
 import equipmentdisplay
 import display
 import imagepaths
@@ -14,46 +15,84 @@ import itemdata
 import logging
 import sys
 
+
+# SELECTION DIRECTION CONSTANTS
+MOVE_UP = 0x1
+MOVE_RIGHT = 0x2
+MOVE_DOWN = 0x3
+MOVE_LEFT = 0x4
+
 # Maps equipment IDs to the dict that maps directions one can
 # traverse in the display to the adjacent equipment slot ID.
 ALLOWED_MOVEMENT_MAPPING = {
-# TODO
-    EQUIP_SLOT_HEAD: {
-        equipmentdisplay.MOVE_DOWN: itemdata.EQUIP_SLOT_NECK
+    itemdata.EQUIP_SLOT_HEAD: {
+        MOVE_DOWN: itemdata.EQUIP_SLOT_NECK,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_AMMO,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_BACK,
     },
-    EQUIP_SLOT_MAIN_HAND: {
+    itemdata.EQUIP_SLOT_MAIN_HAND: {
+        MOVE_UP: itemdata.EQUIP_SLOT_AMMO,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_MAIN_BODY,
+    },
+    itemdata.EQUIP_SLOT_OFF_HAND: {
+        MOVE_UP: itemdata.EQUIP_SLOT_BACK,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_WRIST,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_MAIN_BODY,
+    },
+    itemdata.EQUIP_SLOT_MAIN_BODY: {
+        MOVE_UP: itemdata.EQUIP_SLOT_NECK,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_LEGS,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_OFF_HAND,
+    },
+    itemdata.EQUIP_SLOT_LEGS: {
+        MOVE_UP: itemdata.EQUIP_SLOT_MAIN_BODY,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_FEET,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_WRIST,
+    },
+    itemdata.EQUIP_SLOT_NECK: {
+        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_MAIN_BODY,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_AMMO,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_BACK,
+    },
+    itemdata.EQUIP_SLOT_AMMO: {
+        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_NECK,
+    },
+    itemdata.EQUIP_SLOT_HANDS: {
+        MOVE_UP: itemdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_FEET,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_LEGS,
+    },
+    itemdata.EQUIP_SLOT_FEET: {
+        MOVE_UP: itemdata.EQUIP_SLOT_LEGS,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: itemdata.EQUIP_SLOT_RING,
+    },
+    itemdata.EQUIP_SLOT_RING: {
+        MOVE_UP: itemdata.EQUIP_SLOT_WRIST,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_FEET,
+    },
+    itemdata.EQUIP_SLOT_BACK: {
+        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_OFF_HAND,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_NECK,
+    },
+    itemdata.EQUIP_SLOT_WRIST: {
+        MOVE_UP: itemdata.EQUIP_SLOT_OFF_HAND,
+        MOVE_DOWN: itemdata.EQUIP_SLOT_RING,
+        MOVE_LEFT: itemdata.EQUIP_SLOT_LEGS,
+    },
+}
 
-    },
-    EQUIP_SLOT_OFF_HAND: {
+EQUIPMENT_VIEWING_NAME_INFO = {
+    language.LANG_ENGLISH: "Equipment",
+    language.LANG_ESPANOL: "Equipo"
 
-    },
-    EQUIP_SLOT_MAIN_BODY: {
-
-    },
-    EQUIP_SLOT_LEGS: {
-
-    },
-    EQUIP_SLOT_NECK: {
-
-    },
-    EQUIP_SLOT_AMMO: {
-
-    },
-    EQUIP_SLOT_HANDS: {
-
-    },
-    EQUIP_SLOT_FEET: {
-
-    },
-    EQUIP_SLOT_RING: {
-
-    },
-    EQUIP_SLOT_BACK: {
-
-    },
-    EQUIP_SLOT_WRIST: {
-
-    },
 }
 
 class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
@@ -162,10 +201,10 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         self.blit_selection_description(selection_info[0])
 
     # Overridden.
-    def convert_to_icon_data_list(self, equipment_dict):
+    def convert_to_icon_data(self, equipment_dict):
         ret_data = None
 
-        if equipment_dict:
+        if equipment_dict is not None:
             ret_data = {}
 
             for slot_id in itemdata.EQUIPMENT_SLOT_ID_LIST:
@@ -173,12 +212,13 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
 
                 quantity_text = None
                 rendered_supertext = None
-                curr_obj = None
+                curr_object = None
                 equipped_id = None
+                curr_image = None
 
                 if equipment_info:
                     equipped_id = equipment_info[0]
-                    curr_obj = equipment_info[1]
+                    curr_object = equipment_info[1]
                     quantity = equipment_info[2]
 
                     if curr_object.is_stackable():
@@ -187,10 +227,12 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                         )
                 else:
                     equipped_id = slot_id
-                    curr_obj= items.Item.get_item(slot_id)
+                    curr_object = items.Item.get_item(slot_id)
 
                 if curr_object:
                     curr_image = curr_object.get_icon()
+                else:
+                    logger.warn("Couldn't get image.")
 
                 if quantity_text:
                     rendered_supertext = \
@@ -228,84 +270,54 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         ):
 
         ret_info = None
-        icon_data_list = [] #$$
+        icon_data_mapping = {}
+        curr_slot_id = None
 
         display_to_use = self.selection_area_display
 
         if bottom_text:
             display_to_use = self.truncated_selection_area_display
 
-        if selection_data:
-            icon_data_list = self.convert_to_icon_data_list(selection_data)
+        if selection_data is not None:
+            icon_data_mapping = self.convert_to_icon_data(selection_data)
 
-        if selection_data and icon_data_list:
-            # Start with the first item.
-            curr_index = starting_selected_index
-            first_viewable_row_index = \
-                display_to_use.get_row_index(curr_index)
-            last_viewable_row_index = \
-                first_viewable_row_index \
-                + display_to_use.num_rows \
-                - 1
+        logger.info("{0} items in icon data mapping.".format(
+            len(icon_data_mapping)
+        ))
+
+        if icon_data_mapping:
+            curr_slot_id = starting_selected_slot_id
 
             done = False
 
-            new_index = False
-            changed_index = True
+            new_slot_id = None
+            changed_id = True
 
             while not done:
-                curr_selected_row = display_to_use.get_row_index(
-                        curr_index
-                    )
-
-                if curr_selected_row < first_viewable_row_index:
-                    # Scroll down.
-                    first_viewable_row_index = curr_selected_row
-                    last_viewable_row_index = \
-                        first_viewable_row_index \
-                        + display_to_use.num_rows \
-                        - 1
-                elif curr_selected_row > last_viewable_row_index:
-                    # Scroll up.
-                    last_viewable_row_index = curr_selected_row
-                    first_viewable_row_index = max(
-                            0,
-                            last_viewable_row_index \
-                            - display_to_use.num_rows \
-                            + 1
-                        )
-
-                logger.debug("Curr row index {0}. First viewable: {1}. Last viewable: {2}".format(
-                    curr_selected_row,
-                    first_viewable_row_index,
-                    last_viewable_row_index
-                ))
-
-                if changed_index:
-                    self.blit_selection_background(
-                        title_info,
-                        bottom_text=bottom_text,
-                    )
-                    pygame.display.update()
-
-                go_down = False
-                go_up = False
-                go_left = False
-                go_right = False
+                movement_dir = None
                 open_options = False
 
                 received_input = False
 
-                curr_selection_info = selection_data[curr_index]
+                curr_selection_info = None
+                equipped_info = selection_data.get(curr_slot_id, None)
 
-                if changed_index:
-                    display_to_use.blit_icon_listing(
+                if equipped_info:
+                    # We only want item object and quantity.
+                    curr_selection_info = equipped_info[1:3]
+                else:
+                    curr_slot_obj = items.Item.get_item(curr_slot_id)
+                    curr_selection_info = [curr_slot_obj, None]
+
+                if changed_id:
+                    self.blit_selection_background(
+                        title_info,
+                        bottom_text=bottom_text,
+                    )
+                    display_to_use.blit_equipment_icons(
                         self.main_display_surface,
-                        icon_data_list,
-                        first_viewable_row_index,
-                        curr_index,
-                        preselected_index_list=preselected_index_list,
-                        show_continue_icon=True,
+                        icon_data_mapping,
+                        selected_slot_id=curr_slot_id,
                         alternative_top_left=None,
                     )
 
@@ -325,52 +337,27 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                             sys.exit(0)
                         elif events.type == pygame.KEYDOWN:
                             if events.key == pygame.K_ESCAPE:
-                                logger.info("Leaving selection viewing.")
+                                logger.info("Leaving equipment viewing.")
                                 received_input = True
                                 done = True
-                                go_down = False
-                                go_up = False
-                                go_left = False
-                                go_right = False
-                                open_options = False
                             elif events.key == pygame.K_DOWN:
-                                logger.info("Going down in grid.")
-                                go_down = True
-                                go_up = False
-                                go_left = False
-                                go_right = False
-                                open_options = False
+                                logger.info("Going down in viewing.")
+                                movement_dir = MOVE_DOWN
                                 received_input = True
                             elif events.key == pygame.K_UP:
-                                logger.info("Going up in grid.")
-                                go_down = False
-                                go_up = True
-                                go_left = False
-                                go_right = False
-                                open_options = False
+                                logger.info("Going up in viewing.")
+                                movement_dir = MOVE_UP
                                 received_input = True
                             elif events.key == pygame.K_LEFT:
-                                logger.info("Going left in grid.")
-                                go_down = False
-                                go_up = False
-                                go_left = True
-                                go_right = False
-                                open_options = False
+                                logger.info("Going left in viewing.")
+                                movement_dir = MOVE_LEFT
                                 received_input = True
                             elif events.key == pygame.K_RIGHT:
-                                logger.info("Going right in grid.")
-                                go_down = False
-                                go_up = False
-                                go_left = False
-                                go_right = True
-                                open_options = False
+                                logger.info("Going right in viewing.")
+                                movement_dir = MOVE_RIGHT
                                 received_input = True
                             elif events.key == pygame.K_RETURN:
                                 logger.info("Opening menu")
-                                go_down = False
-                                go_up = False
-                                go_left = False
-                                go_right = False
                                 open_options = True
                                 received_input = True
                             elif custom_actions and events.key in custom_actions:
@@ -384,46 +371,14 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                                         ret_option_id
                                     ))
                                     received_input = True
-                                    ret_info = (ret_option_id, curr_index)
+                                    ret_info = (ret_option_id, curr_slot_id)
                                     done = True
-                                else:
-                                    received_input = False
-
-                                go_down = False
-                                go_up = False
-                                go_left = False
-                                go_right = False
-                                open_options = False
 
                 if received_input:
-                    new_index = curr_index
-                    if go_down:
-                        new_index = min(
-                            max_index,
-                            curr_index + display_to_use.num_columns
-                        )
-                    elif go_up:
-                        new_index = max(
-                            0,
-                            curr_index - display_to_use.num_columns
-                        )
-                    elif go_right:
-                        new_index = min(
-                            max_index,
-                            curr_index + 1
-                        )
-                    elif go_left:
-                        new_index = max(
-                            0,
-                            curr_index - 1
-                        )
-                    elif open_options:
-                        # Show item options.
-                        self.blit_selection_background(
-                            title_info,
-                            bottom_text=bottom_text,
-                        )
+                    new_slot_id = curr_slot_id
 
+                    if open_options:
+                        # Show item options.
                         ret_option = self.display_selection_options(
                             curr_selection_info
                         )
@@ -431,50 +386,32 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                         if ret_option \
                             and ret_option != menuoptions.CANCEL_OPTION_ID:
                             done = True
-                            ret_info = (ret_option, curr_index)
+                            ret_info = (ret_option, curr_slot_id)
                         else:
-                            self.blit_selection_background(
-                                title_info,
-                                bottom_text=bottom_text,
-                            )
-
-                            self.blit_selection_details(
-                                curr_selection_info
-                            )
-
+                            if curr_selection_info:
+                                self.blit_selection_details(
+                                    curr_selection_info
+                                )
                             pygame.display.update()
+                            
+                    elif movement_dir is not None:
+                        # Move to other slot if possible.
+                        new_slot_id = ALLOWED_MOVEMENT_MAPPING.get(
+                            curr_slot_id,
+                            {}
+                        ).get(
+                            movement_dir,
+                            curr_slot_id
+                        )
 
-                    if new_index != curr_index:
-                        changed_index = True
-                        curr_index = new_index
+                    if new_slot_id is not None and new_slot_id != curr_slot_id:
+                        changed_id = True
+                        curr_slot_id = new_slot_id
                     else:
-                        changed_index = False
+                        changed_id = False
 
-                    logger.info("Curr index now: {0}".format(curr_index))
+                    logger.info("Curr id now: {0}".format(curr_slot_id))
                     # TODO rest
-
-        # Handle blank selection data.
-        elif len(selection_data) == 0:
-            self.blit_selection_background(
-                title_info,
-                bottom_text=bottom_text,
-            )
-
-            pygame.display.update()
-
-            received_input = False
-
-            while not received_input:
-                timekeeper.Timekeeper.tick()
-
-                for events in pygame.event.get():
-                    if events.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit(0)
-                    elif events.type == pygame.KEYDOWN:
-                        if events.key == pygame.K_ESCAPE:
-                            logger.info("Leaving selection viewing.")
-                            received_input = True
 
         logger.info("Returning selection: {0}".format(ret_info))
         return ret_info

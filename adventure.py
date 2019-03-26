@@ -11,7 +11,6 @@ import objdata
 import resources
 import interactiveobj
 import display
-import equipmentdata
 import timekeeper
 import interaction
 import imageids

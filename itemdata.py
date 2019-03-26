@@ -464,6 +464,222 @@ EQUIPMENT_SLOT_DATA_INFO = {
 
 # For items that are not consumable nor equippable.
 STANDARD_ITEM_DATA = {
+    EQUIP_SLOT_HEAD: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Head Slot",
+            language.LANG_ESPANOL: "Espacio de Cabeza",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For helmets, hats, and other headgear.",
+            language.LANG_ESPANOL: "Para yelmos, sombreros, y otros tocados.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_HEAD_PATH,
+        },
+    },
+    EQUIP_SLOT_MAIN_HAND: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Main Hand Slot",
+            language.LANG_ESPANOL: "Espacio de Brazo Principal",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For swords, bows, staffs, and other weapons.",
+            language.LANG_ESPANOL: "Para espadas, arcos, bastones, y otras armas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_MAIN_HAND_PATH,
+        },
+    },
+    EQUIP_SLOT_OFF_HAND: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Off Hand Slot",
+            language.LANG_ESPANOL: "Espacio de Secundario",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For shields and secondary weapons.",
+            language.LANG_ESPANOL: "Para escudos y armas secundarias.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_OFF_HAND_PATH,
+        },
+    },
+    EQUIP_SLOT_MAIN_BODY: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Torso Slot",
+            language.LANG_ESPANOL: "Espacio de Torso",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For clothing and armour for the torso.",
+            language.LANG_ESPANOL: "Para ropa y armadura para el torso.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_BODY_PATH,
+        },
+    },
+    EQUIP_SLOT_LEGS: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Legs Slot",
+            language.LANG_ESPANOL: "Espacio de Piernas",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For clothing and armour for the legs.",
+            language.LANG_ESPANOL: "Para ropa y armadura para las piernas.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_LEGS_PATH,
+        },
+    },
+    EQUIP_SLOT_NECK: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Neck Slot",
+            language.LANG_ESPANOL: "Espacio de Cuello",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For necklaces and other neck items.",
+            language.LANG_ESPANOL: "Para collares y otras cosas para el cuello.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_NECK_PATH,
+        },
+    },
+    EQUIP_SLOT_AMMO: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Ammo Slot",
+            language.LANG_ESPANOL: "Espacio de Munición",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For arrows and other types of ammunition.",
+            language.LANG_ESPANOL: "Para las flechas y otros tipos de munición.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_AMMO_PATH,
+        },
+    },
+    EQUIP_SLOT_HANDS: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Hands Slot",
+            language.LANG_ESPANOL: "Espacio de Manos",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For gloves and other hand gear.",
+            language.LANG_ESPANOL: "Para guantes y otras equipo para las manos.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_HANDS_PATH,
+        },
+    },
+    EQUIP_SLOT_FEET: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Feet Slot",
+            language.LANG_ESPANOL: "Espacio de Pies",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For boots, shoes, and other footwear.",
+            language.LANG_ESPANOL: "Para botas, zapatos, y otros calzados.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_FEET_PATH,
+        },
+    },
+    EQUIP_SLOT_RING: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Ring Slot",
+            language.LANG_ESPANOL: "Espacio de Anillos",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For rings.",
+            language.LANG_ESPANOL: "Para anillos.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_RING_PATH,
+        },
+    },
+    EQUIP_SLOT_BACK: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Back Slot.",
+            language.LANG_ESPANOL: "Espacio de Espalda",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For capes and other items that go on the back.",
+            language.LANG_ESPANOL: "Para capas y otras cosas para la espalda.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_BACK_PATH,
+        },
+    },
+    EQUIP_SLOT_WRIST: {
+        NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Wrist Slot",
+            language.LANG_ESPANOL: "Espacio de Muñeca",
+        },
+        BASE_VALUE_LOW_FIELD: 0,
+        BASE_VALUE_HIGH_FIELD: 0,
+        DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "For bracelets and other wrist items.",
+            language.LANG_ESPANOL: "Para pulseras y otras cosas para la muñeca.",
+        },
+        WEIGHT_POINT_FIELD: 0,
+        PROPERTIES_FIELD: 0,
+        ITEM_OPTION_ID_LIST_FIELD: None,
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.ITEM_ICON_IMAGE_ID: imagepaths.EQUIPMENT_ICON_WRIST_PATH,
+        },
+    },
     CURRENCY_GOLD_COIN_ID: {
         NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "Gold Coins",

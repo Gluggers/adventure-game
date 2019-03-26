@@ -280,6 +280,7 @@ class SelectionGridViewing(viewing.Viewing):
                     auto_advance=True,
                     refresh_during=False,
                     refresh_after=False,
+                    no_display_update=True,
                 )
 
         # Handle bottom text display.
@@ -291,6 +292,7 @@ class SelectionGridViewing(viewing.Viewing):
                 auto_advance=True,
                 refresh_during=False,
                 refresh_after=False,
+                no_display_update=True,
             )
             self.truncated_selection_area_display.blit_background(
                 self.main_display_surface
@@ -314,7 +316,11 @@ class SelectionGridViewing(viewing.Viewing):
         pass
 
     # Overridable by child.
-    def get_selection_options(self, selection_info, allowed_option_set=None):
+    def get_selection_options(
+            self,
+            selection_info,
+            allowed_selection_option_set=None,
+        ):
         return None
 
     # Inherited method.
@@ -325,8 +331,6 @@ class SelectionGridViewing(viewing.Viewing):
         ):
         ret_option = None
 
-        self.blit_main_selection_details(selection_info)
-
         # Get valid options.
         options_to_show = self.get_selection_options(
             selection_info,
@@ -334,6 +338,8 @@ class SelectionGridViewing(viewing.Viewing):
         )
 
         if options_to_show:
+            self.blit_main_selection_details(selection_info)
+
             ret_option = self.display_menu_display(
                 self.selection_option_menu_display,
                 options_to_show,
@@ -349,7 +355,7 @@ class SelectionGridViewing(viewing.Viewing):
         return ret_option
 
     # Overridable by child.
-    def convert_to_icon_data_list(self, selection_data_list):
+    def convert_to_icon_data(self, selection_data_list):
         return None
 
     # Handles displaying the item listing and returns
@@ -374,6 +380,7 @@ class SelectionGridViewing(viewing.Viewing):
         ret_info = None
         max_index = len(selection_data) - 1
         icon_data_list = []
+        curr_index = None
 
         display_to_use = self.selection_area_display
 
@@ -381,7 +388,7 @@ class SelectionGridViewing(viewing.Viewing):
             display_to_use = self.truncated_selection_area_display
 
         if selection_data:
-            icon_data_list = self.convert_to_icon_data_list(selection_data)
+            icon_data_list = self.convert_to_icon_data(selection_data)
 
         if selection_data and icon_data_list:
             # Start with the first item.
@@ -395,7 +402,7 @@ class SelectionGridViewing(viewing.Viewing):
 
             done = False
 
-            new_index = False
+            new_index = None
             changed_index = True
 
             while not done:
@@ -426,13 +433,6 @@ class SelectionGridViewing(viewing.Viewing):
                     last_viewable_row_index
                 ))
 
-                if changed_index:
-                    self.blit_selection_background(
-                        title_info,
-                        bottom_text=bottom_text,
-                    )
-                    pygame.display.update()
-
                 go_down = False
                 go_up = False
                 go_left = False
@@ -444,6 +444,11 @@ class SelectionGridViewing(viewing.Viewing):
                 curr_selection_info = selection_data[curr_index]
 
                 if changed_index:
+                    self.blit_selection_background(
+                        title_info,
+                        bottom_text=bottom_text,
+                    )
+
                     display_to_use.blit_icon_listing(
                         self.main_display_surface,
                         icon_data_list,
@@ -563,14 +568,9 @@ class SelectionGridViewing(viewing.Viewing):
                             curr_index - 1
                         )
                     elif open_options:
-                        # Show item options.
-                        self.blit_selection_background(
-                            title_info,
-                            bottom_text=bottom_text,
-                        )
-
                         ret_option = self.display_selection_options(
-                            curr_selection_info
+                            curr_selection_info,
+                            allowed_selection_option_set=allowed_selection_option_set,
                         )
 
                         if ret_option \
@@ -578,14 +578,10 @@ class SelectionGridViewing(viewing.Viewing):
                             done = True
                             ret_info = (ret_option, curr_index)
                         else:
-                            self.blit_selection_background(
-                                title_info,
-                                bottom_text=bottom_text,
-                            )
-
-                            self.blit_selection_details(
-                                curr_selection_info
-                            )
+                            if curr_selection_info:
+                                self.blit_selection_details(
+                                    curr_selection_info
+                                )
 
                             pygame.display.update()
 
@@ -620,6 +616,21 @@ class SelectionGridViewing(viewing.Viewing):
                         if events.key == pygame.K_ESCAPE:
                             logger.info("Leaving selection viewing.")
                             received_input = True
+                        elif custom_actions and events.key in custom_actions:
+                            ret_option_id = custom_actions.get(
+                                events.key,
+                                None
+                            )
+
+                            if ret_option_id:
+                                logger.info("Activating custom action {0}".format(
+                                    ret_option_id
+                                ))
+                                received_input = True
+                                ret_info = (ret_option_id, curr_index)
+                                done = True
+                            else:
+                                received_input = False
 
         logger.info("Returning selection: {0}".format(ret_info))
         return ret_info
@@ -806,6 +817,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
                 alternative_top_left=None,
+                no_display_update=True,
             )
 
     def blit_selected_object_quantity(self, quantity):
@@ -822,6 +834,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
                 alternative_top_left=None,
+                no_display_update=True,
             )
 
     def blit_selected_object_enlarged_icon(self, selected_obj):
@@ -865,10 +878,14 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
                 vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
                 alternative_top_left=None,
+                no_display_update=True,
             )
 
     # Overridden.
     def blit_main_selection_details(self, selection_info):
+        self.selection_details_side_display.blit_background(
+            self.main_display_surface
+        )
         self.blit_selected_object_name(selection_info[0])
         self.blit_selected_object_quantity(selection_info[1])
         self.blit_selected_object_enlarged_icon(selection_info[0])
@@ -879,7 +896,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         self.blit_selection_description(selection_info[0])
 
     # Overridden.
-    def get_selection_options(self, selection_info, allowed_option_set=None):
+    def get_selection_options(
+            self,
+            selection_info,
+            allowed_selection_option_set=None,
+        ):
         selection_options = []
 
         selection_obj = selection_info[0]
@@ -892,14 +913,15 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             option_list.append(menuoptions.CANCEL_OPTION_ID)
 
         for option in option_list:
-            if allowed_option_set:
+            if allowed_selection_option_set:
                 if option in allowed_selection_option_set:
                     selection_options.append(option)
 
+        logger.info("Selection options: {0}".format(selection_options))
         return selection_options
 
     # Overridden.
-    def convert_to_icon_data_list(self, selection_data_list):
+    def convert_to_icon_data(self, selection_data_list):
         ret_data = None
 
         if selection_data_list:
@@ -935,11 +957,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
     @classmethod
     def create_item_selection_grid_viewing(
-                cls,
-                main_display_surface,
-                item_icon_dimensions,
-                display_pattern=display.PATTERN_2_ID,
-            ):
+            cls,
+            main_display_surface,
+            item_icon_dimensions,
+            display_pattern=display.PATTERN_2_ID,
+        ):
         ret_viewing = None
 
         if main_display_surface:

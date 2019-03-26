@@ -3,7 +3,8 @@ import language
 import logging
 import viewing
 import viewingdata
-import selectiongridviewing
+import selectionviewing
+import equipmentviewing
 import directions
 import entity
 import map
@@ -65,14 +66,14 @@ class Game():
 
             # Create inventory viewing and toolbelt viewings for overworld..
             self.overworld_inventory_viewing = \
-                selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
                     self.main_display_screen,
                     itemdata.ITEM_ICON_DIMENSIONS,
                     display_pattern=display.PATTERN_2_ID,
                 )
 
             self.overworld_toolbelt_viewing = \
-                selectiongridviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
                     self.main_display_screen,
                     itemdata.ITEM_ICON_DIMENSIONS,
                     display_pattern=display.PATTERN_2_ID,
@@ -384,7 +385,7 @@ class Game():
                 preselected_index_list=None,
                 custom_actions=None,
                 bottom_text=None,
-                allowed_selection_option_set=menuoptions.OVERWORLD_MENU_OPTION_IDS,
+                allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
             )
             logger.info("Ret info from inventory viewing: {0}".format(ret_info))
             # TODO handle ret_info.
@@ -411,12 +412,34 @@ class Game():
                 bottom_text=None,
                 allowed_selection_option_set=None,
             )
-            logger.info("Ret info from inventory viewing: {0}".format(ret_info))
+            logger.info("Ret info from toolbet viewing: {0}".format(ret_info))
             # TODO handle ret_info.
 
             #self.overworld_viewing.refresh_and_blit_self()
         else:
             logger.warn("No overworld toolbelt viewing or protagonist set.")
+
+    def handle_overworld_equipment_viewing(self):
+        if self.overworld_equipment_viewing and self.protagonist:
+            self.overworld_equipment_viewing.blit_selection_background(
+                equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
+                bottom_text=None,
+            )
+
+            ret_info = self.overworld_equipment_viewing.handle_equipment_selection_area(
+                equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
+                self.protagonist.equipment_dict,
+                starting_selected_slot_id=itemdata.EQUIP_SLOT_HEAD,
+                bottom_text=None,
+                custom_actions=None,
+                allowed_selection_option_set=menuoptions.OVERWORLD_EQUIPMENT_ITEM_OPTION_SET,
+            )
+            logger.info("Ret info from equipment viewing: {0}".format(ret_info))
+            # TODO handle ret_info.
+
+            #self.overworld_viewing.refresh_and_blit_self()
+        else:
+            logger.warn("No overworld equipment viewing or protagonist set.")
 
     def toggle_language(self):
         # For now, just switch to other language
@@ -670,6 +693,10 @@ class Game():
         elif option_id == menuoptions.TOOLS_OPTION_ID:
             logger.info("Displaying toolbelt from menu.")
             self.handle_overworld_toolbelt()
+            self.overworld_viewing.refresh_and_blit_self()
+        elif option_id == menuoptions.EQUIPMENT_OPTION_ID:
+            logger.info("Displaying equipment from menu.")
+            self.handle_overworld_equipment_viewing()
             self.overworld_viewing.refresh_and_blit_self()
 
     def handle_overworld_loop(self):

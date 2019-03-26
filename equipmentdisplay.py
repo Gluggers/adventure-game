@@ -1,15 +1,11 @@
+import pygame
 import display
 import viewingdata
 import itemdata
 import imagepaths
 import items
 import language
-
-# SELECTION DIRECTION CONSTANTS
-MOVE_UP = 0x1
-MOVE_RIGHT = 0x2
-MOVE_DOWN = 0x3
-MOVE_LEFT = 0x4
+import logging
 
 class EquipmentDisplay(display.Display):
     def __init__(
@@ -77,7 +73,7 @@ class EquipmentDisplay(display.Display):
         second_row_center_y = third_row_center_y \
             - vertical_pixels_between_icons \
             - icon_height
-        second_row_center_y = second_row_center_y \
+        first_row_center_y = second_row_center_y \
             - vertical_pixels_between_icons \
             - icon_height
         fourth_row_center_y = third_row_center_y \
@@ -130,7 +126,7 @@ class EquipmentDisplay(display.Display):
             third_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_EQUIP_SLOT_OFF_HAND] = (
+        self.equipment_icon_center[itemdata.EQUIP_SLOT_OFF_HAND] = (
             third_column_center_x,
             third_row_center_y
         )
@@ -153,7 +149,7 @@ class EquipmentDisplay(display.Display):
             alternative_top_left=None,
         ):
         if surface and equipment_info_dict \
-                and (selected_equipment_id is not None):
+                and (selected_slot_id is not None):
             icon_space_rect = self.icon_display_rect
 
             if alternative_top_left:
@@ -226,3 +222,8 @@ class EquipmentDisplay(display.Display):
                                 rendered_supertext,
                                 icon_rect.topleft,
                             )
+
+# set up logger
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
