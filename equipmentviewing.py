@@ -1,7 +1,6 @@
 import pygame
 import viewing
 import viewingdata
-import items
 import equipmentdisplay
 import display
 import imagepaths
@@ -11,6 +10,8 @@ import language
 import timekeeper
 import inventory
 import selectionviewing
+import equipmentdata
+import equipmentslot
 import itemdata
 import logging
 import sys
@@ -25,67 +26,67 @@ MOVE_LEFT = 0x4
 # Maps equipment IDs to the dict that maps directions one can
 # traverse in the display to the adjacent equipment slot ID.
 ALLOWED_MOVEMENT_MAPPING = {
-    itemdata.EQUIP_SLOT_HEAD: {
-        MOVE_DOWN: itemdata.EQUIP_SLOT_NECK,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_AMMO,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_BACK,
+    equipmentdata.EQUIP_SLOT_HEAD: {
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_NECK,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_AMMO,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_BACK,
     },
-    itemdata.EQUIP_SLOT_MAIN_HAND: {
-        MOVE_UP: itemdata.EQUIP_SLOT_AMMO,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_HANDS,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_MAIN_BODY,
+    equipmentdata.EQUIP_SLOT_MAIN_HAND: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_AMMO,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_MAIN_BODY,
     },
-    itemdata.EQUIP_SLOT_OFF_HAND: {
-        MOVE_UP: itemdata.EQUIP_SLOT_BACK,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_WRIST,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_MAIN_BODY,
+    equipmentdata.EQUIP_SLOT_OFF_HAND: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_BACK,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_WRIST,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_MAIN_BODY,
     },
-    itemdata.EQUIP_SLOT_MAIN_BODY: {
-        MOVE_UP: itemdata.EQUIP_SLOT_NECK,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_LEGS,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_MAIN_HAND,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_OFF_HAND,
+    equipmentdata.EQUIP_SLOT_MAIN_BODY: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_NECK,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_LEGS,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_OFF_HAND,
     },
-    itemdata.EQUIP_SLOT_LEGS: {
-        MOVE_UP: itemdata.EQUIP_SLOT_MAIN_BODY,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_FEET,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_HANDS,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_WRIST,
+    equipmentdata.EQUIP_SLOT_LEGS: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_MAIN_BODY,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_FEET,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_WRIST,
     },
-    itemdata.EQUIP_SLOT_NECK: {
-        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_MAIN_BODY,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_AMMO,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_BACK,
+    equipmentdata.EQUIP_SLOT_NECK: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_MAIN_BODY,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_AMMO,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_BACK,
     },
-    itemdata.EQUIP_SLOT_AMMO: {
-        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_MAIN_HAND,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_NECK,
+    equipmentdata.EQUIP_SLOT_AMMO: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_NECK,
     },
-    itemdata.EQUIP_SLOT_HANDS: {
-        MOVE_UP: itemdata.EQUIP_SLOT_MAIN_HAND,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_FEET,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_LEGS,
+    equipmentdata.EQUIP_SLOT_HANDS: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_MAIN_HAND,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_FEET,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_LEGS,
     },
-    itemdata.EQUIP_SLOT_FEET: {
-        MOVE_UP: itemdata.EQUIP_SLOT_LEGS,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_HANDS,
-        MOVE_RIGHT: itemdata.EQUIP_SLOT_RING,
+    equipmentdata.EQUIP_SLOT_FEET: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_LEGS,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_HANDS,
+        MOVE_RIGHT: equipmentdata.EQUIP_SLOT_RING,
     },
-    itemdata.EQUIP_SLOT_RING: {
-        MOVE_UP: itemdata.EQUIP_SLOT_WRIST,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_FEET,
+    equipmentdata.EQUIP_SLOT_RING: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_WRIST,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_FEET,
     },
-    itemdata.EQUIP_SLOT_BACK: {
-        MOVE_UP: itemdata.EQUIP_SLOT_HEAD,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_OFF_HAND,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_NECK,
+    equipmentdata.EQUIP_SLOT_BACK: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_HEAD,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_OFF_HAND,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_NECK,
     },
-    itemdata.EQUIP_SLOT_WRIST: {
-        MOVE_UP: itemdata.EQUIP_SLOT_OFF_HAND,
-        MOVE_DOWN: itemdata.EQUIP_SLOT_RING,
-        MOVE_LEFT: itemdata.EQUIP_SLOT_LEGS,
+    equipmentdata.EQUIP_SLOT_WRIST: {
+        MOVE_UP: equipmentdata.EQUIP_SLOT_OFF_HAND,
+        MOVE_DOWN: equipmentdata.EQUIP_SLOT_RING,
+        MOVE_LEFT: equipmentdata.EQUIP_SLOT_LEGS,
     },
 }
 
@@ -119,6 +120,202 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             display_pattern=display_pattern,
             enlarged_selection_background_path=enlarged_selection_background_path,
         )
+
+        # Recalculate some displays.
+        # Calculate the various base viewing rects for the inventory.
+        top_display_width = int(0.7 * self.display_rect.width)
+        top_display_height = 50
+
+        self.top_display_rect = pygame.Rect(
+            self.display_rect.x,
+            self.display_rect.y,
+            top_display_width,
+            top_display_height,
+        )
+
+        selection_details_width = self.display_rect.width \
+                            - top_display_width \
+                            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+        selection_details_height = self.display_rect.height
+        self.selection_details_rect = pygame.Rect(
+            self.top_display_rect.right \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            self.display_rect.y,
+            selection_details_width,
+            selection_details_height
+        )
+
+        selection_listing_width = int(0.5*top_display_width)
+        selection_listing_height = self.display_rect.height \
+                            - self.top_display_rect.height \
+                            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+
+        bottom_text_width = int(0.5*top_display_width)
+        bottom_text_height = int(self.display_rect.height / 4) \
+                            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+
+        truncated_selection_listing_height = selection_listing_height \
+            - bottom_text_height \
+            - viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING
+
+        self.bottom_text_rect = pygame.Rect(
+            self.display_rect.x,
+            self.display_rect.bottom - bottom_text_height,
+            bottom_text_width,
+            bottom_text_height,
+        )
+
+        self.bottom_text_display = None
+
+        self.selection_area_rect = pygame.Rect(
+            self.top_display_rect.right - selection_listing_width,
+            self.top_display_rect.bottom \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            selection_listing_width,
+            selection_listing_height
+        )
+
+        # In case of bottom text.
+        self.truncated_selection_grid_rect = pygame.Rect(
+            self.top_display_rect.right - selection_listing_width,
+            self.top_display_rect.bottom \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            selection_listing_width,
+            truncated_selection_listing_height
+        )
+
+        # Will display the title.
+        self.title_display = None
+
+        # Will display the selections in the inventory.
+        self.selection_area_display = None
+        self.truncated_selection_area_display = None
+
+        self.selection_details_side_display = display.Display(
+            self.main_display_surface,
+            self.selection_details_rect,
+            background_pattern=self.display_pattern,
+        )
+
+        # Will display the character stats on the left.
+        self.char_equip_stats_display_rect = pygame.Rect(
+            self.display_rect.x,
+            self.top_display_rect.bottom \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            top_display_width - selection_listing_width,
+            selection_listing_height
+        )
+
+        self.truncated_char_equip_stats_display_rect = pygame.Rect(
+            self.display_rect.x,
+            self.top_display_rect.bottom \
+                + viewingdata.GRID_VIEWING_IN_BETWEEN_PADDING,
+            top_display_width - selection_listing_width,
+            truncated_selection_listing_height
+        )
+
+        self.char_equip_stats_display = None
+        self.truncated_char_equip_stats_display = None
+
+
+        self.selection_name_display = None
+        self.selection_name_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_details_rect.y + 15,
+            self.selection_details_rect.width,
+            80,
+        )
+        self.selection_name_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display subtitle of selected object.
+        self.selection_subtitle_display = None
+        self.selection_subtitle_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_name_rect.bottom \
+                + 10,
+            self.selection_details_rect.width,
+            30,
+        )
+        self.selection_subtitle_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display enlarged image icon of selected item.
+        self.icon_enlarged_display = None
+        self.icon_enlarged_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_subtitle_rect.bottom + 10,
+            self.enlarged_icon_dimensions[0],
+            self.enlarged_icon_dimensions[1]
+        )
+        self.icon_enlarged_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display details about a single item in the inventory.
+        self.selection_description_display = None
+        self.selection_description_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.icon_enlarged_rect.bottom,
+            self.selection_details_rect.width,
+            self.selection_details_rect.bottom \
+                - (self.icon_enlarged_rect.bottom)
+        )
+
+        # Will display item options for a selected item.
+        self.selection_option_menu_display = None
+        self.selection_option_menu_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.icon_enlarged_rect.bottom + 15,
+            self.selection_details_rect.width - 30,
+            self.selection_details_rect.bottom \
+                - (self.icon_enlarged_rect.bottom + 15) \
+                - 30
+        )
+        self.selection_option_menu_rect.centerx = \
+            self.selection_description_rect.centerx
+
+    def create_char_equip_stats_display(self):
+        logger.info("Creating character equipment stats display...")
+        font_obj = display.Display.get_font(
+                fontinfo.CHAR_EQUIP_STATS_FONT_ID
+            )
+        if font_obj:
+            self.char_equip_stats_display = display.Text_Display(
+                self.main_display_surface,
+                self.char_equip_stats_display_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=self.display_pattern,
+                horizontal_padding=10,
+                vertical_padding=10,
+            )
+
+            if not self.char_equip_stats_display:
+                logger.error("Failed to make char equipment stats display")
+        else:
+            logger.error("Character equipment stats font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+    def create_truncated_char_equip_stats_display(self):
+        logger.info("Creating truncated character equipment stats display...")
+        font_obj = display.Display.get_font(
+                fontinfo.CHAR_EQUIP_STATS_FONT_ID
+            )
+        if font_obj:
+            self.truncated_char_equip_stats_display = display.Text_Display(
+                self.main_display_surface,
+                self.truncated_char_equip_stats_display_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=self.display_pattern,
+                horizontal_padding=10,
+                vertical_padding=10,
+            )
+
+            if not self.truncated_char_equip_stats_display:
+                logger.error("Failed to make truncated char equipment stats display")
+        else:
+            logger.error("Character equipment stats font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Overridden.
     def create_selection_area_display(self):
@@ -173,15 +370,13 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Overridden.
-    def blit_selection_description(self, selected_obj):
-        # Blit item description and usage info.
+    def blit_selection_info_text(self, selected_obj):
+        # Blit selection description and usage info.
         if selected_obj:
-            item_info = "\n".join([
-                selected_obj.get_description_info(),
-            ])
+            selection_info = selected_obj.get_info_text()
             self.display_text_display_first_page(
                 self.selection_description_display,
-                item_info,
+                selection_info,
                 advance_delay_ms=0,
                 auto_advance=True,
                 refresh_during=False,
@@ -191,14 +386,23 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                 alternative_top_left=None,
             )
 
-    def blit_main_selection_details(self, selection_info):
+    # Overridden.
+    def create_additional_displays(self):
+        self.create_selection_name_display()
+        self.create_selection_subtitle_display()
+        self.create_selection_description_display()
+        self.create_selection_options_display()
+        self.create_char_equip_stats_display()
+        self.create_truncated_char_equip_stats_display()
+
+    def blit_main_selection_info(self, selection_info):
         self.blit_selected_object_name(selection_info[0])
         self.blit_selected_object_quantity(selection_info[1])
         self.blit_selected_object_enlarged_icon(selection_info[0])
 
     def blit_selection_details(self, selection_info):
-        self.blit_main_selection_details(selection_info)
-        self.blit_selection_description(selection_info[0])
+        self.blit_main_selection_info(selection_info)
+        self.blit_selection_info_text(selection_info[0])
 
     # Overridden.
     def convert_to_icon_data(self, equipment_dict):
@@ -207,7 +411,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         if equipment_dict is not None:
             ret_data = {}
 
-            for slot_id in itemdata.EQUIPMENT_SLOT_ID_LIST:
+            for slot_id in equipmentdata.EQUIPMENT_SLOT_DATA:
                 equipment_info = equipment_dict.get(slot_id, None)
 
                 quantity_text = None
@@ -221,17 +425,18 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                     curr_object = equipment_info[1]
                     quantity = equipment_info[2]
 
-                    if curr_object.is_stackable():
+                    if curr_object and curr_object.is_stackable():
                         quantity_text = display.Display.get_abbreviated_quantity(
                             quantity
                         )
                 else:
                     equipped_id = slot_id
-                    curr_object = items.Item.get_item(slot_id)
+                    #curr_object = equipmentslot.EquipmentSlot.get_slot_object(slot_id)
 
                 if curr_object:
                     curr_image = curr_object.get_icon()
-                else:
+
+                if not curr_image:
                     logger.warn("Couldn't get image.")
 
                 if quantity_text:
@@ -245,6 +450,92 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                 ret_data[slot_id] = [curr_image, rendered_supertext]
 
         return ret_data
+
+    # Overridden.
+    def blit_selection_background(
+            self,
+            title_info,
+            bottom_text=None,
+            char_statistics_text=None,
+        ):
+        stats_display_to_use = None
+
+        # Testing
+        char_statistics_text = "\n".join([
+            "Ranged accuracy: 999",
+            "Ranged strength: 999",
+            "Ranged defense: 999",
+            "Ranged accuracy: 999",
+            "Ranged strength: 999",
+            "Ranged defense: 999",
+            "Ranged accuracy: 999",
+            "Ranged strength: 999",
+            "Ranged defense: 999",
+            "Agility: 999",
+            "Weight: 999",
+        ])
+
+        # Blit details background.
+        if self.selection_details_side_display:
+            self.selection_details_side_display.blit_background(
+                self.main_display_surface
+            )
+
+        # Handle selection title display.
+        if self.title_display:
+            # Get title text.
+            title_text = title_info.get(
+                language.Language.get_current_language_id(),
+                None
+            )
+
+            if title_text:
+                self.display_text_display_first_page(
+                    self.title_display,
+                    title_text,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=False,
+                    refresh_after=False,
+                    no_display_update=True,
+                )
+
+        # Handle bottom text display.
+        if bottom_text:
+            stats_display_to_use = self.truncated_char_equip_stats_display
+            self.display_text_display_first_page(
+                self.bottom_text_display,
+                self.bottom_text,
+                advance_delay_ms=0,
+                auto_advance=True,
+                refresh_during=False,
+                refresh_after=False,
+                no_display_update=True,
+            )
+            self.truncated_selection_area_display.blit_background(
+                self.main_display_surface
+            )
+        else:
+            stats_display_to_use = self.char_equip_stats_display
+            self.selection_area_display.blit_background(
+                self.main_display_surface
+            )
+
+        if stats_display_to_use:
+            if char_statistics_text:
+                self.display_text_display_first_page(
+                    stats_display_to_use,
+                    char_statistics_text,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=False,
+                    refresh_after=False,
+                    no_display_update=True,
+                )
+            else:
+                stats_display_to_use.blit_background(
+                    self.main_display_surface
+                )
 
     # Overridden.
     def handle_selection_area(
@@ -263,7 +554,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             self,
             title_info,
             selection_data, # Equipment dict.
-            starting_selected_slot_id=itemdata.EQUIP_SLOT_HEAD,
+            starting_selected_slot_id=equipmentdata.EQUIP_SLOT_HEAD,
             custom_actions=None,
             bottom_text=None,
             allowed_selection_option_set=None,
@@ -306,7 +597,8 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                     # We only want item object and quantity.
                     curr_selection_info = equipped_info[1:3]
                 else:
-                    curr_slot_obj = items.Item.get_item(curr_slot_id)
+                    curr_slot_obj = \
+                        equipmentslot.EquipmentSlot.get_slot_object(curr_slot_id)
                     curr_selection_info = [curr_slot_obj, None]
 
                 if changed_id:
@@ -393,7 +685,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                                     curr_selection_info
                                 )
                             pygame.display.update()
-                            
+
                     elif movement_dir is not None:
                         # Move to other slot if possible.
                         new_slot_id = ALLOWED_MOVEMENT_MAPPING.get(
@@ -420,7 +712,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
     def create_equipment_viewing(
                 cls,
                 main_display_surface,
-                item_icon_dimensions,
+                icon_dimensions,
                 display_pattern=display.PATTERN_2_ID,
             ):
         ret_viewing = None
@@ -428,7 +720,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         if main_display_surface:
             ret_viewing = EquipmentViewing(
                 main_display_surface,
-                item_icon_dimensions,
+                icon_dimensions,
                 display_pattern=display_pattern,
             )
 

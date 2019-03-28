@@ -48,7 +48,7 @@ INVENTORY_BASIC_INSTRUCTIONS_BACKGROUND_PATH = DISPLAY_PATH \
 ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
                         + "item_listing_selected_image_60x60_dk.png" # [0]
 ITEM_LISTING_UNSELECTED_DEFAULT_PATH = DISPLAY_PATH \
-                        + "item_listing_unselected_image_60x60_dk.png" # [0]
+                        + "item_listing_unselected_image2_60x60_dk.png" # [0]
 ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH = DISPLAY_PATH \
                         + "item_listing_selected_image_background_enlarged_120x120_dk.png" # [0]
 ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
@@ -74,7 +74,7 @@ EQUIPMENT_ICON_NECK_PATH = EQUIPMENT_ICON_PATH \
 EQUIPMENT_ICON_BODY_PATH = EQUIPMENT_ICON_PATH \
                         + "head_icon_50x50_dk.png" #[0]
 EQUIPMENT_ICON_LEGS_PATH = EQUIPMENT_ICON_PATH \
-                        + "head_icon_50x50_dk.png" #[0]
+                        + "legs_icon_50x50_dk.png" #[0]
 EQUIPMENT_ICON_FEET_PATH = EQUIPMENT_ICON_PATH \
                         + "head_icon_50x50_dk.png" #[0]
 EQUIPMENT_ICON_AMMO_PATH = EQUIPMENT_ICON_PATH \

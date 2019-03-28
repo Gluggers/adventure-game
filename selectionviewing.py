@@ -212,7 +212,7 @@ class SelectionGridViewing(viewing.Viewing):
     # Inherited method.
     def create_bottom_text_display(self):
         if self.bottom_text_rect:
-            logger.info("Creating iselection bottom text display...")
+            logger.info("Creating selection bottom text display...")
             font_obj = display.Display.get_font(
                     fontinfo.SELECTION_BOTTOM_TEXT_FONT_ID
                 )
@@ -308,7 +308,7 @@ class SelectionGridViewing(viewing.Viewing):
         pass
 
     # Overridable by child.
-    def blit_main_selection_details(self, selection_info):
+    def blit_main_selection_info(self, selection_info):
         pass
 
     # Overridable by child.
@@ -338,7 +338,7 @@ class SelectionGridViewing(viewing.Viewing):
         )
 
         if options_to_show:
-            self.blit_main_selection_details(selection_info)
+            self.blit_main_selection_info(selection_info)
 
             ret_option = self.display_menu_display(
                 self.selection_option_menu_display,
@@ -860,14 +860,18 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                     enlarged_icon_rect,
                 )
 
-    def blit_selection_description(self, selected_obj):
+    def blit_selection_info_text(self, selected_obj):
         # Blit item description and usage info.
+        # Also include stat info if available.
         if selected_obj:
+            """
             item_info = "\n".join([
                 selected_obj.get_description_info(),
                 '--------',
                 selected_obj.get_usage_info()
             ])
+            """
+            item_info = selected_obj.get_info_text()
             self.display_text_display_first_page(
                 self.selection_description_display,
                 item_info,
@@ -882,7 +886,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             )
 
     # Overridden.
-    def blit_main_selection_details(self, selection_info):
+    def blit_main_selection_info(self, selection_info):
         self.selection_details_side_display.blit_background(
             self.main_display_surface
         )
@@ -892,8 +896,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
     # Overridden.
     def blit_selection_details(self, selection_info):
-        self.blit_main_selection_details(selection_info)
-        self.blit_selection_description(selection_info[0])
+        self.blit_main_selection_info(selection_info)
+        self.blit_selection_info_text(selection_info[0])
 
     # Overridden.
     def get_selection_options(

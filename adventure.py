@@ -16,6 +16,7 @@ import interaction
 import imageids
 import game
 import items
+import equipmentslot
 
 from pygame.locals import *
 
@@ -67,13 +68,13 @@ def main():
     # Load resources.
     resources.Resource.build_resources()
 
+    # Load equipment slots.
+    equipmentslot.EquipmentSlot.build_equipment_slots()
+
     # Load items.
     items.Item.build_standard_items()
 
-    # Load equipment slot icons.
-    #equipmentdata.EquipmentSlot.init_equipment_slot_icons()
-
-    # load characters
+    # Load characters. # TODO
 
     # load maps
     map.Map.build_maps()

@@ -27,6 +27,7 @@ import items
 import imagepaths
 import menuoptions
 import itemdata
+import equipmentdata
 
 logger = None
 
@@ -429,7 +430,7 @@ class Game():
             ret_info = self.overworld_equipment_viewing.handle_equipment_selection_area(
                 equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
                 self.protagonist.equipment_dict,
-                starting_selected_slot_id=itemdata.EQUIP_SLOT_HEAD,
+                starting_selected_slot_id=equipmentdata.EQUIP_SLOT_HEAD,
                 bottom_text=None,
                 custom_actions=None,
                 allowed_selection_option_set=menuoptions.OVERWORLD_EQUIPMENT_ITEM_OPTION_SET,

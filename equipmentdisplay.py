@@ -1,9 +1,9 @@
 import pygame
 import display
 import viewingdata
-import itemdata
+import equipmentslot
+import equipmentdata
 import imagepaths
-import items
 import language
 import logging
 
@@ -64,10 +64,12 @@ class EquipmentDisplay(display.Display):
         icon_width = icon_dimensions[0]
         icon_height = icon_dimensions[1]
         num_rows = 5
-        vertical_pixels_between_icons = \
-            int((self.icon_display_rect.height - (5 * icon_height)) / num_rows)
+        #vertical_pixels_between_icons = \
+            #int((self.icon_display_rect.height - (5 * icon_height)) / num_rows)
+        vertical_pixels_between_icons = 20
 
-        horizontal_pixels_between_icons = int(icon_width / 2)
+        #horizontal_pixels_between_icons = int(icon_width / 2)
+        horizontal_pixels_between_icons = 20
 
         third_row_center_y = self.icon_display_rect.centery
         second_row_center_y = third_row_center_y \
@@ -90,51 +92,51 @@ class EquipmentDisplay(display.Display):
             + horizontal_pixels_between_icons \
             + icon_width
 
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_HEAD] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_HEAD] = (
             second_column_center_x,
             first_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_NECK] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_NECK] = (
             second_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_MAIN_BODY] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_MAIN_BODY] = (
             second_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_LEGS] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_LEGS] = (
             second_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_FEET] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_FEET] = (
             second_column_center_x,
             fifth_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_AMMO] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_AMMO] = (
             first_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_MAIN_HAND] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_MAIN_HAND] = (
             first_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_HANDS] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_HANDS] = (
             first_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_BACK] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_BACK] = (
             third_column_center_x,
             second_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_OFF_HAND] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_OFF_HAND] = (
             third_column_center_x,
             third_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_WRIST] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_WRIST] = (
             third_column_center_x,
             fourth_row_center_y
         )
-        self.equipment_icon_center[itemdata.EQUIP_SLOT_RING] = (
+        self.equipment_icon_center[equipmentdata.EQUIP_SLOT_RING] = (
             third_column_center_x,
             fifth_row_center_y
         )
@@ -145,7 +147,7 @@ class EquipmentDisplay(display.Display):
             self,
             surface,
             equipment_info_dict,
-            selected_slot_id=itemdata.EQUIP_SLOT_HEAD,
+            selected_slot_id=equipmentdata.EQUIP_SLOT_HEAD,
             alternative_top_left=None,
         ):
         if surface and equipment_info_dict \
@@ -171,7 +173,7 @@ class EquipmentDisplay(display.Display):
             ))
 
             # Blit the icons.
-            for slot_id in itemdata.EQUIPMENT_SLOT_ID_LIST:
+            for slot_id in equipmentdata.EQUIPMENT_SLOT_DATA:
                 # Check if we have info in the argument dict.
                 equipped_info = equipment_info_dict.get(slot_id, None)
 
@@ -185,11 +187,14 @@ class EquipmentDisplay(display.Display):
                     # This slot is equipped.
                     icon_to_blit = equipped_info[0]
                     rendered_supertext = equipped_info[1]
+                """
                 else:
-                    equipment_slot_obj = items.Item.get_item(slot_id)
+                    equipment_slot_obj = \
+                        equipmentslot.EquipmentSlot.get_slot_object(slot_id)
                     if equipment_slot_obj:
                         icon_to_blit = \
                             equipment_slot_obj.get_icon()
+                """
 
                 if slot_id == selected_slot_id:
                     # This slot is selected.
