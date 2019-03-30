@@ -15,6 +15,7 @@ SELECTION_SUPERTEXT_FONT_ID = 0x14
 SELECTION_MENU_FONT_ID = 0x15
 SELECTION_BOTTOM_TEXT_FONT_ID = 0x16
 CHAR_EQUIP_STATS_FONT_ID = 0x20
+ITEM_EQUIP_STATS_FONT_ID = 0x21
 
 ### FONT INFO FIELDS ###
 FONT_SIZE_FIELD = 0x1
@@ -67,6 +68,10 @@ FONT_INFO = {
         FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },
     CHAR_EQUIP_STATS_FONT_ID: {
+        FONT_SIZE_FIELD: 16,
+        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    },
+    ITEM_EQUIP_STATS_FONT_ID: {
         FONT_SIZE_FIELD: 16,
         FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     },

@@ -374,22 +374,50 @@ class Game():
             self.protagonist.inventory.standard_sort()
             #self.protagonist.inventory.print_self()
 
-            self.overworld_inventory_viewing.blit_selection_background(
-                inventory.Inventory.inventory_name_info,
-                bottom_text=None,
-            )
+            #self.overworld_inventory_viewing.blit_selection_background(
+                #inventory.Inventory.inventory_name_info,
+                #bottom_text=None,
+            #)
 
-            ret_info = self.overworld_inventory_viewing.handle_selection_area(
-                inventory.Inventory.inventory_name_info,
-                self.protagonist.inventory.inventory_data,
-                starting_selected_index=0,
-                preselected_index_list=None,
-                custom_actions=None,
-                bottom_text=None,
-                allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
-            )
-            logger.info("Ret info from inventory viewing: {0}".format(ret_info))
-            # TODO handle ret_info.
+            done = False
+            curr_index = 0
+
+            while not done:
+                ret_info = self.overworld_inventory_viewing.handle_selection_area(
+                    inventory.Inventory.inventory_name_info,
+                    self.protagonist.inventory.inventory_data,
+                    starting_selected_index=curr_index,
+                    preselected_index_list=None,
+                    custom_actions=None,
+                    bottom_text=None,
+                    allowed_selection_option_set=menuoptions.OVERWORLD_INVENTORY_ITEM_OPTION_SET,
+                )
+                logger.info("Ret info from inventory viewing: {0}".format(ret_info))
+                # TODO handle ret_info.
+
+                if ret_info is None:
+                    done = True
+                else:
+                    option_id = ret_info[0]
+                    selected_index = ret_info[1]
+
+                    if option_id == menuoptions.DISCARD_OPTION_ID:
+                        # Remove this item.
+                        # TODO
+                        self.protagonist.inventory.remove_item_by_index(
+                            selected_index,
+                            remove_all=True,
+                        )
+
+                        curr_index = min(
+                            selected_index,
+                            self.protagonist.inventory.current_size() - 1
+                        )
+                    elif option_id == menuoptions.DISCARD_X_OPTION_ID:
+                        #TODO
+                        done = True
+                    else:
+                        done = True
 
             #self.overworld_viewing.refresh_and_blit_self()
         else:
@@ -688,7 +716,7 @@ class Game():
             logger.info("Displaying inventory from menu.")
             self.handle_overworld_inventory()
             self.overworld_viewing.refresh_and_blit_self()
-        elif option_id == menuoptions.STATS_OPTION_ID:
+        elif option_id == menuoptions.LEVELS_OPTION_ID:
             logger.info("Displaying stat levels from menu.")
             self.display_statistics(self.protagonist)
         elif option_id == menuoptions.TOOLS_OPTION_ID:

@@ -9,7 +9,7 @@ CANCEL_OPTION_ID = 0x3
 # OVERWORLD SIDE MENU OPTIONS #
 INVENTORY_OPTION_ID = 0x11
 EQUIPMENT_OPTION_ID = 0x12
-STATS_OPTION_ID = 0x13
+LEVELS_OPTION_ID = 0x13
 QUESTS_OPTION_ID = 0x14
 CONFIGURATION_OPTION_ID = 0x15
 SAVE_GAME_OPTION_ID = 0x16
@@ -19,9 +19,8 @@ CHARACTER_OPTION_ID = 0x19
 SPELLS_OPTION_ID = 0x1A
 TOOLS_OPTION_ID = 0x1B
 
-# ITEM OPTION IDS FOR INVENTORY
+# ITEM OPTION IDS
 #USE_OPTION_ID = 0x30 # For using an item with another.
-DISCARD_OPTION_ID = 0x31 # For discarding items.
 LIGHT_OPTION_ID = 0x32 # For lighting items like logs on fire.
 EQUIP_OPTION_ID = 0x33 # For equipping equippable items.
 UNEQUIP_OPTION_ID = 0x34 # For unequipping equippable items.
@@ -30,20 +29,35 @@ IDENTIFY_OPTION_ID = 0x36 # For identifying unknown items.
 READ_OPTION_ID = 0x37 # For identifying readable items.
 EAT_OPTION_ID = 0x38
 DRINK_OPTION_ID = 0x39
+VIEW_ITEM_STATS_OPTION_ID = 0x3A
+DISCARD_OPTION_ID = 0x3B # For discarding items.
+DISCARD_X_OPTION_ID = 0x3C
+
 
 # STORE OPTION IDS
 BUY_1_OPTION_ID = 0x41 # For buying items in stores.
 BUY_5_OPTION_ID = 0x42
 BUY_10_OPTION_ID = 0x43
+BUY_X_OPTION_ID = 0x44
+BUY_ALL_OPTION_ID = 0x45
 SELL_1_OPTION_ID = 0x51 # For selling items in stores.
 SELL_5_OPTION_ID = 0x52
 SELL_10_OPTION_ID = 0x53
+SELL_X_OPTION_ID = 0x54
+SELL_ALL_OPTION_ID = 0x55
 
 # LOOT OPTION IDS
 TAKE_1_OPTION_ID = 0x61
 TAKE_5_OPTION_ID = 0x62
 TAKE_10_OPTION_ID = 0x63
-TAKE_ALL_OPTION_ID = 0x64
+TAKE_X_OPTION_ID = 0x65
+TAKE_ALL_OPTION_ID = 0x65
+
+DEPOSIT_1_OPTION_ID = 0x71
+DEPOSIT_5_OPTION_ID = 0x72
+DEPOSIT_10_OPTION_ID = 0x73
+DEPOSIT_X_OPTION_ID = 0x74
+DEPOSIT_ALL_OPTION_ID = 0x75
 
 # Some convenient option ID lists for common items.
 DEFAULT_LOG_OPTION_ID_LIST = [
@@ -78,8 +92,8 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Equipment",
         language.LANG_ESPANOL: "Equipo",
     },
-    STATS_OPTION_ID: {
-        language.LANG_ENGLISH: "Stats",
+    LEVELS_OPTION_ID: {
+        language.LANG_ENGLISH: "Levels",
         language.LANG_ESPANOL: "Niveles",
     },
     QUESTS_OPTION_ID: {
@@ -122,6 +136,10 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Discard",
         language.LANG_ESPANOL: "Descartar",
     },
+    DISCARD_X_OPTION_ID: {
+        language.LANG_ENGLISH: "Discard X",
+        language.LANG_ESPANOL: "Descartar X",
+    },
     LIGHT_OPTION_ID: {
         language.LANG_ENGLISH: "Light",
         language.LANG_ESPANOL: "Encender",
@@ -154,6 +172,10 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Drink",
         language.LANG_ESPANOL: "Tomar",
     },
+    VIEW_ITEM_STATS_OPTION_ID: {
+        language.LANG_ENGLISH: "Item Stats",
+        language.LANG_ESPANOL: "Datos del Artículo",
+    },
     BUY_1_OPTION_ID: {
         language.LANG_ENGLISH: "Buy 1",
         language.LANG_ESPANOL: "Comprar 1",
@@ -178,21 +200,41 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Sell 10",
         language.LANG_ESPANOL: "Vender 10",
     },
+    BUY_ALL_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy All",
+        language.LANG_ESPANOL: "Comprar Todos",
+    },
+    BUY_X_OPTION_ID: {
+        language.LANG_ENGLISH: "Buy X",
+        language.LANG_ESPANOL: "Comprar X",
+    },
+    SELL_ALL_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell All",
+        language.LANG_ESPANOL: "Vender Todos",
+    },
+    SELL_X_OPTION_ID: {
+        language.LANG_ENGLISH: "Sell X",
+        language.LANG_ESPANOL: "Vender X",
+    },
     TAKE_1_OPTION_ID: {
         language.LANG_ENGLISH: "Take 1",
-        language.LANG_ESPANOL: "Tomar 1",
+        language.LANG_ESPANOL: "Recoger 1",
     },
     TAKE_5_OPTION_ID: {
         language.LANG_ENGLISH: "Take 5",
-        language.LANG_ESPANOL: "Tomar 5",
+        language.LANG_ESPANOL: "Recoger 5",
     },
     TAKE_10_OPTION_ID: {
         language.LANG_ENGLISH: "Take 10",
-        language.LANG_ESPANOL: "Tomar 10",
+        language.LANG_ESPANOL: "Recoger 10",
+    },
+    TAKE_X_OPTION_ID: {
+        language.LANG_ENGLISH: "Take X",
+        language.LANG_ESPANOL: "Recoger X",
     },
     TAKE_ALL_OPTION_ID: {
         language.LANG_ENGLISH: "Take All",
-        language.LANG_ESPANOL: "Tomar Todos",
+        language.LANG_ESPANOL: "Recoger Todos",
     },
 }
 
@@ -200,7 +242,7 @@ OPTION_NAME_INFO = {
 OVERWORLD_MENU_OPTION_IDS = [
     INVENTORY_OPTION_ID,
     EQUIPMENT_OPTION_ID,
-    STATS_OPTION_ID,
+    LEVELS_OPTION_ID,
     SPELLS_OPTION_ID,
     TOOLS_OPTION_ID,
     QUESTS_OPTION_ID,
@@ -213,7 +255,9 @@ OVERWORLD_MENU_OPTION_IDS = [
 ]
 
 COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
+    VIEW_ITEM_STATS_OPTION_ID,
     DISCARD_OPTION_ID,
+    DISCARD_X_OPTION_ID,
     LIGHT_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
@@ -225,7 +269,9 @@ COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
 ])
 
 OVERWORLD_INVENTORY_ITEM_OPTION_SET = set([
+    VIEW_ITEM_STATS_OPTION_ID,
     DISCARD_OPTION_ID,
+    DISCARD_X_OPTION_ID,
     LIGHT_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
@@ -237,7 +283,7 @@ OVERWORLD_INVENTORY_ITEM_OPTION_SET = set([
 ])
 
 OVERWORLD_EQUIPMENT_ITEM_OPTION_SET = set([
-    DISCARD_OPTION_ID,
+    VIEW_ITEM_STATS_OPTION_ID,
     UNEQUIP_OPTION_ID,
     CANCEL_OPTION_ID,
 ])
@@ -246,6 +292,8 @@ SHOP_ITEM_OPTION_SET = set([
     BUY_1_OPTION_ID,
     BUY_5_OPTION_ID,
     BUY_10_OPTION_ID,
+    BUY_X_OPTION_ID,
+    BUY_ALL_OPTION_ID,
     CANCEL_OPTION_ID,
 ])
 
@@ -253,11 +301,15 @@ SHOP_MODE_INVENTORY_ITEM_OPTION_SET = set([
     SELL_1_OPTION_ID,
     SELL_5_OPTION_ID,
     SELL_10_OPTION_ID,
+    SELL_X_OPTION_ID,
+    SELL_ALL_OPTION_ID,
     CANCEL_OPTION_ID,
 ])
 
 BATTLE_MODE_INVENTORY_ITEM_OPTION_SET = set([
     DISCARD_OPTION_ID,
+    DISCARD_X_OPTION_ID,
+    VIEW_ITEM_STATS_OPTION_ID,
     EQUIP_OPTION_ID,
     EAT_OPTION_ID,
     DRINK_OPTION_ID,
@@ -268,6 +320,7 @@ BATTLE_LOOT_ITEM_OPTION_SET = set([
     TAKE_1_OPTION_ID,
     TAKE_5_OPTION_ID,
     TAKE_10_OPTION_ID,
+    TAKE_X_OPTION_ID,
     TAKE_ALL_OPTION_ID,
     CANCEL_OPTION_ID,
 ])

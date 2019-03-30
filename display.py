@@ -85,6 +85,19 @@ class TextPage(object):
                 self._rendered_text_lines.append(rendered_text)
                 self._text_lines.append(item)
 
+    @classmethod
+    def merge_pages(cls, page_list):
+        ret_page = None
+
+        if page_list:
+            ret_page = TextPage(None, None, None)
+
+            for page in page_list:
+                ret_page._text_lines += page.text_lines
+                ret_page._rendered_text_lines += page.rendered_text_lines
+
+        return ret_page
+
     @property
     def text_lines(self):
         """Returns the array of text lines for the page."""
@@ -94,6 +107,12 @@ class TextPage(object):
     def rendered_text_lines(self):
         """Returns the array of rendered text lines for the page."""
         return self._rendered_text_lines
+
+    def get_num_text_lines(self):
+        return len(self._text_lines)
+
+    def get_num_rendered_lines(self):
+        return len(self._rendered_text_lines)
 
 class MenuPage(object):
     """A class used to represent a single menu page for a menu display.
@@ -755,13 +774,19 @@ class Text_Display(Display):
 
         if text_string:
             # Split string based on whitespace.
-            word_list = text_string.split()
+            #word_list = text_string.split()
+
+            # Split string based on spaces.
+            word_list = text_string.split(' ')
 
             if word_list:
                 # Add a space to every word except the last one.
                 for i in range(len(word_list) - 1):
                     ret_list.append(word_list[i] + " ")
-                ret_list.append(word_list[len(word_list) - 1])
+
+                last_word = word_list[len(word_list) - 1]
+                if last_word:
+                    ret_list.append(last_word)
 
         logger.debug(
             "Converted {0} to word list {1}".format(
@@ -782,9 +807,13 @@ class Text_Display(Display):
         # string will carry over to a new text line.
         if text_string:
             text_lines = []
+            text_string_lines = []
 
             # Separate out the string based on newlines.
-            text_string_lines = [x.strip() for x in text_string.split('\n')]
+            for x in text_string.split('\n'):
+                if x:
+                    text_string_lines.append(x)
+            #text_string_lines = [x.strip() for x in text_string.split('\n')]
 
             for line in text_string_lines:
                 word_list = Text_Display.convert_to_word_list(line)

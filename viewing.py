@@ -187,6 +187,17 @@ class Viewing():
                     # Refresh and reblit self.
                     if refresh_during:
                         self.refresh_and_blit_self()
+                        self.display_single_text_page(
+                            text_display,
+                            page,
+                            advance_delay_ms=0,
+                            auto_advance=False,
+                            refresh_during=False,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                            no_display_update=True,
+                        )
 
                         if not no_display_update:
                             pygame.display.update()
@@ -245,6 +256,114 @@ class Viewing():
 
                 if no_display_update:
                     pygame.display.update()
+
+    def display_input_text_box(
+            self,
+            text_display,
+            prompt_text_to_display,
+            prompt_font_color=viewingdata.COLOR_BLACK,
+            input_font_color=viewingdata.COLOR_BLACK,
+            input_delay_ms=viewingdata.DEFAULT_ADVANCE_DELAY_MS,
+            refresh_during=True,
+            refresh_after=True,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            alternative_top_left=None,
+            no_display_update=False,
+        ):
+        if text_to_display and self.main_display_surface and text_display:
+            # Get the text lines for the prompt.
+            page_list = text_display.get_text_pages(
+                prompt_text_to_display,
+                font_color=prompt_font_color,
+            )
+            num_pages = len(page_list)
+
+            if num_pages > 1:
+                logger.warn("This method only blits first page.")
+                logger.warn("Submitted text is {0} pages.".format(num_pages))
+
+            first_page = page_list[0]
+
+            done = False
+            user_input_str = ""
+            max_lines = text_display.lines_per_page
+            refresh_tick_counter = 0
+
+            while not done:
+                page_to_append = text_display.get_text_pages(
+                    user_input_str + "*",
+                    font_color=input_font_color,
+                )
+
+                combined_page = display.TextDisplay.merge_pages(
+                    first_page,
+                    page_to_append,
+                )
+
+                num_lines = combined_page.get_num_rendered_lines()
+
+                if num_lines == max_lines:
+                    logger.warn("This method will not blit all the lines.")
+
+                # Display just the first page.
+                self.display_single_text_page(
+                    text_display,
+                    combined_page,
+                    advance_delay_ms=input_delay_ms,
+                    auto_advance=auto_advance,
+                    refresh_during=refresh_during,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
+                    no_display_update=no_display_update,
+                )
+
+                # Wait for user to give input.
+                given_input = False
+                while not given_input:
+                    input_str = ""
+
+                    timekeeper.Timekeeper.tick()
+
+                    refresh_tick_counter = (refresh_tick_counter + 1) \
+                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+
+                    if refresh_during \
+                            and (refresh_tick_counter == 0):
+                        logger.debug("Refreshing while waiting.")
+                        self.refresh_and_blit_self()
+                        self.display_single_text_page(
+                            text_display,
+                            combined_page,
+                            advance_delay_ms=input_delay_ms,
+                            auto_advance=auto_advance,
+                            refresh_during=refresh_during,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                            no_display_update=no_display_update,
+                        )
+                        pygame.display.update()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            # TODO process input. reblit page
+                            # upon each valid character
+                            given_input = True
+                            done = True
+
+                        # TODO process string? display new string?
+
+            if refresh_after:
+                self.refresh_and_blit_self()
+
+                if no_display_update:
+                    pygame.display.update()
+
 
     # Returns option ID for selected option, None if no option selected.
     def display_menu_display(

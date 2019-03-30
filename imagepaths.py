@@ -46,11 +46,11 @@ INVENTORY_BASIC_ITEM_DETAILS_BACKGROUND_PATH = DISPLAY_PATH \
 INVENTORY_BASIC_INSTRUCTIONS_BACKGROUND_PATH = DISPLAY_PATH \
                         + "" # [0]
 ITEM_LISTING_SELECTED_DEFAULT_PATH = DISPLAY_PATH \
-                        + "item_listing_selected_image_60x60_dk.png" # [0]
+                        + "item_listing_selected_image2_60x60_dk.png" # [0]
 ITEM_LISTING_UNSELECTED_DEFAULT_PATH = DISPLAY_PATH \
-                        + "item_listing_unselected_image2_60x60_dk.png" # [0]
+                        + "item_listing_unselected_image3_60x60_dk.png" # [0]
 ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH = DISPLAY_PATH \
-                        + "item_listing_selected_image_background_enlarged_120x120_dk.png" # [0]
+                        + "item_listing_selected_image_background_enlarged2_120x120_dk.png" # [0]
 ITEM_LISTING_CONT_UP_PATH = DISPLAY_PATH \
                         + "item_listing_continue_up_icon_30x30_dk.png" # [0]
 ITEM_LISTING_CONT_DOWN_PATH = DISPLAY_PATH \

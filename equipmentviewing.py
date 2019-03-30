@@ -238,6 +238,18 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         )
         self.selection_subtitle_rect.centerx = self.selection_details_rect.centerx
 
+        # Will display item stats of selected item.
+        self.selection_statistics_display = None
+        self.selection_statistics_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_name_rect.bottom \
+                + 10,
+            self.selection_details_rect.width - 30,
+            self.selection_details_rect.bottom \
+                - self.selection_name_rect.bottom \
+                - 40,
+        )
+
         # Will display enlarged image icon of selected item.
         self.icon_enlarged_display = None
         self.icon_enlarged_rect = pygame.Rect(
@@ -387,11 +399,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             )
 
     # Overridden.
-    def create_additional_displays(self):
-        self.create_selection_name_display()
-        self.create_selection_subtitle_display()
-        self.create_selection_description_display()
-        self.create_selection_options_display()
+    def create_additional_equipment_displays(self):
         self.create_char_equip_stats_display()
         self.create_truncated_char_equip_stats_display()
 
@@ -462,15 +470,22 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
 
         # Testing
         char_statistics_text = "\n".join([
+            "Character Equipment Stats:",
+            " ",
+            "~Offensive~",
             "Ranged accuracy: 999",
             "Ranged strength: 999",
-            "Ranged defense: 999",
             "Ranged accuracy: 999",
             "Ranged strength: 999",
-            "Ranged defense: 999",
             "Ranged accuracy: 999",
             "Ranged strength: 999",
+            " ",
+            "~Defensive~",
             "Ranged defense: 999",
+            "Ranged defense: 999",
+            "Ranged defense: 999",
+            " ",
+            "~Other~",
             "Agility: 999",
             "Weight: 999",
         ])
@@ -726,7 +741,9 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
 
             # Create displays for viewing.
             ret_viewing.create_base_displays()
-            ret_viewing.create_additional_displays()
+            ret_viewing.create_additional_selection_displays()
+            ret_viewing.create_additional_equipment_displays()
+
 
         return ret_viewing
 

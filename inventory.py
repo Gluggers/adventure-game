@@ -102,10 +102,10 @@ class Inventory():
 
     # Adds item to inventory. Returns True upon success, False on failure.
     def add_item(
-                self,
-                item_obj,
-                quantity=1,
-            ):
+            self,
+            item_obj,
+            quantity=1,
+        ):
         success = False
 
         if item_obj and quantity > 0:
@@ -170,10 +170,10 @@ class Inventory():
 
     # Adds item to inventory. Returns True upon success, False on failure.
     def add_item_by_id(
-                self,
-                item_id,
-                quantity=1,
-            ):
+            self,
+            item_id,
+            quantity=1,
+        ):
         success = False
 
         if quantity > 0 and (item_id is not None):
@@ -206,46 +206,42 @@ class Inventory():
                 inventory_entry[1]
             ))
 
-    def remove_item(self, item_obj, quantity=1):
+    def remove_item(self, item_obj, quantity=1, remove_all=False):
         # Check if we have the item to begin with.
         if item_obj and quantity > 0:
-            entry_index = self.get_item_index(item_obj.item_id)
+            self.remove_item_by_id(
+                item_obj.item_id,
+                quantity=quantity,
+                remove_all=remove_all,
+            )
+
+    def remove_item_by_id(self, item_id, quantity=1, remove_all=False):
+        if quantity > 0 and (item_id is not None):
+            # Make sure item ID is valid.
+            entry_index = self.get_item_index(item_id)
 
             if entry_index >= 0:
-                # We can reduce the item quantity.
-                inventory_entry = self.inventory_data[entry_index]
-                old_quantity = inventory_entry[1]
-                new_quantity = old_quantity - quantity
-
-                if new_quantity <= 0:
-                    # Remove entry from inventory.
-                    self.inventory_data.pop(entry_index)
-                    logger.info("Removed item slot in inventory for {0}".format(
-                        item_obj.get_name()
-                    ))
-                else:
-                    self.inventory_data[entry_index] = [
-                        item_obj,
-                        new_quantity
-                    ]
-                    logger.info("Reduced quantity for {0} from {1} to {2}".format(
-                        item_obj.get_name(),
-                        old_quantity,
-                        new_quantity,
-                    ))
+                self.remove_item_by_index(
+                    entry_index,
+                    quantity=quantity,
+                    remove_all=remove_all,
+                )
             else:
                 logger.warn("Trying to remove item that isn't in inventory.")
 
-    def remove_item_by_id(self, item_id, quantity=1):
-        if quantity > 0 and (item_id is not None):
-            # Make sure item ID is valid.
-            item_obj = items.Item.get_item(item_id)
+    def remove_item_by_index(self, index, quantity=1, remove_all=False):
+        if quantity > 0 and (index is not None) \
+                and index >= 0 and index <= len(self.inventory_data):
+            inventory_entry = self.inventory_data[index]
+            item_obj = inventory_entry[0]
+            old_quantity = inventory_entry[1]
+            new_quantity = max(0, old_quantity - quantity)
 
-            if item_obj:
-                self.remove_item(
-                    item_obj,
-                    quantity=quantity,
-                )
+            if item_obj and old_quantity:
+                if new_quantity > 0 and not remove_all:
+                    self.inventory_data[index] = [item_obj, new_quantity]
+                else:
+                    self.inventory_data.pop(index)
             else:
                 logger.error(
                     "Trying to remove invalid item ID from inventory.".format(

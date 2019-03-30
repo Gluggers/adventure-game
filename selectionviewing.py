@@ -674,6 +674,18 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         )
         self.selection_subtitle_rect.centerx = self.selection_details_rect.centerx
 
+        # Will display item stats of selected item.
+        self.selection_statistics_display = None
+        self.selection_statistics_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_name_rect.bottom \
+                + 10,
+            self.selection_details_rect.width - 30,
+            self.selection_details_rect.bottom \
+                - self.selection_name_rect.bottom \
+                - 40,
+        )
+
         # Will display enlarged image icon of selected item.
         self.icon_enlarged_display = None
         self.icon_enlarged_rect = pygame.Rect(
@@ -719,6 +731,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
+                background_pattern=None,
                 horizontal_padding=20,
                 vertical_padding=0,
             )
@@ -741,12 +754,36 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
+                background_pattern=None,
                 horizontal_padding=20,
                 vertical_padding=0,
             )
 
             if not self.selection_subtitle_display:
                 logger.error("Failed to make selection subtitle display")
+        else:
+            logger.error("Font not found.")
+            logger.error("Must init fonts through display.Display.init_fonts.")
+
+    def create_selection_statistics_display(self):
+        logger.info("Creating selection statistics display...")
+        font_obj = display.Display.get_font(
+                fontinfo.ITEM_EQUIP_STATS_FONT_ID,
+            )
+        if font_obj:
+            self.selection_statistics_display = display.Text_Display(
+                self.main_display_surface,
+                self.selection_statistics_rect,
+                font_obj,
+                background_color=display.P1_BG_3_COLOR,
+                background_image_path=None,
+                background_pattern=None,
+                horizontal_padding=5,
+                vertical_padding=5,
+            )
+
+            if not self.selection_statistics_display:
+                logger.error("Failed to make selection statistics display")
         else:
             logger.error("Font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
@@ -764,6 +801,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 font_obj,
                 background_color=None,
                 background_image_path=None,
+                background_pattern=None,
                 horizontal_padding=20,
                 vertical_padding=20,
             )
@@ -787,8 +825,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 background_color=display.P1_BG_3_COLOR,
                 background_image_path=None,
                 background_pattern=None,
-                horizontal_padding=20,
-                vertical_padding=20,
+                horizontal_padding=5,
+                vertical_padding=5,
             )
 
             if not self.selection_option_menu_display:
@@ -797,11 +835,12 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             logger.error("Display font not found.")
             logger.error("Must init fonts through display.Display.init_fonts.")
 
-    def create_additional_displays(self):
+    def create_additional_selection_displays(self):
         self.create_selection_name_display()
         self.create_selection_subtitle_display()
         self.create_selection_description_display()
         self.create_selection_options_display()
+        self.create_selection_statistics_display()
 
     def blit_selected_object_name(self, selected_obj):
         if selected_obj:
@@ -911,8 +950,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
         option_list = []
 
-        if selection_obj.item_menu_option_ids:
-            for id in selection_obj.item_menu_option_ids:
+        if selection_obj.menu_option_ids:
+            for id in selection_obj.menu_option_ids:
                 option_list.append(id)
             option_list.append(menuoptions.CANCEL_OPTION_ID)
 
@@ -977,7 +1016,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             # Create displays for viewing.
             ret_viewing.create_base_displays()
-            ret_viewing.create_additional_displays()
+            ret_viewing.create_additional_selection_displays()
 
         return ret_viewing
 
