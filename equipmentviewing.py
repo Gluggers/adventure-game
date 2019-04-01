@@ -382,7 +382,11 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             logger.error("Must init fonts through display.Display.init_fonts.")
 
     # Overridden.
-    def blit_selection_info_text(self, selected_obj):
+    def blit_selection_info_text(
+            self,
+            selected_obj,
+            reference_entity=None,
+        ):
         # Blit selection description and usage info.
         if selected_obj:
             selection_info = selected_obj.get_info_text()
@@ -403,17 +407,35 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
         self.create_char_equip_stats_display()
         self.create_truncated_char_equip_stats_display()
 
-    def blit_main_selection_info(self, selection_info):
+    def blit_main_selection_info(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
         self.blit_selected_object_name(selection_info[0])
         self.blit_selected_object_quantity(selection_info[1])
         self.blit_selected_object_enlarged_icon(selection_info[0])
 
-    def blit_selection_details(self, selection_info):
-        self.blit_main_selection_info(selection_info)
-        self.blit_selection_info_text(selection_info[0])
+    def blit_selection_details(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
+        self.blit_main_selection_info(
+            selection_info,
+            reference_entity=reference_entity,
+        )
+        self.blit_selection_info_text(
+            selection_info[0],
+            reference_entity=reference_entity,
+        )
 
     # Overridden.
-    def convert_to_icon_data(self, equipment_dict):
+    def convert_to_icon_data(
+            self,
+            equipment_dict,
+            reference_entity=None,
+        ):
         ret_data = None
 
         if equipment_dict is not None:
@@ -562,6 +584,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             custom_actions=None,
             bottom_text=None,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
         pass
 
@@ -573,6 +596,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             custom_actions=None,
             bottom_text=None,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
 
         ret_info = None
@@ -585,7 +609,10 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             display_to_use = self.truncated_selection_area_display
 
         if selection_data is not None:
-            icon_data_mapping = self.convert_to_icon_data(selection_data)
+            icon_data_mapping = self.convert_to_icon_data(
+                selection_data,
+                reference_entity=reference_entity,
+            )
 
         logger.info("{0} items in icon data mapping.".format(
             len(icon_data_mapping)
@@ -630,7 +657,8 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
 
                     if curr_selection_info:
                         self.blit_selection_details(
-                            curr_selection_info
+                            curr_selection_info,
+                            reference_entity=reference_entity,
                         )
 
                     pygame.display.update()
@@ -687,7 +715,8 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                     if open_options:
                         # Show item options.
                         ret_option = self.display_selection_options(
-                            curr_selection_info
+                            curr_selection_info,
+                            reference_entity=reference_entity,
                         )
 
                         if ret_option \
@@ -697,7 +726,8 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                         else:
                             if curr_selection_info:
                                 self.blit_selection_details(
-                                    curr_selection_info
+                                    curr_selection_info,
+                                    reference_entity=reference_entity,
                                 )
                             pygame.display.update()
 

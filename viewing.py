@@ -148,6 +148,15 @@ class Viewing():
     # and blits self and updates display after all pages.
     # If refresh_during is True, refreshes and blits self and updates display
     # while waiting for advancement and in between pages.
+    # If text_to_display is a list of strings, each string will be
+    # included and deliminated as a new line where possible.
+    # font_color can be a single tuple representing a font color, or
+    # a list of tuples representing font colors for each line of
+    # text_to_display. List values of font_color are only valid if
+    # text_to_display is a list of strings, and each index of the list
+    # will correspond to the next. If text_to_display is a list of strings
+    # and font_color is a single tuple, then that color will apply
+    # to each text string in text_to_display.
     def display_text_display(
             self,
             text_display,
@@ -162,12 +171,17 @@ class Viewing():
             alternative_top_left=None,
             no_display_update=False,
         ):
-        if self.main_display_surface and text_display and text_to_display:
-            # Get the pages.
-            page_list = text_display.get_text_pages(
-                text_to_display,
-                font_color=font_color,
-            )
+        if self.main_display_surface and text_display and text_to_display and font_color:
+            page_list = []
+
+            if isinstance(text_to_display, str) and not isinstance(font_color, tuple):
+                logger.error("Invalid format for font color with single string for text_to_display.")
+            else:
+                # Get the pages.
+                page_list = text_display.get_text_pages(
+                    text_to_display,
+                    font_color=font_color,
+                )
 
             if page_list:
                 # Display each text page.
@@ -211,6 +225,15 @@ class Viewing():
     # and blits self and updates display after all pages.
     # If refresh_during is True, refreshes and blits self and updates display
     # while waiting for advancement and in between pages.
+    # If text_to_display is a list of strings, each string will be
+    # included and deliminated as a new line where possible.
+    # font_color can be a single tuple representing a font color, or
+    # a list of tuples representing font colors for each line of
+    # text_to_display. List values of font_color are only valid if
+    # text_to_display is a list of strings, and each index of the list
+    # will correspond to the next. If text_to_display is a list of strings
+    # and font_color is a single tuple, then that color will apply
+    # to each text string in text_to_display.
     def display_text_display_first_page(
             self,
             text_display,
@@ -225,19 +248,25 @@ class Viewing():
             alternative_top_left=None,
             no_display_update=False,
         ):
-        if text_to_display and self.main_display_surface and text_display:
-            # Get the pages.
-            page_list = text_display.get_text_pages(
-                text_to_display,
-                font_color=font_color,
-            )
-            num_pages = len(page_list)
+        if text_to_display and self.main_display_surface and text_display and font_color:
+            page_list = []
 
-            if num_pages > 1:
-                logger.warn("This method only blits first page.")
-                logger.warn("Submitted text is {0} pages.".format(num_pages))
+            if isinstance(text_to_display, str) and not isinstance(font_color, tuple):
+                logger.error("Invalid format for font color with single string for text_to_display.")
+            else:
+                # Get the pages.
+                page_list = text_display.get_text_pages(
+                    text_to_display,
+                    font_color=font_color,
+                )
 
             if page_list:
+                num_pages = len(page_list)
+
+                if num_pages > 1:
+                    logger.warn("This method only blits first page.")
+                    logger.warn("Submitted text is {0} pages.".format(num_pages))
+
                 # Display just the first page.
                 self.display_single_text_page(
                     text_display,
@@ -357,6 +386,7 @@ class Viewing():
                             done = True
 
                         # TODO process string? display new string?
+                        #$$
 
             if refresh_after:
                 self.refresh_and_blit_self()

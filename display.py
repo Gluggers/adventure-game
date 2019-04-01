@@ -85,6 +85,7 @@ class TextPage(object):
                 self._rendered_text_lines.append(rendered_text)
                 self._text_lines.append(item)
 
+    """
     @classmethod
     def merge_pages(cls, page_list):
         ret_page = None
@@ -97,6 +98,7 @@ class TextPage(object):
                 ret_page._rendered_text_lines += page.rendered_text_lines
 
         return ret_page
+    """
 
     @property
     def text_lines(self):
@@ -997,59 +999,133 @@ class Text_Display(Display):
 
         return ret_lines
 
+    def consolidate_pages(self, page_list):
+        ret_list = []
+
+        rendered_lines = []
+        text_lines = []
+
+        for page in page_list:
+            rendered_lines += page.rendered_text_lines
+            text_lines += page.text_lines
+
+        if rendered_lines and text_lines:
+            curr_index = 0
+            num_lines = len(rendered_lines)
+
+            while curr_index < num_lines:
+                # Set blank page and manually add lines.
+                curr_page = TextPage(None, None, None)
+                end_index = min(curr_index + self.lines_per_page, num_lines)
+
+                curr_page._text_lines = text_lines[curr_index:end_index]
+                curr_page._rendered_text_lines = \
+                    rendered_lines[curr_index:end_index]
+
+                ret_list.append(curr_page)
+
+                curr_index = end_index
+
+        return ret_list
+
     # Returns list of TextPage objects, each containing
     # a list of strings, where each string represents one line of text
     # to place on display.
-    def get_text_pages(self, text_string, font_color=viewingdata.COLOR_BLACK):
+    # If text_to_display is a list of strings, each string will be
+    # included and deliminated as a new line where possible.
+    # font_color can be a single tuple representing a font color, or
+    # a list of tuples representing font colors for each line of
+    # text_to_display. List values of font_color are only valid if
+    # text_to_display is a list of strings, and each index of the list
+    # will correspond to the next. If text_to_display is a list of strings
+    # and font_color is a single tuple, then that color will apply
+    # to each text string in text_to_display.
+    def get_text_pages(self, text_to_display, font_color=viewingdata.COLOR_BLACK):
         ret_page_list = []
         page_list = []
 
+        strings_to_process = []
+
+        text_to_print = None
+        font_color_to_use = None
+        use_color_list = False
+
         # Get lines of text to print.
-        lines_to_print = self.get_text_lines(text_string)
-
-        logger.debug(
-            "Get text pages. Text: {0}\nLines:{1}".format(
-                text_string,
-                lines_to_print
-            )
-        )
-
-        if lines_to_print:
-            num_lines = len(lines_to_print)
-
-            if num_lines > self.lines_per_page:
-                num_lines_processed = 0
-                remaining_lines = num_lines
-
-                while remaining_lines > 0:
-                    # Get number of lines to add to page.
-                    num_lines_to_add = min(self.lines_per_page, remaining_lines)
-
-                    # Get indices for list slicing.
-                    start_index = num_lines_processed
-                    end_index = start_index + num_lines_to_add
-
-                    page_lines = lines_to_print[start_index:end_index]
-
-                    # Create page and add to page list.
-                    page_list.append(
-                        TextPage(page_lines, self.font_object, font_color)
-                    )
-
-                    num_lines_processed = num_lines_processed + num_lines_to_add
-                    remaining_lines = remaining_lines - num_lines_to_add
+        if isinstance(text_to_display, str):
+            if isinstance(font_color, tuple):
+                strings_to_process.append(text_to_display)
+                font_color_to_use = font_color
             else:
-                # All lines can fit on a single page.
-                page_list.append(
-                    TextPage(
-                        lines_to_print,
-                        self.font_object,
-                        font_color,
-                    )
+                logger.error("Invalid format for font color with single string for text_to_display.")
+        elif isintance(text_to_display, list):
+            strings_to_process = text_to_display
+
+            if isinstance(font_color, list):
+                use_color_list = True
+            elif isinstance(font_color, tuple):
+                font_color_to_use = font_color
+            else:
+                logger.error("Invalid format for font_color")
+        else:
+            logger.error("Invalid format for text_to_display")
+
+        for index in range(len(strings_to_process)):
+            text_to_process = strings_to_process[index]
+
+            lines_to_print = self.get_text_lines(text_to_process)
+
+            logger.debug(
+                "Get text pages. Text: {0}\nLines:{1}".format(
+                    text_to_process,
+                    lines_to_print
                 )
+            )
+
+            if use_color_list:
+                font_color_to_use = font_color[index]
+
+            if lines_to_print and font_color_to_use:
+                num_lines = len(lines_to_print)
+
+                if num_lines > self.lines_per_page:
+                    num_lines_processed = 0
+                    remaining_lines = num_lines
+
+                    while remaining_lines > 0:
+                        # Get number of lines to add to page.
+                        num_lines_to_add = min(self.lines_per_page, remaining_lines)
+
+                        # Get indices for list slicing.
+                        start_index = num_lines_processed
+                        end_index = start_index + num_lines_to_add
+
+                        page_lines = lines_to_print[start_index:end_index]
+
+                        # Create page and add to page list.
+                        page_list.append(
+                            TextPage(page_lines, self.font_object, font_color_to_use)
+                        )
+
+                        num_lines_processed = num_lines_processed + num_lines_to_add
+                        remaining_lines = remaining_lines - num_lines_to_add
+                else:
+                    # All lines can fit on a single page.
+                    page_list.append(
+                        TextPage(
+                            lines_to_print,
+                            self.font_object,
+                            font_color_to_use,
+                        )
+                    )
 
         if page_list:
-            ret_page_list = page_list
+            if len(page_list) > 1:
+                # Consolidate page lines.
+                ret_page_list = self.consolidate_pages(page_list)
+            else:
+                ret_page_list = page_list
+        else:
+            logger.warn("No page made.")
 
         # Debugging
         for page in ret_page_list:

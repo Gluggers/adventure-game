@@ -308,11 +308,19 @@ class SelectionGridViewing(viewing.Viewing):
         pass
 
     # Overridable by child.
-    def blit_main_selection_info(self, selection_info):
+    def blit_main_selection_info(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
         pass
 
     # Overridable by child.
-    def blit_selection_details(self, selection_info):
+    def blit_selection_details(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
         pass
 
     # Overridable by child.
@@ -320,6 +328,7 @@ class SelectionGridViewing(viewing.Viewing):
             self,
             selection_info,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
         return None
 
@@ -328,6 +337,7 @@ class SelectionGridViewing(viewing.Viewing):
             self,
             selection_info,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
         ret_option = None
 
@@ -335,10 +345,14 @@ class SelectionGridViewing(viewing.Viewing):
         options_to_show = self.get_selection_options(
             selection_info,
             allowed_selection_option_set=allowed_selection_option_set,
+            reference_entity=reference_entity,
         )
 
         if options_to_show:
-            self.blit_main_selection_info(selection_info)
+            self.blit_main_selection_info(
+                selection_info,
+                reference_entity=reference_entity,
+            )
 
             ret_option = self.display_menu_display(
                 self.selection_option_menu_display,
@@ -355,7 +369,11 @@ class SelectionGridViewing(viewing.Viewing):
         return ret_option
 
     # Overridable by child.
-    def convert_to_icon_data(self, selection_data_list):
+    def convert_to_icon_data(
+            self,
+            selection_data_list,
+            reference_entity=None,
+        ):
         return None
 
     # Handles displaying the item listing and returns
@@ -376,6 +394,7 @@ class SelectionGridViewing(viewing.Viewing):
             custom_actions=None,
             bottom_text=None,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
         ret_info = None
         max_index = len(selection_data) - 1
@@ -388,7 +407,10 @@ class SelectionGridViewing(viewing.Viewing):
             display_to_use = self.truncated_selection_area_display
 
         if selection_data:
-            icon_data_list = self.convert_to_icon_data(selection_data)
+            icon_data_list = self.convert_to_icon_data(
+                selection_data,
+                reference_entity=reference_entity,
+            )
 
         if selection_data and icon_data_list:
             # Start with the first item.
@@ -461,7 +483,8 @@ class SelectionGridViewing(viewing.Viewing):
 
                     if curr_selection_info:
                         self.blit_selection_details(
-                            curr_selection_info
+                            curr_selection_info,
+                            reference_entity=reference_entity,
                         )
 
                     pygame.display.update()
@@ -571,6 +594,7 @@ class SelectionGridViewing(viewing.Viewing):
                         ret_option = self.display_selection_options(
                             curr_selection_info,
                             allowed_selection_option_set=allowed_selection_option_set,
+                            reference_entity=reference_entity,
                         )
 
                         if ret_option \
@@ -580,7 +604,8 @@ class SelectionGridViewing(viewing.Viewing):
                         else:
                             if curr_selection_info:
                                 self.blit_selection_details(
-                                    curr_selection_info
+                                    curr_selection_info,
+                                    reference_entity=reference_entity,
                                 )
 
                             pygame.display.update()
@@ -899,7 +924,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                     enlarged_icon_rect,
                 )
 
-    def blit_selection_info_text(self, selected_obj):
+    def blit_selection_info_text(
+            self,
+            selected_obj,
+            reference_entity=None,
+        ):
         # Blit item description and usage info.
         # Also include stat info if available.
         if selected_obj:
@@ -925,7 +954,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             )
 
     # Overridden.
-    def blit_main_selection_info(self, selection_info):
+    def blit_main_selection_info(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
         self.selection_details_side_display.blit_background(
             self.main_display_surface
         )
@@ -934,15 +967,26 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         self.blit_selected_object_enlarged_icon(selection_info[0])
 
     # Overridden.
-    def blit_selection_details(self, selection_info):
-        self.blit_main_selection_info(selection_info)
-        self.blit_selection_info_text(selection_info[0])
+    def blit_selection_details(
+            self,
+            selection_info,
+            reference_entity=None,
+        ):
+        self.blit_main_selection_info(
+            selection_info,
+            reference_entity=reference_entity,
+        )
+        self.blit_selection_info_text(
+            selection_info[0],
+            reference_entity=reference_entity,
+        )
 
     # Overridden.
     def get_selection_options(
             self,
             selection_info,
             allowed_selection_option_set=None,
+            reference_entity=None,
         ):
         selection_options = []
 
@@ -964,7 +1008,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         return selection_options
 
     # Overridden.
-    def convert_to_icon_data(self, selection_data_list):
+    def convert_to_icon_data(
+            self,
+            selection_data_list,
+            reference_entity=None,
+        ):
         ret_data = None
 
         if selection_data_list:
