@@ -377,8 +377,8 @@ class SelectionGridViewing(viewing.Viewing):
         return None
 
     # Handles displaying the item listing and returns
-    # the selected option and item index as a tuple
-    # (None if no option is selected).
+    # the selected option, item index, and top viewing row index
+    # as a tuple (None if no option is selected).
     # custom_actions is a dict that maps pygame keys to
     # option IDs to return (will return the tuple of (option ID, curr_index)).
     # Used for custom actions like having
@@ -390,6 +390,7 @@ class SelectionGridViewing(viewing.Viewing):
             title_info,
             selection_data,
             starting_selected_index=0,
+            preset_top_viewing_row_index=None,
             preselected_index_list=None,
             custom_actions=None,
             bottom_text=None,
@@ -415,8 +416,12 @@ class SelectionGridViewing(viewing.Viewing):
         if selection_data and icon_data_list:
             # Start with the first item.
             curr_index = starting_selected_index
-            first_viewable_row_index = \
-                display_to_use.get_row_index(curr_index)
+            first_viewable_row_index = None
+            if preset_top_viewing_row_index is not None:
+                first_viewable_row_index = preset_top_viewing_row_index
+            else:
+                first_viewable_row_index = \
+                    display_to_use.get_row_index(curr_index)
             last_viewable_row_index = \
                 first_viewable_row_index \
                 + display_to_use.num_rows \
@@ -557,7 +562,7 @@ class SelectionGridViewing(viewing.Viewing):
                                         ret_option_id
                                     ))
                                     received_input = True
-                                    ret_info = (ret_option_id, curr_index)
+                                    ret_info = (ret_option_id, curr_index, first_viewable_row_index)
                                     done = True
                                 else:
                                     received_input = False
@@ -600,7 +605,7 @@ class SelectionGridViewing(viewing.Viewing):
                         if ret_option \
                             and ret_option != menuoptions.CANCEL_OPTION_ID:
                             done = True
-                            ret_info = (ret_option, curr_index)
+                            ret_info = (ret_option, curr_index, first_viewable_row_index)
                         else:
                             if curr_selection_info:
                                 self.blit_selection_details(
@@ -652,7 +657,7 @@ class SelectionGridViewing(viewing.Viewing):
                                     ret_option_id
                                 ))
                                 received_input = True
-                                ret_info = (ret_option_id, curr_index)
+                                ret_info = (ret_option_id, curr_index, first_viewable_row_index)
                                 done = True
                             else:
                                 received_input = False

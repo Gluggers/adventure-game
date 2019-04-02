@@ -1068,7 +1068,7 @@ class Text_Display(Display):
                 font_color_to_use = font_color
             else:
                 logger.error("Invalid format for font color with single string for text_to_display.")
-        elif isintance(text_to_display, list):
+        elif isinstance(text_to_display, list):
             strings_to_process = text_to_display
 
             if isinstance(font_color, list):

@@ -206,16 +206,29 @@ class Inventory():
                 inventory_entry[1]
             ))
 
-    def remove_item(self, item_obj, quantity=1, remove_all=False):
+    def remove_item(
+            self,
+            item_obj,
+            quantity=1,
+            remove_all_stackable=False,
+            remove_all_nonstackable=False,
+        ):
         # Check if we have the item to begin with.
         if item_obj and quantity > 0:
             self.remove_item_by_id(
                 item_obj.item_id,
                 quantity=quantity,
-                remove_all=remove_all,
+                remove_all_stackable=remove_all_stackable,
+                remove_all_nonstackable=remove_all_nonstackable,
             )
 
-    def remove_item_by_id(self, item_id, quantity=1, remove_all=False):
+    def remove_item_by_id(
+            self,
+            item_id,
+            quantity=1,
+            remove_all_stackable=False,
+            remove_all_nonstackable=False,
+        ):
         if quantity > 0 and (item_id is not None):
             # Make sure item ID is valid.
             entry_index = self.get_item_index(item_id)
@@ -224,24 +237,58 @@ class Inventory():
                 self.remove_item_by_index(
                     entry_index,
                     quantity=quantity,
-                    remove_all=remove_all,
+                    remove_all_stackable=remove_all_stackable,
+                    remove_all_nonstackable=remove_all_nonstackable,
                 )
             else:
                 logger.warn("Trying to remove item that isn't in inventory.")
 
-    def remove_item_by_index(self, index, quantity=1, remove_all=False):
+    # TODO. Change so there is no remove_all flag? Caller has
+    # to do quantity by hand?
+    def remove_item_by_index(
+            self,
+            index,
+            quantity=1,
+            remove_all_stackable=False,
+            remove_all_nonstackable=False,
+        ):
         if quantity > 0 and (index is not None) \
                 and index >= 0 and index <= len(self.inventory_data):
             inventory_entry = self.inventory_data[index]
             item_obj = inventory_entry[0]
-            old_quantity = inventory_entry[1]
+            old_quantity = None
+
+            if item_obj.is_stackable():
+                old_quantity = inventory_entry[1]
+            else:
+                old_quantity = self.get_item_quantity(item_obj)
+
             new_quantity = max(0, old_quantity - quantity)
 
             if item_obj and old_quantity:
-                if new_quantity > 0 and not remove_all:
-                    self.inventory_data[index] = [item_obj, new_quantity]
+                if item_obj.is_stackable():
+                    if new_quantity > 0 and not remove_all_stackable:
+                        self.inventory_data[index] = [item_obj, new_quantity]
+                    else:
+                        self.inventory_data.pop(index)
                 else:
+                    # Handle nonstackable item.
                     self.inventory_data.pop(index)
+                    to_remove = quantity - 1
+
+                    if remove_all_nonstackable:
+                        to_remove = old_quantity - 1
+
+                    early_finish = False
+                    while to_remove > 0 and not early_finish:
+                        index = self.get_item_index(item_obj.item_id)
+                        if index >= 0:
+                            self.inventory_data.pop(index)
+                        else:
+                            early_finish = True
+
+                        to_remove -= 1
+
             else:
                 logger.error(
                     "Trying to remove invalid item ID from inventory.".format(

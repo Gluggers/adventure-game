@@ -580,6 +580,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
             title_info,
             selection_data,
             starting_selected_index=0,
+            preset_top_viewing_row_index=None,
             preselected_index_list=None,
             custom_actions=None,
             bottom_text=None,

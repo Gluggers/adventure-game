@@ -303,7 +303,7 @@ class Viewing():
         ):
         user_input_str = ""
 
-        if text_to_display and self.main_display_surface and text_display:
+        if prompt_text_to_display and self.main_display_surface and text_display:
             done = False
             input_suffix = "*"
             refresh_tick_counter = 0
@@ -324,6 +324,9 @@ class Viewing():
                     alternative_top_left=alternative_top_left,
                     no_display_update=no_display_update,
                 )
+
+                if not no_display_update:
+                    pygame.display.update()
 
                 # Wait for user to give input.
                 given_input = False
@@ -350,7 +353,8 @@ class Viewing():
                             alternative_top_left=alternative_top_left,
                             no_display_update=no_display_update,
                         )
-                        pygame.display.update()
+                        if not no_display_update:
+                            pygame.display.update()
 
                     for events in pygame.event.get():
                         if events.type == pygame.QUIT:

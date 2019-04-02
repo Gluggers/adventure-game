@@ -382,7 +382,7 @@ class Game():
                 horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_CENTERED,
                 alternative_top_left=None,
-                no_display_update=True,
+                no_display_update=False,
             )
 
             logger.info("Returned string from input: {0}".format(input_str))
@@ -409,12 +409,15 @@ class Game():
 
             done = False
             curr_index = 0
+            preset_top_viewing_row_index = None
 
             while not done:
+
                 ret_info = self.overworld_inventory_viewing.handle_selection_area(
                     inventory.Inventory.inventory_name_info,
                     self.protagonist.inventory.inventory_data,
                     starting_selected_index=curr_index,
+                    preset_top_viewing_row_index=preset_top_viewing_row_index,
                     preselected_index_list=None,
                     custom_actions=None,
                     bottom_text=None,
@@ -428,13 +431,14 @@ class Game():
                 else:
                     option_id = ret_info[0]
                     selected_index = ret_info[1]
+                    preset_top_viewing_row_index = ret_info[2]
 
                     if option_id == menuoptions.DISCARD_OPTION_ID:
                         # Remove this item.
                         # TODO
                         self.protagonist.inventory.remove_item_by_index(
                             selected_index,
-                            remove_all=True,
+                            remove_all_stackable=True,
                         )
 
                         curr_index = min(
@@ -443,10 +447,26 @@ class Game():
                         )
                     elif option_id == menuoptions.DISCARD_X_OPTION_ID:
                         # Get user input on how many to remove.
-                        self.overworld_inventory_viewing.display_input_text_box(
-                            #$$ TODO
+                        # TESTING
+                        to_remove_str = self.get_input_quantity(
+                            self.overworld_inventory_viewing,
+                            self.overworld_inventory_viewing.selection_option_menu_display,
+                            "Select how many to discard."
                         )
-                        done = True
+
+                        to_remove = display.Display.parse_abbreviated_quantity(to_remove_str)
+                        logger.info("Number to remove: {0}".format(to_remove))
+
+                        if to_remove:
+                            self.protagonist.inventory.remove_item_by_index(
+                                selected_index,
+                                quantity=to_remove,
+                            )
+
+                            curr_index = min(
+                                selected_index,
+                                self.protagonist.inventory.current_size() - 1
+                            )
                     else:
                         done = True
 
