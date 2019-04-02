@@ -28,6 +28,7 @@ import imagepaths
 import menuoptions
 import itemdata
 import equipmentdata
+import re
 
 logger = None
 
@@ -366,6 +367,33 @@ class Game():
                         auto_advance=False,
                     )
 
+    def get_input_quantity(self, viewing_obj, display_obj, prompt_text):
+        ret_quantity = None
+
+        if viewing_obj and display_obj and prompt_text:
+            input_str = viewing_obj.display_input_text_box(
+                display_obj,
+                prompt_text,
+                prompt_font_color=viewingdata.COLOR_BLACK,
+                input_font_color=viewingdata.COLOR_BLUE_TEXT,
+                input_delay_ms=viewingdata.INITIAL_INPUT_DELAY_MS,
+                refresh_during=False,
+                refresh_after=False,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                alternative_top_left=None,
+                no_display_update=True,
+            )
+
+            logger.info("Returned string from input: {0}".format(input_str))
+
+            if re.search(viewingdata.ALLOWED_NUMBER_INPUT_STR_REGEX, input_str):
+                ret_quantity = display.Display.parse_abbreviated_quantity(
+                    input_str
+                )
+
+        return ret_quantity
+
     # TODO enhance once menus are set up.
     def handle_overworld_inventory(self):
         if self.overworld_inventory_viewing and self.protagonist:
@@ -414,7 +442,10 @@ class Game():
                             self.protagonist.inventory.current_size() - 1
                         )
                     elif option_id == menuoptions.DISCARD_X_OPTION_ID:
-                        #TODO
+                        # Get user input on how many to remove.
+                        self.overworld_inventory_viewing.display_input_text_box(
+                            #$$ TODO
+                        )
                         done = True
                     else:
                         done = True

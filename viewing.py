@@ -67,7 +67,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
-            no_display_update=False,
+            no_display_update=True,
         ):
         if page and text_display and self.main_display_surface:
             text_display.blit_page(
@@ -169,7 +169,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
-            no_display_update=False,
+            no_display_update=True,
         ):
         if self.main_display_surface and text_display and text_to_display and font_color:
             page_list = []
@@ -246,7 +246,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
-            no_display_update=False,
+            no_display_update=True,
         ):
         if text_to_display and self.main_display_surface and text_display and font_color:
             page_list = []
@@ -283,10 +283,133 @@ class Viewing():
             if refresh_after:
                 self.refresh_and_blit_self()
 
-                if no_display_update:
+                if not no_display_update:
                     pygame.display.update()
 
+    # Returns the inputed string.
     def display_input_text_box(
+            self,
+            text_display,
+            prompt_text_to_display,
+            prompt_font_color=viewingdata.COLOR_BLACK,
+            input_font_color=viewingdata.COLOR_BLUE_TEXT,
+            input_delay_ms=viewingdata.INITIAL_INPUT_DELAY_MS,
+            refresh_during=True,
+            refresh_after=True,
+            horizontal_orientation=display.ORIENTATION_CENTERED,
+            vertical_orientation=display.ORIENTATION_CENTERED,
+            alternative_top_left=None,
+            no_display_update=True,
+        ):
+        user_input_str = ""
+
+        if text_to_display and self.main_display_surface and text_display:
+            done = False
+            input_suffix = "*"
+            refresh_tick_counter = 0
+            font_colors = [prompt_font_color, input_font_color]
+
+            while not done:
+                # Display just the first page.
+                self.display_text_display_first_page(
+                    text_display,
+                    [prompt_text_to_display, user_input_str + input_suffix],
+                    font_color=font_colors,
+                    advance_delay_ms=input_delay_ms,
+                    auto_advance=True,
+                    refresh_during=refresh_during,
+                    refresh_after=refresh_after,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
+                    no_display_update=no_display_update,
+                )
+
+                # Wait for user to give input.
+                given_input = False
+                while not given_input:
+                    timekeeper.Timekeeper.tick()
+
+                    refresh_tick_counter = (refresh_tick_counter + 1) \
+                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+
+                    if refresh_during \
+                            and (refresh_tick_counter == 0):
+                        logger.debug("Refreshing while waiting.")
+                        self.refresh_and_blit_self()
+                        self.display_text_display_first_page(
+                            text_display,
+                            [prompt_text_to_display, user_input_str + input_suffix],
+                            font_color=font_colors,
+                            advance_delay_ms=0,
+                            auto_advance=True,
+                            refresh_during=refresh_during,
+                            refresh_after=refresh_after,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                            no_display_update=no_display_update,
+                        )
+                        pygame.display.update()
+
+                    for events in pygame.event.get():
+                        if events.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit(0)
+                        elif events.type == pygame.KEYDOWN:
+                            if events.key == pygame.K_RETURN:
+                                given_input = True
+                                done = True
+                            elif events.key == pygame.K_ESCAPE:
+                                # Exit and return None.
+                                given_input = True
+                                done = True
+                                user_input_str = None
+                            elif events.key == pygame.K_BACKSPACE:
+                                # Delete last character.
+                                given_input = True
+                                user_input_str = user_input_str[:-1]
+                            else:
+                                entered_char = viewingdata.get_pygame_key_str(
+                                    events.key,
+                                    shift_on=False,
+                                )
+
+                                if entered_char:
+                                    given_input = True
+                                    user_input_str += entered_char
+
+            if refresh_after:
+                self.refresh_and_blit_self()
+
+                if not no_display_update:
+                    pygame.display.update()
+
+        return user_input_str
+
+    def get_input_quantity(self, display_to_use, prompt_text):
+        ret_quantity = None
+
+        if display_to_use and prompt_text:
+            ret_str = self.display_input_text_box(
+                display_to_use,
+                prompt_text,
+                prompt_font_color=viewingdata.COLOR_BLACK,
+                input_font_color=viewingdata.COLOR_BLUE_TEXT,
+                input_delay_ms=viewingdata.INITIAL_INPUT_DELAY_MS,
+                refresh_during=False,
+                refresh_after=False,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                alternative_top_left=None,
+                no_display_update=True, #$$
+            )
+
+        return ret_quantity
+
+
+
+    def display_input_text_box_old(
             self,
             text_display,
             prompt_text_to_display,
@@ -298,7 +421,7 @@ class Viewing():
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
-            no_display_update=False,
+            no_display_update=True,
         ):
         if text_to_display and self.main_display_surface and text_display:
             # Get the text lines for the prompt.
@@ -391,7 +514,7 @@ class Viewing():
             if refresh_after:
                 self.refresh_and_blit_self()
 
-                if no_display_update:
+                if not no_display_update:
                     pygame.display.update()
 
 
@@ -794,7 +917,7 @@ class Overworld_Viewing(Viewing):
                 auto_advance=True,
                 refresh_during=False,
                 refresh_after=False,
-                no_display_update=False,
+                no_display_update=True,
             )
 
     # If refresh_after is True, refreshes
@@ -829,7 +952,7 @@ class Overworld_Viewing(Viewing):
             auto_advance=False,
             refresh_during=True,
             refresh_after=True,
-            no_display_update=False,
+            no_display_update=True,
         ):
         if text and self.main_display_surface and self.bottom_text_display:
             self.display_text_display_first_page(

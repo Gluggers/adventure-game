@@ -533,6 +533,17 @@ class Display(object):
             self.background_image = background
 
     @classmethod
+    def parse_abbreviated_quantity(cls, quantity_str):
+        ret_quantity = None
+
+        if quantity_str:
+            # TODO. enhance #$$
+            quantity = int(quantity_str)
+            ret_quantity = quantity
+
+        return ret_quantity
+
+    @classmethod
     def get_abbreviated_quantity(cls, quantity):
         """ Returns abbreviated string for the quantity.
 
