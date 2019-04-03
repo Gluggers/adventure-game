@@ -228,8 +228,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 0,
         PROPERTIES_FIELD: STACKABLE_F,
-        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID,
-            menuoptions.DISCARD_X_OPTION_ID],
+        viewingicondata.OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_STACKABLE_OPTION_ID_LIST,
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
             imageids.ICON_IMAGE_ID: imagepaths.GOLD_COINS_ICON_PATH,
         },
@@ -251,7 +250,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 0,
         PROPERTIES_FIELD: STACKABLE_F,
-        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_STACKABLE_OPTION_ID_LIST,
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
             imageids.ICON_IMAGE_ID: imagepaths.SILVER_COINS_ICON_PATH,
         },
@@ -273,7 +272,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 0,
         PROPERTIES_FIELD: STACKABLE_F,
-        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_STACKABLE_OPTION_ID_LIST,
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
 
         },
@@ -295,7 +294,7 @@ STANDARD_ITEM_DATA = {
         },
         WEIGHT_POINT_FIELD: 0,
         PROPERTIES_FIELD: STACKABLE_F,
-        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.OPTION_ID_LIST_FIELD: menuoptions.DEFAULT_STACKABLE_OPTION_ID_LIST,
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
 
         },

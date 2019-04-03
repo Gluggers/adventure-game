@@ -219,10 +219,16 @@ class Item(viewingicon.ViewingIcon):
                         itemdata.CREATE_REQ_QUEST_FIELD,
                         None
                     )
+                default_menu_id_list = menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS
+                menu_option_ids = None
+
+                if properties & itemdata.STACKABLE_F:
+                    default_menu_id_list = menuoptions.DEFAULT_STACKABLE_OPTION_ID_LIST
+
                 menu_option_ids = item_data.get(
-                        viewingicondata.OPTION_ID_LIST_FIELD,
-                        menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS
-                    )
+                    viewingicondata.OPTION_ID_LIST_FIELD,
+                    default_menu_id_list
+                )
 
 
                 # Ensure we have the required fields.
@@ -339,26 +345,26 @@ class Equipable_Item(Item):
 
 class Consumable_Item(Item):
     def __init__(
-                self,
-                item_id,
-                name_info,
-                description_info,
-                heal_value=0,
-                usage_info={},
-                image_path_dict={},
-                base_value_low=0,
-                base_value_high=0,
-                weight_points=0,
-                properties=(itemdata.SELLABLE_F | itemdata.ALCHABLE_F),
-                interaction_id=interactiondata.DEFAULT_ID,
-                required_creation_items={},
-                required_creation_levels={},
-                required_creation_quests=[],
-                item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
-                skill_effect_info={},
-                combat_boost_info={},
-                required_consume_quests=[],
-            ):
+            self,
+            item_id,
+            name_info,
+            description_info,
+            heal_value=0,
+            usage_info={},
+            image_path_dict={},
+            base_value_low=0,
+            base_value_high=0,
+            weight_points=0,
+            properties=(itemdata.SELLABLE_F | itemdata.ALCHABLE_F),
+            interaction_id=interactiondata.DEFAULT_ID,
+            required_creation_items={},
+            required_creation_levels={},
+            required_creation_quests=[],
+            item_menu_option_ids=menuoptions.DEFAULT_ITEM_MENU_OPTION_IDS,
+            skill_effect_info={},
+            combat_boost_info={},
+            required_consume_quests=[],
+        ):
         Item.__init__(
             self,
             item_id,

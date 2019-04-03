@@ -271,7 +271,7 @@ class Interaction():
                             logger.info("Gathered resource!")
 
                             # TODO handle all the item stuff here.
-                            acting_object.add_item_to_inventory_by_id(
+                            acting_object.add_item_to_inventory(
                                     gained_resource.item_id
                                 )
 

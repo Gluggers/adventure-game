@@ -30,32 +30,31 @@ READ_OPTION_ID = 0x37 # For identifying readable items.
 EAT_OPTION_ID = 0x38
 DRINK_OPTION_ID = 0x39
 VIEW_ITEM_STATS_OPTION_ID = 0x3A
-DISCARD_OPTION_ID = 0x3B # For discarding items.
-DISCARD_X_OPTION_ID = 0x3C
+DISCARD_OPTION_ID = 0x3B # For discarding nonstackable items.
+DISCARD_1_OPTION_ID = 0x3C # For discarding stackable items.
+DISCARD_5_OPTION_ID = 0x3D # For discarding stackable items.
+DISCARD_X_OPTION_ID = 0x3E # For discarding stackable items.
+DISCARD_ALL_OPTION_ID = 0x3F # For discarding stackable items.
 
 
 # STORE OPTION IDS
 BUY_1_OPTION_ID = 0x41 # For buying items in stores.
 BUY_5_OPTION_ID = 0x42
-BUY_10_OPTION_ID = 0x43
 BUY_X_OPTION_ID = 0x44
 BUY_ALL_OPTION_ID = 0x45
 SELL_1_OPTION_ID = 0x51 # For selling items in stores.
 SELL_5_OPTION_ID = 0x52
-SELL_10_OPTION_ID = 0x53
 SELL_X_OPTION_ID = 0x54
 SELL_ALL_OPTION_ID = 0x55
 
 # LOOT OPTION IDS
 TAKE_1_OPTION_ID = 0x61
 TAKE_5_OPTION_ID = 0x62
-TAKE_10_OPTION_ID = 0x63
 TAKE_X_OPTION_ID = 0x65
 TAKE_ALL_OPTION_ID = 0x65
 
 DEPOSIT_1_OPTION_ID = 0x71
 DEPOSIT_5_OPTION_ID = 0x72
-DEPOSIT_10_OPTION_ID = 0x73
 DEPOSIT_X_OPTION_ID = 0x74
 DEPOSIT_ALL_OPTION_ID = 0x75
 
@@ -68,6 +67,13 @@ DEFAULT_LOG_OPTION_ID_LIST = [
 
 DEFAULT_ITEM_MENU_OPTION_IDS = [
     DISCARD_OPTION_ID,
+]
+
+DEFAULT_STACKABLE_OPTION_ID_LIST = [
+    DISCARD_1_OPTION_ID,
+    DISCARD_5_OPTION_ID,
+    DISCARD_X_OPTION_ID,
+    DISCARD_ALL_OPTION_ID,
 ]
 
 # Maps option ID to dict that maps language ID to the option name.
@@ -136,9 +142,21 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Discard",
         language.LANG_ESPANOL: "Descartar",
     },
+    DISCARD_1_OPTION_ID: {
+        language.LANG_ENGLISH: "Discard 1",
+        language.LANG_ESPANOL: "Descartar 1",
+    },
+    DISCARD_5_OPTION_ID: {
+        language.LANG_ENGLISH: "Discard 5",
+        language.LANG_ESPANOL: "Descartar 5",
+    },
     DISCARD_X_OPTION_ID: {
         language.LANG_ENGLISH: "Discard X",
         language.LANG_ESPANOL: "Descartar X",
+    },
+    DISCARD_ALL_OPTION_ID: {
+        language.LANG_ENGLISH: "Discard ALL",
+        language.LANG_ESPANOL: "Descartar TODOS",
     },
     LIGHT_OPTION_ID: {
         language.LANG_ENGLISH: "Light",
@@ -192,14 +210,6 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Sell 5",
         language.LANG_ESPANOL: "Vender 5",
     },
-    BUY_10_OPTION_ID: {
-        language.LANG_ENGLISH: "Buy 10",
-        language.LANG_ESPANOL: "Comprar 10",
-    },
-    SELL_10_OPTION_ID: {
-        language.LANG_ENGLISH: "Sell 10",
-        language.LANG_ESPANOL: "Vender 10",
-    },
     BUY_ALL_OPTION_ID: {
         language.LANG_ENGLISH: "Buy All",
         language.LANG_ESPANOL: "Comprar Todos",
@@ -223,10 +233,6 @@ OPTION_NAME_INFO = {
     TAKE_5_OPTION_ID: {
         language.LANG_ENGLISH: "Take 5",
         language.LANG_ESPANOL: "Recoger 5",
-    },
-    TAKE_10_OPTION_ID: {
-        language.LANG_ENGLISH: "Take 10",
-        language.LANG_ESPANOL: "Recoger 10",
     },
     TAKE_X_OPTION_ID: {
         language.LANG_ENGLISH: "Take X",
@@ -257,7 +263,10 @@ OVERWORLD_MENU_OPTION_IDS = [
 COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
     VIEW_ITEM_STATS_OPTION_ID,
     DISCARD_OPTION_ID,
+    DISCARD_1_OPTION_ID,
+    DISCARD_5_OPTION_ID,
     DISCARD_X_OPTION_ID,
+    DISCARD_ALL_OPTION_ID,
     LIGHT_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
@@ -271,7 +280,10 @@ COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
 OVERWORLD_INVENTORY_ITEM_OPTION_SET = set([
     VIEW_ITEM_STATS_OPTION_ID,
     DISCARD_OPTION_ID,
+    DISCARD_1_OPTION_ID,
+    DISCARD_5_OPTION_ID,
     DISCARD_X_OPTION_ID,
+    DISCARD_ALL_OPTION_ID,
     LIGHT_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
@@ -291,7 +303,6 @@ OVERWORLD_EQUIPMENT_ITEM_OPTION_SET = set([
 SHOP_ITEM_OPTION_SET = set([
     BUY_1_OPTION_ID,
     BUY_5_OPTION_ID,
-    BUY_10_OPTION_ID,
     BUY_X_OPTION_ID,
     BUY_ALL_OPTION_ID,
     CANCEL_OPTION_ID,
@@ -300,7 +311,6 @@ SHOP_ITEM_OPTION_SET = set([
 SHOP_MODE_INVENTORY_ITEM_OPTION_SET = set([
     SELL_1_OPTION_ID,
     SELL_5_OPTION_ID,
-    SELL_10_OPTION_ID,
     SELL_X_OPTION_ID,
     SELL_ALL_OPTION_ID,
     CANCEL_OPTION_ID,
@@ -308,7 +318,10 @@ SHOP_MODE_INVENTORY_ITEM_OPTION_SET = set([
 
 BATTLE_MODE_INVENTORY_ITEM_OPTION_SET = set([
     DISCARD_OPTION_ID,
+    DISCARD_1_OPTION_ID,
+    DISCARD_5_OPTION_ID,
     DISCARD_X_OPTION_ID,
+    DISCARD_ALL_OPTION_ID,
     VIEW_ITEM_STATS_OPTION_ID,
     EQUIP_OPTION_ID,
     EAT_OPTION_ID,
@@ -319,7 +332,6 @@ BATTLE_MODE_INVENTORY_ITEM_OPTION_SET = set([
 BATTLE_LOOT_ITEM_OPTION_SET = set([
     TAKE_1_OPTION_ID,
     TAKE_5_OPTION_ID,
-    TAKE_10_OPTION_ID,
     TAKE_X_OPTION_ID,
     TAKE_ALL_OPTION_ID,
     CANCEL_OPTION_ID,

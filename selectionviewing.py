@@ -9,6 +9,7 @@ import language
 import timekeeper
 import inventory
 import itemdata
+import items
 import logging
 import sys
 
@@ -967,9 +968,10 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         self.selection_details_side_display.blit_background(
             self.main_display_surface
         )
-        self.blit_selected_object_name(selection_info[0])
+        item_obj = items.Item.get_item(selection_info[0])
+        self.blit_selected_object_name(item_obj)
         self.blit_selected_object_quantity(selection_info[1])
-        self.blit_selected_object_enlarged_icon(selection_info[0])
+        self.blit_selected_object_enlarged_icon(item_obj)
 
     # Overridden.
     def blit_selection_details(
@@ -977,12 +979,14 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             selection_info,
             reference_entity=None,
         ):
+        item_obj = items.Item.get_item(selection_info[0])
+
         self.blit_main_selection_info(
             selection_info,
             reference_entity=reference_entity,
         )
         self.blit_selection_info_text(
-            selection_info[0],
+            item_obj,
             reference_entity=reference_entity,
         )
 
@@ -995,7 +999,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         ):
         selection_options = []
 
-        selection_obj = selection_info[0]
+        selection_obj = items.Item.get_item(selection_info[0])
 
         option_list = []
 
@@ -1012,7 +1016,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         logger.info("Selection options: {0}".format(selection_options))
         return selection_options
 
-    # Overridden.
+    # Overridden. selection_data_list is list of 2-tuples of the form
+    # (item ID, quantity)
     def convert_to_icon_data(
             self,
             selection_data_list,
@@ -1024,7 +1029,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             ret_data = []
 
             for data in selection_data_list:
-                curr_object = data[0]
+                curr_id = data[0]
+                curr_object = items.Item.get_item(curr_id)
                 curr_image = None
                 quantity = data[1]
                 quantity_text = None

@@ -398,24 +398,16 @@ class Game():
     def handle_overworld_inventory(self):
         if self.overworld_inventory_viewing and self.protagonist:
             # Sort inventory first before displaying it.
-            #self.protagonist.inventory.alphabetical_sort(reverse=False)
             self.protagonist.inventory.standard_sort()
-            #self.protagonist.inventory.print_self()
-
-            #self.overworld_inventory_viewing.blit_selection_background(
-                #inventory.Inventory.inventory_name_info,
-                #bottom_text=None,
-            #)
 
             done = False
             curr_index = 0
             preset_top_viewing_row_index = None
 
             while not done:
-
                 ret_info = self.overworld_inventory_viewing.handle_selection_area(
                     inventory.Inventory.inventory_name_info,
-                    self.protagonist.inventory.inventory_data,
+                    self.protagonist.inventory.item_listing_data,
                     starting_selected_index=curr_index,
                     preset_top_viewing_row_index=preset_top_viewing_row_index,
                     preselected_index_list=None,
@@ -434,16 +426,51 @@ class Game():
                     preset_top_viewing_row_index = ret_info[2]
 
                     if option_id == menuoptions.DISCARD_OPTION_ID:
-                        # Remove this item.
-                        # TODO
+                        # Remove this item. Shouldn't be stackable.
                         self.protagonist.inventory.remove_item_by_index(
                             selected_index,
-                            remove_all_stackable=True,
+                            quantity=1,
                         )
 
                         curr_index = min(
                             selected_index,
-                            self.protagonist.inventory.current_size() - 1
+                            self.protagonist.inventory.get_last_index()
+                        )
+                    elif option_id == menuoptions.DISCARD_1_OPTION_ID:
+                        # Remove this item. Should be stackable.
+                        self.protagonist.inventory.remove_item_by_index(
+                            selected_index,
+                            quantity=1,
+                        )
+
+                        curr_index = min(
+                            selected_index,
+                            self.protagonist.inventory.get_last_index()
+                        )
+                    elif option_id == menuoptions.DISCARD_5_OPTION_ID:
+                        # Remove this item. Should be stackable.
+                        self.protagonist.inventory.remove_item_by_index(
+                            selected_index,
+                            quantity=5,
+                        )
+
+                        curr_index = min(
+                            selected_index,
+                            self.protagonist.inventory.get_last_index()
+                        )
+                    elif option_id == menuoptions.DISCARD_ALL_OPTION_ID:
+                        # Remove this item. Should be stackable.
+                        selected_item_info = \
+                            self.protagonist.inventory.get_item_entry(
+                                selected_index
+                            )
+                        self.protagonist.inventory.remove_item_all(
+                            selected_item_info[0]
+                        )
+
+                        curr_index = min(
+                            selected_index,
+                            self.protagonist.inventory.get_last_index()
                         )
                     elif option_id == menuoptions.DISCARD_X_OPTION_ID:
                         # Get user input on how many to remove.
@@ -465,7 +492,7 @@ class Game():
 
                             curr_index = min(
                                 selected_index,
-                                self.protagonist.inventory.current_size() - 1
+                                self.protagonist.inventory.get_last_index()
                             )
                     else:
                         done = True
@@ -477,7 +504,6 @@ class Game():
     def handle_overworld_toolbelt(self):
         if self.overworld_toolbelt_viewing and self.protagonist:
             # Sort inventory first before displaying it.
-            #self.protagonist.tool_inventory.alphabetical_sort(reverse=False)
             self.protagonist.tool_inventory.standard_sort()
 
             self.protagonist.tool_inventory.print_self()
@@ -488,7 +514,7 @@ class Game():
 
             ret_info = self.overworld_toolbelt_viewing.handle_selection_area(
                 inventory.Inventory.toolbelt_name_info,
-                self.protagonist.tool_inventory.inventory_data,
+                self.protagonist.tool_inventory.item_listing_data,
                 bottom_text=None,
                 allowed_selection_option_set=None,
             )
@@ -859,20 +885,20 @@ class Game():
                         self.load_game()
                     elif events.key == pygame.K_1:
                         # Testing inventory.
-                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_TREE_ID, 2)
-                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_OAK_ID, 2)
-                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_WILLOW_ID, 2)
-                        self.protagonist.inventory.add_item_by_id(itemdata.LOG_MAPLE_ID, 2)
-                        self.protagonist.inventory.add_item_by_id(itemdata.CURRENCY_SILVER_COIN_ID, 500)
+                        self.protagonist.inventory.add_item(itemdata.LOG_TREE_ID, 2)
+                        self.protagonist.inventory.add_item(itemdata.LOG_OAK_ID, 2)
+                        self.protagonist.inventory.add_item(itemdata.LOG_WILLOW_ID, 2)
+                        self.protagonist.inventory.add_item(itemdata.LOG_MAPLE_ID, 2)
+                        self.protagonist.inventory.add_item(itemdata.CURRENCY_SILVER_COIN_ID, 500)
                     elif events.key == pygame.K_2:
                         # Display stats. # TESTING TODO.
                         logger.info("Displaying statistics.")
                         self.display_statistics(self.protagonist)
                     elif events.key == pygame.K_3:
                         # Testing inventory.
-                        curr_money = self.protagonist.inventory.get_item_quantity_by_id(itemdata.CURRENCY_GOLD_COIN_ID)
+                        curr_money = self.protagonist.inventory.get_item_quantity(itemdata.CURRENCY_GOLD_COIN_ID)
                         logger.info("Curr money: {0}".format(curr_money))
-                        self.protagonist.inventory.add_item_by_id(
+                        self.protagonist.inventory.add_item(
                             itemdata.CURRENCY_GOLD_COIN_ID,
                             curr_money,
                         )

@@ -157,11 +157,11 @@ class Entity(interactiveobj.Interactive_Object):
     def inventory_full(self):
         return self.inventory.is_full()
 
-    def add_item_to_inventory_by_id(self, item_id, quantity=1):
-        return self.inventory.add_item_by_id(item_id, quantity=quantity)
+    def add_item_to_inventory(self, item_id, quantity=1):
+        return self.inventory.add_item(item_id, quantity=quantity)
 
-    def add_item_to_toolbelt_by_id(self, item_id, quantity=1):
-        return self.tool_inventory.add_item_by_id(item_id, quantity=quantity)
+    def add_item_to_toolbelt(self, item_id, quantity=1):
+        return self.tool_inventory.add_item(item_id, quantity=quantity)
 
     def has_item_equipped(self, item_id):
         has_equipped = False
@@ -172,14 +172,14 @@ class Entity(interactiveobj.Interactive_Object):
 
         return has_equipped
 
-    def has_tool_id(self, item_id):
-        return self.tool_inventory.has_item_id_in_inventory(item_id)
+    def has_tool(self, item_id):
+        return self.tool_inventory.has_item(item_id)
 
     # TODO test this.
     def has_item(self, item_id):
-        return self.inventory.has_item_id_in_inventory(item_id) \
+        return self.inventory.has_item(item_id) \
             or self.has_item_equipped(item_id) \
-            or self.has_tool_id(item_id)
+            or self.has_tool(item_id)
 
     def get_skill_level(self, skill_id):
         ret_level = None
@@ -447,23 +447,23 @@ class Protagonist(Character):
         logger.debug("Protagonist race: {0}".format(protagonist.race))
 
         # Set initial money.
-        protagonist.add_item_to_inventory_by_id(
+        protagonist.add_item_to_inventory(
             itemdata.CURRENCY_GOLD_COIN_ID,
             quantity=START_NUM_GOLD_COINS,
         )
 
         # Set tool belt.
-        protagonist.add_item_to_toolbelt_by_id(
+        protagonist.add_item_to_toolbelt(
             itemdata.HAMMER_NORMAL_ID,
             quantity=1,
         )
-        protagonist.add_item_to_toolbelt_by_id(
+        protagonist.add_item_to_toolbelt(
             itemdata.KNIFE_ID,
         )
-        protagonist.add_item_to_toolbelt_by_id(
+        protagonist.add_item_to_toolbelt(
             itemdata.NEEDLE_ID,
         )
-        protagonist.add_item_to_toolbelt_by_id(
+        protagonist.add_item_to_toolbelt(
             itemdata.TINDERBOX_ID,
         )
 
