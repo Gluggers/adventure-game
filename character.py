@@ -1,7 +1,6 @@
 import pygame
 import interactiveobj
 import adventure
-import map
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0

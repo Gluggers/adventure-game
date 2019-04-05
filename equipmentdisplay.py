@@ -187,14 +187,6 @@ class EquipmentDisplay(display.Display):
                     # This slot is equipped.
                     icon_to_blit = equipped_info[0]
                     rendered_supertext = equipped_info[1]
-                """
-                else:
-                    equipment_slot_obj = \
-                        equipmentslot.EquipmentSlot.get_slot_object(slot_id)
-                    if equipment_slot_obj:
-                        icon_to_blit = \
-                            equipment_slot_obj.get_icon()
-                """
 
                 if slot_id == selected_slot_id:
                     # This slot is selected.

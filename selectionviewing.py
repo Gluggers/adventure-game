@@ -910,7 +910,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
     def blit_selected_object_enlarged_icon(self, selected_obj):
         if selected_obj:
             # Blit enlarged icon and background.
-            enlarged_icon = selected_obj.get_enlarged_icon()
+            enlarged_icon = selected_obj.enlarged_icon
             if enlarged_icon:
                 if self.enlarged_selection_background:
                     enlarged_background_rect = \
@@ -1036,7 +1036,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 quantity_text = None
 
                 if curr_object:
-                    curr_image = curr_object.get_icon()
+                    curr_image = curr_object.icon
 
                 if curr_object.is_stackable():
                     quantity_text = display.Display.get_abbreviated_quantity(

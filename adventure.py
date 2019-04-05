@@ -1,6 +1,6 @@
 import pygame
 import sys
-import map
+import gamemap
 import mapdata
 import tile
 import logging
@@ -77,14 +77,17 @@ def main():
     # Load characters. # TODO
 
     # load maps
-    map.Map.build_maps()
+    gamemap.Map.build_maps()
 
     # create protagonist
     protag_tile_loc = (12,12)
     game_obj.build_protagonist("Bob")
 
     # set map and blit
-    game_obj.set_and_blit_current_game_map(mapdata.R0_A0_ID, protag_tile_loc)
+    game_obj.set_and_blit_current_game_map(
+        mapdata.R0_A0_ID,
+        protag_tile_loc
+    )
 
     # blit protagonist
     #game_obj.viewing.blit_interactive_object(

@@ -464,7 +464,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                     #curr_object = equipmentslot.EquipmentSlot.get_slot_object(slot_id)
 
                 if curr_object:
-                    curr_image = curr_object.get_icon()
+                    curr_image = curr_object.icon
 
                 if not curr_image:
                     logger.warn("Couldn't get image.")

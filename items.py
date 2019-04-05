@@ -72,32 +72,18 @@ class Item(viewingicon.ViewingIcon):
             for quest_id in required_creation_quests:
                 self.required_creation_quests.append(quest_id)
 
-    def get_name(self, alternative_language_id=None):
-        ret_name = ""
-        if alternative_language_id is not None:
-            ret_name = self.name_info.get(alternative_language_id, "")
-        else:
-            ret_name = self.name_info.get(language.Language.current_language_id, "")
-
-        return ret_name
-
-    def get_image(self, image_id):
-        return self.image_dict.get(image_id, None)
-
-    def get_enlarged_icon(self):
-        return self.enlarged_icon
-
-    def get_icon(self):
-        return self.get_image(imageids.ICON_IMAGE_ID)
-
     def get_statistics_info(self):
         # TODO
         return None
 
     # Overridden.
-    def get_info_text(self):
-        description_info = self.get_description_info()
-        usage_info = self.get_usage_info()
+    def get_info_text(self, alternative_language_id=None):
+        description_info = self.get_description_info(
+            alternative_language_id=alternative_language_id,
+        )
+        usage_info = self.get_usage_info(
+            alternative_language_id=alternative_language_id,
+        )
 
         ret_lines = []
 
@@ -121,32 +107,6 @@ class Item(viewingicon.ViewingIcon):
         elif self.name_info:
             ret_str = self.get_name(
                 alternative_language_id=alternative_language_id
-            )
-
-        return ret_str
-
-    # Returns the appropriate language translation for the item's description
-    # info string.
-    def get_description_info(
-                self,
-                alternative_language_id=None,
-            ):
-        ret_str = None
-
-        if self.description_info:
-            if alternative_language_id is not None:
-                ret_str = self.description_info.get(
-                        alternative_language_id,
-                        None
-                    )
-            else:
-                ret_str = self.description_info.get(
-                        language.Language.current_language_id,
-                        None
-                    )
-        elif self.name_info:
-            ret_str = ret_str = self.get_name(
-                alternative_language_id=alternative_langauge_id
             )
 
         return ret_str

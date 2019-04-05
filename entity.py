@@ -1,6 +1,5 @@
 import pygame
 import tiledata
-import map
 import mapdata
 import skills
 import interactiveobj
