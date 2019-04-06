@@ -36,11 +36,39 @@ VIEWING_TILE_PADDING = 2
 
 # Base Viewing class.
 class Viewing(object):
+    """Base class that handles viewing-based methods and functions.
+
+    Viewing objects handle Display objects and act as an interface between
+    the Game object and Display-related methods. This base class provides
+    basic inheritable methods, some of which are templates for child classes
+    to fully implement or customize by overriding.
+
+    Attributes:
+        main_display_surface: the pygame Surface object for the main display
+            screen linked to the Viewing object. This Surface object is used
+            to blit pixels and changes to the display screen.
+    """
+
     def __init__(
             self,
             main_display_surface,
         ):
-        self.main_display_surface = main_display_surface
+        """Initializes the Viewing object.
+
+        Args:
+            main_display_surface: the pygame Surface object for the main
+                display screen that will be linked to the Viewing object.
+                This Surface object is used to blit pixels and changes to
+                the display screen.
+        """
+
+        self._main_display_surface = main_display_surface
+
+    @property
+    def main_display_surface(self):
+        """Returns the pygame Surface object for the main display."""
+
+        return self._main_display_surface
 
     def refresh_self(self):
         """Refreshes self. Does not update display.
@@ -135,9 +163,9 @@ class Viewing(object):
                 before updating the display.
         """
 
-        if page and text_display and self.main_display_surface:
+        if page and text_display and self._main_display_surface:
             text_display.blit_page(
-                self.main_display_surface,
+                self._main_display_surface,
                 page,
                 show_continue_icon=False,
                 horizontal_orientation=horizontal_orientation,
@@ -159,7 +187,7 @@ class Viewing(object):
 
                 # Reblit page but with continue icon if available.
                 text_display.blit_page(
-                    self.main_display_surface,
+                    self._main_display_surface,
                     page,
                     show_continue_icon=True,
                     horizontal_orientation=horizontal_orientation,
@@ -190,7 +218,7 @@ class Viewing(object):
                         LOGGER.debug("Refreshing while waiting.")
                         self.refresh_and_blit_self()
                         text_display.blit_page(
-                            self.main_display_surface,
+                            self._main_display_surface,
                             page,
                             show_continue_icon=True,
                             horizontal_orientation=horizontal_orientation,
@@ -210,19 +238,6 @@ class Viewing(object):
                                 LOGGER.debug("Advancing to next page")
                                 advance = True
 
-    # If refresh_after is True, refreshes
-    # and blits self and updates display after all pages.
-    # If refresh_during is True, refreshes and blits self and updates display
-    # while waiting for advancement and in between pages.
-    # If text_to_display is a list of strings, each string will be
-    # included and deliminated as a new line where possible.
-    # font_color can be a single tuple representing a font color, or
-    # a list of tuples representing font colors for each line of
-    # text_to_display. List values of font_color are only valid if
-    # text_to_display is a list of strings, and each index of the list
-    # will correspond to the next. If text_to_display is a list of strings
-    # and font_color is a single tuple, then that color will apply
-    # to each text string in text_to_display.
     def display_text_display(
             self,
             text_display,
@@ -237,9 +252,87 @@ class Viewing(object):
             alternative_top_left=None,
             no_display_update=True,
         ):
-        #LOGGER.info("Going to blit text %s", text_to_display)
+        """Displays text on the specified TextDisplay object.
 
-        if self.main_display_surface and text_display \
+        The amount of text on each line and in a single text box space is
+        determined by the TextDisplay object properties.
+
+        By default, the user will have to manually advance through the
+        text display sequence to move on to the next chunk of text or to
+        finish displaying the text.
+
+        Args:
+            text_display: the TextDisplay object will display the text.
+                Depending on the TextDisplay object properties and on
+                the amount of text in the text_to_display argument,
+                the text may show up across multiple lines or even across
+                multiple text pages.
+            text_to_display: can either be a String or a list of Strings that
+                represent the text to display. If passing in a single String,
+                the String will be broken up across several lines depending
+                on length and whether or not newline characters appear in the
+                string.
+                If passing in a list of Strings, each String in the list will
+                start on a new line of text, and each individual String may
+                take up multiple lines depending on length and whether or not
+                the String contains newline characters.
+            font_color: can either be a tuple or a list of tuples that
+                represent the font color for the text lines. Note that
+                each font_color tuple is a 3-tuple that defines the hex
+                value of the color, such as (0x23, 0x4A, 0x5F).
+                If passing in a single tuple, the entire text will be
+                displayed in that color.
+                If passing in a list of tuples, the user must also pass in
+                a list of Strings for text_to_display, and each list
+                must be of the same length.
+                List values of font_color are only valid if text_to_display
+                is a list of strings, and each index of the list will
+                correspond to the next. In other words, each tuple will define
+                the color of the corresponding String (the first tuple
+                in the font_color list will define the color for the first
+                String in text_to-display, etc).
+                If text_to_display is a list of strings and font_color
+                is a single tuple, then that color will apply to each text
+                string in text_to_display.
+            advance_delay_ms: number of milliseconds to wait before user
+                can exit out of or continue through the text display.
+            auto_advance: if True, the text display will finish and exit
+                after advance_delay_ms milliseconds without any user
+                input or interaction. If False, user must manually continue
+                through or exit out of the text display.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself once the TextDisplay object has finished displaying
+                the text.
+                If False, the calling Viewing object will not
+                refresh after the text display.
+            horizontal_orientation: determines the text's horizontal
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center horizontally.
+                    ORIENTATION_LEFT_JUSTIFIED - left justify the text.
+                    ORIENTATION_RIGHT_JUSTIFIED - right justify the text.
+            vertical_orientation: determines the text's vertical
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center vertically.
+                    ORIENTATION_TOP_JUSTIFIED = top justify the text.
+                    ORIENTATION_BOTTOM_JUSTIFIED = bottom justify the text.
+            alternative_top_left: optional argument where the caller can pass
+                in a tuple of x,y screen pixel coordinates to define a custom
+                top left corner for text_display when blitting the text.
+                Default is None (use the predefined top left of text_display).
+            no_display_update: if True, the pygame display will not update
+                when blitting the text in this method or while waiting for
+                the user, even if refresh_during or refresh_after are
+                set to True. This option is set for method callers who want
+                to blit multiple things before updating the display.
+        """
+
+        if self._main_display_surface and text_display \
             and text_to_display and font_color:
             page_list = []
 
@@ -321,7 +414,7 @@ class Viewing(object):
             alternative_top_left=None,
             no_display_update=True,
         ):
-        if text_to_display and self.main_display_surface \
+        if text_to_display and self._main_display_surface \
             and text_display and font_color:
             page_list = []
 
@@ -381,7 +474,7 @@ class Viewing(object):
         ):
         user_input_str = ""
 
-        if prompt_text_to_display and self.main_display_surface \
+        if prompt_text_to_display and self._main_display_surface \
             and text_display:
             done = False
             input_suffix = "*"
@@ -491,7 +584,7 @@ class Viewing(object):
         ret_option_id = None
         menu_pages = []
 
-        if self.main_display_surface \
+        if self._main_display_surface \
                 and menu_display \
                 and option_id_list:
             # Get list of menu pages.
@@ -519,7 +612,7 @@ class Viewing(object):
 
                 # Blit the current menu page.
                 menu_display.blit_menu_page(
-                    self.main_display_surface,
+                    self._main_display_surface,
                     curr_page,
                     curr_selected_index,
                     horizontal_orientation=horizontal_orientation,
@@ -537,7 +630,7 @@ class Viewing(object):
                     self.refresh_and_blit_self()
                     # Blit the current menu page.
                     menu_display.blit_menu_page(
-                        self.main_display_surface,
+                        self._main_display_surface,
                         curr_page,
                         curr_selected_index,
                         horizontal_orientation=horizontal_orientation,
@@ -565,7 +658,7 @@ class Viewing(object):
                         LOGGER.debug("Refreshing while waiting.")
                         self.refresh_and_blit_self()
                         menu_display.blit_menu_page(
-                            self.main_display_surface,
+                            self._main_display_surface,
                             curr_page,
                             curr_selected_index,
                             horizontal_orientation=horizontal_orientation,
@@ -667,7 +760,7 @@ class Viewing(object):
 
                         # Reblit menu page with new selected option.
                         menu_display.blit_menu_page(
-                            self.main_display_surface,
+                            self._main_display_surface,
                             curr_page,
                             curr_selected_index,
                             horizontal_orientation=horizontal_orientation,
@@ -683,7 +776,7 @@ class Viewing(object):
                         if refresh_during:
                             self.refresh_and_blit_self()
                             menu_display.blit_menu_page(
-                                self.main_display_surface,
+                                self._main_display_surface,
                                 curr_page,
                                 curr_selected_index,
                                 horizontal_orientation=horizontal_orientation,
@@ -731,7 +824,7 @@ class OverworldViewing(Viewing):
         )
         if top_display_font:
             self.top_health_display = display.Text_Display(
-                self.main_display_surface,
+                self._main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
                 background_pattern=self.background_pattern,
@@ -753,7 +846,7 @@ class OverworldViewing(Viewing):
         )
         if font_obj:
             self.bottom_text_display = display.Text_Display(
-                self.main_display_surface,
+                self._main_display_surface,
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
@@ -774,7 +867,7 @@ class OverworldViewing(Viewing):
         )
         if font_obj:
             self.side_menu_display = display.Menu_Display(
-                self.main_display_surface,
+                self._main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
                 font_obj,
                 background_pattern=self.background_pattern,
@@ -820,8 +913,8 @@ class OverworldViewing(Viewing):
     # Blits the top display view onto the main display screen.
     # Does not update the main display - caller will have to do that
     def blit_top_display(self):
-        if self.main_display_surface and self.top_display:
-            self.top_display.blit_onto_surface(self.main_display_surface)
+        if self._main_display_surface and self.top_display:
+            self.top_display.blit_onto_surface(self._main_display_surface)
 
     def get_health_text(self):
         ret_text = None
@@ -841,7 +934,7 @@ class OverworldViewing(Viewing):
     # Blits the top health display onto the main display screen.
     # Does not update the main display - caller will have to do that
     def blit_top_health_display(self, font_color=viewingdata.COLOR_BLACK):
-        if self.main_display_surface and self.top_health_display:
+        if self._main_display_surface and self.top_health_display:
             self.display_text_display_first_page(
                 self.top_health_display,
                 self.get_health_text(),
@@ -887,7 +980,7 @@ class OverworldViewing(Viewing):
             refresh_during=True,
             refresh_after=True,
         ):
-        if text and self.main_display_surface and self.bottom_text_display:
+        if text and self._main_display_surface and self.bottom_text_display:
             self.display_text_display_first_page(
                 self.bottom_text_display,
                 text,
@@ -949,7 +1042,7 @@ class OverworldViewing(Viewing):
             )
 
             self.curr_map.blit_onto_surface(
-                self.main_display_surface,
+                self._main_display_surface,
                 tile_subset_rect=tile_subset_rect
             )
 
@@ -1087,7 +1180,7 @@ class OverworldViewing(Viewing):
 
                 # scroll 1 pixel at a time
                 self.curr_map.scroll(
-                    self.main_display_surface,
+                    self._main_display_surface,
                     direction,
                     1,
                     tile_subset_rect=tile_subset_rect
@@ -1108,7 +1201,7 @@ class OverworldViewing(Viewing):
     # TODO document
     # DOES NOT update viewing - caller needs to do that by updating surface
     def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
-        self.main_display_surface.fill(fill_color)
+        self._main_display_surface.fill(fill_color)
 
     # blits the obj_to_blit sprite image corresponding to image_type_id
     # onto the designated surface. Can specify either top_left_pixel or
@@ -1127,7 +1220,7 @@ class OverworldViewing(Viewing):
         ):
         if self and obj_to_blit and (bottom_left_pixel or top_left_pixel):
             obj_to_blit.blit_onto_surface(
-                self.main_display_surface,
+                self._main_display_surface,
                 image_type_id,
                 bottom_left_pixel=bottom_left_pixel,
                 top_left_pixel=top_left_pixel

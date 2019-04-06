@@ -100,7 +100,9 @@ class Game(object):
         if curr_map and protag_tile_location:
             self.curr_map = curr_map
             self.overworld_viewing.curr_map = curr_map
-            self.curr_map.protagonist_location = protag_tile_location
+
+            self.set_protagonist_tile_position(protag_tile_location)
+            #self.curr_map.protagonist_location = protag_tile_location
 
             # TODO - check if protag tile location is not collision-bound?
 
@@ -134,28 +136,27 @@ class Game(object):
     # change and transition to new map
     # updates display screen
     # TODO document and change
-    """
     def change_current_map(
             self,
-            dest_map,
+            dest_map_id,
             protag_dest_tile_pos,
         ):
-        if dest_map and protag_dest_tile_pos:
-            # set and blit map
-            self.set_and_blit_current_game_map(dest_map, protag_dest_tile_loc)
+        if dest_map_id and protag_dest_tile_pos:
+            # Set and blit map.#$$
+            self.set_and_blit_current_game_map(
+                dest_map_id,
+                protag_dest_tile_loc,
+            )
 
-            self.set_protagonist_tile_position(protag_dest_tile_loc)
-
-            # blit protagonist
+            # Blit protagonist.
             self.overworld_viewing.blit_interactive_object_bottom_left(
                 self.protagonist,
                 imageids.OW_IMAGE_ID_DEFAULT,
                 viewingdata.CENTER_OW_TILE_BOTTOM_LEFT
             )
 
-            # update screen
+            # Update display to show changes.
             pygame.display.update()
-    """
 
     # moves protagonist in the direction specified,
     # using the specified transportation type
@@ -374,10 +375,16 @@ class Game(object):
 
             LOGGER.info("Returned string from input: %s", input_str)
 
-            if re.search(viewingdata.ALLOWED_NUMBER_INPUT_STR_REGEX, input_str):
-                ret_quantity = display.Display.parse_abbreviated_quantity(
-                    input_str
+            if input_str:
+                result = re.search(
+                    viewingdata.ALLOWED_NUMBER_INPUT_STR_REGEX,
+                    input_str,
                 )
+
+                if result:
+                    ret_quantity = display.Display.parse_abbreviated_quantity(
+                        input_str
+                    )
 
         return ret_quantity
 
@@ -479,10 +486,10 @@ class Game(object):
                                 quantity=to_remove,
                             )
 
-                            curr_index = min(
-                                selected_index,
-                                self.protagonist.inventory.get_last_index()
-                            )
+                        curr_index = min(
+                            selected_index,
+                            self.protagonist.inventory.get_last_index()
+                        )
                     else:
                         done = True
 
@@ -491,6 +498,15 @@ class Game(object):
             LOGGER.warn("No overworld inventory viewing or protagonist set.")
 
     def handle_overworld_toolbelt(self):
+        """Handles interactions with the protagonist toolbelt in overworld.
+
+        The method brings up the toolbelt display, which allows the user
+        to view which tools are in the toolbelt.
+
+        Does not automatically update the overworld display after finishing
+        the interaction.
+        """
+
         if self.overworld_toolbelt_viewing and self.protagonist:
             # Sort inventory first before displaying it.
             self.protagonist.tool_inventory.standard_sort()
@@ -509,8 +525,6 @@ class Game(object):
             )
             LOGGER.info("Ret info from toolbet viewing: %s", ret_info)
             # TODO handle ret_info.
-
-            #self.overworld_viewing.refresh_and_blit_self()
         else:
             LOGGER.warn("No overworld toolbelt viewing or protagonist set.")
 
@@ -1015,7 +1029,7 @@ class Game(object):
                         )
 
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
