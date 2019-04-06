@@ -17,6 +17,9 @@ class Timekeeper(object):
     # Class pygame Clock object.
     clock = None
 
+    # Number of ticks since the module was loaded.
+    num_ticks = 0
+
     @classmethod
     def init_clock(cls):
         """Sets up the pygame Clock object."""
@@ -36,9 +39,16 @@ class Timekeeper(object):
         """
 
         Timekeeper.clock.tick(tick_amount)
+        cls.num_ticks += 1
 
     @classmethod
     def time_ms(cls):
         """Returns the current system time in milliseconds."""
 
         return int(time.time_ns() / 1000)
+
+    @classmethod
+    def elapsed_ticks(cls):
+        """Returns the number of ticks that elapsed since the module loaded."""
+
+        return cls.num_ticks

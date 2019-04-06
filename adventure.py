@@ -55,7 +55,7 @@ def main():
     # Init spawn handler queues.
     #spawnhandler.Spawn_Handler.init_spawn_queues()
 
-    # create game
+    # create game. TODO make this a factory method.
     game_obj = game.Game(game_surface, game_language=language.LANG_ESPANOL)
 
 

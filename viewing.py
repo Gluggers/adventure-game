@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""This module contains classes and methods for Viewing objects.
+
+Viewing objects handle Display objects and act as an interface between
+the Game object and Display-related methods. The Viewing classes handle
+functions such as blitting objects onto the screen, blitting text,
+handling traversals through menus and text sequences, and scrolling the map
+upon character movement.
+"""
+
 import logging
 import sys
 import pygame
@@ -79,7 +89,51 @@ class Viewing(object):
             alternative_top_left=None,
             no_display_update=True,
         ):
-        #LOGGER.info("Blitting page text %s", page.text_lines)
+        """Displays a single page's worth of text.
+
+        The amount of text on the single page is determined by the page
+        argument, which should be constructed by the same display as
+        text_display.
+
+        Args:
+            text_display: the TextDisplay object that should be used to
+                display the text. For best results, use the same TextDisplay
+                object that generated the page argument.
+            page: the TextPage object that contains the text to display.
+                For best results, use a TextPage object that was made by
+                the text_display argument.
+            advance_delay_ms: number of milliseconds to wait before user
+                can exit out of or continue through the text display.
+            auto_advance: if True, the text display will finish and exit
+                after advance_delay_ms milliseconds without any user
+                input or interaction. If False, user must manually continue
+                through or exit out of the text display.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            horizontal_orientation: determines the text's horizontal
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center horizontally.
+                    ORIENTATION_LEFT_JUSTIFIED - left justify the text.
+                    ORIENTATION_RIGHT_JUSTIFIED - right justify the text.
+            vertical_orientation: determines the text's vertical
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center vertically.
+                    ORIENTATION_TOP_JUSTIFIED = top justify the text.
+                    ORIENTATION_BOTTOM_JUSTIFIED = bottom justify the text.
+            alternative_top_left: optional argument where the caller can pass
+                in a tuple of x,y screen pixel coordinates to define a custom
+                top left corner for text_display when blitting the text.
+                Default is None (use the predefined top left of text_display).
+            no_display_update: if True, the pygame display will not update
+                when blitting the text in this method or while waiting for
+                the user, even if refresh_during is set to True. This option
+                is set for method callers who want to blit multiple things
+                before updating the display.
+        """
 
         if page and text_display and self.main_display_surface:
             text_display.blit_page(
@@ -1079,43 +1133,23 @@ class OverworldViewing(Viewing):
                 top_left_pixel=top_left_pixel
             )
 
-    ### CLASS METHODS ###
-
-    # assumes map_top_left_pixel_pos has coordinates equally divisible
-    # by tile.TILE_SIZE
-    @classmethod
-    def calculate_top_left_ow_viewing_tile_old(cls, map_top_left_pixel_pos):
-        ret_coord = None
-        if map_top_left_pixel_pos:
-            coord_x = 0
-            coord_y = 0
-            if map_top_left_pixel_pos[0] < 0:
-                # map top left is behind the left side of viewing
-                coord_x = -1 * int(map_top_left_pixel_pos[0] / tile.TILE_SIZE)
-            if map_top_left_pixel_pos[1] >= viewingdata.OW_TOP_DISPLAY_HEIGHT:
-                # map top left is aligned with or below top of overworld viewing
-                coord_y = 0
-            else:
-                # map top left is above top of overworld viewing
-                coord_y = -1 * int(
-                    (map_top_left_pixel_pos[1] \
-                    - viewingdata.OW_TOP_DISPLAY_HEIGHT) \
-                    / tile.TILE_SIZE
-                )
-
-            ret_coord = (coord_x, coord_y)
-            LOGGER.debug(
-                "Top left ow viewing tile: %s, map top left %s",
-                ret_coord,
-                map_top_left_pixel_pos,
-            )
-
-        return ret_coord
-
-    # assumes map_top_left_pixel_pos has coordinates equally divisible
-    # by tile.TILE_SIZE
     @classmethod
     def calculate_top_left_ow_viewing_tile(cls, map_top_left_pixel_pos):
+        """Calculates the tile coordinates for the top left Tile in viewing.
+
+        Given the top left pixel position of the map, the method will
+        determine which Tile coordinate represents the top left Tile in the
+        viewing window.
+
+        Args:
+            map_top_left_pixel_pos: (x,y) pixel coordinate tuple for the
+                map's top left pixel position in the viewing.
+
+        Returns:
+            (x,y) tile coordinate tuple for the Tile in the top left viewing
+            position.
+        """
+
         ret_coord = None
         if map_top_left_pixel_pos:
             coord_x = 0
@@ -1140,10 +1174,23 @@ class OverworldViewing(Viewing):
 
         return ret_coord
 
-    # return top left pixel coordinate for the map given the protagonist's
-    # tile coordinates
     @classmethod
     def get_centered_map_top_left_pixel(cls, protag_tile_coordinate):
+        """Returns the top left pixel display coordinate for the map.
+
+        The top left coordinate for the current map viewing depends on
+        the protagonist's location on the map, as the screen will stay
+        centered on the protagonist.
+
+        Args:
+            protag_tile_coordinate: tile coordinate for the protagonist's
+                current location on the current map.
+
+        Returns:
+            2-tuple representing the x,y pixel coordinates for the top
+            left corner of the map display in the current viewing.
+        """
+
         top_left = (0, 0)
         if protag_tile_coordinate:
             pixel_distance_horiz = viewingdata.CENTER_OW_TILE_TOP_LEFT[0] \
@@ -1156,23 +1203,39 @@ class OverworldViewing(Viewing):
 
         return top_left
 
-    # Returns rect in tile coordinates that defines the tiles that
-    # are in the current viewing window with at most a 2-Tile-wide padding
-    # for smoother scrolling and map loading.
     @classmethod
-    def calculate_tile_viewing_rect(cls, map_object, top_left_viewing_tile):
+    def calculate_tile_viewing_rect(cls, map_object, top_left_viewing_tile_coord):
+        """Returns a 4-tuple representing the viewable rectangular tile grid.
+
+        The 4-tuple is of the form (top left tile x, top left tile y,
+        num horizontal tiles, num vertical tiles), where
+        "top left tile x" is the top left tile x coordinate for the top left
+        Tile that is defined as viewable, "top left tile y" is the top left
+        tile y coordinate for the top left Tile that is defined as viewable,
+        "num horizontal tiles" is the number of columns in the viewable
+        Tile grid, and "num vertical tiles" is the number of rows in the
+        viewable Tile grid. The viewable Tile grid is defined as all Tiles
+        in the current viewing window with at most a 2-Tile-wide padding
+        due to Tiles that appear when scrolling the map.
+
+        Args:
+            map_object: Map object that defines the Tile grid.
+            top_left_viewing_tile_coord: the x,y tile coordinates of the top left
+                Tile in the current viewing window.
+        """
+
         ret_rect = None
 
-        if map_object and top_left_viewing_tile:
+        if map_object and top_left_viewing_tile_coord:
             # see if we can get the Tile padding to the left of the screen
             # and Tile padding above above the screen
             start_tile_x = max(
                 0,
-                top_left_viewing_tile[0] - VIEWING_TILE_PADDING,
+                top_left_viewing_tile_coord[0] - VIEWING_TILE_PADDING,
             )
             start_tile_y = max(
                 0,
-                top_left_viewing_tile[1] - VIEWING_TILE_PADDING,
+                top_left_viewing_tile_coord[1] - VIEWING_TILE_PADDING,
             )
 
             end_tile_x = start_tile_x
@@ -1217,8 +1280,8 @@ class OverworldViewing(Viewing):
             ret_rect = (
                 start_tile_x,
                 start_tile_y,
-                (end_tile_x - start_tile_x + 1),
-                (end_tile_y - start_tile_y + 1)
+                end_tile_x - start_tile_x + 1,
+                end_tile_y - start_tile_y + 1
             )
 
         return ret_rect
@@ -1230,6 +1293,27 @@ class OverworldViewing(Viewing):
             protagonist=None,
             curr_map=None,
         ):
+        """Factory method for an OverworldViewing object.
+
+        Use this method instead of the OverworldViewing init method.
+
+        Args:
+            main_display_surface: pygame Surface object for the display
+                screen.
+            protagonist: optional argument that defines the protagonist
+                object to link to the OverworldViewing object.
+                A Protagonist object can always be linked to the
+                OverworldViewing object after the fact.
+            curr_map: optional argument that defines the current Map object
+                to link to the OverworldViewing object. Map objects can
+                be linked to the OverworldViewing object after the
+                fact, and will actually need to be adjusted due to
+                changing maps throughout gameplay.
+
+            Returns:
+                OverworldViewing object with the specified properties.
+        """
+
         ret_viewing = None
 
         if main_display_surface:
