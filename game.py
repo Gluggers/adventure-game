@@ -366,7 +366,6 @@ class Game(object):
                 input_font_color=viewingdata.COLOR_BLUE_TEXT,
                 input_delay_ms=viewingdata.INITIAL_INPUT_DELAY_MS,
                 refresh_during=False,
-                refresh_after=False,
                 horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_CENTERED,
                 alternative_top_left=None,
@@ -529,6 +528,15 @@ class Game(object):
             LOGGER.warn("No overworld toolbelt viewing or protagonist set.")
 
     def handle_overworld_equipment_viewing(self):
+        """Handles interactions with the protagonist equipment in overworld.
+
+        The method brings up the equipment display, which allows the user
+        to view and iteract with equipped items.
+
+        Does not automatically update the overworld display after finishing
+        the interaction.
+        """
+
         if self.overworld_equipment_viewing and self.protagonist:
             self.overworld_equipment_viewing.blit_selection_background(
                 equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
@@ -551,6 +559,8 @@ class Game(object):
             LOGGER.warn("No overworld equipment viewing or protagonist set.")
 
     def toggle_language(self):
+        """Switches between the supported languages for the game."""
+
         # For now, just switch to other language
         if language.Language.current_language_id == language.LANG_ENGLISH:
             self.change_language(language.LANG_ESPANOL)
@@ -561,6 +571,12 @@ class Game(object):
         pygame.display.update()
 
     def change_language(self, new_language):
+        """Changes the game language to the specified language.
+
+        Args:
+            new_language: language ID value for the langauge to change to.
+        """
+
         if new_language is not None:
             language.Language.set_current_language_id(new_language)
 
@@ -568,8 +584,9 @@ class Game(object):
             self.overworld_viewing.refresh_and_blit_self()
             pygame.display.update()
 
-    # Updates display.
     def refresh_and_blit_overworld_viewing(self):
+        """Updates the overworld viewing and updates the pygame display."""
+
         self.overworld_viewing.refresh_and_blit_self()
         pygame.display.update()
 

@@ -414,6 +414,89 @@ class Viewing(object):
             alternative_top_left=None,
             no_display_update=True,
         ):
+        """Displays a single page's worth of text on the specified TextDisplay.
+
+        The amount of text on each line and in a single text page space is
+        determined by the TextDisplay object properties.
+
+        Even if the amount of input text is more than the amount that will
+        fit on a single text page, the method will display only the first
+        page.
+
+        By default, the user will have to manually advance through the
+        text display sequence to finish displaying the text.
+
+        Args:
+            text_display: the TextDisplay object will display the text.
+                Depending on the TextDisplay object properties and on
+                the amount of text in the text_to_display argument,
+                the text may show up across multiple lines or may be cut off
+                if it does not all fit on one page.
+            text_to_display: can either be a String or a list of Strings that
+                represent the text to display. If passing in a single String,
+                the String will be broken up across several lines depending
+                on length and whether or not newline characters appear in the
+                string.
+                If passing in a list of Strings, each String in the list will
+                start on a new line of text, and each individual String may
+                take up multiple lines depending on length and whether or not
+                the String contains newline characters.
+            font_color: can either be a tuple or a list of tuples that
+                represent the font color for the text lines. Note that
+                each font_color tuple is a 3-tuple that defines the hex
+                value of the color, such as (0x23, 0x4A, 0x5F).
+                If passing in a single tuple, the entire text will be
+                displayed in that color.
+                If passing in a list of tuples, the user must also pass in
+                a list of Strings for text_to_display, and each list
+                must be of the same length.
+                List values of font_color are only valid if text_to_display
+                is a list of strings, and each index of the list will
+                correspond to the next. In other words, each tuple will define
+                the color of the corresponding String (the first tuple
+                in the font_color list will define the color for the first
+                String in text_to-display, etc).
+                If text_to_display is a list of strings and font_color
+                is a single tuple, then that color will apply to each text
+                string in text_to_display.
+            advance_delay_ms: number of milliseconds to wait before user
+                can exit out of or continue through the text display.
+            auto_advance: if True, the text display will finish and exit
+                after advance_delay_ms milliseconds without any user
+                input or interaction. If False, user must manually continue
+                through or exit out of the text display.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself once the TextDisplay object has finished displaying
+                the text.
+                If False, the calling Viewing object will not
+                refresh after the text display.
+            horizontal_orientation: determines the text's horizontal
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center horizontally.
+                    ORIENTATION_LEFT_JUSTIFIED - left justify the text.
+                    ORIENTATION_RIGHT_JUSTIFIED - right justify the text.
+            vertical_orientation: determines the text's vertical
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center vertically.
+                    ORIENTATION_TOP_JUSTIFIED = top justify the text.
+                    ORIENTATION_BOTTOM_JUSTIFIED = bottom justify the text.
+            alternative_top_left: optional argument where the caller can pass
+                in a tuple of x,y screen pixel coordinates to define a custom
+                top left corner for text_display when blitting the text.
+                Default is None (use the predefined top left of text_display).
+            no_display_update: if True, the pygame display will not update
+                when blitting the text in this method or while waiting for
+                the user, even if refresh_during or refresh_after are
+                set to True. This option is set for method callers who want
+                to blit multiple things before updating the display.
+        """
+
         if text_to_display and self._main_display_surface \
             and text_display and font_color:
             page_list = []
@@ -457,7 +540,6 @@ class Viewing(object):
                 if not no_display_update:
                     pygame.display.update()
 
-    # Returns the inputed string.
     def display_input_text_box(
             self,
             text_display,
@@ -466,12 +548,75 @@ class Viewing(object):
             input_font_color=viewingdata.COLOR_BLUE_TEXT,
             input_delay_ms=viewingdata.INITIAL_INPUT_DELAY_MS,
             refresh_during=True,
-            refresh_after=True,
             horizontal_orientation=display.ORIENTATION_CENTERED,
             vertical_orientation=display.ORIENTATION_CENTERED,
             alternative_top_left=None,
             no_display_update=True,
         ):
+        """Displays a text input box for user interaction and returns input.
+
+        The amount of text that fits on each line and on the overall input
+        box is determined by the TextDisplay object properties.
+
+        Even if the amount of text is more than the amount that will
+        fit on a single text page, the method will display only the first
+        page.
+
+        The text input box will show the current inputted text as the user
+        interacts with the input box. Only a subset of keyboard keys will
+        generate user input, as defined in the viewingdata module.
+
+        The user can delete the last character of the passed-in input by
+        pressing the backspace key.
+
+        Args:
+            text_display: the TextDisplay object will display the input
+                prompt and the inputted text.
+                Depending on the TextDisplay object properties and on
+                the amount of text in the text_to_display argument,
+                the text may show up across multiple lines or may be cut off
+                if it does not all fit on one page.
+            prompt_text_to_display: String that represents the input prompt
+                to display to the user.
+            prompt_font_color:  3-tuple that defines the hex value of the
+                font color for the input prompt text.
+            input_font_color:  3-tuple that defines the hex value of the
+                font color for the user's inputted text.
+            input_delay_ms: number of milliseconds to wait before user
+                can start inputting text.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            horizontal_orientation: determines the text's horizontal
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center horizontally.
+                    ORIENTATION_LEFT_JUSTIFIED - left justify the text.
+                    ORIENTATION_RIGHT_JUSTIFIED - right justify the text.
+            vertical_orientation: determines the text's vertical
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center vertically.
+                    ORIENTATION_TOP_JUSTIFIED = top justify the text.
+                    ORIENTATION_BOTTOM_JUSTIFIED = bottom justify the text.
+            alternative_top_left: optional argument where the caller can pass
+                in a tuple of x,y screen pixel coordinates to define a custom
+                top left corner for text_display when blitting the text.
+                Default is None (use the predefined top left of text_display).
+            no_display_update: if True, the pygame display will not update
+                when blitting the text in this method or while waiting for
+                the user, even if refresh_during or refresh_after are
+                set to True. This option is set for method callers who want
+                to blit multiple things before updating the display.
+
+        Returns:
+            Input string from the user. The returned String will be an empty
+            string if no input is given or if the user the passed-in
+            input. Max input string length is defined in the viewingdata
+            module using the constant MAX_INPUT_STR_LEN.
+        """
+
         user_input_str = ""
 
         if prompt_text_to_display and self._main_display_surface \
@@ -481,25 +626,25 @@ class Viewing(object):
             refresh_tick_counter = 0
             font_colors = [prompt_font_color, input_font_color]
 
+            # Display just the first page.
+            self.display_text_display_first_page(
+                text_display,
+                [prompt_text_to_display, user_input_str + input_suffix],
+                font_color=font_colors,
+                advance_delay_ms=input_delay_ms,
+                auto_advance=True,
+                refresh_during=refresh_during,
+                refresh_after=False,
+                horizontal_orientation=horizontal_orientation,
+                vertical_orientation=vertical_orientation,
+                alternative_top_left=alternative_top_left,
+                no_display_update=no_display_update,
+            )
+
+            if not no_display_update:
+                pygame.display.update()
+
             while not done:
-                # Display just the first page.
-                self.display_text_display_first_page(
-                    text_display,
-                    [prompt_text_to_display, user_input_str + input_suffix],
-                    font_color=font_colors,
-                    advance_delay_ms=input_delay_ms,
-                    auto_advance=True,
-                    refresh_during=refresh_during,
-                    refresh_after=refresh_after,
-                    horizontal_orientation=horizontal_orientation,
-                    vertical_orientation=vertical_orientation,
-                    alternative_top_left=alternative_top_left,
-                    no_display_update=no_display_update,
-                )
-
-                if not no_display_update:
-                    pygame.display.update()
-
                 # Wait for user to give input.
                 given_input = False
                 while not given_input:
@@ -523,7 +668,7 @@ class Viewing(object):
                             advance_delay_ms=0,
                             auto_advance=True,
                             refresh_during=refresh_during,
-                            refresh_after=refresh_after,
+                            refresh_after=False,
                             horizontal_orientation=horizontal_orientation,
                             vertical_orientation=vertical_orientation,
                             alternative_top_left=alternative_top_left,
@@ -548,16 +693,37 @@ class Viewing(object):
                             elif events.key == pygame.K_BACKSPACE:
                                 # Delete last character.
                                 given_input = True
-                                user_input_str = user_input_str[:-1]
+
+                                if user_input_str:
+                                    user_input_str = user_input_str[:-1]
                             else:
                                 entered_char = viewingdata.get_pygame_key_str(
                                     events.key,
                                     shift_on=False,
                                 )
 
-                                if entered_char:
+                                if entered_char and len(user_input_str) \
+                                        < viewingdata.MAX_INPUT_STR_LEN:
                                     given_input = True
                                     user_input_str += entered_char
+
+                # Display just the first page.
+                self.display_text_display_first_page(
+                    text_display,
+                    [prompt_text_to_display, user_input_str + input_suffix],
+                    font_color=font_colors,
+                    advance_delay_ms=0,
+                    auto_advance=True,
+                    refresh_during=refresh_during,
+                    refresh_after=False,
+                    horizontal_orientation=horizontal_orientation,
+                    vertical_orientation=vertical_orientation,
+                    alternative_top_left=alternative_top_left,
+                    no_display_update=no_display_update,
+                )
+
+                if not no_display_update:
+                    pygame.display.update()
 
             if refresh_after:
                 self.refresh_and_blit_self()
@@ -581,6 +747,29 @@ class Viewing(object):
             refresh_after=True,
             alternative_top_left=None,
         ):
+        """Displays a menu for user interaction and returns the selected option.
+
+        The number of menu options visible on each menu page is determined by
+        the properties of menu_display.
+
+        In the event where all the options in option_id_list cannot fit on a
+        single menu page, each non-final menu page will have an option at
+        the end indicating that more options are available.
+
+        For best results, each menu option should not be longer than the
+        horizontal space available in the menu_display object.
+
+        Args: TODO
+            menu_display:
+            option_id_list:
+            font_color:  3-tuple that defines the font color for the text.
+            load_delay_ms:
+
+
+        Returns:
+            TODO
+        """
+
         ret_option_id = None
         menu_pages = []
 
@@ -709,6 +898,7 @@ class Viewing(object):
                                 if curr_option_id \
                                     == menuoptions.MORE_OPTIONS_OPTION_ID:
                                     # Go to next page and don't return.
+                                    # Loops through menu if needed.
                                     curr_page_index = \
                                         (curr_page_index + 1) % num_pages
                                     curr_selected_index = 0
@@ -992,13 +1182,20 @@ class OverworldViewing(Viewing):
                 no_display_update=False,
             )
 
-
-    ### MAP HANDLING METHODS ###
-
-    # TODO document
-    # DOES NOT update viewing - caller needs to do that by updating surface
     def set_and_blit_map_on_view(self, protag_tile_location):
-        # set current map's top left position on display screen
+        """Sets the map while keeping the protagonist in the screen center.
+
+        Since the protagonist stays centered in the screen, the method adjusts
+        the map accordingly.
+
+        Does not update the pygame display - caller must do that.
+
+        Args:
+            protag_tile_location: (x,y) Tile coordinate tuple representing
+                the protagonist's location on the map.
+        """
+
+        # Set current map's top left position on display screen.
         if self.curr_map and protag_tile_location:
             # Calculate map top left position based on protag location.
             map_top_left = OverworldViewing.get_centered_map_top_left_pixel(
@@ -1015,19 +1212,26 @@ class OverworldViewing(Viewing):
         else:
             LOGGER.error("Missing parameters for setting and blitting map.")
 
-    # Refreshes the data for the overworld, including the map
-    # and top display.
-    # Does not reblit map or top display - caller will have
-    # to do that.
     def refresh_self(self):
+        """Refreshes overworld data, including map and top display.
+
+        Does not reblit the map or top display - caller must do
+        that.
+
+        """
+
         # Update map.
         self.refresh_map()
 
         # Update top display.
         self.refresh_top_display()
 
-    # Does not update map or display.
     def blit_map(self):
+        """Blits the current map.
+
+        Does not update the map or pygame display.
+        """
+
         if self.curr_map:
             # Set top left viewing tile to define what portions of map to blit
             top_left_viewing_tile_coord =                           \
@@ -1073,10 +1277,13 @@ class OverworldViewing(Viewing):
 
         return ret_option_id
 
-    # Blits overworld viewing as is, without updating.
-    # Does not update display.
-    # OVERRIDES
     def blit_self(self):
+        """Blits overworld viewing as is, without updating.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+        """
+
         # Blit background.
         self.blit_background()
 
@@ -1087,24 +1294,45 @@ class OverworldViewing(Viewing):
         self.blit_top_health_display()
 
     def refresh_top_display(self):
+        """Refreshes top display.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+        """
+
         if self.top_display:
             self.top_display.update_self()
 
     def refresh_and_blit_top_display(self):
+        """Refreshes and blits top display.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+        """
+
         if self.top_display:
             self.refresh_top_display()
             #self.blit_top_display()
             self.blit_top_health_display()
 
-    # Refreshes map.
-    # Does not blit map or update display - caller must
-    # do that.
     def refresh_map(self):
+        """Refreshes the current map.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+        """
+
         if self.curr_map:
             # Refresh map to update it.
             self.curr_map.refresh_self()
 
     def refresh_and_blit_map(self):
+        """Refreshes and blits the current map.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+        """
+
         self.refresh_map()
         self.blit_map()
 
@@ -1198,9 +1426,18 @@ class OverworldViewing(Viewing):
 
     ### SELF BLIT METHODS ###
 
-    # TODO document
-    # DOES NOT update viewing - caller needs to do that by updating surface
     def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
+        """Fills in the viewing background for the overworld.
+
+        Does not update the pygame display.
+        Caller must update display if needed.
+
+        Args:
+            fill_color: 3-tuple that defines the color to fil in the
+                overworld viewing background. For example,
+                (0, 0, 0).
+        """
+
         self._main_display_surface.fill(fill_color)
 
     # blits the obj_to_blit sprite image corresponding to image_type_id
@@ -1421,7 +1658,7 @@ class OverworldViewing(Viewing):
 
         return ret_viewing
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)

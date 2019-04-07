@@ -1351,26 +1351,40 @@ class Menu_Display(Text_Display):
                 )
             )
 
-            done = False
-            remaining_options = option_id_list
-
-            while not done:
-                options_to_add = []
-
-                if len(remaining_options) <= self.max_options_per_page:
-                    # We can add all remaining options to this page.
-                    options_to_add = remaining_options
-                    logger.debug(
-                        "Adding remaining {0} pages to menu page: {1}".format(
-                            len(options_to_add),
-                            options_to_add
-                        )
+            if len(option_id_list) <= self.max_options_per_page:
+                # We can add all options on one page.
+                logger.debug(
+                    "Adding remaining {0} pages to menu page: {1}".format(
+                        len(option_id_list),
+                        option_id_list
                     )
-                    done = True
-                else:
+                )
+
+                if option_id_list:
+                    curr_page = MenuPage(
+                        option_id_list,
+                        self.font_object,
+                        font_color=font_color,
+                    )
+                    ret_pages.append(curr_page)
+            else:
+                # Leave room for the "more options" option.
+                options_per_page = self.max_options_per_page - 1
+
+                # Get the number of menu pages required.
+                num_pages = math.ceil(
+                    len(option_id_list) / options_per_page
+                )
+
+                for i in range(num_pages):
+                    options_to_add = []
+
+                    start_index = i * options_per_page
+                    end_index = start_index + options_per_page
+
                     # Options will carry on to next page.
                     options_to_add = \
-                        remaining_options[0:self.max_options_per_page - 1]
+                        remaining_options[start_index:end_index]
                     options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
                     logger.debug(
                         ("Adding {0} options plus \"more options\" " \
@@ -1378,12 +1392,6 @@ class Menu_Display(Text_Display):
                             len(options_to_add) - 1,
                             options_to_add
                         )
-                    )
-
-                    remaining_options = \
-                        remaining_options[self.max_options_per_page - 1:]
-                    logger.debug(
-                        "Remaining options: {0}".format(remaining_options)
                     )
 
                 if options_to_add:
