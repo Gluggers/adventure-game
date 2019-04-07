@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This module contains constants and information for menu options."""
+
 import language
 
 ### GAME OPTION ID NUMBERS ###

@@ -753,21 +753,53 @@ class Viewing(object):
         the properties of menu_display.
 
         In the event where all the options in option_id_list cannot fit on a
-        single menu page, each non-final menu page will have an option at
-        the end indicating that more options are available.
+        single menu page, each menu page will have an option at
+        the end indicating that more options are available. The "more options"
+        option on the last page will loop back to the first page of menu
+        options to allow for backtracking.
 
-        For best results, each menu option should not be longer than the
+        For best results, each menu option name should not be longer than the
         horizontal space available in the menu_display object.
 
-        Args: TODO
-            menu_display:
-            option_id_list:
+        Args:
+            menu_display: MenuDisplay object that will display the menu
+                options.
+            option_id_list: list of menu option ID values for the menu_display
+                object to display. The option ID values will be translated
+                into their corresponding names depending on the
+                current game language.
             font_color:  3-tuple that defines the font color for the text.
-            load_delay_ms:
-
+            load_delay_ms: time in milliseconds that the user must wait once
+                the menu loads before being able to choose options.
+            option_switch_delay_ms: time in milliseconds that the user must wait
+                after each option switch before taking another action.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself and update the pygame display after the user finishes
+                interacting with the menu.
+            horizontal_orientation: determines the text's horizontal
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center horizontally.
+                    ORIENTATION_LEFT_JUSTIFIED - left justify the text.
+                    ORIENTATION_RIGHT_JUSTIFIED - right justify the text.
+            vertical_orientation: determines the text's vertical
+                orientation as defined by the orientation constants in
+                the display module. Current accepted values are:
+                    ORIENTATION_CENTERED - center vertically.
+                    ORIENTATION_TOP_JUSTIFIED = top justify the text.
+                    ORIENTATION_BOTTOM_JUSTIFIED = bottom justify the text.
+            alternative_top_left: optional argument where the caller can pass
+                in a tuple of x,y screen pixel coordinates to define a custom
+                top left corner for text_display when blitting the text.
+                Default is None (use the predefined top left of menu_display).
 
         Returns:
-            TODO
+            option ID value for the selected option. None if no option was
+            selected (e.g. if the user exits the menu via an escape key).
         """
 
         ret_option_id = None
@@ -986,6 +1018,23 @@ class Viewing(object):
         return ret_option_id
 
 class OverworldViewing(Viewing):
+    """Handles viewing-based methods and functions for the overworld.
+
+    The OverworldViewing class handles overworld-related displays and
+    visual interactions, such as the overworld side menu, map scrolling,
+    and overworld text boxes.  The class also acts as an interface between
+    the Game object and Display-related methods.
+
+    Attributes:
+        main_display_surface: the pygame Surface object for the main display
+            screen linked to the Viewing object. This Surface object is used
+            to blit pixels and changes to the display screen.
+        protagonist: the Protagonist object to link to the OverworldViewing
+            object. The Protagonist object will determine things like
+            what to display in the top health display.
+        # TODO
+    """
+
     def __init__(
             self,
             main_display_surface,
@@ -993,6 +1042,19 @@ class OverworldViewing(Viewing):
             curr_map=None,
             background_pattern=display.PATTERN_1_ID,
         ):
+        """Initialize the OverworldViewing object.
+
+        Args:
+            main_display_surface: the pygame Surface object for the main
+                display screen linked to the Viewing object.
+            protagonist: the Protagonist object to link to the OverworldViewing
+                object. This object can be set later on.
+            curr_map: the Map object for the current map to link to the
+                OverworldViewing object. This object can be set later on.
+            background_pattern: background pattern ID value to determine
+                the background pattern for the displays.
+        """
+
         Viewing.__init__(
             self,
             main_display_surface,
@@ -1000,15 +1062,23 @@ class OverworldViewing(Viewing):
 
         self._protagonist = protagonist
         self.curr_map = curr_map
-        self.background_pattern = background_pattern
+        self._background_pattern = background_pattern
 
         self.top_display = None
         self.bottom_text_display = None
         self.side_menu_display = None
         self.top_health_display = None
 
-    # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_top_health_display(self):
+        """Initializes the top health display.
+
+        The top health display will display the protagonist's current
+        health and max health.
+
+        Requires fonts to be loaded via Display.init_fonts() in
+        the display module.
+        """
+
         top_display_font = display.Display.get_font(
             fontinfo.OW_HEALTH_DISPLAY_FONT_ID
         )
@@ -1017,9 +1087,7 @@ class OverworldViewing(Viewing):
                 self._main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
-                background_pattern=self.background_pattern,
-                #background_color=viewingdata.COLOR_WHITE,
-                #background_image_path=imagepaths.OW_TOP_HEALTH_DISPLAY_BACKGROUND_PATH,
+                background_pattern=self._background_pattern,
                 horizontal_padding=6,
                 vertical_padding=6,
             )
@@ -1031,6 +1099,15 @@ class OverworldViewing(Viewing):
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
 
     def create_bottom_text_display(self):
+        """Initializes the bottom text display.
+
+        The bottom text display will display various messages and dialogues
+        during interactions in the overworld.
+
+        Requires fonts to be loaded via Display.init_fonts() in
+        the display module.
+        """
+
         font_obj = display.Display.get_font(
             fontinfo.OW_BOTTOM_TEXT_FONT_ID
         )
@@ -1040,7 +1117,7 @@ class OverworldViewing(Viewing):
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,
                 continue_icon_image_path=imagepaths.DEFAULT_TEXT_CONTINUE_ICON_PATH,
-                background_pattern=self.background_pattern,
+                background_pattern=self._background_pattern,
                 spacing_factor_between_lines=display.TEXT_BOX_LINE_SPACING_FACTOR,
                 horizontal_padding=viewingdata.TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.TEXT_DISPLAY_VERTICAL_PADDING,
@@ -1052,6 +1129,15 @@ class OverworldViewing(Viewing):
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
 
     def create_side_menu_display(self):
+        """Initializes the side menu display.
+
+        The side menu display will display the overworld side menu options
+        for the user to choose from.
+
+        Requires fonts to be loaded via Display.init_fonts() in
+        the display module.
+        """
+
         font_obj = display.Display.get_font(
             fontinfo.OW_SIDE_MENU_FONT_ID
         )
@@ -1060,7 +1146,7 @@ class OverworldViewing(Viewing):
                 self._main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
                 font_obj,
-                background_pattern=self.background_pattern,
+                background_pattern=self._background_pattern,
                 horizontal_padding=viewingdata.OW_SIDE_MENU_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.OW_SIDE_MENU_VERTICAL_PADDING,
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
@@ -1073,23 +1159,31 @@ class OverworldViewing(Viewing):
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
 
 
-    # Requires fonts to be loaded. see display.Display.init_fonts()
     def create_displays(self):
+        """Initializes the the main displays for the OverworldViewing.
+
+        The method sets the following displays:
+            - Top health display
+            - Side menu display
+            - Bottom text display
+
+        Requires fonts to be loaded via Display.init_fonts() in
+        the display module.
+        """
+
         self.create_top_health_display()
         self.create_bottom_text_display()
         self.create_side_menu_display()
 
-
-    ### GETTERS AND SETTERS ###
-
     @property
     def protagonist(self):
-        """Return protagonist."""
+        """Returns protagonist."""
+
         return self._protagonist
 
     @protagonist.setter
     def protagonist(self, value):
-        """Set protagonist for viewing."""
+        """Sets protagonist for viewing."""
         if value:
             self._protagonist = value
 
@@ -1098,15 +1192,25 @@ class OverworldViewing(Viewing):
             if self.top_display:
                 self.top_display.protagonist = value
 
-    ### DISPLAY HANDLING METHODS ###
-
-    # Blits the top display view onto the main display screen.
-    # Does not update the main display - caller will have to do that
     def blit_top_display(self):
+        """Blits the top display onto the main display surface.
+
+        Caller must update the main pygame display if needed.
+        """
+
         if self._main_display_surface and self.top_display:
             self.top_display.blit_onto_surface(self._main_display_surface)
 
-    def get_health_text(self):
+    def get_overworld_health_text(self):
+        """Returns the health String for the protagonist.
+
+        The String format is "<current health> / <max health>",
+        for example "5 / 12".
+
+        Returns:
+            String representing the current health for the protagonist.
+        """
+
         ret_text = None
 
         ret_text = ''.join([
@@ -1127,7 +1231,7 @@ class OverworldViewing(Viewing):
         if self._main_display_surface and self.top_health_display:
             self.display_text_display_first_page(
                 self.top_health_display,
-                self.get_health_text(),
+                self.get_overworld_health_text(),
                 font_color=font_color,
                 advance_delay_ms=0,
                 auto_advance=True,
