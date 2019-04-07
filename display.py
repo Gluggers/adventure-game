@@ -1376,17 +1376,30 @@ class Menu_Display(Text_Display):
                     len(option_id_list) / options_per_page
                 )
 
+                logger.info(
+                    "%d options, %d options per page, %d menu pages",
+                    len(option_id_list),
+                    self.max_options_per_page,
+                    num_pages,
+                )
+
                 for i in range(num_pages):
                     options_to_add = []
 
                     start_index = i * options_per_page
                     end_index = start_index + options_per_page
 
+                    logger.info(
+                        "Start index %d, end index %d",
+                        start_index,
+                        end_index,
+                    )
+
                     # Options will carry on to next page.
                     options_to_add = \
-                        remaining_options[start_index:end_index]
+                        option_id_list[start_index:end_index]
                     options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
-                    logger.debug(
+                    logger.info(
                         ("Adding {0} options plus \"more options\" " \
                         + "to menu page: {1}").format(
                             len(options_to_add) - 1,
@@ -1394,13 +1407,13 @@ class Menu_Display(Text_Display):
                         )
                     )
 
-                if options_to_add:
-                    curr_page = MenuPage(
-                        options_to_add,
-                        self.font_object,
-                        font_color=font_color,
-                    )
-                    ret_pages.append(curr_page)
+                    if options_to_add:
+                        curr_page = MenuPage(
+                            options_to_add,
+                            self.font_object,
+                            font_color=font_color,
+                        )
+                        ret_pages.append(curr_page)
 
         return ret_pages
 
