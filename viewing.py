@@ -11,7 +11,6 @@ upon character movement.
 import logging
 import sys
 import pygame
-import directions
 import display
 import fontinfo
 import imageids
@@ -22,10 +21,8 @@ import tile
 import timekeeper
 import viewingdata
 
-### WALKING CONSTANTS ###
-WALK1_FRAME_END = (tile.TILE_SIZE / 4)
-WALK2_FRAME_END = 3*(tile.TILE_SIZE / 4)
-STAND_FRAME_END = 2*(tile.TILE_SIZE / 4)
+# Pixel distance for each phase of the walking animation.
+STEP_DURATION = int(tile.TILE_SIZE / 4)
 
 ### TIME CONSTANTS ###
 NUM_MS_SECOND = 1000
@@ -387,19 +384,6 @@ class Viewing(object):
                 if not no_display_update:
                     pygame.display.update()
 
-    # If refresh_after is True, refreshes
-    # and blits self and updates display after all pages.
-    # If refresh_during is True, refreshes and blits self and updates display
-    # while waiting for advancement and in between pages.
-    # If text_to_display is a list of strings, each string will be
-    # included and deliminated as a new line where possible.
-    # font_color can be a single tuple representing a font color, or
-    # a list of tuples representing font colors for each line of
-    # text_to_display. List values of font_color are only valid if
-    # text_to_display is a list of strings, and each index of the list
-    # will correspond to the next. If text_to_display is a list of strings
-    # and font_color is a single tuple, then that color will apply
-    # to each text string in text_to_display.
     def display_text_display_first_page(
             self,
             text_display,
@@ -725,15 +709,8 @@ class Viewing(object):
                 if not no_display_update:
                     pygame.display.update()
 
-            if refresh_after:
-                self.refresh_and_blit_self()
-
-                if not no_display_update:
-                    pygame.display.update()
-
         return user_input_str
 
-    # Returns option ID for selected option, None if no option selected.
     def display_menu_display(
             self,
             menu_display,
@@ -859,9 +836,6 @@ class Viewing(object):
                         alternative_top_left=alternative_top_left,
                     )
                     pygame.display.update()
-
-                # Clear event queue to prevent premature advancement.
-                #pygame.event.clear() # TODO remove?
 
                 LOGGER.debug("Waiting for user to select a menu option...")
                 selected = False
@@ -1006,10 +980,6 @@ class Viewing(object):
                                 alternative_top_left=alternative_top_left,
                             )
                             pygame.display.update()
-
-                        # Clear event queue to prevent
-                        # premature advancement.
-                        #pygame.event.clear() # TODO remove?
 
         if refresh_after:
             self.refresh_and_blit_self()
@@ -1228,6 +1198,15 @@ class OverworldViewing(Viewing):
     # Blits the top health display onto the main display screen.
     # Does not update the main display - caller will have to do that
     def blit_top_health_display(self, font_color=viewingdata.COLOR_BLACK):
+        """Blits the top health display using specified font color.
+
+        Caller must update the main pygame display if needed.
+
+        Args:
+            font_color: 3-tuple representing the font color for the health
+                display text.
+        """
+
         if self._main_display_surface and self.top_health_display:
             self.display_text_display_first_page(
                 self.top_health_display,
@@ -1251,6 +1230,60 @@ class OverworldViewing(Viewing):
             refresh_during=True,
             refresh_after=True,
         ):
+        """Displays text on the bottom text display.
+
+        The amount of text on each line and in a single text box space is
+        determined by the TextDisplay object properties.
+
+        By default, the user will have to manually advance through the
+        text display sequence to move on to the next chunk of text or to
+        finish displaying the text.
+
+        Args:
+            text: can either be a String or a list of Strings that
+                represent the text to display. If passing in a single String,
+                the String will be broken up across several lines depending
+                on length and whether or not newline characters appear in the
+                string.
+                If passing in a list of Strings, each String in the list will
+                start on a new line of text, and each individual String may
+                take up multiple lines depending on length and whether or not
+                the String contains newline characters.
+            font_color: can either be a tuple or a list of tuples that
+                represent the font color for the text lines. Note that
+                each font_color tuple is a 3-tuple that defines the hex
+                value of the color, such as (0x23, 0x4A, 0x5F).
+                If passing in a single tuple, the entire text will be
+                displayed in that color.
+                If passing in a list of tuples, the user must also pass in
+                a list of Strings for text_to_display, and each list
+                must be of the same length.
+                List values of font_color are only valid if text_to_display
+                is a list of strings, and each index of the list will
+                correspond to the next. In other words, each tuple will define
+                the color of the corresponding String (the first tuple
+                in the font_color list will define the color for the first
+                String in text_to-display, etc).
+                If text_to_display is a list of strings and font_color
+                is a single tuple, then that color will apply to each text
+                string in text_to_display.
+            advance_delay_ms: number of milliseconds to wait before user
+                can exit out of or continue through the text display.
+            auto_advance: if True, the text display will finish and exit
+                after advance_delay_ms milliseconds without any user
+                input or interaction. If False, user must manually continue
+                through or exit out of the text display.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself once the TextDisplay object has finished displaying
+                the text.
+                If False, the calling Viewing object will not
+                refresh after the text display.
+        """
+
         if text and self.bottom_text_display:
             self.display_text_display(
                 self.bottom_text_display,
@@ -1274,6 +1307,63 @@ class OverworldViewing(Viewing):
             refresh_during=True,
             refresh_after=True,
         ):
+        """Displays a single page's worth of text on bottom text display.
+
+        The amount of text on each line and in a single text page space is
+        determined by the bottom text display's properties.
+
+        Even if the amount of input text is more than the amount that will
+        fit on a single text page, the method will display only the first
+        page.
+
+        By default, the user will have to manually advance through the
+        text display sequence to finish displaying the text.
+
+        Args:
+            text: can either be a String or a list of Strings that
+                represent the text to display. If passing in a single String,
+                the String will be broken up across several lines depending
+                on length and whether or not newline characters appear in the
+                string.
+                If passing in a list of Strings, each String in the list will
+                start on a new line of text, and each individual String may
+                take up multiple lines depending on length and whether or not
+                the String contains newline characters.
+            font_color: can either be a tuple or a list of tuples that
+                represent the font color for the text lines. Note that
+                each font_color tuple is a 3-tuple that defines the hex
+                value of the color, such as (0x23, 0x4A, 0x5F).
+                If passing in a single tuple, the entire text will be
+                displayed in that color.
+                If passing in a list of tuples, the user must also pass in
+                a list of Strings for text_to_display, and each list
+                must be of the same length.
+                List values of font_color are only valid if text_to_display
+                is a list of strings, and each index of the list will
+                correspond to the next. In other words, each tuple will define
+                the color of the corresponding String (the first tuple
+                in the font_color list will define the color for the first
+                String in text_to-display, etc).
+                If text_to_display is a list of strings and font_color
+                is a single tuple, then that color will apply to each text
+                string in text_to_display.
+            advance_delay_ms: number of milliseconds to wait before user
+                can exit out of or continue through the text display.
+            auto_advance: if True, the text display will finish and exit
+                after advance_delay_ms milliseconds without any user
+                input or interaction. If False, user must manually continue
+                through or exit out of the text display.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself once the TextDisplay object has finished displaying
+                the text.
+                If False, the calling Viewing object will not
+                refresh after the text display.
+        """
+
         if text and self._main_display_surface and self.bottom_text_display:
             self.display_text_display_first_page(
                 self.bottom_text_display,
@@ -1321,7 +1411,6 @@ class OverworldViewing(Viewing):
 
         Does not reblit the map or top display - caller must do
         that.
-
         """
 
         # Update map.
@@ -1339,7 +1428,7 @@ class OverworldViewing(Viewing):
         if self.curr_map:
             # Set top left viewing tile to define what portions of map to blit
             top_left_viewing_tile_coord =                           \
-                OverworldViewing.calculate_top_left_ow_viewing_tile(
+                OverworldViewing.get_top_left_ow_viewing_tile(
                     self.curr_map.top_left_position
                 )
 
@@ -1349,7 +1438,7 @@ class OverworldViewing(Viewing):
                 top_left_viewing_tile_coord
             )
 
-            self.curr_map.blit_onto_surface(
+            self.curr_map.blit_map(
                 self._main_display_surface,
                 tile_subset_rect=tile_subset_rect
             )
@@ -1363,10 +1452,40 @@ class OverworldViewing(Viewing):
             #load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
             #option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
         ):
+        """Displays the overworld side menu and returns the selected option.
+
+        The number of menu options visible on each menu page is determined by
+        the properties of the overworld side menu.
+
+        In the event where all the options in option_id_list cannot fit on a
+        single menu page, each menu page will have an option at
+        the end indicating that more options are available. The "more options"
+        option on the last page will loop back to the first page of menu
+        options to allow for backtracking.
+
+        For best results, each menu option name should not be longer than the
+        horizontal space available the side menu.
+
+        Args:
+            menu_option_ids: list of menu option ID values for the menu display
+                object to display. The option ID values will be translated
+                into their corresponding names depending on the
+                current game language.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself and update the pygame display after the user finishes
+                interacting with the menu.
+
+        Returns:
+            option ID value for the selected option. None if no option was
+            selected (e.g. if the user exits the menu via an escape key).
+        """
+
         ret_option_id = None
         if menu_option_ids:
-            # TODO - parent class call display menu
-
             ret_option_id = self.display_menu_display(
                 self.side_menu_display,
                 menu_option_ids,
@@ -1443,12 +1562,24 @@ class OverworldViewing(Viewing):
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
     # scroll_wait_time is the time (in milliseconds)
-    def scroll_map_single_tile(self, direction):
-        # get top left viewing tile and tile subset rect to blit
+    def scroll_map_single_tile(self, scroll_direction, walk_direction):
+        """Scrolls the map while walking the main character.
 
+        Note that the character should walk in the opposite direction of the
+        map scrolling, so for best results, ensure that scroll_direction
+        and walk_direction are opposite directions.
+
+        Args:
+            scroll_direction: direction ID that indicates in which direction
+                the map should scroll.
+            walk_direction: direction ID that indicates in which direction
+                the character should walk.
+        """
+
+        # Get top left viewing tile and tile subset rect to blit.
         tile_subset_rect = OverworldViewing.calculate_tile_viewing_rect(
             self.curr_map,
-            OverworldViewing.calculate_top_left_ow_viewing_tile(
+            OverworldViewing.get_top_left_ow_viewing_tile(
                 self.curr_map.top_left_position
             )
         )
@@ -1458,77 +1589,42 @@ class OverworldViewing(Viewing):
             tile_subset_rect
         )
 
-        # walk1 for TILE_SIZE/4 duration, stand for TILE_SIZE/4,
-        # walk2 for TILE_SIZE/4, stand for TILE_SIZE/4
-        # walk1 for 0 to 7, stand for 8 to 15,
-        # walk2 for 16 to 23, stand for 24 to 31
-        for i in range(tile.TILE_SIZE):
-            # reset the surface screen to default to black for empty map
-            # spaces
-            self.blit_background(fill_color=viewingdata.COLOR_BLACK)
+        # Get image ID list for the walk animation in this direction.
+        walk_image_ids = imageids.get_entity_walk_image_ids(
+            walk_direction
+        )
+        if walk_image_ids:
+            # Number of steps in the walk animation.
+            phase_duration = int(tile.TILE_SIZE / len(walk_image_ids))
 
-            # blit protagonist
-            # TODO - have designated spot for protagonist?
-            if self._protagonist:
-                # get image type ID for protagonist:
-                image_type_id = imageids.OW_IMAGE_ID_DEFAULT
-                offset = i % tile.TILE_SIZE
+            for i in range(tile.TILE_SIZE):
+                # Reset the surface screen to default to black for empty map
+                # spaces.
+                self.blit_background(fill_color=viewingdata.COLOR_BLACK)
 
-                if direction == directions.DIR_SOUTH:
-                    # map scrolls south, character walks north
-                    if offset < WALK1_FRAME_END:
-                        image_type_id = imageids.OW_IMAGE_ID_WALK1_NORTH
-                    elif (offset >= STAND_FRAME_END) and (offset < WALK2_FRAME_END):
-                        image_type_id = imageids.OW_IMAGE_ID_WALK2_NORTH
-                    else:
-                        image_type_id = imageids.OW_IMAGE_ID_FACE_NORTH
-                elif direction == directions.DIR_WEST:
-                    if offset < WALK1_FRAME_END:
-                        image_type_id = imageids.OW_IMAGE_ID_WALK1_EAST
-                    elif (offset >= STAND_FRAME_END) \
-                        and (offset < WALK2_FRAME_END):
-                        image_type_id = imageids.OW_IMAGE_ID_WALK2_EAST
-                    else:
-                        image_type_id = imageids.OW_IMAGE_ID_FACE_EAST
-                elif direction == directions.DIR_NORTH:
-                    if offset < WALK1_FRAME_END:
-                        image_type_id = imageids.OW_IMAGE_ID_WALK1_SOUTH
-                    elif (offset >= STAND_FRAME_END) \
-                        and (offset < WALK2_FRAME_END):
-                        image_type_id = imageids.OW_IMAGE_ID_WALK2_SOUTH
-                    else:
-                        image_type_id = imageids.OW_IMAGE_ID_FACE_SOUTH
-                elif direction == directions.DIR_EAST:
-                    if offset < WALK1_FRAME_END:
-                        image_type_id = imageids.OW_IMAGE_ID_WALK1_WEST
-                    elif (offset >= STAND_FRAME_END) \
-                        and (offset < WALK2_FRAME_END):
-                        image_type_id = imageids.OW_IMAGE_ID_WALK2_WEST
-                    else:
-                        image_type_id = imageids.OW_IMAGE_ID_FACE_WEST
+                if self._protagonist:
+                    # Get image ID for protagonist.
+                    image_type_id = walk_image_ids[int(i / phase_duration)]
 
-                # Set new protagonist image id
-                self._protagonist.curr_image_id = image_type_id
+                    if image_type_id:
+                        self._protagonist.curr_image_id = image_type_id
 
-                # scroll 1 pixel at a time
-                self.curr_map.scroll(
-                    self._main_display_surface,
-                    direction,
-                    1,
-                    tile_subset_rect=tile_subset_rect
-                )
+                    # scroll 1 pixel at a time
+                    self.curr_map.scroll(
+                        self._main_display_surface,
+                        scroll_direction,
+                        1,
+                        tile_subset_rect=tile_subset_rect
+                    )
 
-                # Also blit the top view on top.
-                #self.blit_top_display()
-                self.blit_top_health_display()
+                    # Also blit the top view on top.
+                    self.blit_top_health_display()
 
-            # Update main display
-            pygame.display.update()
+                    # Update main display
+                    pygame.display.update()
 
-            # wait till next iteration
-            pygame.time.wait(SINGLE_PIXEL_SCROLL_TIME_MS)
-
-    ### SELF BLIT METHODS ###
+                    # wait till next iteration
+                    pygame.time.wait(SINGLE_PIXEL_SCROLL_TIME_MS)
 
     def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
         """Fills in the viewing background for the overworld.
@@ -1544,31 +1640,8 @@ class OverworldViewing(Viewing):
 
         self._main_display_surface.fill(fill_color)
 
-    # blits the obj_to_blit sprite image corresponding to image_type_id
-    # onto the designated surface. Can specify either top_left_pixel or
-    # bottom_left_pixel as the reference point for blitting the image.
-    # bottom_left_pixel is recommended for images that are larger than
-    # a single Tile image. If both top_left_pixel and bottom_left_pixel are
-    # specified, the method will use bottom_left_pixel as an override.
-    # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
-    # Does not update the surface display - caller will have to do that.
-    def blit_interactive_object(
-            self,
-            obj_to_blit,
-            image_type_id,
-            bottom_left_pixel=None,
-            top_left_pixel=None,
-        ):
-        if self and obj_to_blit and (bottom_left_pixel or top_left_pixel):
-            obj_to_blit.blit_onto_surface(
-                self._main_display_surface,
-                image_type_id,
-                bottom_left_pixel=bottom_left_pixel,
-                top_left_pixel=top_left_pixel
-            )
-
     @classmethod
-    def calculate_top_left_ow_viewing_tile(cls, map_top_left_pixel_pos):
+    def get_top_left_ow_viewing_tile(cls, map_top_left_pixel_pos):
         """Calculates the tile coordinates for the top left Tile in viewing.
 
         Given the top left pixel position of the map, the method will
@@ -1589,10 +1662,10 @@ class OverworldViewing(Viewing):
             coord_x = 0
             coord_y = 0
             if map_top_left_pixel_pos[0] < 0:
-                # map top left is behind the left side of viewing
+                # Map top left is behind the left side of viewing.
                 coord_x = -1 * int(map_top_left_pixel_pos[0] / tile.TILE_SIZE)
             if map_top_left_pixel_pos[1] < 0:
-                # map top left is above top of overworld viewing
+                # Map top left is above top of overworld viewing.
                 coord_y = -1 * int(
                     (map_top_left_pixel_pos[1] \
                     - viewingdata.OW_TOP_DISPLAY_HEIGHT) \

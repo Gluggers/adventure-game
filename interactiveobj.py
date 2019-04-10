@@ -16,18 +16,18 @@ class Interactive_Object(pygame.sprite.Sprite):
 
     # examine_info maps language IDs to an examine string.
     def __init__(
-                self,
-                object_type,
-                object_id,
-                name_info, # maps language id to name
-                image_path_dict,
-                collision_width=1,
-                collision_height=1,
-                examine_info={},
-                interaction_id=None,
-                replacement_object_id=None,
-                respawn_time_s=None, # None means never respawns.
-            ):
+            self,
+            object_type,
+            object_id,
+            name_info, # maps language id to name
+            image_path_dict,
+            collision_width=1,
+            collision_height=1,
+            examine_info={},
+            interaction_id=None,
+            replacement_object_id=None,
+            respawn_time_s=None, # None means never respawns.
+        ):
         # Call the parent class (Sprite) init
         pygame.sprite.Sprite.__init__(self)
         self.object_type = object_type
@@ -54,7 +54,7 @@ class Interactive_Object(pygame.sprite.Sprite):
             # convert alpha for transparency
             self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
 
-        self.curr_image_id = imageids.OW_IMAGE_ID_DEFAULT
+        self.curr_image_id = imageids.OBJ_SPRITE_IMAGE_ID
 
     def get_name(self, alternative_language_id=None):
         ret_name = ""
@@ -65,7 +65,6 @@ class Interactive_Object(pygame.sprite.Sprite):
 
         return ret_name
 
-
     # blits the interactive object sprite image corresponding to image_type_id
     # onto the designated surface. Can specify either top_left_pixel or
     # bottom_left_pixel as the reference point for blitting the image.
@@ -74,12 +73,12 @@ class Interactive_Object(pygame.sprite.Sprite):
     # specified, the method will use bottom_left_pixel as an override.
     # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # Does not update the surface display - caller will have to do that.
-    def blit_onto_surface(                                                  \
-            self,                                                           \
-            surface,                                                        \
-            image_type_id=None,                                             \
-            bottom_left_pixel=None,                                         \
-            top_left_pixel=None                                             \
+    def blit_onto_surface(
+            self,
+            surface,
+            image_type_id=None,
+            bottom_left_pixel=None,
+            top_left_pixel=None
         ):
         if self and surface and (bottom_left_pixel or top_left_pixel):
             id_to_use = None

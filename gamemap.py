@@ -556,7 +556,7 @@ class Map:
             tile_obj = self.get_tile_from_pos(tile_coordinate)
 
             if tile_obj:
-                tile_obj.blit_onto_surface(surface, dest_top_left)
+                tile_obj.blit_tile(surface, dest_top_left)
 
     # Blits tiles starting at current top left position
     # caller needs to update surface after method
@@ -590,7 +590,7 @@ class Map:
                     curr_pixel_x = start_pixel_x
                     for tile_index in range(start_tile_x, end_tile_x + 1):
                         single_tile = self.tile_grid[grid_row][tile_index]
-                        single_tile.blit_onto_surface(surface, (curr_pixel_x, curr_pixel_y))
+                        single_tile.blit_tile(surface, (curr_pixel_x, curr_pixel_y))
                         curr_pixel_x = curr_pixel_x + tile.TILE_SIZE
                     curr_pixel_y = curr_pixel_y + tile.TILE_SIZE
 
@@ -654,7 +654,6 @@ class Map:
                                     # on object type?
                                     obj_to_blit.blit_onto_surface(
                                         surface,
-                                        image_type_id=imageids.OW_IMAGE_ID_DEFAULT,
                                         bottom_left_pixel=bottom_left_pixel
                                     )
 
@@ -665,7 +664,7 @@ class Map:
     # tile_subset_rect is rect of tile coordinates that indicates which
     # tiles and objects to blit, rather than blitting the whole map.
     # Setting to None will blit the whole map
-    def blit_onto_surface(self, surface, tile_subset_rect=None):
+    def blit_map(self, surface, tile_subset_rect=None):
         if self and surface and self.top_left_position and self.tile_grid:
             # Blit the tiles.
             self.blit_tiles(surface, tile_subset_rect=tile_subset_rect)
@@ -703,7 +702,7 @@ class Map:
             if new_pixel_location:
                 # Update map top left and blit map.
                 self.top_left_position = new_pixel_location
-                self.blit_onto_surface(                                 \
+                self.blit_map(                                 \
                     surface,                                            \
                     tile_subset_rect=tile_subset_rect                   \
                 )

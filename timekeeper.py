@@ -14,6 +14,13 @@ NUM_MS_SECOND = 1000
 REFRESH_INTERVAL_NUM_TICKS = CLOCK_TICK
 
 class Timekeeper(object):
+    """Handles time-based methods and functions, such as ticks.
+
+    The user should not generate Timekeeper objects, as the class
+    is primarily for class methods related to time and the
+    pygame clock.
+    """
+
     # Class pygame Clock object.
     clock = None
 

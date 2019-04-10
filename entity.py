@@ -74,7 +74,7 @@ class Entity(interactiveobj.Interactive_Object):
 
         # By default, face south.
         self.facing_direction = directions.DIR_SOUTH
-        self.curr_image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
+        self.curr_image_id = imageids.IMAGE_ID_FACE_SOUTH
 
         # Set up skills. self.skill_info_mapping maps skill IDs to
         # a length-3 list
@@ -112,10 +112,10 @@ class Entity(interactiveobj.Interactive_Object):
 
             # Record skill information.
             self.skill_info_mapping[skill_id] = [
-                                                    skill_level,
-                                                    exp,
-                                                    remaining_exp
-                                                ]
+                skill_level,
+                exp,
+                remaining_exp
+            ]
 
         # Set up health - use hitpoint stat if possible,
         # otherwise default hitpoints value.
@@ -271,34 +271,20 @@ class Entity(interactiveobj.Interactive_Object):
     # top_left_pixel and bottom_left_pixel are tuples of pixel coordinates.
     # DOES NOT update surface - caller will have to do that
     def face_direction(
-                self,
-                surface,
-                direction,
-                bottom_left_pixel=None,
-                top_left_pixel=None,
-            ):
-        image_id = None
-
+            self,
+            surface,
+            direction,
+            bottom_left_pixel=None,
+            top_left_pixel=None,
+        ):
         if self and surface and (bottom_left_pixel or top_left_pixel):
-            if direction == directions.DIR_NORTH:
-                image_id = imageids.OW_IMAGE_ID_FACE_NORTH
-                logger.debug("Facing NORTH")
-            elif direction == directions.DIR_EAST:
-                image_id = imageids.OW_IMAGE_ID_FACE_EAST
-                logger.debug("Facing EAST")
-            elif direction == directions.DIR_SOUTH:
-                image_id = imageids.OW_IMAGE_ID_FACE_SOUTH
-                logger.debug("Facing SOUTH")
-            elif direction == directions.DIR_WEST:
-                image_id = imageids.OW_IMAGE_ID_FACE_WEST
-                logger.debug("Facing WEST")
+            image_id = imageids.get_direction_image_id(direction)
 
             if image_id is not None:
                 # change direction variable and blit
                 self.facing_direction = direction
                 self.blit_onto_surface(
                     surface,
-                    image_id,
                     bottom_left_pixel=bottom_left_pixel,
                     top_left_pixel=top_left_pixel,
                 )
@@ -409,9 +395,9 @@ class Protagonist(Character):
 
     @classmethod
     def protagonist_factory(
-                cls,
-                name
-            ):
+            cls,
+            name
+        ):
         protagonist = None
 
         # TODO check if we already have protagonist?

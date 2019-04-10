@@ -103,7 +103,7 @@ class Tile(object):
         return bool(transportation_flag & self._allowed_transport) \
             or (transportation_flag == self._allowed_transport)
 
-    def blit_onto_surface(self, surface, top_left_pixel_tuple):
+    def blit_tile(self, surface, top_left_pixel_tuple):
         """Blits Tile at the provided top left pixel.
 
         Does not update the surface display - caller will have to do that.

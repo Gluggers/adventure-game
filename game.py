@@ -148,13 +148,6 @@ class Game(object):
                 protag_dest_tile_loc,
             )
 
-            # Blit protagonist.
-            self.overworld_viewing.blit_interactive_object_bottom_left(
-                self.protagonist,
-                imageids.OW_IMAGE_ID_DEFAULT,
-                viewingdata.CENTER_OW_TILE_BOTTOM_LEFT
-            )
-
             # Update display to show changes.
             pygame.display.update()
 
@@ -279,7 +272,10 @@ class Game(object):
                 )
             else:
                 # same map, just scroll
-                self.overworld_viewing.scroll_map_single_tile(map_scroll_dir)
+                self.overworld_viewing.scroll_map_single_tile(
+                    map_scroll_dir,
+                    protag_move_dir,
+                )
 
                 # Check if the new tile is a connector tile for the map.
                 # If so, switch to the map and tile position.
