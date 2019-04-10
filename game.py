@@ -646,7 +646,7 @@ class Game(object):
                 protag_loc = self.get_protagonist_tile_position()
                 if protag_loc:
                     interact_method(
-                        interaction_id,
+                        #interaction_id,
                         self,
                         self.protagonist,
                         target_object,

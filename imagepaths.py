@@ -105,9 +105,8 @@ TILE_WATER_NORMAL_3_PATH = TILE_IMAGE_PATH + "tile_water_normal_3_32x32_dk.png" 
 
 ### INTERACTIVE OBJECTS
 HERB_BASIC_PATH = INTER_OBJ_PATH + "herb_basic_32x32_lz.png" # [1]
-#ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_lz.png" # [1]
-ORE_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
-#ORE_COPPER_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_copper_32x32_dk.png" # [0]
+ROCK_EMPTY_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_empty_32x32_dk.png" # [0]
+ROCK_COPPER_BASIC_PATH = INTER_OBJ_PATH + "ore_rock_copper_32x32_dk.png" # [0]
 TREE_STUMP_PATH = INTER_OBJ_PATH + "tree_stump_2_64x64_lz_dk.png" # [1] modified by DK
 WILLOW_STUMP_PATH = INTER_OBJ_PATH + "willow_stump_64x64_dk.png" # [0]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz_dk.png" # [1] modified by DK
@@ -121,6 +120,7 @@ LOG_NORMAL_ICON_PATH = ITEMS_PATH + "log_normal_icon_50x50_dk.png" # [0]
 LOG_OAK_ICON_PATH = ITEMS_PATH + "log_oak_icon_50x50_dk.png" # [0]
 LOG_WILLOW_ICON_PATH = ITEMS_PATH + "log_willow_icon_50x50_dk.png" # [0]
 LOG_MAPLE_ICON_PATH = ITEMS_PATH + "log_maple_icon_50x50_dk.png" # [0]
+ORE_COPPER_ICON_PATH = ITEMS_PATH + "ore_copper_icon_50x50_dk.png" # [0]
 HAMMER_NORMAL_ICON_PATH = ITEMS_PATH + "hammer_normal_icon_50x50_dk.png" # [0]
 KNIFE_NORMAL_ICON_PATH = ITEMS_PATH + "knife_normal_icon_50x50_dk.png" # [0]
 NEEDLE_ICON_PATH = ITEMS_PATH + "needle_icon_50x50_dk.png" # [0]

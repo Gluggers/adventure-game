@@ -475,6 +475,28 @@ STANDARD_ITEM_DATA = {
             imageids.ICON_IMAGE_ID: imagepaths.LOG_MAPLE_ICON_PATH,
         },
     },
+    ORE_COPPER_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Copper Ore",
+            language.LANG_ESPANOL: "Mineral de Cobre",
+        },
+        BASE_VALUE_LOW_FIELD: 60,
+        BASE_VALUE_HIGH_FIELD: 120,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of copper core.",
+            language.LANG_ESPANOL: "Es mineral de cobre.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_COPPER_ICON_PATH,
+        },
+    },
 }
 
 # TODO set boost type IDs

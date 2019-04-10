@@ -62,14 +62,14 @@ class Interaction():
 
     @classmethod
     def default_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-            ):
+            cls,
+            interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object and target_object:
             display_text = DEFAULT_INTERACTION_MESSAGE_INFO.get(
                     language.Language.current_language_id,
@@ -85,10 +85,10 @@ class Interaction():
 
     @classmethod
     def meets_resource_level(
-                cls,
-                acting_object,
-                target_object,
-            ):
+            cls,
+            acting_object,
+            target_object,
+        ):
         meets_level = False
 
         if acting_object and target_object:
@@ -117,19 +117,18 @@ class Interaction():
     # Main skilling text must be 1 page or less.
     @classmethod
     def gathering_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-                main_skilling_text,
-                skill_id,
-                #resource_gather_text=None,
-                resource_exhaust_text=None,
-                intro_skilling_text=None,
-            ):
+            cls,
+            interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+            main_skilling_text,
+            skill_id,
+            resource_exhaust_text=None,
+            intro_skilling_text=None,
+        ):
         if game_object \
                 and game_object.overworld_viewing \
                 and acting_object \
@@ -365,39 +364,41 @@ class Interaction():
         game_object.refresh_and_blit_overworld_viewing()
         pygame.display.update()
 
-    # TODO - pass in interaction ID?
     @classmethod
     def chop_tree_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-            ):
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             obj_name = target_object.get_name()
 
             main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
-                    interaction_id,
-                    {}
-                ).get(
-                    language.Language.current_language_id,
-                    ""
-                ).format(obj_name)
+                #interaction_id,
+                interactiondata.CHOP_TREE_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
 
             resource_exhaust_text = interactiondata.GATHERING_RESOURCE_EXHAUST_MESSAGES.get(
-                    interaction_id,
-                    {}
-                ).get(
-                    language.Language.current_language_id,
-                    ""
-                ).format(obj_name)
+                #interaction_id,
+                interactiondata.CHOP_TREE_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
 
             cls.gathering_interaction(
-                interaction_id,
+                #interaction_id,
+                interactiondata.CHOP_TREE_ID,
                 game_object,
                 acting_object,
                 target_object,
@@ -410,56 +411,101 @@ class Interaction():
 
     @classmethod
     def mine_rock_interaction(
-                cls,
-                interaction_id,
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
+        if game_object and acting_object \
+                and target_object and acting_object_loc and target_object_loc:
+            obj_name = target_object.get_name()
+
+            main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
+                #interaction_id,
+                interactiondata.MINE_ROCK_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
+
+            resource_exhaust_text = interactiondata.GATHERING_RESOURCE_EXHAUST_MESSAGES.get(
+                #interaction_id,
+                interactiondata.MINE_ROCK_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
+
+            cls.gathering_interaction(
+                #interaction_id,
+                interactiondata.MINE_ROCK_ID,
                 game_object,
                 acting_object,
                 target_object,
                 acting_object_loc,
                 target_object_loc,
-            ):
+                main_skilling_text,
+                skills.SKILL_ID_MINING,
+                resource_exhaust_text=resource_exhaust_text,
+            )
+
+    @classmethod
+    def fishing_rod_interaction(
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             pass
 
     @classmethod
-    def fishing_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-            ):
+    def fishing_net_interaction(
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             pass
 
     @classmethod
     def cooking_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-            ):
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             pass
 
     @classmethod
     def herblore_gather_interaction(
-                cls,
-                interaction_id,
-                game_object,
-                acting_object,
-                target_object,
-                acting_object_loc,
-                target_object_loc,
-            ):
+            cls,
+            #interaction_id,
+            game_object,
+            acting_object,
+            target_object,
+            acting_object_loc,
+            target_object_loc,
+        ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             logger.info("Place herb gather interaction here.")
@@ -484,7 +530,8 @@ ID_TO_METHOD_MAPPING = {
     interactiondata.DEFAULT_ID: Interaction.default_interaction,
     interactiondata.CHOP_TREE_ID: Interaction.chop_tree_interaction,
     interactiondata.MINE_ROCK_ID: Interaction.mine_rock_interaction,
-    interactiondata.FISHING_ID: Interaction.fishing_interaction,
+    interactiondata.FISHING_ROD_ID: Interaction.fishing_rod_interaction,
+    interactiondata.FISHING_NET_ID: Interaction.fishing_net_interaction,
     interactiondata.COOKING_ID: Interaction.cooking_interaction,
     interactiondata.HERBLORE_GATHER_ID: Interaction.herblore_gather_interaction,
 }
