@@ -140,6 +140,9 @@ ORE_COAL_ICON_PATH = ITEMS_PATH + "ore_coal_icon_50x50_dk.png" # [0]
 ORE_SILVER_ICON_PATH = ITEMS_PATH + "ore_silver_icon_50x50_dk.png" # [0]
 ORE_GOLD_ICON_PATH = ITEMS_PATH + "ore_gold_icon_50x50_dk.png" # [0]
 ORE_TITANIUM_ICON_PATH = ITEMS_PATH + "ore_titanium_icon_50x50_dk.png" # [0]
+FISH_RAW_TROUT_ICON_PATH = ITEMS_PATH + "trout_icon_50x50_dk.png" # [0]
+FISH_RAW_PERCH_ICON_PATH = ITEMS_PATH + "perch_icon_50x50_dk.png" # [0]
+FISH_RAW_SALMON_ICON_PATH = ITEMS_PATH + "salmon_icon_50x50_dk.png" # [0]
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

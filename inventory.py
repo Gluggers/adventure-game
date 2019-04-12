@@ -19,17 +19,43 @@ class ItemListing(object):
             self,
             max_size=DEFAULT_MAX_ITEM_LISTING_SIZE,
         ):
+        """Initializes the ItemListing object with the given max capacity."""
+
         # Will be lists of 2-tuple (item_id, quantity).
         self._item_listing_data = []
         self._max_size = max_size
 
     @property
     def item_listing_data(self):
+        """Returns the item listing data."""
+
         return self._item_listing_data
 
     @property
     def max_size(self):
+        """Returns the max capacity for the ItemListing object."""
+
         return self._max_size
+
+    def clear_items(self):
+        """Removes all items from listing."""
+
+        self._item_listing_data = []
+
+    def get_listing_dict(self):
+        """Returns ItemListing contents as a dict that maps item IDs to
+        quantity."""
+
+        ret_dict = {}
+
+        if self._item_listing_data:
+            for item_info in self._item_listing_data:
+                ret_dict[item_info[0]] = item_info[1] \
+                    + ret_dict.get(
+                        item_info[0], 0
+                    )
+
+        return ret_dict
 
     def is_full(self):
         """Returns True if listing is full, False otherwise."""
@@ -134,6 +160,17 @@ class ItemListing(object):
             item_id,
             quantity=1,
         ):
+        """Returns False. Base method for adding items to an item listing.
+        returns True upon success, False upon failure.
+
+        Args:
+            item_id: ID number for the Item to add.
+            quantity: amount of item_id to add.
+
+        Returns:
+            This base method always returns False.
+        """
+
         return False
 
     # Child must override.
@@ -236,6 +273,17 @@ class Inventory(ItemListing):
             item_id,
             quantity=1,
         ):
+        """Adds the corresponding number of items to the inventory and
+        returns True upon success, False upon failure.
+
+        Args:
+            item_id: ID number for the Item to add.
+            quantity: amount of item_id to add.
+
+        Returns:
+            True upon successful addition to the inventory, False otherwise.
+        """
+
         success = False
         num_to_add = quantity
 

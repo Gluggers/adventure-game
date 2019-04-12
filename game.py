@@ -9,6 +9,7 @@ import display
 import entity
 import equipmentdata
 import equipmentviewing
+import imageids
 import interaction
 import inventory
 import itemdata
@@ -30,7 +31,7 @@ GAME_TITLE = "Adventure Game v0.1"
 DIFFICULTY_NORMAL = 0x0
 DIFFICULTY_HARD = 0x1
 
-DEFAULT_SAVE_FILE_NAME = "savegame.pkl"
+DEFAULT_SAVE_FILE_NAME = "savegame.json"
 
 class Game(object):
     def __init__(
@@ -90,7 +91,7 @@ class Game(object):
     # TODO document
     # centers map automatically depending on where protagonist is
     # DOES NOT UPDATE SURFACE
-    def set_and_blit_current_game_map(
+    def set_and_blit_game_map(
             self,
             curr_map_id,
             protag_tile_location=(0, 0),
@@ -133,6 +134,50 @@ class Game(object):
             position = self.curr_map.protagonist_location
         return position
 
+    def set_object_respawn(self, target_object, target_object_loc):
+        """Sets the respawn for the given object at the given location.
+
+        Does not reblit or refresh the map or display.
+
+        Args:
+            target_object: object to set respawn for, typically a resource
+                object.
+            target_object_loc: 2-tuple (x,y) Tile location for the target
+                object.
+        """
+
+        # Get exhausted version of object.
+        replacement_id = \
+            target_object.replacement_object_id
+        respawn_time_s = \
+            target_object.respawn_time_s
+        original_id = \
+            target_object.object_id
+
+        LOGGER.info(
+            "Replacing object %d with %d for %d seconds. Bottom tile loc %d",
+            original_id,
+            replacement_id,
+            respawn_time_s,
+            target_object_loc,
+        )
+
+        # Clear previous object and add replacement obj.
+        self.set_pending_spawn_action_curr_map(
+            target_object_loc,
+            object_id=replacement_id,
+            countdown_time_s=0,
+        )
+
+        # Set pending spawn action and update map.
+        # None respawn time means never respawn.
+        if respawn_time_s is not None:
+            self.set_pending_spawn_action_curr_map(
+                target_object_loc,
+                object_id=original_id,
+                countdown_time_s=respawn_time_s,
+            )
+
     # change and transition to new map
     # updates display screen
     # TODO document and change
@@ -143,7 +188,7 @@ class Game(object):
         ):
         if dest_map_id and protag_dest_tile_pos:
             # Set and blit map.#$$
-            self.set_and_blit_current_game_map(
+            self.set_and_blit_game_map(
                 dest_map_id,
                 protag_dest_tile_loc,
             )
@@ -699,56 +744,120 @@ class Game(object):
         )
 
     def get_save_data(self):
+        """Returns dict containing save data for the game."""
+
         save_data = {}
 
-        save_data[savefiledata.CURRENT_MAP_ID] = self.curr_map.map_id
-        save_data[savefiledata.CURRENT_PROTAG_TILE_LOCATION] = \
-            self.get_protagonist_tile_position()
+        save_data[savefiledata.MAP_ID] = self.curr_map.map_id
+        save_data[savefiledata.PROTAG_LOCATION] = \
+            list(self.get_protagonist_tile_position())
         save_data[savefiledata.GAME_LANGUAGE] = \
             language.Language.current_language_id
+        save_data[savefiledata.PROTAG_IMAGE_ID] = \
+            self.protagonist.curr_image_id
+
+        save_data[savefiledata.PROTAG_INVENTORY] = \
+            self.protagonist.inventory.get_listing_dict()
+
+        save_data[savefiledata.PROTAG_TOOLBELT] = \
+            self.protagonist.tool_inventory.get_listing_dict()
+
+        saved_equipment = {}
+        for equipmentslot, item_info in self.protagonist.equipment_dict:
+            # Store just item ID and quantity.
+            saved_equipment[equipmentslot] = [item_info[0], item_info[2]]
+
+        # Save stats.
+        save_data[savefiledata.PROTAG_STATS] = \
+            self.protagonist.skill_info_mapping
 
         # TODO implement further
 
         return save_data
 
-    def write_data_to_save_file(self, save_file_name):
-        if save_file_name:
-            # Obtain save data.
-            save_data = self.get_save_data()
+    def write_data_to_save_file(self, save_data, save_file_name):
+        """Writes the save data to the indicated save file."""
 
+        if save_file_name and save_data:
             # Write save data.
             with open(save_file_name, "w") as save_file:
                 json.dump(save_data, save_file)
                 #pickle.dump(save_data, save_file, pickle.HIGHEST_PROTOCOL)
 
-    def save_game(self):
-        #
+    def save_game(self, save_file_name=DEFAULT_SAVE_FILE_NAME):
+        """Saves the game and writes save data to the indicated save file."""
 
-        self.write_data_to_save_file(DEFAULT_SAVE_FILE_NAME)
+        # Obtain save data.
+        save_data = self.get_save_data()
+
+        self.write_data_to_save_file(save_data, save_file_name)
+
         LOGGER.info("Saved game.")
 
-    def load_data_from_save_file(self, save_file_name):
+    def load_game(self, save_file_name=DEFAULT_SAVE_FILE_NAME):
+        """Loads the save data from save_file_name."""
+
+        save_data = None
+
         if save_file_name:
             # Obtain save data.
-            save_data = {}
-
             with open(save_file_name, "r") as save_file:
                 #loaded_game = pickle.load(save_file)
                 save_data = json.load(save_file)
 
-            if save_data:
-                # Update game information.
-                pprint.pprint(save_data)
+        if save_data:
+            LOGGER.info("Loaded game.")
 
-    def load_game(self):
-        self.load_data_from_save_file(DEFAULT_SAVE_FILE_NAME)
-        LOGGER.info("Loaded game.")
+            # Update game information.
+            pprint.pprint(save_data)
 
-        # Debugging
-        LOGGER.debug(
-            "Protag location: %s",
-            self.get_protagonist_tile_position()
-        )
+            # Set game language.
+            self.change_language(
+                save_data.get(
+                    savefiledata.GAME_LANGUAGE,
+                    language.DEFAULT_LANGUAGE
+                )
+            )
+
+            self.protagonist.curr_image_id = save_data.get(
+                savefiledata.PROTAG_IMAGE_ID,
+                imageids.IMAGE_ID_FACE_SOUTH
+            )
+
+            # Set map and protagonist location.
+            self.set_and_blit_game_map(
+                save_data.get(savefiledata.MAP_ID),
+                tuple(save_data.get(savefiledata.PROTAG_LOCATION, (0, 0)))
+            )
+
+            # Set protagonist items. TODO equipment.
+            self.protagonist.clear_all_items()
+            for item_id, quantity in save_data.get(savefiledata.PROTAG_INVENTORY, {}).items():
+                self.protagonist.add_item_to_inventory(
+                    int(item_id),
+                    quantity=quantity
+                )
+
+            for item_id, quantity in save_data.get(savefiledata.PROTAG_TOOLBELT, {}).items():
+                self.protagonist.add_item_to_toolbelt(
+                    int(item_id),
+                    quantity=quantity
+                )
+
+            for skill_id, skill_info in save_data.get(savefiledata.PROTAG_STATS, {}).items():
+                self.protagonist.skill_info_mapping[skill_id] = [
+                    skill_info[0],
+                    skill_info[1],
+                    skill_info[2]
+                ]
+
+            # Debugging
+            LOGGER.info(
+                "Protag location: %s",
+                self.get_protagonist_tile_position()
+            )
+
+            self.display_statistics(self.protagonist)
 
     def display_statistics(self, target_entity):
         # Debugging for now. TODO.

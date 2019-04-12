@@ -42,6 +42,8 @@ CURRENCY_VALUE_MAPPING = {
 KNIFE_ID = 10001
 TINDERBOX_ID = 10002
 NEEDLE_ID = 10003
+FISHING_ROD_ID = 10010
+FISHING_NET_ID = 10011
 HAMMER_NORMAL_ID = 10102 # For metals up to steel.
 HAMMER_TITANIUM_ID = 10106 # For metals up to titanium.
 HAMMER_MITHRIL_ID = 10107 # For metals up to mithril.
@@ -61,7 +63,17 @@ HATCHET_ANCIENT_ID = 10209
 HATCHET_ASTRAL_ID = 10210
 HATCHET_DRAGONITE_ID = 10211
 HATCHET_CELESTIAL_ID = 10212
-# TODO pickaxe
+PICKAXE_STONE_ID = 10302
+PICKAXE_BRONZE_ID = 10303
+PICKAXE_IRON_ID = 10304
+PICKAXE_STEEL_ID = 10305
+PICKAXE_TITANIUM_ID = 10306
+PICKAXE_MITHRIL_ID = 10307
+PICKAXE_ADAMANT_ID = 10308
+PICKAXE_ANCIENT_ID = 10309
+PICKAXE_ASTRAL_ID = 10310
+PICKAXE_DRAGONITE_ID = 10311
+PICKAXE_CELESTIAL_ID = 10312
 
 # WEAPONS 50000 TO 0x59999
 DAGGER_WOODEN_ID = 50001
@@ -156,6 +168,31 @@ ORE_ANCIENT_ID = 140108
 ORE_SILVER_ID = 140111
 ORE_GOLD_ID = 140112
 ORE_PLATINUM_ID = 140113
+
+### COOKABLE ITEMS 150000 TO 159999
+FISH_RAW_TROUT_ID = 150001 # Freshwater.
+FISH_RAW_CATFISH_ID = 150002 # Freshwater.
+FISH_RAW_SHRIMP_ID = 150003 # Saltwater.
+FISH_RAW_PERCH_ID = 150004 # Freshwater.
+FISH_RAW_SALMON_ID = 150005 # Freshwater.
+# sardines
+# tilapia
+# herring
+# red snapper
+# salmon
+# swordfish/marlin
+# tuna
+# bluefin tuna
+# shark
+# mackerel
+# pike
+# bass
+# sunfish
+# barracuda
+# squid
+# octopus
+# pufferfish
+# eel
 
 ### VALID HATCHETS FOR WOODCUTTING ###
 HATCHETS = set([
@@ -488,7 +525,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -510,7 +547,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -532,7 +569,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -554,7 +591,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -576,7 +613,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -598,7 +635,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
@@ -620,13 +657,79 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to create and smith metals.",
-            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+            language.LANG_ESPANOL: "Puedo usar eso en la herrería.",
         },
         WEIGHT_POINT_FIELD: 10,
         PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
         viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
             imageids.ICON_IMAGE_ID: imagepaths.ORE_TITANIUM_ICON_PATH,
+        },
+    },
+    FISH_RAW_TROUT_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Trout",
+            language.LANG_ESPANOL: "Trucha",
+        },
+        BASE_VALUE_LOW_FIELD: 15,
+        BASE_VALUE_HIGH_FIELD: 30,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "It's a raw trout.",
+            language.LANG_ESPANOL: "Es trucha cruda.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could cook this.",
+            language.LANG_ESPANOL: "Puedo cocinar esto.",
+        },
+        WEIGHT_POINT_FIELD: 1,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.FISH_RAW_TROUT_ICON_PATH,
+        },
+    },
+    FISH_RAW_SALMON_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Salmon",
+            language.LANG_ESPANOL: "Salmón",
+        },
+        BASE_VALUE_LOW_FIELD: 23,
+        BASE_VALUE_HIGH_FIELD: 50,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "It's fresh, raw salmon.",
+            language.LANG_ESPANOL: "Es salmón fresco y crudo.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could cook this.",
+            language.LANG_ESPANOL: "Puedo cocinar esto.",
+        },
+        WEIGHT_POINT_FIELD: 1,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.FISH_RAW_SALMON_ICON_PATH,
+        },
+    },
+    FISH_RAW_PERCH_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Perch",
+            language.LANG_ESPANOL: "Perca",
+        },
+        BASE_VALUE_LOW_FIELD: 7,
+        BASE_VALUE_HIGH_FIELD: 15,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "It's fresh, raw perch.",
+            language.LANG_ESPANOL: "Es perca fresca y cruda.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could cook this.",
+            language.LANG_ESPANOL: "Puedo cocinar esto.",
+        },
+        WEIGHT_POINT_FIELD: 1,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.FISH_RAW_PERCH_ICON_PATH,
         },
     },
 }

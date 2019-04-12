@@ -127,9 +127,15 @@ RESPAWN_TIME_S_FIELD = 0x8
 
 ### RESOURCE DATA FIELDS ###
 RELATED_SKILL_ID_FIELD = 0x301
-REQUIRED_LEVEL_FIELD = 0x302
-GAINED_XP_FIELD = 0x303
-RESOURCE_ITEM_FIELD = 0x304
+MIN_REQUIRED_LEVEL_FIELD = 0x302
+
+# Map to list of tuples of the form
+#(resource item ID, required level,
+# probability weighting, exp gained)
+RESOURCE_ITEM_INFO_FIELD = 0x306
+
+#GAINED_XP_FIELD = 0x303
+#RESOURCE_ITEM_FIELD = 0x304
 EXHAUSTION_PROBABILITY_FIELD = 0x305 # Values must be between 0.0 and 1.0
 
 ## TESTING PROTAG IMAGE PATH DICT
@@ -234,9 +240,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_HERBLORE,
-        REQUIRED_LEVEL_FIELD: 1,
-        GAINED_XP_FIELD: 20,
-        RESOURCE_ITEM_FIELD: None,
+        MIN_REQUIRED_LEVEL_FIELD: 1,
+        #GAINED_XP_FIELD: 20,
+        #RESOURCE_ITEM_FIELD: None,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "Maybe I can pick this herb.",
@@ -244,6 +250,9 @@ RESOURCE_DATA = {
         },
         INTERACTION_ID_FIELD: interactiondata.HERBLORE_GATHER_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.3,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (None, 1, 1, 20),
+        ],
     },
     TREE_BASIC_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -256,9 +265,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
-        REQUIRED_LEVEL_FIELD: 1,
-        GAINED_XP_FIELD: 20,
-        RESOURCE_ITEM_FIELD: itemdata.LOG_TREE_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 1,
+        #GAINED_XP_FIELD: 20,
+        #RESOURCE_ITEM_FIELD: itemdata.LOG_TREE_ID,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "It's just a tree. Maybe I can cut it down.",
@@ -267,6 +276,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,  # TODO change.
         REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.LOG_TREE_ID, 1, 1, 20),
+        ],
     },
     TREE_OAK_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -279,9 +291,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
-        REQUIRED_LEVEL_FIELD: 10,
-        GAINED_XP_FIELD: 50,
-        RESOURCE_ITEM_FIELD: itemdata.LOG_OAK_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 10,
+        #GAINED_XP_FIELD: 50,
+        #RESOURCE_ITEM_FIELD: itemdata.LOG_OAK_ID,
         RESPAWN_TIME_S_FIELD:  30,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "What a magnificent oak. Maybe I can cut it down.",
@@ -290,6 +302,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,
         REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.LOG_OAK_ID, 10, 1, 50),
+        ],
     },
     TREE_WILLOW_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -302,9 +317,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
-        REQUIRED_LEVEL_FIELD: 25,
-        GAINED_XP_FIELD: 100,
-        RESOURCE_ITEM_FIELD: itemdata.LOG_WILLOW_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 25,
+        #GAINED_XP_FIELD: 100,
+        #RESOURCE_ITEM_FIELD: itemdata.LOG_WILLOW_ID,
         RESPAWN_TIME_S_FIELD:  120,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "What a magnificent willow. These grow by water.",
@@ -313,6 +328,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,
         REPLACEMENT_OBJECT_ID_FIELD: WILLOW_STUMP_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.LOG_WILLOW_ID, 25, 1, 100),
+        ],
     },
     ROCK_COPPER_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -325,9 +343,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 10,
-        GAINED_XP_FIELD: 35,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_COPPER_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 10,
+        #GAINED_XP_FIELD: 35,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_COPPER_ID,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some copper ore in this rock. Maybe I can mine it.",
@@ -336,6 +354,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_COPPER_ID, 10, 1, 35),
+        ],
     },
     ROCK_TIN_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -348,9 +369,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 10,
-        GAINED_XP_FIELD: 35,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_TIN_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 10,
+        #GAINED_XP_FIELD: 35,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_TIN_ID,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some tin ore in this rock. Maybe I can mine it.",
@@ -359,6 +380,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_TIN_ID, 10, 1, 35),
+        ],
     },
     ROCK_IRON_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -371,9 +395,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 20,
-        GAINED_XP_FIELD: 50,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_IRON_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 20,
+        #GAINED_XP_FIELD: 50,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_IRON_ID,
         RESPAWN_TIME_S_FIELD:  20,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some iron ore in this rock. Maybe I can mine it.",
@@ -382,6 +406,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_IRON_ID, 20, 1, 50),
+        ],
     },
     ROCK_COAL_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -394,9 +421,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 30,
-        GAINED_XP_FIELD: 75,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_COAL_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 30,
+        #GAINED_XP_FIELD: 75,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_COAL_ID,
         RESPAWN_TIME_S_FIELD:  100,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some coal in this rock. Maybe I can mine it.",
@@ -405,6 +432,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_COAL_ID, 30, 1, 75),
+        ],
     },
     ROCK_SILVER_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -417,9 +447,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 35,
-        GAINED_XP_FIELD: 80,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_SILVER_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 35,
+        #GAINED_XP_FIELD: 80,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_SILVER_ID,
         RESPAWN_TIME_S_FIELD:  200,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some silver ore in this rock. Maybe I can mine it.",
@@ -428,6 +458,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_SILVER_ID, 35, 1, 80),
+        ],
     },
     ROCK_TITANIUM_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -440,9 +473,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 40,
-        GAINED_XP_FIELD: 85,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_TITANIUM_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 40,
+        #GAINED_XP_FIELD: 85,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_TITANIUM_ID,
         RESPAWN_TIME_S_FIELD:  180,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some titanium ore in this rock. Maybe I can mine it.",
@@ -451,6 +484,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_TITANIUM_ID, 40, 1, 85),
+        ],
     },
     ROCK_GOLD_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -463,9 +499,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 55,
-        GAINED_XP_FIELD: 110,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 55,
+        #GAINED_XP_FIELD: 110,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
         RESPAWN_TIME_S_FIELD:  240,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "There is some gold ore in this rock. Maybe I can mine it.",
@@ -474,6 +510,9 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.ORE_GOLD_ID, 55, 1, 110),
+        ],
     },
     FISHING_SPOT_1_ID: {
         OBJECT_NAME_INFO_FIELD: {
@@ -486,9 +525,9 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_FISHING,
-        REQUIRED_LEVEL_FIELD: 1,
-        GAINED_XP_FIELD: 20,
-        RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
+        MIN_REQUIRED_LEVEL_FIELD: 1,
+        #GAINED_XP_FIELD: 20,
+        #RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
         RESPAWN_TIME_S_FIELD:  60,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "I can see fish in the water. Maybe I can catch them.",
@@ -497,5 +536,10 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.CATCH_FISH_ROD_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,
         REPLACEMENT_OBJECT_ID_FIELD: FISHING_SPOT_EMPTY_ID,
+        RESOURCE_ITEM_INFO_FIELD: [
+            (itemdata.FISH_RAW_PERCH_ID, 1, 1, 20),
+            (itemdata.FISH_RAW_TROUT_ID, 10, 2, 40),
+            (itemdata.FISH_RAW_SALMON_ID, 25, 2, 65),
+        ],
     },
 }

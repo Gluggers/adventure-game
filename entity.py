@@ -49,14 +49,47 @@ class Entity(interactiveobj.Interactive_Object):
             image_path_dict,
             collision_width=1,
             collision_height=1,
-            skill_levels={},
-            equipment_dict={},
+            skill_levels=None,
+            equipment_dict=None,
             gender=GENDER_NEUTRAL,
             race=RACE_HUMAN,
             examine_info=None,
             interaction_id=interactiondata.DEFAULT_ID,
             manual_hitpoints=None,
         ):
+        """Initializes the Entity object.
+
+        Args:
+            id: object ID number for the Entity. Must be unique
+                among interactive objects?
+            name_info: dict that maps language IDs to Strings for
+                the Entity name translation.
+            image_path_dict: dict that maps image IDs to the file paths
+                for the image file.
+            collision_width: width, in Tiles, of the collision box for the
+                Entity.
+            collision_height: height, in Tiles, of the collision box for the
+                Entity.
+            skill_levels: dict that maps the skill ID to the corresponding
+                level for the entity. The method automatically calculates the
+                experience required for the level and set it accordingly for
+                the entity. Excluding the skill_levels dict or excluding
+                individual skill IDs will set default levels for all
+                applicable skills.
+            equipment_dict: dict that maps equipment slot ID to a 2-tuple
+                of form (item_ID, quantity)
+            gender: gender ID for the Entity.
+            race: race ID for the Entity.
+            examine_info: dict that maps language IDs to Strings containing
+                the corresponding examine info translation.
+            interaction_id: interaction ID that determines what interaction
+                method to use when interacting with the Entity.
+            manual_hitpoints: manually sets the hitpoints for the Entity,
+                regardless of the Entity's hitpoints skill level. If None,
+                uses the default hitpoints formula based on the hitpoints
+                skill level.
+        """
+
         interactiveobj.Interactive_Object.__init__(
             self,
             objdata.TYPE_CHARACTER,
@@ -81,41 +114,40 @@ class Entity(interactiveobj.Interactive_Object):
         # [skill level, current experience, experience to next level]
         self.skill_info_mapping = {}
 
-        for skill_id in skills.SKILL_ID_NAME_MAPPING:
-            # See if caller passed in a custom level for the skill.
-            skill_level = skill_levels.get(skill_id, None)
+        if skill_levels:
+            for skill_id in skills.SKILL_ID_NAME_MAPPING:
+                # See if caller passed in a custom level for the skill.
+                skill_level = skill_levels.get(skill_id, None)
 
-            # Default hitpoints level is different.
-            if not skill_level:
-                if skill_id == skills.SKILL_ID_HITPOINTS:
-                    skill_level = skills.DEFAULT_LEVEL_HITPOINTS
-                else:
-                    skill_level = skills.DEFAULT_LEVEL
+                # Default hitpoints level is different.
+                if not skill_level:
+                    if skill_id == skills.SKILL_ID_HITPOINTS:
+                        skill_level = skills.DEFAULT_LEVEL_HITPOINTS
+                    else:
+                        skill_level = skills.DEFAULT_LEVEL
 
-            # Get the required experience for the level.
-            exp = skills.get_experience_from_level(skill_level)
+                # Get the required experience for the level.
+                exp = skills.get_experience_from_level(skill_level)
 
-            # Get remaining experience for next level.
-            remaining_exp = skills.get_experience_to_next_level(
+                # Get remaining experience for next level.
+                remaining_exp = skills.get_experience_to_next_level(
                     skill_level,
                     exp
                 )
 
-            logger.debug(
-                ("Setting skill level {0}, exp {1}. " \
-                + "exp to next level {2}").format(
+                LOGGER.debug(
+                    "Setting skill level %d, exp %d. exp to next level %d",
                     skill_level,
                     exp,
                     remaining_exp
                 )
-            )
 
-            # Record skill information.
-            self.skill_info_mapping[skill_id] = [
-                skill_level,
-                exp,
-                remaining_exp
-            ]
+                # Record skill information.
+                self.skill_info_mapping[skill_id] = [
+                    skill_level,
+                    exp,
+                    remaining_exp
+                ]
 
         # Set up health - use hitpoint stat if possible,
         # otherwise default hitpoints value.
@@ -136,15 +168,16 @@ class Entity(interactiveobj.Interactive_Object):
         # Set up equipment. The equipment_dict will map equipment slot ID
         # to length-3 list of [item_id, item object, quantity].
         self.equipment_dict = {}
-        for equipment_slot_id, item_info_list in equipment_dict.items():
-            item_id = item_info_list[0]
-            quantity = item_info_list[1]
+        if equipment_dict:
+            for equipment_slot_id, item_info_list in equipment_dict.items():
+                item_id = item_info_list[0]
+                quantity = item_info_list[1]
 
-            # Get item object.
-            item_obj = items.Item.get_item(item_id)
+                # Get item object.
+                item_obj = items.Item.get_item(item_id)
 
-            if item_obj and quantity > 0:
-                self.equipment_dict[equipment_slot_id] = [
+                if item_obj and quantity > 0:
+                    self.equipment_dict[equipment_slot_id] = [
                         item_id,
                         item_obj,
                         quantity,
@@ -154,15 +187,74 @@ class Entity(interactiveobj.Interactive_Object):
         self.inventory = inventory.Inventory.inventory_factory()
 
     def inventory_full(self):
+        """Returns True if inventory is full, False otherwise."""
+
         return self.inventory.is_full()
 
+    def clear_all_items(self):
+        """Removes all items from entity."""
+
+        self.inventory.clear_items()
+        self.tool_inventory.clear_items()
+        self.equipment_dict = {}
+
     def add_item_to_inventory(self, item_id, quantity=1):
+        """Adds the corresponding number of items to the inventory and
+        returns True upon success, False upon failure.
+
+        Args:
+            item_id: ID number for the Item to add.
+            quantity: amount of item_id to add.
+
+        Returns:
+            True upon successful addition to the inventory, False otherwise.
+        """
+
         return self.inventory.add_item(item_id, quantity=quantity)
 
     def add_item_to_toolbelt(self, item_id, quantity=1):
+        """Adds the corresponding number of items to the toolbelt and
+        returns True upon success, False upon failure.
+
+        Args:
+            item_id: ID number for the tool Item to add.
+            quantity: amount of item_id to add.
+
+        Returns:
+            True upon successful addition to the toolbelt, False otherwise.
+        """
+
         return self.tool_inventory.add_item(item_id, quantity=quantity)
 
+    def add_item_to_equipment(self, equipment_slot_id, item_id, quantity=1):
+        """Adds item to equipment dict for entity.
+
+        Does not remove item from inventory or check if item
+        exists in inventory.
+        """
+
+        if item_id is not None and quantity:
+            # Get item object.
+            item_obj = items.Item.get_item(item_id)
+
+            if item_obj:
+                self.equipment_dict[equipment_slot_id] = [
+                    item_id,
+                    item_obj,
+                    quantity,
+                ]
+
+    def equip_item(self, equipment_slot_id, item_id):
+        """Equipts the given item and places it into the equipment slot."""
+
+        # TODO.
+        pass
+
+
     def has_item_equipped(self, item_id):
+        """Returns True if entity has the corresponding item equipped, False
+        otherwise."""
+
         has_equipped = False
 
         for equipment_slot_id, equipped_item_info in self.equipment_dict.items():
@@ -172,15 +264,24 @@ class Entity(interactiveobj.Interactive_Object):
         return has_equipped
 
     def has_tool(self, item_id):
+        """Returns True if entity has the corresponding tool in its toolbelt,
+        False otherwise."""
+
         return self.tool_inventory.has_item(item_id)
 
-    # TODO test this.
     def has_item(self, item_id):
+        """Returns True if entity has the corresponding item, False otherwise.
+
+        The item can be in the inventory, toolbelt, or equipment.
+        """
+
         return self.inventory.has_item(item_id) \
             or self.has_item_equipped(item_id) \
             or self.has_tool(item_id)
 
     def get_skill_level(self, skill_id):
+        """Returns the entity's skill level for the given skill ID."""
+
         ret_level = None
 
         if skill_id is not None:
@@ -192,6 +293,8 @@ class Entity(interactiveobj.Interactive_Object):
         return ret_level
 
     def get_skill_experience(self, skill_id):
+        """Returns the entity's experience for the given skill ID."""
+
         ret_exp = None
 
         if skill_id is not None:
@@ -203,6 +306,9 @@ class Entity(interactiveobj.Interactive_Object):
         return ret_exp
 
     def get_experience_to_next_level(self, skill_id):
+        """Returns the entity's remaining experience for the next skill level
+        for the given skill ID."""
+
         ret_exp = None
 
         if skill_id is not None:
@@ -215,6 +321,9 @@ class Entity(interactiveobj.Interactive_Object):
 
     # Returns the number of levels gained when adding exp to skill_id.
     def gain_experience(self, skill_id, exp):
+        """Adds experience to the entity for the given skill and returns the
+        number of levels gained in that skill."""
+
         levels_gained = 0
 
         if (skill_id is not None) and exp and (exp > 0):
@@ -233,23 +342,19 @@ class Entity(interactiveobj.Interactive_Object):
                     )
 
                 if new_level < old_level:
-                    logger.error("Error in exp gain.")
+                    LOGGER.error("Error in exp gain.")
                 else:
-                    logger.info(
-                        ("Started at level {0} with {1} exp " \
-                        + "({2} remaining to next level.)").format(
-                            old_level,
-                            old_exp,
-                            skill_info[2]
-                        )
+                    LOGGER.info(
+                        "Started at level %d with %d exp (%d remaining to next level.)",
+                        old_level,
+                        old_exp,
+                        skill_info[2]
                     )
-                    logger.info(
-                        ("Now reached level {0} with {1} " \
-                        + " exp ({2} remaining to next level.)").format(
-                            new_level,
-                            new_exp,
-                            new_exp_to_next_level,
-                        )
+                    LOGGER.info(
+                        "Now reached level %d with %d exp (%d remaining to next level.)",
+                        new_level,
+                        new_exp,
+                        new_exp_to_next_level,
                     )
 
                     skill_info[0] = new_level
@@ -292,6 +397,11 @@ class Entity(interactiveobj.Interactive_Object):
 
     @classmethod
     def calculate_max_health(cls, hitpoint_level):
+        """Returns the maximum amount of health based on hitpoint level.
+
+        Follows the formula max_health = hitpoint_level * 10.
+        """
+
         max_health = 0
 
         if hitpoint_level and hitpoint_level > 0:
@@ -299,25 +409,24 @@ class Entity(interactiveobj.Interactive_Object):
 
         return max_health
 
-# extend Entity class
 class Character(Entity):
-    # maps character-related object IDs to character objects
+    # Maps character-related object IDs to Character objects.
     character_listing = {}
 
     def __init__(
-                    self,
-                    id,
-                    name_info,
-                    image_path_dict,
-                    collision_width=1,
-                    collision_height=1,
-                    skill_levels={},
-                    equipment_dict={},
-                    gender=GENDER_NEUTRAL,
-                    race=RACE_HUMAN,
-                    examine_info=None,
-                    interaction_id=interactiondata.DEFAULT_ID,
-                ):
+            self,
+            id,
+            name_info,
+            image_path_dict,
+            collision_width=1,
+            collision_height=1,
+            skill_levels=None,
+            equipment_dict=None,
+            gender=GENDER_NEUTRAL,
+            race=RACE_HUMAN,
+            examine_info=None,
+            interaction_id=interactiondata.DEFAULT_ID,
+        ):
 
         # a Character is an Entity type of interactive object
         Entity.__init__(
@@ -345,13 +454,13 @@ class Character(Entity):
 
         # reject if object ID is for protagonist
         if (object_id == objdata.PROTAGONIST_ID):
-            logger.warn("Cannot use character_factory to build protagonist.")
+            LOGGER.warn("Cannot use character_factory to build protagonist.")
         else:
             # check if we already have this object
             char_from_listing = Character.character_listing.get(
-                        object_id,
-                        None
-                    )
+                object_id,
+                None
+            )
 
             if char_from_listing:
                 ret_character = char_from_listing
@@ -370,8 +479,8 @@ class Protagonist(Character):
             id,
             name_info,
             image_path_dict,
-            skill_levels={},
-            equipment_dict={},
+            skill_levels=None,
+            equipment_dict=None,
             gender=GENDER_NEUTRAL,
             race=RACE_HUMAN,
         ):
@@ -424,6 +533,7 @@ class Protagonist(Character):
             skills.SKILL_ID_HITPOINTS: 1,
             skills.SKILL_ID_WOODCUTTING: 40, # TESTING.
             skills.SKILL_ID_MINING: 40, # TESTING.
+            skills.SKILL_ID_FISHING: 60, # TESTING.
         }
 
         protagonist = Protagonist(
@@ -435,13 +545,14 @@ class Protagonist(Character):
             race=RACE_HUMAN,
         )
 
-        logger.debug("Protagonist ID: {0}".format(protagonist.object_id))
-        logger.debug(
-            "Protagonist obj type: {0}".format(protagonist.object_type)
+        LOGGER.debug("Protagonist ID: %d", protagonist.object_id)
+        LOGGER.debug(
+            "Protagonist obj type: %s",
+            protagonist.object_type
         )
-        logger.debug("Protagonist name: {0}".format(protagonist.name_info))
-        logger.debug("Protagonist gender: {0}".format(protagonist.gender))
-        logger.debug("Protagonist race: {0}".format(protagonist.race))
+        LOGGER.debug("Protagonist name info: %s", protagonist.name_info)
+        LOGGER.debug("Protagonist gender: %s", protagonist.gender)
+        LOGGER.debug("Protagonist race: %s", protagonist.race)
 
         # Set initial money.
         protagonist.add_item_to_inventory(
@@ -474,7 +585,7 @@ class Protagonist(Character):
 
         return protagonist
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)

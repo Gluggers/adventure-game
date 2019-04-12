@@ -67,8 +67,8 @@ GATHERING_RESOURCE_EXHAUST_MESSAGES = {
         language.LANG_ESPANOL: "Ya se agotó el/la {0}.",
     },
     CATCH_FISH_ROD_ID: {
-        language.LANG_ENGLISH: "It looks like there aren't any more {0}...",
-        language.LANG_ESPANOL: "Parece que ya no hay {0}...",
+        language.LANG_ENGLISH: "It looks like there aren't any more fish at this {0}...",
+        language.LANG_ESPANOL: "Parece que ya no hay peces en este {0}...",
     },
 }
 

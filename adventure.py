@@ -83,7 +83,7 @@ def main():
     game_obj.build_protagonist("Bob")
 
     # set map and blit
-    game_obj.set_and_blit_current_game_map(
+    game_obj.set_and_blit_game_map(
         mapdata.R0_A0_ID,
         protag_tile_loc
     )

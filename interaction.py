@@ -88,20 +88,32 @@ class Interaction():
             acting_object,
             target_object,
         ):
+        """Returns True if the acting object has a high enough level to interact
+        with the target object, False otherwise.
+
+        Args:
+            acting_object: the object trying to interact with the target_object
+                resource.
+            target_object: the object being interacted with, typically a
+                resource object.
+        """
+
         meets_level = False
 
         if acting_object and target_object:
             # Check we have the required level.
             skill_id = target_object.related_skill_id
-            required_level = target_object.required_level
+            min_required_level = target_object.min_required_level
 
-            if acting_object.get_skill_level(skill_id) >= required_level:
+            if acting_object.get_skill_level(skill_id) >= min_required_level:
                 meets_level = True
 
         return meets_level
 
     @classmethod
     def display_inventory_full_message(cls, game_object):
+        """Displays message indicating that the inventory is full."""
+
         if game_object:
             game_object.display_overworld_bottom_text(
                 INVENTORY_FULL_MESSAGE_INFO.get(
@@ -147,7 +159,7 @@ class Interaction():
                     target_object
                 ):
                 # Don't have a high enough level.
-                required_level = target_object.required_level
+                min_required_level = target_object.min_required_level
                 skill_name = skills.get_skill_name(
                     target_object.related_skill_id,
                     language.Language.current_language_id
@@ -156,7 +168,7 @@ class Interaction():
                 reject_message = NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
                     language.Language.current_language_id,
                     ""
-                ).format(required_level, skill_name)
+                ).format(min_required_level, skill_name)
 
                 game_object.display_overworld_bottom_text(
                     reject_message,
@@ -186,7 +198,7 @@ class Interaction():
                     refresh_during=False
                 )
 
-                logger.info("Beginning gathering.")
+                LOGGER.info("Beginning gathering.")
 
                 # Start skilling.
                 skilling = True
@@ -196,25 +208,6 @@ class Interaction():
                 pygame.event.clear()
                 prev_overworld_image_id = acting_object.curr_image_id
 
-                # TODO consider cases of boosted EXP
-                resource_gather_text = None
-                gained_resource = items.Item.get_item(
-                    target_object.resource_item
-                )
-                resource_exp = target_object.gained_xp
-                if gained_resource:
-                    resource_gather_text = \
-                        interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
-                            interaction_id,
-                            {}
-                        ).get(
-                            language.Language.current_language_id,
-                            ""
-                        ).format(
-                            gained_resource.get_name(),
-                            resource_exp
-                        )
-
                 while skilling and not resource_exhausted:
                     timekeeper.Timekeeper.tick()
 
@@ -223,7 +216,7 @@ class Interaction():
                     # TODO set next character image ID for skilling.
                     if (num_skill_ticks \
                             % GATHERING_IMAGE_INTERVAL_NUM_TICKS) == 0:
-                        logger.debug("Switch image IDs here.")
+                        LOGGER.debug("Switch image IDs here.")
 
                     if (num_skill_ticks \
                             % timekeeper.REFRESH_INTERVAL_NUM_TICKS) == 0:
@@ -243,12 +236,12 @@ class Interaction():
                     exit_key_pressed = False
                     for events in pygame.event.get():
                         if events.type == pygame.QUIT:
-                            logger.info("Quitting.")
+                            LOGGER.info("Quitting.")
                             pygame.quit()
                             sys.exit(0)
                         elif events.type == pygame.KEYDOWN:
                             if events.key in SKILLING_EXIT_KEYS:
-                                logger.info("Quitting gathering early.")
+                                LOGGER.info("Quitting gathering early.")
                                 exit_key_pressed = True
 
                     if exit_key_pressed:
@@ -266,55 +259,67 @@ class Interaction():
                         #if random.randint(0,4) == 0:
                         if random.randint(0,1) == 0:
                             # We generated a resource.
-                            logger.info("Gathered resource!")
+                            LOGGER.info("Gathered resource!")
 
-                            # TODO handle all the item stuff here.
-                            acting_object.add_item_to_inventory(
-                                gained_resource.item_id
-                            )
+                            # Determine which resource we obtained.
+                            resource_gather_text = None
+                            gained_resource = None
+                            resource_exp = None
 
-                            # Check if resource has been exhausted.
-                            if random.randint(0, 100) < int(
-                                        100 \
-                                        * target_object.exhaustion_probability
-                                    ):
-                                # Resource has been exhausted.
-                                skilling = False
-                                resource_exhausted = True
-                                logger.info("Resource exhausted.")
-
-                                # Get exhausted version of object.
-                                replacement_id = \
-                                    target_object.replacement_object_id
-                                respawn_time_s = \
-                                    target_object.respawn_time_s
-                                original_id = \
-                                    target_object.object_id
-
-                                logger.info("Replacing object {0} with {1} for {2} seconds. Bottom tile loc {3}".format(
-                                    original_id,
-                                    replacement_id,
-                                    respawn_time_s,
-                                    target_object_loc,
-                                ))
-
-                                # Clear previous object and add replacement obj.
-                                game_object.set_pending_spawn_action_curr_map(
-                                    target_object_loc,
-                                    object_id=replacement_id,
-                                    countdown_time_s=0,
+                            resource_item_info = \
+                                target_object.select_resource_item_info(
+                                    acting_object.get_skill_level(
+                                        target_object.related_skill_id
+                                    )
                                 )
 
-                                # Set pending spawn action and update map.
-                                # None respawn time means never respawn.
-                                if respawn_time_s is not None:
-                                    game_object.set_pending_spawn_action_curr_map(
-                                        target_object_loc,
-                                        object_id=original_id,
-                                        countdown_time_s=respawn_time_s,
+                            LOGGER.info(
+                                "Resource item info: %s",
+                                resource_item_info,
+                            )
+
+                            if resource_item_info:
+                                gained_resource = items.Item.get_item(
+                                    resource_item_info[0]
+                                )
+                                # TODO handle cases of boosted exp?
+                                resource_exp = resource_item_info[1]
+
+                            if gained_resource:
+                                resource_gather_text = \
+                                    interactiondata.GATHERING_RESOURCE_GAIN_MESSAGES.get(
+                                        interaction_id,
+                                        {}
+                                    ).get(
+                                        language.Language.current_language_id,
+                                        ""
+                                    ).format(
+                                        gained_resource.get_name(),
+                                        resource_exp
                                     )
 
-                            game_object.refresh_and_blit_overworld_viewing()
+                                # Add item to inventory.
+                                acting_object.add_item_to_inventory(
+                                    gained_resource.item_id
+                                )
+
+                                # Check if resource has been exhausted.
+                                if random.randint(0, 100) < int(
+                                            100 \
+                                            * target_object.exhaustion_probability
+                                        ):
+                                    # Resource has been exhausted.
+                                    skilling = False
+                                    resource_exhausted = True
+                                    LOGGER.info("Resource exhausted.")
+
+                                    # Set respawn.
+                                    game_object.set_object_respawn(
+                                        target_object,
+                                        target_object_loc,
+                                    )
+
+                                game_object.refresh_and_blit_overworld_viewing()
 
                             # Display the resource gather message.
                             if resource_gather_text:
@@ -464,7 +469,37 @@ class Interaction():
         ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
-            pass
+            obj_name = target_object.get_name()
+
+            main_skilling_text = interactiondata.GATHERING_MAIN_MESSAGES.get(
+                #interaction_id,
+                interactiondata.CATCH_FISH_ROD_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
+
+            resource_exhaust_text = interactiondata.GATHERING_RESOURCE_EXHAUST_MESSAGES.get(
+                #interaction_id,
+                interactiondata.CATCH_FISH_ROD_ID,
+                {}
+            ).get(
+                language.Language.current_language_id,
+                ""
+            ).format(obj_name)
+
+            cls.gathering_interaction(
+                interactiondata.CATCH_FISH_ROD_ID,
+                game_object,
+                acting_object,
+                target_object,
+                acting_object_loc,
+                target_object_loc,
+                main_skilling_text,
+                skills.SKILL_ID_FISHING,
+                resource_exhaust_text=resource_exhaust_text,
+            )
 
     @classmethod
     def fishing_net_interaction(
@@ -506,7 +541,7 @@ class Interaction():
         ):
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
-            logger.info("Place herb gather interaction here.")
+            LOGGER.info("Place herb gather interaction here.")
 
     @classmethod
     def get_interaction_method(cls, interaction_id):
@@ -534,7 +569,7 @@ ID_TO_METHOD_MAPPING = {
     interactiondata.HERBLORE_GATHER_ID: Interaction.herblore_gather_interaction,
 }
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
