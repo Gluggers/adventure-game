@@ -394,10 +394,21 @@ class Protagonist(Character):
         self.tool_inventory = inventory.Inventory.inventory_factory(max_size=10)
 
     @classmethod
-    def protagonist_factory(
-            cls,
-            name
-        ):
+    def protagonist_factory(cls, name):
+        """Creates protagonist with given name and gives default attributes.
+
+        The returned protagonist will have the all of its stats at level 1
+        by default and will have the following starting items:
+            Inventory:
+                - 100 gold coins
+            Equipment: None
+            Toolbelt:
+                - Hammer
+                - Knife
+                - Tinderbox
+                - Needle
+        """
+
         protagonist = None
 
         # TODO check if we already have protagonist?
@@ -411,7 +422,8 @@ class Protagonist(Character):
         protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
         protag_skill_levels = {
             skills.SKILL_ID_HITPOINTS: 1,
-            skills.SKILL_ID_WOODCUTTING: 9, # TESTING.
+            skills.SKILL_ID_WOODCUTTING: 40, # TESTING.
+            skills.SKILL_ID_MINING: 40, # TESTING.
         }
 
         protagonist = Protagonist(

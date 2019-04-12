@@ -925,16 +925,35 @@ class Game(object):
                             curr_money,
                         )
                     elif events.key == pygame.K_4:
-                        # Testing stuff.
-                        test_display = display.Display(
-                            self.main_display_screen,
-                            pygame.Rect(100, 100, 50, 150),
-                            background_pattern=display.PATTERN_1_ID
+                        # Testing inventory.
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_TIN_ID,
+                            1
                         )
-                        test_display.blit_background(
-                            self.main_display_screen
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_COPPER_ID,
+                            1
                         )
-                        pygame.display.update()
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_SILVER_ID,
+                            1
+                        )
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_COAL_ID,
+                            1
+                        )
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_GOLD_ID,
+                            1
+                        )
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_TITANIUM_ID,
+                            1
+                        )
+                        self.protagonist.inventory.add_item(
+                            itemdata.ORE_IRON_ID,
+                            1
+                        )
                     elif events.key == pygame.K_t:
                         # Testing stuff.
                         LOGGER.info("Testing.")

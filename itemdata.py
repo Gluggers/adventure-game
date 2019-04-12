@@ -480,8 +480,8 @@ STANDARD_ITEM_DATA = {
             language.LANG_ENGLISH: "Copper Ore",
             language.LANG_ESPANOL: "Mineral de Cobre",
         },
-        BASE_VALUE_LOW_FIELD: 60,
-        BASE_VALUE_HIGH_FIELD: 120,
+        BASE_VALUE_LOW_FIELD: 5,
+        BASE_VALUE_HIGH_FIELD: 10,
         viewingicondata.DESCRIPTION_INFO_FIELD: {
             language.LANG_ENGLISH: "Pieces of copper core.",
             language.LANG_ESPANOL: "Es mineral de cobre.",
@@ -495,6 +495,138 @@ STANDARD_ITEM_DATA = {
         viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
             imageids.ICON_IMAGE_ID: imagepaths.ORE_COPPER_ICON_PATH,
+        },
+    },
+    ORE_TIN_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Tin Ore",
+            language.LANG_ESPANOL: "Mineral de Estaño",
+        },
+        BASE_VALUE_LOW_FIELD: 5,
+        BASE_VALUE_HIGH_FIELD: 10,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of tin ore.",
+            language.LANG_ESPANOL: "Es mineral de estaño.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_TIN_ICON_PATH,
+        },
+    },
+    ORE_IRON_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Iron Ore",
+            language.LANG_ESPANOL: "Mineral de Hierro",
+        },
+        BASE_VALUE_LOW_FIELD: 15,
+        BASE_VALUE_HIGH_FIELD: 30,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of iron ore.",
+            language.LANG_ESPANOL: "Es mineral de hierro.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_IRON_ICON_PATH,
+        },
+    },
+    ORE_COAL_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Coal Ore",
+            language.LANG_ESPANOL: "Mineral de Carbón",
+        },
+        BASE_VALUE_LOW_FIELD: 35,
+        BASE_VALUE_HIGH_FIELD: 80,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of coal.",
+            language.LANG_ESPANOL: "Es mineral de carbón.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_COAL_ICON_PATH,
+        },
+    },
+    ORE_SILVER_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Silver Ore",
+            language.LANG_ESPANOL: "Mineral de Plata",
+        },
+        BASE_VALUE_LOW_FIELD: 40,
+        BASE_VALUE_HIGH_FIELD: 100,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of silver ore.",
+            language.LANG_ESPANOL: "Es mineral de plata.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_SILVER_ICON_PATH,
+        },
+    },
+    ORE_GOLD_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Gold Ore",
+            language.LANG_ESPANOL: "Mineral de Oro",
+        },
+        BASE_VALUE_LOW_FIELD: 100,
+        BASE_VALUE_HIGH_FIELD: 200,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of gold ore.",
+            language.LANG_ESPANOL: "Es mineral de oro.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_GOLD_ICON_PATH,
+        },
+    },
+    ORE_TITANIUM_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Titanium Ore",
+            language.LANG_ESPANOL: "Mineral de Titanio",
+        },
+        BASE_VALUE_LOW_FIELD: 110,
+        BASE_VALUE_HIGH_FIELD: 250,
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "Pieces of titanium ore.",
+            language.LANG_ESPANOL: "Es mineral de titanio.",
+        },
+        USAGE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I could use this to create and smith metals.",
+            language.LANG_ESPANOL: "Puede usar eso en la herrería.",
+        },
+        WEIGHT_POINT_FIELD: 10,
+        PROPERTIES_FIELD: (SELLABLE_F | ALCHABLE_F),
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.DISCARD_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.ORE_TITANIUM_ICON_PATH,
         },
     },
 }

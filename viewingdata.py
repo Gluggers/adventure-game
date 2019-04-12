@@ -168,11 +168,11 @@ HEALTH_TEXT_PREFIX_INFO = {
 # Number of milliseconds to wait in between each
 # text display.
 BOTTOM_TEXT_DELAY_MS = 500
-DEFAULT_ADVANCE_DELAY_MS = 1500
+DEFAULT_ADVANCE_DELAY_MS = 500
 INITIAL_INPUT_DELAY_MS = 300
 
 # Number of milliseconds to wait when loading menu.
-DEFAULT_MENU_LOAD_DELAY_MS = 750
+DEFAULT_MENU_LOAD_DELAY_MS = 500
 
 # Number of milliseconds to wait after changing selected options.
 DEFAULT_MENU_OPTION_SWITCH_DELAY_MS = 750

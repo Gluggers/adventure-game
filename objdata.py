@@ -87,6 +87,13 @@ ROCK_METEORITE_ID = 303091
 ROCK_METEORITE_2_ID = 303092
 ROCK_CELESTIAL_ID = 303101
 ROCK_CELESTIAL_2_ID = 303102
+ROCK_SILVER_ID = 303201
+ROCK_SILVER_2_ID = 303202
+ROCK_GOLD_ID = 303211
+ROCK_GOLD_2_ID = 303212
+
+# 304000 for fishing spots.
+FISHING_SPOT_1_ID = 304001
 
 # ITEM IDS ARE 400000 TO 499999
 MIN_ITEM_ID = 400000
@@ -105,6 +112,7 @@ MIN_MISC_ID = 700000
 ROCK_EMPTY_ID = 700001
 TREE_STUMP_ID = 700002
 WILLOW_STUMP_ID = 700003
+FISHING_SPOT_EMPTY_ID = 700100
 MAX_MISC_ID = 799999
 
 ### OBJECT DATA FIELDS ###
@@ -161,6 +169,22 @@ MISC_OBJECT_DATA = {
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "This ore is empty.",
             language.LANG_ESPANOL: "Esta vena esta agotada.",
+        },
+    },
+    FISHING_SPOT_EMPTY_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "EMPTY FISHING SPOT",
+            language.LANG_ESPANOL: "LUGAR PARA PESCAR AGOTADO",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.FISHING_SPOT_1_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RESPAWN_TIME_S_FIELD:  None,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There used to be fish here.",
+            language.LANG_ESPANOL: "Solia haber peces aqui.",
         },
     },
     TREE_STUMP_ID: {
@@ -233,7 +257,7 @@ RESOURCE_DATA = {
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 1,
-        GAINED_XP_FIELD: 100, #20
+        GAINED_XP_FIELD: 20,
         RESOURCE_ITEM_FIELD: itemdata.LOG_TREE_ID,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
@@ -256,7 +280,7 @@ RESOURCE_DATA = {
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 10,
-        GAINED_XP_FIELD: 200, #50
+        GAINED_XP_FIELD: 50,
         RESOURCE_ITEM_FIELD: itemdata.LOG_OAK_ID,
         RESPAWN_TIME_S_FIELD:  30,
         EXAMINE_INFO_FIELD: {
@@ -279,7 +303,7 @@ RESOURCE_DATA = {
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_WOODCUTTING,
         REQUIRED_LEVEL_FIELD: 25,
-        GAINED_XP_FIELD: 200, #70?
+        GAINED_XP_FIELD: 100,
         RESOURCE_ITEM_FIELD: itemdata.LOG_WILLOW_ID,
         RESPAWN_TIME_S_FIELD:  120,
         EXAMINE_INFO_FIELD: {
@@ -301,8 +325,8 @@ RESOURCE_DATA = {
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
         RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
-        REQUIRED_LEVEL_FIELD: 1,
-        GAINED_XP_FIELD: 100, #20
+        REQUIRED_LEVEL_FIELD: 10,
+        GAINED_XP_FIELD: 35,
         RESOURCE_ITEM_FIELD: itemdata.ORE_COPPER_ID,
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
@@ -312,5 +336,166 @@ RESOURCE_DATA = {
         INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,
         REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_TIN_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "TIN VEIN",
+            language.LANG_ESPANOL: "VENA DE ESTAÑO",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_TIN_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 10,
+        GAINED_XP_FIELD: 35,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_TIN_ID,
+        RESPAWN_TIME_S_FIELD:  10,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some tin ore in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de estaño en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_IRON_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "IRON VEIN",
+            language.LANG_ESPANOL: "VENA DE HIERRO",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_IRON_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 20,
+        GAINED_XP_FIELD: 50,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_IRON_ID,
+        RESPAWN_TIME_S_FIELD:  20,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some iron ore in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de hierro en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_COAL_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "COAL VEIN",
+            language.LANG_ESPANOL: "VENA DE CARBÓN",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_COAL_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 30,
+        GAINED_XP_FIELD: 75,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_COAL_ID,
+        RESPAWN_TIME_S_FIELD:  100,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some coal in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de carbón en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_SILVER_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "SILVER VEIN",
+            language.LANG_ESPANOL: "VENA DE PLATA",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_SILVER_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 35,
+        GAINED_XP_FIELD: 80,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_SILVER_ID,
+        RESPAWN_TIME_S_FIELD:  200,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some silver ore in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de plata en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_TITANIUM_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "TITANIUM VEIN",
+            language.LANG_ESPANOL: "VENA DE TITANIO",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_TITANIUM_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 40,
+        GAINED_XP_FIELD: 85,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_TITANIUM_ID,
+        RESPAWN_TIME_S_FIELD:  180,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some titanium ore in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de titanio en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    ROCK_GOLD_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "GOLD VEIN",
+            language.LANG_ESPANOL: "VENA DE ORO",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_GOLD_BASIC_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_MINING,
+        REQUIRED_LEVEL_FIELD: 55,
+        GAINED_XP_FIELD: 110,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
+        RESPAWN_TIME_S_FIELD:  240,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "There is some gold ore in this rock. Maybe I can mine it.",
+            language.LANG_ESPANOL: "Hay mineral de oro en esta vena. Tal vez pueda extraerlo.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.MINE_ROCK_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 1.0,
+        REPLACEMENT_OBJECT_ID_FIELD: ROCK_EMPTY_ID,
+    },
+    FISHING_SPOT_1_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "FISHING SPOT",
+            language.LANG_ESPANOL: "LUGAR PARA PESCAR",
+        },
+        IMAGE_PATH_DICT_FIELD: {
+            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.FISHING_SPOT_1_PATH,
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RELATED_SKILL_ID_FIELD: skills.SKILL_ID_FISHING,
+        REQUIRED_LEVEL_FIELD: 1,
+        GAINED_XP_FIELD: 20,
+        RESOURCE_ITEM_FIELD: itemdata.ORE_GOLD_ID,
+        RESPAWN_TIME_S_FIELD:  60,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "I can see fish in the water. Maybe I can catch them.",
+            language.LANG_ESPANOL: "Se veían peces en el agua. Tal vez pueda atraparlos.",
+        },
+        INTERACTION_ID_FIELD: interactiondata.CATCH_FISH_ROD_ID,
+        EXHAUSTION_PROBABILITY_FIELD: 0.2,
+        REPLACEMENT_OBJECT_ID_FIELD: FISHING_SPOT_EMPTY_ID,
     },
 }

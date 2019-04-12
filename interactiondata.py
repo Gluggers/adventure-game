@@ -20,9 +20,9 @@ MIN_RESOURCE_ID = 0x300000
 MAX_RESOURCE_ID = 0x3FFFFF
 CHOP_TREE_ID = 0x300001
 MINE_ROCK_ID = 0x300021
-FISHING_ROD_ID = 0x300031
-FISHING_NET_ID = 0x300032
-FISHING_HARPOON_ID = 0x300033
+CATCH_FISH_ROD_ID = 0x300031
+CATCH_FISH_NET_ID = 0x300032
+CATCH_FISH_HARPOON_ID = 0x300033
 COOKING_ID = 0x300041
 HERBLORE_GATHER_ID = 0x300051
 
@@ -50,7 +50,7 @@ GATHERING_MAIN_MESSAGES = {
         language.LANG_ENGLISH: "You attempt to mine the {0}...",
         language.LANG_ESPANOL: "Tratas de extraer minerales del/la {0}...",
     },
-    FISHING_ROD_ID: {
+    CATCH_FISH_ROD_ID: {
         language.LANG_ENGLISH: "You cast out your rod to catch some {0}...",
         language.LANG_ESPANOL: "Lanzas tu caña para pescar {0}...",
     },
@@ -66,7 +66,7 @@ GATHERING_RESOURCE_EXHAUST_MESSAGES = {
         language.LANG_ENGLISH: "You have exhausted the {0}.",
         language.LANG_ESPANOL: "Ya se agotó el/la {0}.",
     },
-    FISHING_ROD_ID: {
+    CATCH_FISH_ROD_ID: {
         language.LANG_ENGLISH: "It looks like there aren't any more {0}...",
         language.LANG_ESPANOL: "Parece que ya no hay {0}...",
     },
@@ -82,7 +82,7 @@ GATHERING_RESOURCE_GAIN_MESSAGES = {
         language.LANG_ENGLISH: "You mined a(n) {0} and earned {1} experience!",
         language.LANG_ESPANOL: "Has extraído un(a) {0}, y has ganado {1} puntos de experiencia!",
     },
-    FISHING_ROD_ID: {
+    CATCH_FISH_ROD_ID: {
         language.LANG_ENGLISH: "You caught a(n) {0} and earned {1} experience!",
         language.LANG_ESPANOL: "Has pescado un(a) {0}, y has ganado {1} puntos de experiencia!",
     },

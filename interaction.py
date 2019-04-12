@@ -1,6 +1,5 @@
 import pygame
 import interactiondata
-import interactiveobj
 import resource
 import entity
 import language
@@ -144,9 +143,9 @@ class Interaction():
                 # Inventory is full.
                 cls.display_inventory_full_message()
             elif not Interaction.meets_resource_level(
-                        acting_object,
-                        target_object
-                    ):
+                    acting_object,
+                    target_object
+                ):
                 # Don't have a high enough level.
                 required_level = target_object.required_level
                 skill_name = skills.get_skill_name(
@@ -155,9 +154,9 @@ class Interaction():
                 )
 
                 reject_message = NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
-                        language.Language.current_language_id,
-                        ""
-                    ).format(required_level, skill_name)
+                    language.Language.current_language_id,
+                    ""
+                ).format(required_level, skill_name)
 
                 game_object.display_overworld_bottom_text(
                     reject_message,
@@ -200,8 +199,8 @@ class Interaction():
                 # TODO consider cases of boosted EXP
                 resource_gather_text = None
                 gained_resource = items.Item.get_item(
-                            target_object.resource_item
-                        )
+                    target_object.resource_item
+                )
                 resource_exp = target_object.gained_xp
                 if gained_resource:
                     resource_gather_text = \
@@ -271,12 +270,11 @@ class Interaction():
 
                             # TODO handle all the item stuff here.
                             acting_object.add_item_to_inventory(
-                                    gained_resource.item_id
-                                )
+                                gained_resource.item_id
+                            )
 
                             # Check if resource has been exhausted.
-                            if random.randint(0, 100) \
-                                    < int(
+                            if random.randint(0, 100) < int(
                                         100 \
                                         * target_object.exhaustion_probability
                                     ):
@@ -530,8 +528,8 @@ ID_TO_METHOD_MAPPING = {
     interactiondata.DEFAULT_ID: Interaction.default_interaction,
     interactiondata.CHOP_TREE_ID: Interaction.chop_tree_interaction,
     interactiondata.MINE_ROCK_ID: Interaction.mine_rock_interaction,
-    interactiondata.FISHING_ROD_ID: Interaction.fishing_rod_interaction,
-    interactiondata.FISHING_NET_ID: Interaction.fishing_net_interaction,
+    interactiondata.CATCH_FISH_ROD_ID: Interaction.fishing_rod_interaction,
+    interactiondata.CATCH_FISH_NET_ID: Interaction.fishing_net_interaction,
     interactiondata.COOKING_ID: Interaction.cooking_interaction,
     interactiondata.HERBLORE_GATHER_ID: Interaction.herblore_gather_interaction,
 }

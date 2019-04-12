@@ -8,22 +8,22 @@ class Resource(interactiveobj.Interactive_Object):
     # Initialize Resource
     # respawn_time_s value of None means the resource object will not respawn?
     def __init__(
-                self,
-                object_id,
-                name_info,
-                image_path_dict,
-                collision_width=1,
-                collision_height=1,
-                related_skill_id=None,
-                required_level=0,
-                gained_xp=0,
-                resource_item=None,
-                respawn_time_s=1,
-                exhaustion_probability=1,
-                examine_info=None,
-                interaction_id=interactiondata.DEFAULT_ID,
-                replacement_object_id=None,
-            ):
+            self,
+            object_id,
+            name_info,
+            image_path_dict,
+            collision_width=1,
+            collision_height=1,
+            related_skill_id=None,
+            required_level=0,
+            gained_xp=0,
+            resource_item=None,
+            respawn_time_s=1,
+            exhaustion_probability=1,
+            examine_info=None,
+            interaction_id=interactiondata.DEFAULT_ID,
+            replacement_object_id=None,
+        ):
         # Call the parent class init
         interactiveobj.Interactive_Object.__init__(
             self,
