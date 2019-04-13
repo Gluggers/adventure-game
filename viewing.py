@@ -368,7 +368,7 @@ class Viewing(object):
                             text_display,
                             page,
                             advance_delay_ms=0,
-                            auto_advance=False,
+                            auto_advance=True,
                             refresh_during=False,
                             horizontal_orientation=horizontal_orientation,
                             vertical_orientation=vertical_orientation,
@@ -1031,15 +1031,29 @@ class OverworldViewing(Viewing):
         )
 
         self._protagonist = protagonist
-        self.curr_map = curr_map
+        self._curr_map = curr_map
         self._background_pattern = background_pattern
 
-        self.top_display = None
-        self.bottom_text_display = None
-        self.side_menu_display = None
-        self.top_health_display = None
+        self._top_display = None
+        self._bottom_text_display = None
+        self._side_menu_display = None
+        self._top_health_display = None
+        self._bottom_menu_display = None
 
-    def create_top_health_display(self):
+    @property
+    def curr_map(self):
+        """Returns the current map object."""
+
+        return self._curr_map
+
+    @curr_map.setter
+    def curr_map(self, value):
+        """Sets the current map object for the viewing."""
+
+        if value:
+            self._curr_map = value
+
+    def _create_top_health_display(self):
         """Initializes the top health display.
 
         The top health display will display the protagonist's current
@@ -1053,7 +1067,7 @@ class OverworldViewing(Viewing):
             fontinfo.OW_HEALTH_DISPLAY_FONT_ID
         )
         if top_display_font:
-            self.top_health_display = display.Text_Display(
+            self._top_health_display = display.Text_Display(
                 self._main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
@@ -1062,13 +1076,15 @@ class OverworldViewing(Viewing):
                 vertical_padding=6,
             )
 
-            if not self.top_health_display:
+            if not self._top_health_display:
                 LOGGER.error("Failed to make top health display")
+                sys.exit(1)
         else:
             LOGGER.error("Top display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
-    def create_bottom_text_display(self):
+    def _create_bottom_text_display(self):
         """Initializes the bottom text display.
 
         The bottom text display will display various messages and dialogues
@@ -1082,7 +1098,7 @@ class OverworldViewing(Viewing):
             fontinfo.OW_BOTTOM_TEXT_FONT_ID
         )
         if font_obj:
-            self.bottom_text_display = display.Text_Display(
+            self._bottom_text_display = display.Text_Display(
                 self._main_display_surface,
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,
@@ -1092,13 +1108,47 @@ class OverworldViewing(Viewing):
                 horizontal_padding=viewingdata.TEXT_DISPLAY_HORIZONTAL_PADDING,
                 vertical_padding=viewingdata.TEXT_DISPLAY_VERTICAL_PADDING,
             )
-            if not self.bottom_text_display:
+            if not self._bottom_text_display:
                 LOGGER.error("Failed to make bottom text display")
+                sys.exit(1)
         else:
             LOGGER.error("Bottom text display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
-    def create_side_menu_display(self):
+    def _create_bottom_menu_display(self):
+        """Initializes the bottom menu display.
+
+        The bottom menu display will display menu options during interactions
+        in the overworld.
+
+        Requires fonts to be loaded via Display.init_fonts() in
+        the display module.
+        """
+
+        font_obj = display.Display.get_font(
+            fontinfo.OW_BOTTOM_MENU_FONT_ID
+        )
+        if font_obj:
+            self._bottom_menu_display = display.MenuDisplay(
+                self._main_display_surface,
+                viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
+                font_obj,
+                background_pattern=self._background_pattern,
+                horizontal_padding=15,
+                vertical_padding=15,
+                selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
+                spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
+            )
+            if not self._bottom_menu_display:
+                LOGGER.error("Failed to make bottom menu display")
+                sys.exit(1)
+        else:
+            LOGGER.error("Bottom menu display font not found.")
+            LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
+
+    def _create_side_menu_display(self):
         """Initializes the side menu display.
 
         The side menu display will display the overworld side menu options
@@ -1112,7 +1162,7 @@ class OverworldViewing(Viewing):
             fontinfo.OW_SIDE_MENU_FONT_ID
         )
         if font_obj:
-            self.side_menu_display = display.Menu_Display(
+            self._side_menu_display = display.MenuDisplay(
                 self._main_display_surface,
                 viewingdata.OW_SIDE_MENU_RECT,
                 font_obj,
@@ -1122,11 +1172,13 @@ class OverworldViewing(Viewing):
                 selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
                 spacing_factor_between_lines=display.MENU_LINE_SPACING_FACTOR,
             )
-            if not self.side_menu_display:
+            if not self._side_menu_display:
                 LOGGER.error("Failed to make side menu display.")
+                sys.exit(1)
         else:
             LOGGER.error("Side menu display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
 
     def create_displays(self):
@@ -1141,9 +1193,10 @@ class OverworldViewing(Viewing):
         the display module.
         """
 
-        self.create_top_health_display()
-        self.create_bottom_text_display()
-        self.create_side_menu_display()
+        self._create_top_health_display()
+        self._create_bottom_text_display()
+        self._create_bottom_menu_display()
+        self._create_side_menu_display()
 
     @property
     def protagonist(self):
@@ -1159,8 +1212,8 @@ class OverworldViewing(Viewing):
 
             # Assign protagonist to top display, as well, which should update
             # the top display
-            if self.top_display:
-                self.top_display.protagonist = value
+            if self._top_display:
+                self._top_display.protagonist = value
 
     def blit_top_display(self):
         """Blits the top display onto the main display surface.
@@ -1168,10 +1221,10 @@ class OverworldViewing(Viewing):
         Caller must update the main pygame display if needed.
         """
 
-        if self._main_display_surface and self.top_display:
-            self.top_display.blit_onto_surface(self._main_display_surface)
+        if self._main_display_surface and self._top_display:
+            self._top_display.blit_onto_surface(self._main_display_surface)
 
-    def get_overworld_health_text(self):
+    def _get_overworld_health_text(self):
         """Returns the health String for the protagonist.
 
         The String format is "<current health> / <max health>",
@@ -1207,10 +1260,10 @@ class OverworldViewing(Viewing):
                 display text.
         """
 
-        if self._main_display_surface and self.top_health_display:
+        if self._main_display_surface and self._top_health_display:
             self.display_text_display_first_page(
-                self.top_health_display,
-                self.get_overworld_health_text(),
+                self._top_health_display,
+                self._get_overworld_health_text(),
                 font_color=font_color,
                 advance_delay_ms=0,
                 auto_advance=True,
@@ -1284,9 +1337,9 @@ class OverworldViewing(Viewing):
                 refresh after the text display.
         """
 
-        if text and self.bottom_text_display:
+        if text and self._bottom_text_display:
             self.display_text_display(
-                self.bottom_text_display,
+                self._bottom_text_display,
                 text,
                 font_color=font_color,
                 advance_delay_ms=advance_delay_ms,
@@ -1364,9 +1417,9 @@ class OverworldViewing(Viewing):
                 refresh after the text display.
         """
 
-        if text and self._main_display_surface and self.bottom_text_display:
+        if text and self._main_display_surface and self._bottom_text_display:
             self.display_text_display_first_page(
-                self.bottom_text_display,
+                self._bottom_text_display,
                 text,
                 font_color=font_color,
                 advance_delay_ms=advance_delay_ms,
@@ -1390,21 +1443,22 @@ class OverworldViewing(Viewing):
         """
 
         # Set current map's top left position on display screen.
-        if self.curr_map and protag_tile_location:
+        if self._curr_map and protag_tile_location:
             # Calculate map top left position based on protag location.
             map_top_left = OverworldViewing.get_centered_map_top_left_pixel(
                 protag_tile_location
             )
 
             if map_top_left:
-                self.curr_map.top_left_position = map_top_left
+                self._curr_map.top_left_position = map_top_left
             else:
-                self.curr_map.top_left_position = viewingdata.OW_VIEWING_TOP_LEFT
+                self._curr_map.top_left_position = viewingdata.OW_VIEWING_TOP_LEFT
 
             # Refresh and blit viewing.
             self.refresh_and_blit_self()
         else:
             LOGGER.error("Missing parameters for setting and blitting map.")
+            sys.exit(1)
 
     def refresh_self(self):
         """Refreshes overworld data, including map and top display.
@@ -1425,20 +1479,20 @@ class OverworldViewing(Viewing):
         Does not update the map or pygame display.
         """
 
-        if self.curr_map:
+        if self._curr_map:
             # Set top left viewing tile to define what portions of map to blit
             top_left_viewing_tile_coord =                           \
                 OverworldViewing.get_top_left_ow_viewing_tile(
-                    self.curr_map.top_left_position
+                    self._curr_map.top_left_position
                 )
 
             # Get subset of tiles to blit.
             tile_subset_rect = OverworldViewing.calculate_tile_viewing_rect(
-                self.curr_map,
+                self._curr_map,
                 top_left_viewing_tile_coord
             )
 
-            self.curr_map.blit_map(
+            self._curr_map.blit_map(
                 self._main_display_surface,
                 tile_subset_rect=tile_subset_rect
             )
@@ -1464,7 +1518,7 @@ class OverworldViewing(Viewing):
         options to allow for backtracking.
 
         For best results, each menu option name should not be longer than the
-        horizontal space available the side menu.
+        horizontal space available in the side menu.
 
         Args:
             menu_option_ids: list of menu option ID values for the menu display
@@ -1487,10 +1541,63 @@ class OverworldViewing(Viewing):
         ret_option_id = None
         if menu_option_ids:
             ret_option_id = self.display_menu_display(
-                self.side_menu_display,
+                self._side_menu_display,
                 menu_option_ids,
                 horizontal_orientation=display.ORIENTATION_LEFT_JUSTIFIED,
                 #vertical_orientation=display.ORIENTATION_TOP_JUSTIFIED,
+                vertical_orientation=display.ORIENTATION_CENTERED,
+                load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
+                option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
+                refresh_after=refresh_after,
+                refresh_during=refresh_during,
+            )
+
+        return ret_option_id
+
+    def display_overworld_bottom_menu(
+            self,
+            menu_option_ids,
+            refresh_after=True,
+            refresh_during=True,
+        ):
+        """Displays the overworld bottom menu and returns the selected option.
+
+        The number of menu options visible on each menu page is determined by
+        the properties of the overworld bottom menu.
+
+        In the event where all the options in option_id_list cannot fit on a
+        single menu page, each menu page will have an option at
+        the end indicating that more options are available. The "more options"
+        option on the last page will loop back to the first page of menu
+        options to allow for backtracking.
+
+        For best results, each menu option name should not be longer than the
+        horizontal space available in the bottom menu.
+
+        Args:
+            menu_option_ids: list of menu option ID values for the menu display
+                object to display. The option ID values will be translated
+                into their corresponding names depending on the
+                current game language.
+            refresh_during: if True, the calling Viewing object will refresh
+                itself periodically while waiting for the text display
+                to finish up. If False, the calling Viewing object will not
+                refresh during the text display.
+            refresh_after: if True, the calling Viewing object will refresh
+                itself and update the pygame display after the user finishes
+                interacting with the menu.
+
+        Returns:
+            option ID value for the selected option. None if no option was
+            selected (e.g. if the user exits the menu via an escape key).
+        """
+
+        ret_option_id = None
+        if menu_option_ids:
+            ret_option_id = self.display_menu_display(
+                self._bottom_menu_display,
+                menu_option_ids,
+                horizontal_orientation=display.ORIENTATION_CENTERED,
                 vertical_orientation=display.ORIENTATION_CENTERED,
                 load_delay_ms=viewingdata.DEFAULT_MENU_LOAD_DELAY_MS,
                 option_switch_delay_ms=viewingdata.DEFAULT_MENU_OPTION_SWITCH_DELAY_MS,
@@ -1523,8 +1630,8 @@ class OverworldViewing(Viewing):
         Caller must update display if needed.
         """
 
-        if self.top_display:
-            self.top_display.update_self()
+        if self._top_display:
+            self._top_display.update_self()
 
     def refresh_and_blit_top_display(self):
         """Refreshes and blits top display.
@@ -1533,7 +1640,7 @@ class OverworldViewing(Viewing):
         Caller must update display if needed.
         """
 
-        if self.top_display:
+        if self._top_display:
             self.refresh_top_display()
             #self.blit_top_display()
             self.blit_top_health_display()
@@ -1545,9 +1652,9 @@ class OverworldViewing(Viewing):
         Caller must update display if needed.
         """
 
-        if self.curr_map:
+        if self._curr_map:
             # Refresh map to update it.
-            self.curr_map.refresh_self()
+            self._curr_map.refresh_self()
 
     def refresh_and_blit_map(self):
         """Refreshes and blits the current map.
@@ -1578,9 +1685,9 @@ class OverworldViewing(Viewing):
 
         # Get top left viewing tile and tile subset rect to blit.
         tile_subset_rect = OverworldViewing.calculate_tile_viewing_rect(
-            self.curr_map,
+            self._curr_map,
             OverworldViewing.get_top_left_ow_viewing_tile(
-                self.curr_map.top_left_position
+                self._curr_map.top_left_position
             )
         )
 
@@ -1610,7 +1717,7 @@ class OverworldViewing(Viewing):
                         self._protagonist.curr_image_id = image_type_id
 
                     # scroll 1 pixel at a time
-                    self.curr_map.scroll(
+                    self._curr_map.scroll(
                         self._main_display_surface,
                         scroll_direction,
                         1,

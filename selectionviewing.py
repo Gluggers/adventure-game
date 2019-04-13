@@ -158,9 +158,11 @@ class SelectionGridViewing(viewing.Viewing):
 
             if not self.title_display:
                 LOGGER.error("Failed to make title display")
+                sys.exit(1)
         else:
             LOGGER.error("Top display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     # Inherited method.
     def create_selection_area_display(self):
@@ -187,9 +189,11 @@ class SelectionGridViewing(viewing.Viewing):
 
             if not self.selection_area_display:
                 LOGGER.error("Failed to make selection grid display")
+                sys.exit(1)
         else:
             LOGGER.error("Selection grid supertext font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     # Inherited method.
     def create_truncated_selection_area_display(self):
@@ -216,9 +220,11 @@ class SelectionGridViewing(viewing.Viewing):
 
             if not self.truncated_selection_area_display:
                 LOGGER.error("Failed to make truncated selection grid display")
+                sys.exit(1)
         else:
             LOGGER.error("Selection grid supertext font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     # Inherited method.
     def create_bottom_text_display(self):
@@ -241,9 +247,11 @@ class SelectionGridViewing(viewing.Viewing):
 
                 if not self.bottom_text_display:
                     LOGGER.error("Failed to make inventory bottom text display")
+                    sys.exit(1)
             else:
                 LOGGER.error("Display font not found.")
                 LOGGER.error("Must init fonts through display.Display.init_fonts.")
+                sys.exit(1)
 
     # Requires fonts to be loaded. see display.Display.init_fonts().
     # Inherited method.
@@ -782,9 +790,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             if not self.selection_name_display:
                 LOGGER.error("Failed to make selection name display")
+                sys.exit(1)
         else:
             LOGGER.error("Font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     def create_selection_subtitle_display(self):
         LOGGER.info("Creating selection subtitle display...")
@@ -805,9 +815,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             if not self.selection_subtitle_display:
                 LOGGER.error("Failed to make selection subtitle display")
+                sys.exit(1)
         else:
             LOGGER.error("Font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     def create_selection_statistics_display(self):
         LOGGER.info("Creating selection statistics display...")
@@ -828,10 +840,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             if not self.selection_statistics_display:
                 LOGGER.error("Failed to make selection statistics display")
+                sys.exit(1)
         else:
             LOGGER.error("Font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
-
+            sys.exit(1)
 
     def create_selection_description_display(self):
         LOGGER.info("Creating selection description display...")
@@ -852,9 +865,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             if not self.selection_description_display:
                 LOGGER.error("Failed to make selection description display")
+                sys.exit(1)
         else:
             LOGGER.error("Display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     def create_selection_options_display(self):
         LOGGER.info("Creating selection options display...")
@@ -862,7 +877,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             fontinfo.SELECTION_MENU_FONT_ID
         )
         if font_obj:
-            self.selection_option_menu_display = display.Menu_Display(
+            self.selection_option_menu_display = display.MenuDisplay(
                 self.main_display_surface,
                 self.selection_option_menu_rect,
                 font_obj,
@@ -875,9 +890,11 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             if not self.selection_option_menu_display:
                 LOGGER.error("Failed to make selection options display")
+                sys.exit(1)
         else:
             LOGGER.error("Display font not found.")
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
 
     def create_additional_selection_displays(self):
         self.create_selection_name_display()

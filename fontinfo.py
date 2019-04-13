@@ -7,6 +7,7 @@ DEFAULT_FONT_ID = 0x1
 OW_HEALTH_DISPLAY_FONT_ID = 0x2
 OW_BOTTOM_TEXT_FONT_ID = 0x3
 OW_SIDE_MENU_FONT_ID = 0x4
+OW_BOTTOM_MENU_FONT_ID = 0x5
 SELECTION_TOP_DISPLAY_FONT_ID = 0x10
 SELECTION_NAME_FONT_ID = 0x11
 SELECTION_DESCRIPTION_FONT_ID = 0x12
@@ -22,58 +23,63 @@ FONT_SIZE_FIELD = 0x1
 FONT_PATH_FIELD = 0x2
 
 ### FONT INFO ###
+FONT_PATH = "fonts/"
 FONT_INFO = {
     DEFAULT_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     OW_HEALTH_DISPLAY_FONT_ID: {
         FONT_SIZE_FIELD: 18,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     OW_BOTTOM_TEXT_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
+    },
+    OW_BOTTOM_MENU_FONT_ID: {
+        FONT_SIZE_FIELD: 16,
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     OW_SIDE_MENU_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_TOP_DISPLAY_FONT_ID: {
         FONT_SIZE_FIELD: 22,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_NAME_FONT_ID: {
         FONT_SIZE_FIELD: 22,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_DESCRIPTION_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_SUBTITLE_FONT_ID: {
         FONT_SIZE_FIELD: 18,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_SUPERTEXT_FONT_ID: {
         FONT_SIZE_FIELD: 11,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_MENU_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     SELECTION_BOTTOM_TEXT_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     CHAR_EQUIP_STATS_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
     ITEM_EQUIP_STATS_FONT_ID: {
         FONT_SIZE_FIELD: 16,
-        FONT_PATH_FIELD: "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        FONT_PATH_FIELD: FONT_PATH + "DejaVuSansMono.ttf"
     },
 }
 

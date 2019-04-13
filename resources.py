@@ -1,5 +1,6 @@
 import logging
 import random
+import sys
 import pygame
 import interactiveobj
 import objdata
@@ -132,11 +133,13 @@ class Resource(interactiveobj.Interactive_Object):
                             "Required fields not found in resource data for ID %d",
                             resource_id
                         )
+                        sys.exit(2)
                 else:
                     LOGGER.error(
                         "Resource data not found for resource ID %d",
                         resource_id
                     )
+                    sys.exit(2)
 
         return ret_resource
 
@@ -225,6 +228,7 @@ class Resource(interactiveobj.Interactive_Object):
         for resource_id in objdata.RESOURCE_DATA:
             if not Resource.resource_factory(resource_id):
                 LOGGER.error("Could not construct resource with ID {0}".format(resource_id))
+                sys.exit(2)
 
 # set up logger
 logging.basicConfig(level=logging.DEBUG)

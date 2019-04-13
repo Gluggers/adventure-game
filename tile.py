@@ -2,6 +2,7 @@
 """Contains functions and constants for Tile objects."""
 
 import logging
+import sys
 import pygame
 import imagepaths
 import tiledata
@@ -202,6 +203,7 @@ class Tile(object):
         for tile_id in tiledata.TILE_DATA:
             if not Tile.tile_factory(tile_id):
                 LOGGER.error("Could not construct tile with ID %d", tile_id)
+                sys.exit(1)
 
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)

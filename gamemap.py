@@ -98,7 +98,7 @@ class Map:
             for grid_row in tile_grid:
                 if grid_width != len(grid_row):
                     # TODO ERROR MESSAGE
-                    logger.error("Invalid grid format - check grid dimensions")
+                    LOGGER.error("Invalid grid format - check grid dimensions")
                     valid_grid_dimensions = False
                     pygame.quit()
                     sys.exit(1)
@@ -112,7 +112,7 @@ class Map:
                     row_to_copy = []
                     for x in grid_row:
                         if (x is not None) and (x.__class__.__name__ != tile.TILE_CLASS):
-                            logger.error("Tile grids can only accept None or Tile objects")
+                            LOGGER.error("Tile grids can only accept None or Tile objects")
                             valid_grid_dimensions = False
                             pygame.quit()
                             sys.exit(1)
@@ -151,20 +151,34 @@ class Map:
             # set up initial interactive objects for map
             for bottom_left_tile_loc, object_id in interactive_obj_dict.items():
                 if (object_id is not None) and bottom_left_tile_loc:
-                    logger.debug("About to set object {0} at {1}".format(object_id, bottom_left_tile_loc))
+                    LOGGER.debug(
+                        "About to set object %d at %s",
+                        object_id,
+                        bottom_left_tile_loc,
+                    )
+
                     if not self.set_interactive_object(object_id, bottom_left_tile_loc):
                         successful = False
-                        logger.warn("Could not place object {0} at {1}".format(object_id, bottom_left_tile_loc))
+                        LOGGER.warn(
+                            "Could not place object %s at %s",
+                            object_id,
+                            bottom_left_tile_loc
+                        )
                     else:
                         # Mark the original interactive obj for the bottom left tile.
                         self.original_bottom_left_tile_obj_mapping[bottom_left_tile_loc] = object_id
-            logger.info("Original bottom left tile obj mapping for {0}: {1}".format(
+            LOGGER.info(
+                "Original bottom left tile obj mapping for %s: %s",
                 self.map_id,
                 self.original_bottom_left_tile_obj_mapping
-            ))
+            )
         else:
             successful = False
-            logger.error("Error: did not set original bottom left tile obj mapping for map id {0}".format(self.map_id))
+            LOGGER.error(
+                "Error: did not set original bottom left tile obj mapping for map id %d",
+                self.map_id,
+            )
+            sys.exit(2)
 
         return successful
 
@@ -181,7 +195,12 @@ class Map:
         if new_location:
             # Check if new location is occupied
             if self.tile_occupied(new_location):
-                logger.error("Cannot move protag from {0} to {1}".format(self._protagonist_location, new_location))
+                LOGGER.error(
+                    "Cannot move protag from %s to %s",
+                    self._protagonist_location,
+                    new_location,
+                )
+                sys.exit(3)
             else:
                 if self._protagonist_location:
                     # Clear old tile location
@@ -192,7 +211,11 @@ class Map:
                 self.bottom_left_tile_obj_mapping[new_location] = [objdata.PROTAGONIST_ID, set([new_location])]
                 self.occupied_tile_dict[new_location] = new_location
 
-                logger.debug("Moving protag away from {0} to {1}".format(self._protagonist_location, new_location))
+                LOGGER.debug(
+                    "Moving protag away from %s to %s",
+                    self._protagonist_location,
+                    new_location,
+                )
 
                 self._protagonist_location = new_location
 
@@ -242,7 +265,7 @@ class Map:
         obj_to_set = interactiveobj.Interactive_Object.get_interactive_object(obj_id)
 
         if not obj_to_set:
-            logger.debug("Could not find object with ID {0}".format(obj_id))
+            LOGGER.debug("Could not find object with ID %d", obj_id)
 
         if self and obj_to_set and bottom_left_tile_loc and self.tile_grid:
             # Check that each tile in the colliion rect is within map
@@ -258,26 +281,31 @@ class Map:
                     if self.tile_occupied(tile_loc):
                         can_set = False
                         # tile is occupied
-                        logger.error(                               \
-                            "Obj already exists at location %s",    \
-                            str(tile_loc)                           \
+                        LOGGER.warn(
+                            "Obj already exists at location %s.",
+                            str(tile_loc)
                         )
                     # TODO check if the tile is walkable before putting an object on it?
                 else:
                     can_set = False
-                    logger.error(                                           \
-                        "Out of bounds location at: {0} ".format(tile_loc)  \
+                    LOGGER.warn(
+                        "Out of bounds location at: %s.",
+                        tile_loc,
                     )
-            # Set if we can
+            # Set if we can.
             if can_set:
                 # Associate object id and collision rect with the bottom left tile coordinate.
                 self.bottom_left_tile_obj_mapping[bottom_left_tile_loc] = [obj_id, collision_tile_set]
-                logger.debug("Setting obj ID {0} to bottom left tile {1}".format(obj_to_set.object_id, bottom_left_tile_loc))
+                LOGGER.debug(
+                    "Setting obj ID %d to bottom left tile %s",
+                    obj_to_set.object_id,
+                    bottom_left_tile_loc,
+                )
 
                 # Mark all tiles within object's collision rect as occupied
                 for tile_loc in collision_tile_set:
                     self.occupied_tile_dict[tile_loc] = bottom_left_tile_loc
-                    logger.debug("Marking {0} as occupied".format(tile_loc))
+                    LOGGER.debug("Marking %s as occupied",tile_loc)
 
                 success = True
 
@@ -331,19 +359,24 @@ class Map:
                         obj_id = obj_info[0]
                         collision_set = obj_info[1]
 
-                        logger.debug("Removing object {0} from {1}".format(obj_id, bottom_left_tile_loc))
+                        LOGGER.debug(
+                            "Removing object %d from %s",
+                            obj_id,
+                            bottom_left_tile_loc,
+                        )
 
                         # Clear object's collision tiles on map
                         for tile_loc in collision_set:
                             self.occupied_tile_dict.pop(tile_loc, None)
-                            logger.debug("Freed tile {0}".format(tile_loc))
+                            LOGGER.debug("Freed tile %s",tile_loc)
 
                         if obj_id is not None:
                             removed_id = obj_id
             else:
-                logger.error(                                            \
-                    "Invalid location %s for unset_interactive_object", \
-                    str(tile_location))
+                LOGGER.warn(
+                    "Invalid location %s for unset_interactive_object",
+                    str(tile_location)
+                )
 
         return removed_id
 
@@ -501,10 +534,11 @@ class Map:
                 curr_time_ms = pygame.time.get_ticks()
                 spawn_info = [object_id, curr_time_ms, countdown_ms]
                 self.pending_spawn_actions[bottom_left_tile_loc] = spawn_info
-                logger.info("Added pending spawn action to tile location {0}: {1}".format(
+                LOGGER.info(
+                    "Added pending spawn action to tile location %s: %s",
                     bottom_left_tile_loc,
                     spawn_info
-                ))
+                )
 
     ### TILE-RELATED METHODS ###
 
@@ -697,7 +731,8 @@ class Map:
                 new_pixel_location = (curr_top_left[0] - distance, curr_top_left[1])
             else:
                 # invalid scroll direction
-                logger.error("Invalid scroll direction {0}".format(scroll_direction))
+                LOGGER.error("Invalid scroll direction %s", scroll_direction)
+                sys.exit(3)
 
             if new_pixel_location:
                 # Update map top left and blit map.
@@ -710,21 +745,21 @@ class Map:
     def execute_spawn_action(self, tile_loc, obj_id):
         if tile_loc:
             # Remove the object, if any, currently on the tile.
-            logger.info("Removing obj at {0}".format(tile_loc))
+            LOGGER.info("Removing obj at %s", tile_loc)
             removed_id = self.unset_interactive_object(tile_loc)
 
             if removed_id is not None:
-                logger.info("Removed object id {0} from {1}".format(
+                LOGGER.info("Removed object id %d from %s",
                     removed_id,
                     tile_loc
-                ))
+                )
 
             if obj_id is not None:
                 # We are adding in a new object.
-                logger.info("Spawning object ID {0} at {1}".format(
+                LOGGER.info("Spawning object ID %d at %s",
                     obj_id,
-                    tile_loc
-                ))
+                    tile_loc,
+                )
 
                 self.set_interactive_object(obj_id, tile_loc)
 
@@ -737,7 +772,7 @@ class Map:
             ):
         # Update remaining timers for spawn actions.
         if self.pending_spawn_actions:
-            logger.debug("Refreshing self.")
+            LOGGER.debug("Refreshing self.")
 
             #curr_time_ms = timekeeper.Timekeeper.time_ms()
             curr_time_ms = pygame.time.get_ticks()
@@ -750,7 +785,11 @@ class Map:
                 if action_info and (len(action_info) == 3):
                     elapsed_time_ms = curr_time_ms - action_info[1]
                     if elapsed_time_ms < 0:
-                        logger.error("Error in elapsed time for pending spawn for map {0}".format(self.map_id))
+                        LOGGER.error(
+                            "Error in elapsed time for pending spawn for map %d",
+                            self.map_id
+                        )
+                        sys.exit(4)
                     else:
                         remaining_time = action_info[2] - elapsed_time_ms
                         action_info[2] = remaining_time
@@ -761,7 +800,8 @@ class Map:
                             # Add to processing list.
                             to_finish.append(tile_loc_tuple)
                 else:
-                    logger.error("Invalid spawn action info {0}.".format(action_info))
+                    LOGGER.error("Invalid spawn action info %s.", action_info)
+                    sys.exit(3)
 
             # Remove spawn action from the pending dict and execute
             # the spawn action.
@@ -773,7 +813,7 @@ class Map:
 
                     self.execute_spawn_action(loc_tuple, obj_id)
 
-            logger.debug("Remaining spawns: {0}".format(self.pending_spawn_actions))
+            LOGGER.debug("Remaining spawns: %d", self.pending_spawn_actions)
 
     ### CLASS METHODS ###
 
@@ -795,14 +835,14 @@ class Map:
             # need to make map
             ret_map_data = mapdata.MAP_DATA.get(map_id, None)
             if (ret_map_data):
-                logger.debug("Parsing map data")
+                LOGGER.debug("Parsing map data")
                 tile_grid_str_list = ret_map_data.get(mapdata.MAP_TILE_GRID_FIELD, None)
                 tile_grid_legend = ret_map_data.get(mapdata.MAP_TILE_GRID_KEY_FIELD, None)
 
                 map_tile_grid = Map.parse_tile_grid(tile_grid_str_list, tile_grid_legend)
 
                 if map_tile_grid:
-                    logger.debug("making map")
+                    LOGGER.debug("making map")
                     ret_map = Map(                                          \
                         map_id,                                             \
                         map_tile_grid,                                      \
@@ -817,20 +857,25 @@ class Map:
                     # like with the interactive objects?
 
                     if ret_map:
-                        if ret_map.init_interactive_obj(               \
-                                    ret_map_data.get(                       \
-                                        mapdata.MAP_INTER_OBJ_DICT_FIELD,   \
-                                        {}                                  \
-                                    )                                       \
-                                ):
-                            logger.debug("Successfully initialized interactive objects on map {0}".format(map_id))
+                        if ret_map.init_interactive_obj(
+                            ret_map_data.get(
+                                mapdata.MAP_INTER_OBJ_DICT_FIELD,
+                                {}
+                            )):
+                            LOGGER.debug(
+                                "Successfully initialized interactive objects on map %d",
+                                map_id,
+                            )
                         else:
-                            logger.warn("Failed to initialize all interactive objects on map {0}".format(map_id))
+                            LOGGER.warn(
+                                "Failed to initialize all interactive objects on map %d",
+                                map_id,
+                            )
                         # Add map to listing,
                         # even if the objects weren't all successfully initialized.
                         Map.map_listing[map_id] = ret_map
                     else:
-                        logger.warn("failed to make map with id {0}".format(map_id))
+                        LOGGER.warn("failed to make map with id %d", map_id)
 
         return ret_map
 
@@ -853,17 +898,17 @@ class Map:
                             if curr_tile:
                                 curr_row.append(curr_tile)
                             else:
-                                logger.warn("No tile found for tile id {0}".format(curr_id))
+                                LOGGER.warn("No tile found for tile id %d", curr_id)
                                 failed = True
                                 break
                         else:
-                            logger.warn("No tile id found for tile char {0}".format(tile_char))
+                            LOGGER.warn("No tile id found for tile char %s", tile_char)
                             failed = True
                             break
                     if curr_row:
                         curr_grid.append(curr_row)
                     else:
-                        logger.warn("No tiles added to row")
+                        LOGGER.warn("No tiles added to row")
                         failed = True
                         break
             if not failed:
@@ -876,19 +921,26 @@ class Map:
         ret_map = Map.map_listing.get(map_id, None)
 
         if not ret_map:
-            logger.warn("Get_map: No map found for map id {0}".format(map_id))
+            LOGGER.warn(
+                "Get_map: No map found for map id %d",
+                map_id,
+            )
 
         return ret_map
 
     @classmethod
     def build_maps(cls):
-        logger.debug("Building maps")
+        LOGGER.debug("Building maps")
 
         for map_id in mapdata.MAP_DATA:
             if not Map.map_factory(map_id):
-                logger.error("Could not construct map with ID {0}".format(map_id))
+                LOGGER.error(
+                    "Could not construct map with ID %d",
+                    map_id,
+                )
+                sys.exit(2)
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)

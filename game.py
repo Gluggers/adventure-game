@@ -39,24 +39,28 @@ class Game(object):
             display_surface,
             game_language=language.DEFAULT_LANGUAGE,
         ):
+        """Initializes the Game object. Sets the display surface and language.
+
+        Args:
+            display_surface: pygame Surface object that represents the main
+                game screen.
+            game_language: language ID for the game language translation.
+        """
+
         if display_surface:
-            # will change as game progresses
+            # Will change as game progresses.
             self.protagonist = None
             self.curr_map = None
             language.Language.set_current_language_id(game_language)
 
-            # create main display screen
+            # Set main display screen.
             self.main_display_screen = display_surface
 
-            # create initial viewing object
+            # Create initial viewing objects.
             self.overworld_viewing = \
                 viewing.OverworldViewing.create_overworld_viewing(
                     self.main_display_screen,
                 )
-
-            self.overworld_inventory_viewing = None
-            self.overworld_toolbelt_viewing = None
-            self.overworld_equipment_viewing = None
 
             # Create inventory viewing and toolbelt viewings for overworld..
             self.overworld_inventory_viewing = \
@@ -81,9 +85,19 @@ class Game(object):
                 )
 
             if not self.overworld_viewing:
-                LOGGER.error("Failed to create viewing object.")
+                LOGGER.error("Failed to create overworld viewing.")
+                sys.exit(1)
+            elif not self.overworld_inventory_viewing:
+                LOGGER.error("Failed to create overworld inventory viewing.")
+                sys.exit(1)
+            elif not self.overworld_toolbelt_viewing:
+                LOGGER.error("Failed to create overworld toolbelt viewing.")
+                sys.exit(1)
+            elif not self.overworld_equipment_viewing:
+                LOGGER.error("Failed to create overworld equipment viewing.")
+                sys.exit(1)
             else:
-                LOGGER.debug("Created viewing object.")
+                LOGGER.debug("Created viewing objects.")
 
             # set default difficulty to normal.
             self.difficulty = DIFFICULTY_NORMAL
@@ -125,13 +139,19 @@ class Game(object):
         self.overworld_viewing.protagonist = protagonist
 
     def set_protagonist_tile_position(self, new_position):
+        """Sets protagonist position on the current map."""
+
         if new_position and self.protagonist and self.curr_map:
             self.curr_map.protagonist_location = new_position
 
     def get_protagonist_tile_position(self):
+        """Returns the 2-tuple (x,y) Tile location for the protagonist on the
+        current map."""
+
         position = None
         if self.curr_map:
             position = self.curr_map.protagonist_location
+
         return position
 
     def set_object_respawn(self, target_object, target_object_loc):
@@ -250,8 +270,7 @@ class Game(object):
                     can_move = True
             else:
                 LOGGER.debug(
-                    "Cannot move to destination tile %s " + \
-                        "with transportation type %s",
+                    "Cannot move to destination tile %s with transportation type %s",
                     intended_dest_tile_loc,
                     transportation_type,
                 )
@@ -329,8 +348,10 @@ class Game(object):
 
         return can_move
 
-    # does not update surface - caller will have to do that
+    # Does not update surface - caller will have to do that
     def turn_protagonist(self, direction_to_face):
+        """Turns the protagonist in the specified direction."""
+
         # reblit tile that the protagonist is on
         self.curr_map.blit_tile(
             self.overworld_viewing.main_display_surface,
@@ -351,6 +372,9 @@ class Game(object):
     # Returns the tile location tuple for the tile that the protagonist
     # is facing.
     def get_protagonist_facing_tile_location(self):
+        """Returns the tile location (x,y) tuple for the Tile that the
+        protagonist is facing."""
+
         front_tile_pos = None
 
         if self.protagonist \
@@ -794,40 +818,19 @@ class Game(object):
 
         LOGGER.info("Saved game.")
 
-    def load_game(self, save_file_name=DEFAULT_SAVE_FILE_NAME):
-        """Loads the save data from save_file_name."""
+    def load_saved_protag_info(self, save_data):
+        """Loads the saved protagonist info contained in save_data.
 
-        save_data = None
-
-        if save_file_name:
-            # Obtain save data.
-            with open(save_file_name, "r") as save_file:
-                #loaded_game = pickle.load(save_file)
-                save_data = json.load(save_file)
+        Args:
+            save_data: dict containing the save information obtained
+                in load_game.
+        """
 
         if save_data:
-            LOGGER.info("Loaded game.")
-
-            # Update game information.
-            pprint.pprint(save_data)
-
-            # Set game language.
-            self.change_language(
-                save_data.get(
-                    savefiledata.GAME_LANGUAGE,
-                    language.DEFAULT_LANGUAGE
-                )
-            )
-
+            # Protagonist will face the correct direction.
             self.protagonist.curr_image_id = save_data.get(
                 savefiledata.PROTAG_IMAGE_ID,
                 imageids.IMAGE_ID_FACE_SOUTH
-            )
-
-            # Set map and protagonist location.
-            self.set_and_blit_game_map(
-                save_data.get(savefiledata.MAP_ID),
-                tuple(save_data.get(savefiledata.PROTAG_LOCATION, (0, 0)))
             )
 
             # Set protagonist items. TODO equipment.
@@ -844,6 +847,7 @@ class Game(object):
                     quantity=quantity
                 )
 
+            # Set protagonist skills.
             for skill_id, skill_info in save_data.get(savefiledata.PROTAG_STATS, {}).items():
                 self.protagonist.skill_info_mapping[skill_id] = [
                     skill_info[0],
@@ -851,12 +855,51 @@ class Game(object):
                     skill_info[2]
                 ]
 
-            # Debugging
-            LOGGER.info(
-                "Protag location: %s",
-                self.get_protagonist_tile_position()
+    def load_saved_map_info(self, save_data):
+        """Loads the saved map info contained in save_data.
+
+        Args:
+            save_data: dict containing the save information obtained
+                in load_game.
+        """
+
+        if save_data:
+            # TODO load the changed map data for all maps.
+
+            # Set map and protagonist location.
+            self.set_and_blit_game_map(
+                save_data.get(savefiledata.MAP_ID),
+                tuple(save_data.get(savefiledata.PROTAG_LOCATION, (0, 0)))
             )
 
+    def load_game(self, save_file_name=DEFAULT_SAVE_FILE_NAME):
+        """Loads the save data from save_file_name."""
+
+        save_data = None
+
+        if save_file_name:
+            # Obtain save data.
+            with open(save_file_name, "r") as save_file:
+                #loaded_game = pickle.load(save_file)
+                save_data = json.load(save_file)
+
+        if save_data:
+            LOGGER.info("Loading game.")
+
+            # Debugging.
+            pprint.pprint(save_data)
+
+            # Load saved information.
+            self.change_language(
+                save_data.get(
+                    savefiledata.GAME_LANGUAGE,
+                    language.DEFAULT_LANGUAGE
+                )
+            )
+            self.load_saved_protag_info(save_data)
+            self.load_saved_map_info(save_data)
+
+            # Debugging.
             self.display_statistics(self.protagonist)
 
     def display_statistics(self, target_entity):
@@ -894,15 +937,74 @@ class Game(object):
             refresh_after=True,
             refresh_during=True,
         ):
-        ret_option_id = self.overworld_viewing.display_overworld_side_menu(
+        return self.overworld_viewing.display_overworld_side_menu(
             menuoptions.OVERWORLD_MENU_OPTION_IDS,
             refresh_after=refresh_after,
             refresh_during=refresh_during,
         )
 
-        return ret_option_id
+    def display_bottom_menu(
+            self,
+            menu_options,
+            refresh_after=True,
+            refresh_during=True,
+        ):
+        return self.overworld_viewing.display_overworld_bottom_menu(
+            menu_options,
+            refresh_after=refresh_after,
+            refresh_during=refresh_during,
+        )
 
-    def process_overworld_menu_option(self, option_id):
+    def start_load_sequence(self):
+        # TODO check if load file exists.
+        load_prompt_text = savefiledata.LOAD_PROMPT_TEXT.get(
+            language.Language.current_language_id,
+            None
+        )
+
+        if load_prompt_text:
+            self.display_overworld_bottom_text(
+                load_prompt_text,
+                refresh_after=False,
+                refresh_during=True,
+                auto_advance=False,
+            )
+            ret_option_id = self.display_bottom_menu(
+                [menuoptions.YES_OPTION_ID, menuoptions.NO_OPTION_ID],
+                refresh_after=True,
+                refresh_during=True,
+            )
+
+            LOGGER.info("Picked option %s", ret_option_id)
+
+            if ret_option_id == menuoptions.YES_OPTION_ID:
+                LOGGER.info("Decided to load game.")
+                self.load_game()
+
+    def start_save_sequence(self):
+        # TODO check if the save file already exists.
+        save_prompt_text = savefiledata.SAVE_PROMPT_TEXT.get(
+            language.Language.current_language_id,
+            None
+        )
+
+        if save_prompt_text:
+            self.display_overworld_bottom_text(
+                save_prompt_text,
+                refresh_after=False,
+                refresh_during=True,
+                auto_advance=False,
+            )
+            ret_option_id = self.display_bottom_menu(
+                [menuoptions.YES_OPTION_ID, menuoptions.NO_OPTION_ID],
+                refresh_after=True,
+                refresh_during=True,
+            )
+
+            if ret_option_id == menuoptions.YES_OPTION_ID:
+                self.save_game()
+
+    def process_ow_side_menu_option(self, option_id):
         if option_id == menuoptions.QUIT_GAME_OPTION_ID:
             LOGGER.info("Quitting game from menu.")
             pygame.quit()
@@ -921,6 +1023,14 @@ class Game(object):
         elif option_id == menuoptions.EQUIPMENT_OPTION_ID:
             LOGGER.info("Displaying equipment from menu.")
             self.handle_overworld_equipment_viewing()
+            self.overworld_viewing.refresh_and_blit_self()
+        elif option_id == menuoptions.SAVE_GAME_OPTION_ID:
+            LOGGER.info("Starting to save game.")
+            self.start_save_sequence()
+            self.overworld_viewing.refresh_and_blit_self()
+        elif option_id == menuoptions.LOAD_GAME_OPTION_ID:
+            LOGGER.info("Starting to load saved game.")
+            self.start_load_sequence()
             self.overworld_viewing.refresh_and_blit_self()
 
     def handle_overworld_loop(self):
@@ -988,14 +1098,6 @@ class Game(object):
                         # Language switch initiated.
                         LOGGER.info("Language change toggled.")
                         self.toggle_language()
-                    elif events.key == pygame.K_s:
-                        # Save game.
-                        LOGGER.info("Save game initiated.")
-                        self.save_game()
-                    elif events.key == pygame.K_l:
-                        # Load game.
-                        LOGGER.info("Loading game initiated.")
-                        self.load_game()
                     elif events.key == pygame.K_1:
                         # Testing inventory.
                         self.protagonist.inventory.add_item(
@@ -1082,7 +1184,7 @@ class Game(object):
                         )
                         self.refresh_and_blit_overworld_viewing()
 
-                        self.process_overworld_menu_option(selected_option_id)
+                        self.process_ow_side_menu_option(selected_option_id)
                 elif events.type == pygame.KEYUP:
                     if events.key == pygame.K_RIGHT:
                         pressed_right = False
@@ -1132,42 +1234,46 @@ class Game(object):
             elif interact_in_front or examine_in_front:
                 LOGGER.debug("Trying to interact/examine in front")
 
-                # Get tile coordinate in front of protagonist
+                # Get tile coordinate in front of protagonist.
                 front_tile_pos = self.get_protagonist_facing_tile_location()
 
                 LOGGER.debug("Facing tile loc: %s", front_tile_pos)
 
-                # See if the map has an interactive object whose collision
-                # space takes up the facing tile.
-                inter_obj = self.curr_map.get_object_occupying_tile(
-                    front_tile_pos
-                )
-
-                # Get bottom left tile of object.
-                obj_bottom_left_tile_pos = \
-                    self.get_bottom_left_tile_of_occupied_tile(front_tile_pos)
-
-                if inter_obj and obj_bottom_left_tile_pos:
-                    LOGGER.debug(
-                        "Facing object %s", inter_obj.object_id
+                if front_tile_pos:
+                    # See if the map has an interactive object whose collision
+                    # space takes up the facing tile.
+                    inter_obj = self.curr_map.get_object_occupying_tile(
+                        front_tile_pos
                     )
 
-                    if interact_in_front:
-                        # Interact with object.
-                        self.protag_interact(
-                            inter_obj,
-                            obj_bottom_left_tile_pos
+                    # Get bottom left tile of object.
+                    obj_bottom_left_tile_pos = \
+                        self.get_bottom_left_tile_of_occupied_tile(
+                            front_tile_pos
                         )
-                    elif examine_in_front:
-                        LOGGER.info("Examining")
-                        # Display examine text at bottom of screen.
-                        self.display_overworld_bottom_text(
-                            inter_obj.get_examine_info(
-                                language.Language.current_language_id
-                            ),
-                            refresh_after=True,
-                            refresh_during=True,
+
+                    if inter_obj and obj_bottom_left_tile_pos:
+                        LOGGER.debug(
+                            "Facing object %s", inter_obj.object_id
                         )
+
+                        if interact_in_front:
+                            # Interact with object.
+                            self.protag_interact(
+                                inter_obj,
+                                obj_bottom_left_tile_pos
+                            )
+                        elif examine_in_front:
+                            LOGGER.info("Examining")
+
+                            # Display examine text at bottom of screen.
+                            self.display_overworld_bottom_text(
+                                inter_obj.get_examine_info(
+                                    language.Language.current_language_id
+                                ),
+                                refresh_after=True,
+                                refresh_during=True,
+                            )
 
 
 # Set up logger.

@@ -1270,7 +1270,7 @@ class Text_Display(Display):
                     * self.text_height
                 )
 
-class Menu_Display(Text_Display):
+class MenuDisplay(Text_Display):
     # If no background image is specified, default to background_color.
     # For best results, ensure that background_image_path points to an image
     # of size equal to the display_rect dimension values.
