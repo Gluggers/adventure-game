@@ -10,6 +10,10 @@ LOAD_PROMPT_TEXT = {
     language.LANG_ENGLISH: "Are you sure you want to load from the save file? You will lose any unsaved progress.",
     language.LANG_ESPANOL: "Estás seguro/a de que deseas cargar los datos del archivo guardado? Perderás todo el progreso que no sea guardado.",
 }
+SAVING_GAME_TEXT = {
+    language.LANG_ENGLISH: "Saving progress...",
+    language.LANG_ESPANOL: "Guardando el progreso...",
+}
 
 ### SAVE FILE DATA FIELDS ###
 GAME_LANGUAGE = "game_language" # 0x100

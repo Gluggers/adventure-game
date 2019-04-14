@@ -32,8 +32,10 @@ RANGED WEAPONS
 15 oak bow (upgrade with bronze)
 20 iron arrow
 30 willow bow (upgrade with iron), steel arrow
+40 titanium arrow
 45 maple bow (upgrade with steel)
-60 yew bow (upgrade with titanium)
+50 mithril arrow
+60 yew bow (upgrade with titanium), adamant arrow
 70 ancient bow, ancient arrow
 80 astral bow, astral arrow
 90 dragonite bow, dragonite arrow
@@ -42,20 +44,50 @@ RANGED WEAPONS
 RANGED ARMOUR
 01 leather
 10 snakeskin
-20 fortified snakeskin
+15 fortied leather (using bronze)
+20 fortified snakeskin (using iron)
 30 crocodile skin
-40 fortified crocodile skin
+40 fortified crocodile skin (using steel)
 50 normal dragonhide
-60 fortified dragonhide
-70 ancient (from ancient dragonhide)
-80 astral (from astral dragonhide)
-90 purified dragonhide (from pure dragon hide)
+60 fortified dragonhide (using titanium)
+70 ancient archer armour
+80 astral archer armour
+90 dragonite archer armour
 100 master/celestial (from celestial dragon hide)
 
 MAGIC WEAPONS
-01 basic/apprentice
-10 oak
-20
+01 basic staff/wand (normal wood)
+10 oak staff/wand
+20 willow staff/wand
+25 twisted staff/wand
+30 maple staff/wand
+35 enchanted staff/wand
+40 teak staff/wand
+45 eucalyptus staff/wand
+50 mahogany staff/wand
+55 chaos staff/wand
+60 yew staff/wand
+70 ancient staff/wand
+75 ghost staff/wand
+80 astral staff/wand
+85 staff/wand of shadows
+90 dragonite staff/wand
+100 master/celestial staff/wand
+
+MAGIC ARMOUR
+01 robes (regular)
+10 apprentice robes
+20 occult robes
+30 enchanted robes
+40 chaos robes
+50 arcane robes
+60 divine robes
+70 ancient robes
+75 ghost robes
+80 astral robes
+85 shadow robes
+90 dragon order robes
+100 master/celestial robes
 """
 
 import logging

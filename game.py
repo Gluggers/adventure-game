@@ -1002,7 +1002,22 @@ class Game(object):
             )
 
             if ret_option_id == menuoptions.YES_OPTION_ID:
+                saving_game_text = savefiledata.SAVING_GAME_TEXT.get(
+                    language.Language.current_language_id,
+                    None
+                )
+                if saving_game_text:
+                    self.display_overworld_bottom_text(
+                        saving_game_text,
+                        refresh_after=False,
+                        refresh_during=False,
+                        auto_advance=True,
+                        advance_delay_ms=2000,
+                    )
+
                 self.save_game()
+
+                self.overworld_viewing.refresh_and_blit_self()
 
     def process_ow_side_menu_option(self, option_id):
         if option_id == menuoptions.QUIT_GAME_OPTION_ID:
