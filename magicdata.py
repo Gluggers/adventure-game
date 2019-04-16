@@ -41,37 +41,36 @@ SPELL_EARTH_PULSE_ID = 0x2
 """
 NORMAL SPELLBOOK
     APPRENTICE LEVEL SPELL
-    1   water pulse
-    4   earth pulse
-    7   air pulse
-    10  fire pulse
+    1   water pulse - BM
+    4   earth pulse - BM
+    7   air pulse - BM
+    10  fire pulse - BM
 
     LOW LEVEL SPELL
-    18  water burst
-    22  earth burst
-    26  air burst
-    30  fire burst
+    18  water burst - BM
+    22  earth burst - BM
+    26  air burst - BM
+    30  fire burst - BM
 
     MEDIUM LEVEL SPELL
-    40  water beam
-    45  earth beam
-    50  air beam
-    55  fire beam
+    40  water beam - BM
+    45  earth beam - BM
+    50  air beam - BM
+    55  fire beam - BM
 
     HIGH LEVEL SPELL
-    67  water surge
-    73  earth surge
-    79  air surge
-    85  fire surge
+    67  water surge - BM
+    73  earth surge - BM
+    79  air surge - BM
+    85  fire surge - BM
 
     MASTER SPELLS
-    97  tsunami
-    98  earthquake
-    99  tornado
-    100 eruption
+    97  tsunami - BM
+    98  earthquake - BM
+    99  tornado - BM
+    100 eruption - BM
 
 FORBIDDEN SPELLBOOK
-
 
 
 ARCANE SPELLBOOK

@@ -25,6 +25,8 @@ START_NUM_GOLD_COINS = 100
 
 DEFAULT_MAX_HEALTH = 10
 
+MAX_RUN_ENERGY = 100.0
+
 class Entity(interactiveobj.Interactive_Object):
     # id represents the object ID.
     # name_info maps language ID to entity name.
@@ -104,6 +106,12 @@ class Entity(interactiveobj.Interactive_Object):
 
         self.gender = gender
         self.race = race
+
+        # Determines walk/run.
+        self.run_on = False
+
+        # Determines how much longer the entity can run.
+        self.run_energy = MAX_RUN_ENERGY
 
         # By default, face south.
         self.facing_direction = directions.DIR_SOUTH
@@ -185,6 +193,24 @@ class Entity(interactiveobj.Interactive_Object):
 
         # Maps Item IDs to the number of items held.
         self.inventory = inventory.Inventory.inventory_factory()
+
+    # TODO - increment run energy.
+
+    def decrement_run_energy(self, distance=1,):
+        """Reduce run energy based on distance ran and the entity's
+        weight and agility level.
+
+        Args:
+            distance: number of tiles moved, not counting map
+                switches, teleports, or connector tiles.
+        """
+
+        # TODO change calculation.
+        if distance:
+            self.run_energy = max(
+                0.0,
+                self.run_energy - (2 * distance)
+            )
 
     def inventory_full(self):
         """Returns True if inventory is full, False otherwise."""

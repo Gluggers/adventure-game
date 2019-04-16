@@ -26,8 +26,11 @@ STEP_DURATION = int(tile.TILE_SIZE / 4)
 
 ### TIME CONSTANTS ###
 NUM_MS_SECOND = 1000
-SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.75)
-SINGLE_PIXEL_SCROLL_TIME_MS = int(SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+WALK_SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.65)
+WALK_SINGLE_PIXEL_SCROLL_TIME_MS = int(WALK_SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+RUN_SINGLE_TILE_SCROLL_TIME_MS = int(NUM_MS_SECOND * 0.25)
+RUN_SINGLE_PIXEL_SCROLL_TIME_MS = int(RUN_SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+
 
 VIEWING_TILE_PADDING = 2
 
@@ -1669,18 +1672,25 @@ class OverworldViewing(Viewing):
     # scroll map one Tile distance in the indicated direction.
     # updates main display with each new viewpoint
     # scroll_wait_time is the time (in milliseconds)
-    def scroll_map_single_tile(self, scroll_direction, walk_direction):
+    def scroll_map_single_tile(
+            self,
+            scroll_direction,
+            char_move_direction,
+            run=False,
+        ):
         """Scrolls the map while walking the main character.
 
         Note that the character should walk in the opposite direction of the
         map scrolling, so for best results, ensure that scroll_direction
-        and walk_direction are opposite directions.
+        and char_move_direction are opposite directions.
 
         Args:
             scroll_direction: direction ID that indicates in which direction
                 the map should scroll.
-            walk_direction: direction ID that indicates in which direction
+            char_move_direction: direction ID that indicates in which direction
                 the character should walk.
+            run: if True, have the character run. If False, have the character
+                walk.
         """
 
         # Get top left viewing tile and tile subset rect to blit.
@@ -1698,8 +1708,17 @@ class OverworldViewing(Viewing):
 
         # Get image ID list for the walk animation in this direction.
         walk_image_ids = imageids.get_entity_walk_image_ids(
-            walk_direction
+            char_move_direction
         )
+
+        # Get wait time in between pixel movements.
+        wait_time = None
+
+        if run:
+            wait_time = int(RUN_SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+        else:
+            wait_time = int(WALK_SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
+
         if walk_image_ids:
             # Number of steps in the walk animation.
             phase_duration = int(tile.TILE_SIZE / len(walk_image_ids))
@@ -1730,8 +1749,8 @@ class OverworldViewing(Viewing):
                     # Update main display
                     pygame.display.update()
 
-                    # wait till next iteration
-                    pygame.time.wait(SINGLE_PIXEL_SCROLL_TIME_MS)
+                    # Wait till next iteration
+                    pygame.time.wait(wait_time)
 
     def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
         """Fills in the viewing background for the overworld.

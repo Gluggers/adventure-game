@@ -47,60 +47,59 @@ class Game(object):
             game_language: language ID for the game language translation.
         """
 
-        if display_surface:
-            # Will change as game progresses.
-            self.protagonist = None
-            self.curr_map = None
-            language.Language.set_current_language_id(game_language)
+        # Will change as game progresses.
+        self.protagonist = None
+        self.curr_map = None
+        language.Language.set_current_language_id(game_language)
 
-            # Set main display screen.
-            self.main_display_screen = display_surface
+        # Set main display screen.
+        self.main_display_screen = display_surface
 
-            # Create initial viewing objects.
-            self.overworld_viewing = \
-                viewing.OverworldViewing.create_overworld_viewing(
-                    self.main_display_screen,
-                )
+        # Create initial viewing objects.
+        self.overworld_viewing = \
+            viewing.OverworldViewing.create_overworld_viewing(
+                self.main_display_screen,
+            )
 
-            # Create inventory viewing and toolbelt viewings for overworld..
-            self.overworld_inventory_viewing = \
-                selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
-                    self.main_display_screen,
-                    itemdata.ITEM_ICON_DIMENSIONS,
-                    display_pattern=display.PATTERN_2_ID,
-                )
+        # Create inventory viewing and toolbelt viewings for overworld..
+        self.overworld_inventory_viewing = \
+            selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                self.main_display_screen,
+                itemdata.ITEM_ICON_DIMENSIONS,
+                display_pattern=display.PATTERN_2_ID,
+            )
 
-            self.overworld_toolbelt_viewing = \
-                selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
-                    self.main_display_screen,
-                    itemdata.ITEM_ICON_DIMENSIONS,
-                    display_pattern=display.PATTERN_2_ID,
-                )
+        self.overworld_toolbelt_viewing = \
+            selectionviewing.ItemSelectionGridViewing.create_item_selection_grid_viewing(
+                self.main_display_screen,
+                itemdata.ITEM_ICON_DIMENSIONS,
+                display_pattern=display.PATTERN_2_ID,
+            )
 
-            self.overworld_equipment_viewing = \
-                equipmentviewing.EquipmentViewing.create_equipment_viewing(
-                    self.main_display_screen,
-                    itemdata.ITEM_ICON_DIMENSIONS,
-                    display_pattern=display.PATTERN_2_ID,
-                )
+        self.overworld_equipment_viewing = \
+            equipmentviewing.EquipmentViewing.create_equipment_viewing(
+                self.main_display_screen,
+                itemdata.ITEM_ICON_DIMENSIONS,
+                display_pattern=display.PATTERN_2_ID,
+            )
 
-            if not self.overworld_viewing:
-                LOGGER.error("Failed to create overworld viewing.")
-                sys.exit(1)
-            elif not self.overworld_inventory_viewing:
-                LOGGER.error("Failed to create overworld inventory viewing.")
-                sys.exit(1)
-            elif not self.overworld_toolbelt_viewing:
-                LOGGER.error("Failed to create overworld toolbelt viewing.")
-                sys.exit(1)
-            elif not self.overworld_equipment_viewing:
-                LOGGER.error("Failed to create overworld equipment viewing.")
-                sys.exit(1)
-            else:
-                LOGGER.debug("Created viewing objects.")
+        if not self.overworld_viewing:
+            LOGGER.error("Failed to create overworld viewing.")
+            sys.exit(1)
+        elif not self.overworld_inventory_viewing:
+            LOGGER.error("Failed to create overworld inventory viewing.")
+            sys.exit(1)
+        elif not self.overworld_toolbelt_viewing:
+            LOGGER.error("Failed to create overworld toolbelt viewing.")
+            sys.exit(1)
+        elif not self.overworld_equipment_viewing:
+            LOGGER.error("Failed to create overworld equipment viewing.")
+            sys.exit(1)
+        else:
+            LOGGER.debug("Created viewing objects.")
 
-            # set default difficulty to normal.
-            self.difficulty = DIFFICULTY_NORMAL
+        # Set default difficulty to normal.
+        self.difficulty = DIFFICULTY_NORMAL
 
     # TODO document
     # centers map automatically depending on where protagonist is
@@ -222,14 +221,48 @@ class Game(object):
     # screen updates.  Successful moves across different maps will
     # also trigger map changes and associated display changes.
     # Returns True if successful move, False otherwise.
-    def move_protagonist(self, protag_move_dir, transportation_type):
+    def move_protagonist(
+            self,
+            protag_move_dir,
+            transportation_type,
+        ):
+        """Moves the protagonist, if possible, in the specified direction using
+        the given transportation type, and returns True upon successful move,
+        False if unable to move.
+
+        If the protagonist cannot move in the specified direction with the
+        given transportation type, then the method will not move the
+        protagonist and will return False.
+
+        If the protagonist will enter a different map by moving in
+        the specified direction, then the method will change the map and
+        return True.
+
+        If the protagonist is set to currently run, then the method will
+        have the protagonist run rather than walk.
+
+        Args:
+            protag_move_dir: direction ID to move the protagonist in.
+            transportation_type: transportation flag that indicates what
+                transportation method the protagonist is using (e.g. walking
+                vs. flying vs. sailing)
+
+        Returns:
+            True upon successful move, False otherwise.
+        """
+
         can_move = False
         changing_maps = False
         dest_map = None
         dest_map_id = None
         map_scroll_dir = None
 
-        # get intended destination tile and check if protagonist is
+        run = False
+
+        if self.protagonist.run_on and int(self.protagonist.run_energy):
+            run = True
+
+        # Get intended destination tile and check if protagonist is
         # trying to go out of bounds
         curr_tile_loc = self.curr_map.protagonist_location
         intended_dest_tile_loc = None
@@ -335,11 +368,21 @@ class Game(object):
                     dest_map_id
                 )
             else:
-                # same map, just scroll
+                # Same map, just scroll.
                 self.overworld_viewing.scroll_map_single_tile(
                     map_scroll_dir,
                     protag_move_dir,
+                    run=run,
                 )
+
+                # Reduce run energy if applicable.
+                if run and transportation_type & tiledata.WALKABLE_F:
+                    self.protagonist.decrement_run_energy()
+
+                    LOGGER.info(
+                        "Run energy now at %d.",
+                        self.protagonist.run_energy,
+                    )
 
                 # Check if the new tile is a connector tile for the map.
                 # If so, switch to the map and tile position.
@@ -795,6 +838,10 @@ class Game(object):
         save_data[savefiledata.PROTAG_STATS] = \
             self.protagonist.skill_info_mapping
 
+        # Save run info.
+        save_data[savefiledata.PROTAG_RUN_ON] = self.protagonist.run_on
+        save_data[savefiledata.PROTAG_RUN_ENERGY] = self.protagonist.run_energy
+
         # TODO implement further
 
         return save_data
@@ -854,6 +901,17 @@ class Game(object):
                     skill_info[1],
                     skill_info[2]
                 ]
+
+            # Set protagonist run info.
+            self.protagonist.run_on = save_data.get(
+                savefiledata.PROTAG_RUN_ON,
+                False,
+            )
+
+            self.protagonist.run_energy = save_data.get(
+                savefiledata.PROTAG_RUN_ENERGY,
+                0
+            )
 
     def load_saved_map_info(self, save_data):
         """Loads the saved map info contained in save_data.
@@ -1180,9 +1238,14 @@ class Game(object):
                             itemdata.ORE_IRON_ID,
                             1
                         )
-                    elif events.key == pygame.K_t:
-                        # Testing stuff.
-                        LOGGER.info("Testing.")
+                    elif events.key == pygame.K_r:
+                        # Toggle on/off run for the protagonist.
+                        self.protagonist.run_on = not self.protagonist.run_on
+
+                        LOGGER.info(
+                            "Toggling protagonist run to %s",
+                            self.protagonist.run_on,
+                        )
                     elif events.key == pygame.K_ESCAPE:
                         # Display menu.
                         LOGGER.info("Displaying menu.")

@@ -44,15 +44,15 @@ MAX_CHEST_ID = 0x6FFFFF
 GATHERING_MAIN_MESSAGES = {
     CHOP_TREE_ID: {
         language.LANG_ENGLISH: "You attempt to chop down the {0}...",
-        language.LANG_ESPANOL: "Tratas de cortar el/la {0}...",
+        language.LANG_ESPANOL: "Tratas de cortar {0}...",
     },
     MINE_ROCK_ID: {
         language.LANG_ENGLISH: "You attempt to mine the {0}...",
-        language.LANG_ESPANOL: "Tratas de extraer minerales del/la {0}...",
+        language.LANG_ESPANOL: "Tratas de extraer minerales de {0}...",
     },
     CATCH_FISH_ROD_ID: {
-        language.LANG_ENGLISH: "You cast out your rod to catch some {0}...",
-        language.LANG_ESPANOL: "Lanzas tu caña para pescar {0}...",
+        language.LANG_ENGLISH: "You cast out your rod at the {0} to catch some fish...",
+        language.LANG_ESPANOL: "Lanzas tu caña para pescar en {0}...",
     },
 }
 
