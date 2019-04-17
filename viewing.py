@@ -1231,7 +1231,7 @@ class OverworldViewing(Viewing):
         """Returns the health String for the protagonist.
 
         The String format is "<current health> / <max health>",
-        for example "5 / 12".
+        for example "5 / 12". Rounds health down to the nearest integer.
 
         Returns:
             String representing the current health for the protagonist.
@@ -1244,9 +1244,9 @@ class OverworldViewing(Viewing):
                 language.Language.current_language_id,
                 ""
             ),
-            str(self._protagonist.curr_health),
+            str(int(self._protagonist.curr_health)),
             ' / ',
-            str(self._protagonist.max_health),
+            str(int(self._protagonist.max_health)),
         ])
 
         return ret_text
@@ -1463,12 +1463,22 @@ class OverworldViewing(Viewing):
             LOGGER.error("Missing parameters for setting and blitting map.")
             sys.exit(1)
 
+    def refresh_protagonist(self):
+        """Refreshes the protagonist, such as health and run energy."""
+
+        if self._protagonist:
+            self._protagonist.refresh_self()
+
     def refresh_self(self):
-        """Refreshes overworld data, including map and top display.
+        """Refreshes overworld data, including map, linked protagonist,
+        and top display.
 
         Does not reblit the map or top display - caller must do
         that.
         """
+
+        # Update protagonist.
+        self.refresh_protagonist()
 
         # Update map.
         self.refresh_map()

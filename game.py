@@ -259,8 +259,11 @@ class Game(object):
 
         run = False
 
-        if self.protagonist.run_on and int(self.protagonist.run_energy):
-            run = True
+        if self.protagonist.run_on:
+                if int(self.protagonist.run_energy):
+                    run = True
+                else:
+                    self.protagonist.run_on = False
 
         # Get intended destination tile and check if protagonist is
         # trying to go out of bounds
@@ -689,14 +692,21 @@ class Game(object):
             language.Language.set_current_language_id(new_language)
 
             # Refresh viewings.
-            self.overworld_viewing.refresh_and_blit_self()
-            pygame.display.update()
+            self.refresh_and_blit_overworld_viewing()
 
-    def refresh_and_blit_overworld_viewing(self):
-        """Updates the overworld viewing and updates the pygame display."""
+    def refresh_and_blit_overworld_viewing(self, display_update=True):
+        """Updates the overworld viewing and updates the pygame display if
+        requested.
+
+        Args:
+            display_update: if True, updates pygame display. If False, does
+                not update the display.
+        """
 
         self.overworld_viewing.refresh_and_blit_self()
-        pygame.display.update()
+
+        if display_update:
+            pygame.display.update()
 
     # Blits text in bottom text box.
     # If refresh_after is True, refreshes
@@ -795,6 +805,8 @@ class Game(object):
                 object_id=object_id,
                 countdown_time_s=countdown_time_s,
             )
+
+            map_obj.refresh_self()
 
     # Sets spawn action for the current map.
     def set_pending_spawn_action_curr_map(
@@ -1075,8 +1087,6 @@ class Game(object):
 
                 self.save_game()
 
-                self.overworld_viewing.refresh_and_blit_self()
-
     def process_ow_side_menu_option(self, option_id):
         if option_id == menuoptions.QUIT_GAME_OPTION_ID:
             LOGGER.info("Quitting game from menu.")
@@ -1085,26 +1095,26 @@ class Game(object):
         elif option_id == menuoptions.INVENTORY_OPTION_ID:
             LOGGER.info("Displaying inventory from menu.")
             self.handle_overworld_inventory()
-            self.overworld_viewing.refresh_and_blit_self()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
         elif option_id == menuoptions.LEVELS_OPTION_ID:
             LOGGER.info("Displaying stat levels from menu.")
             self.display_statistics(self.protagonist)
         elif option_id == menuoptions.TOOLS_OPTION_ID:
             LOGGER.info("Displaying toolbelt from menu.")
             self.handle_overworld_toolbelt()
-            self.overworld_viewing.refresh_and_blit_self()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
         elif option_id == menuoptions.EQUIPMENT_OPTION_ID:
             LOGGER.info("Displaying equipment from menu.")
             self.handle_overworld_equipment_viewing()
-            self.overworld_viewing.refresh_and_blit_self()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
         elif option_id == menuoptions.SAVE_GAME_OPTION_ID:
             LOGGER.info("Starting to save game.")
             self.start_save_sequence()
-            self.overworld_viewing.refresh_and_blit_self()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
         elif option_id == menuoptions.LOAD_GAME_OPTION_ID:
             LOGGER.info("Starting to load saved game.")
             self.start_load_sequence()
-            self.overworld_viewing.refresh_and_blit_self()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
 
     def handle_overworld_loop(self):
         continue_playing = True

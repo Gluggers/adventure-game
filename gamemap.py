@@ -49,6 +49,8 @@ class Map:
         self.adj_map_dict = {}
         self.top_left_position = top_left
 
+        self.last_refresh_time_ms = pygame.time.get_ticks()
+
         # Maps bottom left tile location tuples
         # to the object ID of the original interactive obj on the tile
         # (No entry in dict for tile locations that are not
@@ -111,7 +113,7 @@ class Map:
                 for grid_row in tile_grid:
                     row_to_copy = []
                     for x in grid_row:
-                        if (x is not None) and (x.__class__.__name__ != tile.TILE_CLASS):
+                        if (x is not None) and (not isinstance(x, tile.Tile)):
                             LOGGER.error("Tile grids can only accept None or Tile objects")
                             valid_grid_dimensions = False
                             pygame.quit()
@@ -514,11 +516,11 @@ class Map:
     # will not do anything, including overwriting it. # TODO - change?
     # Caller needs to refresh the map.
     def set_pending_spawn_action(
-                self,
-                bottom_left_tile_loc,
-                object_id=None,
-                countdown_time_s=0,
-            ):
+            self,
+            bottom_left_tile_loc,
+            object_id=None,
+            countdown_time_s=0,
+        ):
         if bottom_left_tile_loc \
                 and not self.pending_spawn_actions.get(
                     bottom_left_tile_loc,
@@ -530,9 +532,7 @@ class Map:
                 self.execute_spawn_action(bottom_left_tile_loc, object_id)
             else:
                 # Timed action.
-                #curr_time_ms = timekeeper.Timekeeper.time_ms()
-                curr_time_ms = pygame.time.get_ticks()
-                spawn_info = [object_id, curr_time_ms, countdown_ms]
+                spawn_info = [object_id, countdown_ms]
                 self.pending_spawn_actions[bottom_left_tile_loc] = spawn_info
                 LOGGER.info(
                     "Added pending spawn action to tile location %s: %s",
@@ -766,39 +766,39 @@ class Map:
     # Refreshes map. Check for respawns.
     # Does not reblit map - caller will have to do that.
     def refresh_self(
-                self,
-                #surface,
-                #tile_subset_rect=None,
-            ):
+            self,
+            #surface,
+            #tile_subset_rect=None,
+        ):
+        # Get elapsed time since last refresh.
+        curr_time_ms = pygame.time.get_ticks()
+
+        elapsed_ms = curr_time_ms - self.last_refresh_time_ms
+
+        self.last_refresh_time_ms = curr_time_ms
+
+        if elapsed_ms < 0:
+            logger.error("Error with elapsed time %d", elapsed_ms)
+            sys.exit(4)
+
         # Update remaining timers for spawn actions.
         if self.pending_spawn_actions:
             LOGGER.debug("Refreshing self.")
 
-            #curr_time_ms = timekeeper.Timekeeper.time_ms()
-            curr_time_ms = pygame.time.get_ticks()
             to_finish = []
 
             for tile_loc_tuple, action_info in self.pending_spawn_actions.items():
-                # action_info is of the form [object ID for object to place on tile
-                # (None if removing object), time of entry or last refresh of object,
-                # and remaining time in milliseconds].
-                if action_info and (len(action_info) == 3):
-                    elapsed_time_ms = curr_time_ms - action_info[1]
-                    if elapsed_time_ms < 0:
-                        LOGGER.error(
-                            "Error in elapsed time for pending spawn for map %d",
-                            self.map_id
-                        )
-                        sys.exit(4)
-                    else:
-                        remaining_time = action_info[2] - elapsed_time_ms
-                        action_info[2] = remaining_time
-                        action_info[1] = curr_time_ms
-                        self.pending_spawn_actions[tile_loc_tuple] = action_info
+                # action_info is of the form (object ID for object to place on
+                # tile (None if removing object), and remaining time in
+                # milliseconds).
+                if action_info and (len(action_info) == 2):
+                    remaining_ms = action_info[1] - elapsed_ms
+                    action_info[1] = remaining_ms
+                    self.pending_spawn_actions[tile_loc_tuple] = action_info
 
-                        if remaining_time <= 0:
-                            # Add to processing list.
-                            to_finish.append(tile_loc_tuple)
+                    if remaining_ms <= 0:
+                        # Add to processing list.
+                        to_finish.append(tile_loc_tuple)
                 else:
                     LOGGER.error("Invalid spawn action info %s.", action_info)
                     sys.exit(3)

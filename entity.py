@@ -1,3 +1,4 @@
+import sys
 import pygame
 import tiledata
 import mapdata
@@ -26,6 +27,12 @@ START_NUM_GOLD_COINS = 100
 DEFAULT_MAX_HEALTH = 10
 
 MAX_RUN_ENERGY = 100.0
+
+# Health recovery rate in health points per minute.
+DEFAULT_HEALTH_REGEN_PER_MIN = 2
+
+# Run energy recovery rate in points per minute.
+DEFAULT_RUN_REGEN_PER_MIN = 30
 
 class Entity(interactiveobj.Interactive_Object):
     # id represents the object ID.
@@ -205,7 +212,7 @@ class Entity(interactiveobj.Interactive_Object):
                 switches, teleports, or connector tiles.
         """
 
-        # TODO change calculation.
+        # TODO change calculation based on weight.
         if distance:
             self.run_energy = max(
                 0.0,
@@ -431,7 +438,7 @@ class Entity(interactiveobj.Interactive_Object):
         max_health = 0
 
         if hitpoint_level and hitpoint_level > 0:
-            max_health = hitpoint_level * 10
+            max_health = hitpoint_level * 10.0
 
         return max_health
 
@@ -525,8 +532,46 @@ class Protagonist(Character):
         )
         self.quest_journal = {}
 
+        # Time in MS of last refresh.
+        self.last_refresh_time_ms = pygame.time.get_ticks()
+
         # TODO make max_size constant. Add items here?
         self.tool_inventory = inventory.Inventory.inventory_factory(max_size=10)
+
+    def refresh_self(self):
+        """Refreshes self, including attributes like run energy and health."""
+
+        # Get elapsed time since last refresh.
+        curr_time_ms = pygame.time.get_ticks()
+
+        elapsed_ms = curr_time_ms - self.last_refresh_time_ms
+
+        self.last_refresh_time_ms = curr_time_ms
+
+        if elapsed_ms < 0:
+            logger.error("Error in elapsed time %d", elapsed_ms)
+            sys.exit(4)
+
+        elapsed_min = elapsed_ms / 60000
+
+        # Regenerate some health and run energy.
+        if self.curr_health < self.max_health:
+            self.curr_health = min(
+                self.max_health,
+                self.curr_health + (elapsed_min * DEFAULT_HEALTH_REGEN_PER_MIN)
+            )
+
+        if self.run_energy < MAX_RUN_ENERGY:
+            self.run_energy = min(
+                MAX_RUN_ENERGY,
+                self.run_energy + (elapsed_min * DEFAULT_RUN_REGEN_PER_MIN)
+            )
+
+        LOGGER.debug(
+            "Protag run energy %d, health %d",
+            self.run_energy,
+            self.curr_health,
+        )
 
     @classmethod
     def protagonist_factory(cls, name):
