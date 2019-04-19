@@ -9,12 +9,13 @@ import display
 import entity
 import equipmentdata
 import equipmentviewing
+import gamemap
 import imageids
 import interaction
 import inventory
 import itemdata
 import language
-import gamemap
+import mapdata
 import menuoptions
 import savefiledata
 import selectionviewing
@@ -394,16 +395,11 @@ class Game(object):
 
         return can_move
 
-    # Does not update surface - caller will have to do that
     def turn_protagonist(self, direction_to_face):
-        """Turns the protagonist in the specified direction."""
+        """Turns the protagonist in the specified direction.
 
-        # reblit tile that the protagonist is on
-        self.curr_map.blit_tile(
-            self.overworld_viewing.main_display_surface,
-            self.curr_map.protagonist_location,
-            viewingdata.CENTER_OW_TILE_TOP_LEFT,
-        )
+        Does not update surface - caller will have to do that
+        """
 
         # make protagonist face the direction
         self.protagonist.face_direction(
@@ -925,6 +921,9 @@ class Game(object):
                 0
             )
 
+            # Reset last refresh time.
+            self.protagonist.last_refresh_time_ms = pygame.time.get_ticks()
+
     def load_saved_map_info(self, save_data):
         """Loads the saved map info contained in save_data.
 
@@ -934,7 +933,13 @@ class Game(object):
         """
 
         if save_data:
-            # TODO load the changed map data for all maps.
+            for map_id in mapdata.MAP_DATA:
+                map_obj = gamemap.Map.get_map(map_id)
+
+                if map_obj:
+                    # TODO load changed map data.
+
+                    map_obj.last_refresh_time_ms = pygame.time.get_ticks()
 
             # Set map and protagonist location.
             self.set_and_blit_game_map(
@@ -1136,9 +1141,11 @@ class Game(object):
             timekeeper.Timekeeper.tick()
             num_ticks = num_ticks + 1
 
-            # TODO: update map
             if num_ticks % timekeeper.REFRESH_INTERVAL_NUM_TICKS == 0:
                 self.refresh_and_blit_overworld_viewing()
+            elif num_ticks % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS == 0:
+                self.overworld_viewing.blit_self()
+                pygame.display.update()
 
             interact_in_front = False
             examine_in_front = False

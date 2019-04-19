@@ -62,7 +62,7 @@ def main():
     tile.Tile.build_tiles()
 
     # Load miscellaneous objects.
-    interactiveobj.Interactive_Object.build_misc_objects()
+    interactiveobj.InteractiveObject.build_misc_objects()
 
     # Load resources.
     resources.Resource.build_resources()

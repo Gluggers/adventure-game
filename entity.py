@@ -34,7 +34,7 @@ DEFAULT_HEALTH_REGEN_PER_MIN = 2
 # Run energy recovery rate in points per minute.
 DEFAULT_RUN_REGEN_PER_MIN = 30
 
-class Entity(interactiveobj.Interactive_Object):
+class Entity(interactiveobj.InteractiveObject):
     # id represents the object ID.
     # name_info maps language ID to entity name.
     # image_path_dict maps image type IDs to the file paths for the image.
@@ -55,7 +55,7 @@ class Entity(interactiveobj.Interactive_Object):
             self,
             id,
             name_info,
-            image_path_dict,
+            image_info_dict,
             collision_width=1,
             collision_height=1,
             skill_levels=None,
@@ -73,8 +73,12 @@ class Entity(interactiveobj.Interactive_Object):
                 among interactive objects?
             name_info: dict that maps language IDs to Strings for
                 the Entity name translation.
-            image_path_dict: dict that maps image IDs to the file paths
-                for the image file.
+            image_info_dict: dict that maps image sequence IDs to a length-2
+                list of the following format:
+                    [list of file paths for image files for the image sequence,
+                    image sequence duration in milliseconds].
+                    If image sequence duration is None, then only the first
+                    image in the image sequence will be used.
             collision_width: width, in Tiles, of the collision box for the
                 Entity.
             collision_height: height, in Tiles, of the collision box for the
@@ -99,12 +103,12 @@ class Entity(interactiveobj.Interactive_Object):
                 skill level.
         """
 
-        interactiveobj.Interactive_Object.__init__(
+        interactiveobj.InteractiveObject.__init__(
             self,
             objdata.TYPE_CHARACTER,
             name_info,
             id,
-            image_path_dict,
+            image_info_dict,
             collision_width=collision_width,
             collision_height=collision_height,
             examine_info=examine_info,
@@ -425,6 +429,7 @@ class Entity(interactiveobj.Interactive_Object):
                     surface,
                     bottom_left_pixel=bottom_left_pixel,
                     top_left_pixel=top_left_pixel,
+                    blit_time_ms=pygame.time.get_ticks(),
                 )
                 self.curr_image_id = image_id
 
@@ -599,7 +604,7 @@ class Protagonist(Character):
             language.LANG_ENGLISH: name,
             language.LANG_ESPANOL: name,
         }
-        protag_image_path_dict = objdata.IMAGE_PATH_DICT_PROTAG
+        protag_image_path_dict = objdata.IMAGE_INFO_DICT_PROTAG
         protag_skill_levels = {
             skills.SKILL_ID_HITPOINTS: 1,
             skills.SKILL_ID_WOODCUTTING: 40, # TESTING.
@@ -649,7 +654,7 @@ class Protagonist(Character):
         # TODO rest of setup
 
         # Add protagonist to object listing
-        interactiveobj.Interactive_Object.add_interactive_obj_to_listing(
+        interactiveobj.InteractiveObject.add_interactive_obj_to_listing(
             objdata.PROTAGONIST_ID,
             protagonist
         )

@@ -96,7 +96,8 @@ EQUIPMENT_ICON_RING_PATH = EQUIPMENT_ICON_PATH \
 ### TILE LAYER 1 IMAGE PATHS ###
 TILE_DEFAULT_PATH = TILE_IMAGE_PATH + "tile_default_32x32_dk.png" # [0]
 TILE_GRASS_PLAIN_PATH = TILE_IMAGE_PATH + "tile_grass_plain_32x32_dk.png" # [0]
-TILE_GRASS_FLOWERS_PATH = TILE_IMAGE_PATH + "tile_grass_flowers_1_32x32_dk.png" # [0]
+TILE_GRASS_FLOWERS_1_PATH = TILE_IMAGE_PATH + "tile_grass_flowers_1_32x32_dk.png" # [0]
+TILE_GRASS_FLOWERS_2_PATH = TILE_IMAGE_PATH + "tile_grass_flowers_2_32x32_dk.png" # [0]
 TILE_GRASS_1_PATH = TILE_IMAGE_PATH + "tile_grass_1_32x32_dk.png" # [0]
 TILE_GRASS_2_PATH = TILE_IMAGE_PATH + "tile_grass_2_32x32_dk.png" # [0]
 TILE_SAND_PATH = TILE_IMAGE_PATH + "tile_sand_32x32_dk.png" # [0]

@@ -204,6 +204,7 @@ class Viewing(object):
                 # Wait for user to advance.
                 advance = False
                 refresh_tick_counter = 0
+                reblit_tick_counter = 0
 
                 LOGGER.debug("Waiting to advance...")
 
@@ -211,12 +212,28 @@ class Viewing(object):
                     timekeeper.Timekeeper.tick()
                     refresh_tick_counter = (refresh_tick_counter + 1) \
                                     % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                    reblit_tick_counter = (reblit_tick_counter + 1) \
+                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         # Refresh and reblit self and page.
                         LOGGER.debug("Refreshing while waiting.")
                         self.refresh_and_blit_self()
+                        text_display.blit_page(
+                            self._main_display_surface,
+                            page,
+                            show_continue_icon=True,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                        )
+
+                        if not no_display_update:
+                            pygame.display.update()
+
+                    elif reblit_tick_counter == 0:
+                        self.blit_self()
                         text_display.blit_page(
                             self._main_display_surface,
                             page,
@@ -611,6 +628,7 @@ class Viewing(object):
             done = False
             input_suffix = "*"
             refresh_tick_counter = 0
+            reblit_tick_counter = 0
             font_colors = [prompt_font_color, input_font_color]
 
             # Display just the first page.
@@ -639,11 +657,34 @@ class Viewing(object):
 
                     refresh_tick_counter = (refresh_tick_counter + 1) \
                             % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                    reblit_tick_counter = (reblit_tick_counter + 1) \
+                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         LOGGER.debug("Refreshing while waiting.")
                         self.refresh_and_blit_self()
+                        text_lines = [
+                            prompt_text_to_display,
+                            user_input_str + input_suffix
+                        ]
+                        self.display_text_display_first_page(
+                            text_display,
+                            text_lines,
+                            font_color=font_colors,
+                            advance_delay_ms=0,
+                            auto_advance=True,
+                            refresh_during=refresh_during,
+                            refresh_after=False,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                            no_display_update=no_display_update,
+                        )
+                        if not no_display_update:
+                            pygame.display.update()
+                    elif reblit_tick_counter == 0:
+                        self.blit_self()
                         text_lines = [
                             prompt_text_to_display,
                             user_input_str + input_suffix
@@ -805,6 +846,7 @@ class Viewing(object):
 
             done = False
             refresh_tick_counter = 0
+            reblit_tick_counter = 0
 
             while not done:
                 curr_page = menu_pages[curr_page_index]
@@ -850,11 +892,24 @@ class Viewing(object):
 
                     refresh_tick_counter = (refresh_tick_counter + 1) \
                             % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                    reblit_tick_counter = (reblit_tick_counter + 1) \
+                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         LOGGER.debug("Refreshing while waiting.")
                         self.refresh_and_blit_self()
+                        menu_display.blit_menu_page(
+                            self._main_display_surface,
+                            curr_page,
+                            curr_selected_index,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                        )
+                        pygame.display.update()
+                    if reblit_tick_counter == 0:
+                        self.blit_self()
                         menu_display.blit_menu_page(
                             self._main_display_surface,
                             curr_page,
@@ -1218,15 +1273,6 @@ class OverworldViewing(Viewing):
             if self._top_display:
                 self._top_display.protagonist = value
 
-    def blit_top_display(self):
-        """Blits the top display onto the main display surface.
-
-        Caller must update the main pygame display if needed.
-        """
-
-        if self._main_display_surface and self._top_display:
-            self._top_display.blit_onto_surface(self._main_display_surface)
-
     def _get_overworld_health_text(self):
         """Returns the health String for the protagonist.
 
@@ -1507,7 +1553,8 @@ class OverworldViewing(Viewing):
 
             self._curr_map.blit_map(
                 self._main_display_surface,
-                tile_subset_rect=tile_subset_rect
+                tile_subset_rect=tile_subset_rect,
+                blit_time_ms=pygame.time.get_ticks(),
             )
 
     def display_overworld_side_menu(
@@ -1633,7 +1680,6 @@ class OverworldViewing(Viewing):
         # Blit map and top display.
         self.blit_map()
 
-        #self.blit_top_display()
         self.blit_top_health_display()
 
     def refresh_top_display(self):
@@ -1655,7 +1701,6 @@ class OverworldViewing(Viewing):
 
         if self._top_display:
             self.refresh_top_display()
-            #self.blit_top_display()
             self.blit_top_health_display()
 
     def refresh_map(self):

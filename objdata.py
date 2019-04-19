@@ -117,7 +117,7 @@ MAX_MISC_ID = 799999
 
 ### OBJECT DATA FIELDS ###
 OBJECT_NAME_INFO_FIELD = 0x1
-IMAGE_PATH_DICT_FIELD = 0x2
+IMAGE_INFO_DICT_FIELD = 0x2
 COLLISION_WIDTH_FIELD = 0x3
 COLLISION_HEIGHT_FIELD = 0x4
 EXAMINE_INFO_FIELD = 0x5
@@ -139,24 +139,67 @@ RESOURCE_ITEM_INFO_FIELD = 0x306
 EXHAUSTION_PROBABILITY_FIELD = 0x305 # Values must be between 0.0 and 1.0
 
 ## TESTING PROTAG IMAGE PATH DICT
-IMAGE_PATH_DICT_PROTAG = {
-    imageids.IMAGE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
-    imageids.IMAGE_ID_FACE_NORTH: imagepaths.PROT_RANGER_F_OW_FACE_NORTH,
-    imageids.IMAGE_ID_FACE_EAST: imagepaths.PROT_RANGER_F_OW_FACE_EAST,
-    imageids.IMAGE_ID_FACE_SOUTH: imagepaths.PROT_RANGER_F_OW_FACE_SOUTH,
-    imageids.IMAGE_ID_FACE_WEST: imagepaths.PROT_RANGER_F_OW_FACE_WEST,
-    imageids.IMAGE_ID_WALK1_NORTH: imagepaths.PROT_RANGER_F_OW_WALK1_NORTH,
-    imageids.IMAGE_ID_WALK1_EAST: imagepaths.PROT_RANGER_F_OW_WALK1_EAST,
-    imageids.IMAGE_ID_WALK1_SOUTH: imagepaths.PROT_RANGER_F_OW_WALK1_SOUTH,
-    imageids.IMAGE_ID_WALK1_WEST: imagepaths.PROT_RANGER_F_OW_WALK1_WEST,
-    imageids.IMAGE_ID_WALK2_NORTH: imagepaths.PROT_RANGER_F_OW_WALK2_NORTH,
-    imageids.IMAGE_ID_WALK2_EAST: imagepaths.PROT_RANGER_F_OW_WALK2_EAST,
-    imageids.IMAGE_ID_WALK2_SOUTH: imagepaths.PROT_RANGER_F_OW_WALK2_SOUTH,
-    imageids.IMAGE_ID_WALK2_WEST: imagepaths.PROT_RANGER_F_OW_WALK2_WEST,
-    imageids.BATTLE_IMAGE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
-    imageids.BATTLE_IMAGE_ID_STAND: imagepaths.PROT_RANGER_F_OW_DEFAULT,
-    imageids.BATTLE_IMAGE_ID_ATTACK: imagepaths.PROT_RANGER_F_OW_DEFAULT,
-    imageids.BATTLE_IMAGE_ID_FAINTED: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+IMAGE_INFO_DICT_PROTAG = {
+    imageids.SEQUENCE_ID_DEFAULT: [
+        [imagepaths.PROT_RANGER_F_OW_DEFAULT],
+        None
+    ],
+    imageids.SEQUENCE_ID_FACE_NORTH: [
+        [imagepaths.PROT_RANGER_F_OW_FACE_NORTH],
+        None
+    ],
+    imageids.SEQUENCE_ID_FACE_EAST: [
+        [imagepaths.PROT_RANGER_F_OW_FACE_EAST],
+        None
+    ],
+    imageids.SEQUENCE_ID_FACE_SOUTH: [
+        [imagepaths.PROT_RANGER_F_OW_FACE_SOUTH],
+        None
+    ],
+    imageids.SEQUENCE_ID_FACE_WEST: [
+        [imagepaths.PROT_RANGER_F_OW_FACE_WEST],
+        None
+    ],
+    imageids.SEQUENCE_ID_WALK_NORTH: [
+        [
+            imagepaths.PROT_RANGER_F_OW_WALK1_NORTH,
+            imagepaths.PROT_RANGER_F_OW_FACE_NORTH,
+            imagepaths.PROT_RANGER_F_OW_WALK2_NORTH,
+            imagepaths.PROT_RANGER_F_OW_FACE_NORTH,
+        ],
+        None
+    ],
+    imageids.SEQUENCE_ID_WALK_EAST: [
+        [
+            imagepaths.PROT_RANGER_F_OW_WALK1_EAST,
+            imagepaths.PROT_RANGER_F_OW_FACE_EAST,
+            imagepaths.PROT_RANGER_F_OW_WALK2_EAST,
+            imagepaths.PROT_RANGER_F_OW_FACE_EAST,
+        ],
+        None
+    ],
+    imageids.SEQUENCE_ID_WALK_SOUTH: [
+        [
+            imagepaths.PROT_RANGER_F_OW_WALK1_SOUTH,
+            imagepaths.PROT_RANGER_F_OW_FACE_SOUTH,
+            imagepaths.PROT_RANGER_F_OW_WALK2_SOUTH,
+            imagepaths.PROT_RANGER_F_OW_FACE_SOUTH,
+        ],
+        None
+    ],
+    imageids.SEQUENCE_ID_WALK_WEST: [
+        [
+            imagepaths.PROT_RANGER_F_OW_WALK1_WEST,
+            imagepaths.PROT_RANGER_F_OW_FACE_WEST,
+            imagepaths.PROT_RANGER_F_OW_WALK2_WEST,
+            imagepaths.PROT_RANGER_F_OW_FACE_WEST,
+        ],
+        None
+    ],
+    imageids.BATTLE_SEQUENCE_ID_DEFAULT: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
+    imageids.BATTLE_SEQUENCE_ID_STAND: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
+    imageids.BATTLE_SEQUENCE_ID_ATTACK: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
+    imageids.BATTLE_SEQUENCE_ID_FAINTED: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
 }
 
 ### MISCELLANEOUS OBJECT DATA ###
@@ -166,8 +209,8 @@ MISC_OBJECT_DATA = {
             language.LANG_ENGLISH: "EMPTY ORE",
             language.LANG_ESPANOL: "VENA AGOTADA",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_EMPTY_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_EMPTY_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -182,8 +225,8 @@ MISC_OBJECT_DATA = {
             language.LANG_ENGLISH: "EMPTY FISHING SPOT",
             language.LANG_ESPANOL: "LUGAR PARA PESCAR AGOTADO",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.FISHING_SPOT_1_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.FISHING_SPOT_1_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -198,8 +241,8 @@ MISC_OBJECT_DATA = {
             language.LANG_ENGLISH: "TREE STUMP",
             language.LANG_ESPANOL: "TOCON",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.TREE_STUMP_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_STUMP_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
@@ -214,8 +257,8 @@ MISC_OBJECT_DATA = {
             language.LANG_ENGLISH: "WILLOW STUMP",
             language.LANG_ESPANOL: "TOCON DE SAUCE",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.WILLOW_STUMP_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.WILLOW_STUMP_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
@@ -234,8 +277,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "BASIC HERB",
             language.LANG_ESPANOL: "HIERBA BASICA",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.HERB_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.HERB_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -259,8 +302,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "TREE",
             language.LANG_ESPANOL: "ARBOL",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.TREE_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
@@ -285,8 +328,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "OAK TREE",
             language.LANG_ESPANOL: "ROBLE",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.TREE_OAK_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_OAK_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
@@ -311,8 +354,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "WILLOW TREE",
             language.LANG_ESPANOL: "SAUCE",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.TREE_WILLOW_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_WILLOW_PATH,
         },
         COLLISION_WIDTH_FIELD: 2,
         COLLISION_HEIGHT_FIELD: 1,
@@ -337,8 +380,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "COPPER VEIN",
             language.LANG_ESPANOL: "VENA DE COBRE",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_COPPER_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_COPPER_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -363,8 +406,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "TIN VEIN",
             language.LANG_ESPANOL: "VENA DE ESTAÑO",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_TIN_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_TIN_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -389,8 +432,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "IRON VEIN",
             language.LANG_ESPANOL: "VENA DE HIERRO",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_IRON_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_IRON_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -415,8 +458,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "COAL VEIN",
             language.LANG_ESPANOL: "VENA DE CARBÓN",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_COAL_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_COAL_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -441,8 +484,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "SILVER VEIN",
             language.LANG_ESPANOL: "VENA DE PLATA",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_SILVER_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_SILVER_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -467,8 +510,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "TITANIUM VEIN",
             language.LANG_ESPANOL: "VENA DE TITANIO",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_TITANIUM_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_TITANIUM_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -493,8 +536,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "GOLD VEIN",
             language.LANG_ESPANOL: "VENA DE ORO",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.ROCK_GOLD_BASIC_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_GOLD_BASIC_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,
@@ -519,8 +562,8 @@ RESOURCE_DATA = {
             language.LANG_ENGLISH: "FISHING SPOT",
             language.LANG_ESPANOL: "LUGAR PARA PESCAR",
         },
-        IMAGE_PATH_DICT_FIELD: {
-            imageids.OBJ_SPRITE_IMAGE_ID: imagepaths.FISHING_SPOT_1_PATH,
+        IMAGE_INFO_DICT_FIELD: {
+            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.FISHING_SPOT_1_PATH,
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,

@@ -1,7 +1,7 @@
 import logging
-import pygame
 import random
 import sys
+import pygame
 import interactiveobj
 import objdata
 import tile
@@ -39,8 +39,14 @@ class Map:
     #
     # top_left represents the (x,y) pixel coordinate on the display screen where the
     # top left corner of the map should start.
-    def __init__(self, map_id, tile_grid, connector_tile_dict={}, \
-                adj_map_dict={}, top_left=(0,0)):
+    def __init__(
+            self,
+            map_id,
+            tile_grid,
+            connector_tile_dict=None,
+            adj_map_dict=None,
+            top_left=(0, 0),
+        ):
         self.height = 0
         self.width = 0
         self.map_id = map_id
@@ -264,7 +270,7 @@ class Map:
     def set_interactive_object(self, obj_id, bottom_left_tile_loc):
         success = False
         can_set = True
-        obj_to_set = interactiveobj.Interactive_Object.get_interactive_object(obj_id)
+        obj_to_set = interactiveobj.InteractiveObject.get_interactive_object(obj_id)
 
         if not obj_to_set:
             LOGGER.debug("Could not find object with ID %d", obj_id)
@@ -457,7 +463,7 @@ class Map:
 
                 if obj_id:
                     # Get object.
-                    occupying_object = interactiveobj.Interactive_Object.get_interactive_object(obj_id)
+                    occupying_object = interactiveobj.InteractiveObject.get_interactive_object(obj_id)
 
         return occupying_object
 
@@ -584,20 +590,68 @@ class Map:
 
     ### BLIT METHODS ###
 
-    def blit_tile(self, surface, tile_coordinate, dest_top_left):
-        if surface and tile_coordinate and dest_top_left and self.location_within_bounds(tile_coordinate):
+    def blit_tile(
+            self,
+            surface,
+            tile_coordinate,
+            blit_time_ms=None,
+        ):
+        """
+        Blits the Tile object located on the Map coordinate.
+
+        Args:
+            surface: pygame Surface object to blit the Map object on.
+            tile_coordinate: (x, y) tuple representing the tile grid
+                coordinate (not the pixel coordinate) of the Tile to blit.
+            blit_time_ms: the system time in milliseconds to use for blitting
+                the individual Tile objects.. This time is used to determine
+                which image to use from a Tile's image sequence. If None,
+                or if the Tile doesn't have an image sequence duration,
+                only the first Tile image will be blitted.
+        """
+
+        if surface and tile_coordinate and self.location_within_bounds(tile_coordinate):
             # y, x
             tile_obj = self.get_tile_from_pos(tile_coordinate)
 
             if tile_obj:
-                tile_obj.blit_tile(surface, dest_top_left)
+                # Get the destination top left.
+                dest_top_left = (
+                    self.top_left_position[0] \
+                    + (tile.TILE_SIZE * tile_coordinate[0]),
+                    self.top_left_position[1] \
+                    + (tile.TILE_SIZE * tile_coordinate[1]),
+                )
 
-    # Blits tiles starting at current top left position
-    # caller needs to update surface after method
-    # tile_subset_rect is rect of tile coordinates that indicates which
-    # tiles to blit, rather than blitting the whole map. Setting to None
-    # will blit the whole map
-    def blit_tiles(self, surface, tile_subset_rect=None):
+                tile_obj.blit_tile(
+                    surface,
+                    dest_top_left,
+                    blit_time_ms=blit_time_ms,
+                )
+
+    def blit_tiles(
+            self,
+            surface,
+            tile_subset_rect=None,
+            blit_time_ms=None,
+        ):
+        """Blits the Map's Tile objects.
+
+        Caller needs to update the pygame display surface.
+
+        Args:
+            surface: pygame Surface object to blit the Tiles on.
+            tile_subset_rect: rect of Tile coordinates (top left x,
+                top left y, width, height) that indicates which
+                Map subsection to blit, rather than blitting the whole map.
+                Setting to None will blit all the Tiles in the Map.
+            blit_time_ms: the system time in milliseconds to use for blitting
+                the individual Tile objects. This time is used to determine
+                which image to use from a Tile's image sequence. If None,
+                or if the Tile doesn't have an image sequence duration,
+                only the first Tile image will be blitted.
+        """
+
         if surface and self.tile_grid and self.top_left_position:
             tile_subset = (0, 0, self.width, self.height)
 
@@ -624,7 +678,11 @@ class Map:
                     curr_pixel_x = start_pixel_x
                     for tile_index in range(start_tile_x, end_tile_x + 1):
                         single_tile = self.tile_grid[grid_row][tile_index]
-                        single_tile.blit_tile(surface, (curr_pixel_x, curr_pixel_y))
+                        single_tile.blit_tile(
+                            surface,
+                            (curr_pixel_x, curr_pixel_y),
+                            blit_time_ms=blit_time_ms,
+                        )
                         curr_pixel_x = curr_pixel_x + tile.TILE_SIZE
                     curr_pixel_y = curr_pixel_y + tile.TILE_SIZE
 
@@ -635,7 +693,30 @@ class Map:
     # tiles to include for blitting, rather than blitting the whole map.
     # Setting to None will blit all the current spawned objects on
     # the map.
-    def blit_interactive_objects(self, surface, tile_subset_rect=None):
+    def blit_interactive_objects(
+            self,
+            surface,
+            tile_subset_rect=None,
+            blit_time_ms=None,
+        ):
+        """Blits the interactive objects on the Map, left to right, top
+        to down.
+
+        Caller needs to update the pygame display surface.
+
+        Args:
+            surface: pygame Surface object to blit the objects. on.
+            tile_subset_rect: rect of Tile coordinates (top left x,
+                top left y, width, height) that indicates which
+                Map subsection to blit, rather than blitting the whole map.
+                Setting to None will blit all the Tiles in the Map.
+            blit_time_ms: the system time in milliseconds to use for blitting
+                the individual interactive objects. This time is used to determine
+                which image to use from the object's image sequence. If None,
+                or if the object doesn't have an image sequence duration,
+                only the first object image will be blitted.
+        """
+
         if surface and self.tile_grid and self.top_left_position:
             tile_subset = (0, 0, self.width, self.height)
 
@@ -663,7 +744,7 @@ class Map:
                         obj_info = self.bottom_left_tile_obj_mapping.get(tile_loc, None)
                         if obj_info:
                             obj_to_blit =                       \
-                                interactiveobj.Interactive_Object.get_interactive_object(obj_info[0])
+                                interactiveobj.InteractiveObject.get_interactive_object(obj_info[0])
 
                             if obj_to_blit:
                                 bottom_left_pixel = None
@@ -672,7 +753,8 @@ class Map:
                                     bottom_left_pixel = viewingdata.CENTER_OW_TILE_BOTTOM_LEFT
                                     obj_to_blit.blit_onto_surface(
                                         surface,
-                                        bottom_left_pixel=bottom_left_pixel
+                                        bottom_left_pixel=bottom_left_pixel,
+                                        blit_time_ms=blit_time_ms,
                                     )
                                 else:
                                     bottom_left_pixel = (                           \
@@ -688,7 +770,8 @@ class Map:
                                     # on object type?
                                     obj_to_blit.blit_onto_surface(
                                         surface,
-                                        bottom_left_pixel=bottom_left_pixel
+                                        bottom_left_pixel=bottom_left_pixel,
+                                        blit_time_ms=blit_time_ms,
                                     )
 
 
@@ -698,15 +781,42 @@ class Map:
     # tile_subset_rect is rect of tile coordinates that indicates which
     # tiles and objects to blit, rather than blitting the whole map.
     # Setting to None will blit the whole map
-    def blit_map(self, surface, tile_subset_rect=None):
+    def blit_map(
+            self,
+            surface,
+            tile_subset_rect=None,
+            blit_time_ms=None,
+        ):
+        """Blits entire Map, including tiles and spawned interactive objects.
+
+        Caller needs to update surface.
+
+        Args:
+            surface: pygame Surface object to blit the Map on.
+            tile_subset_rect: rect of Tile coordinates (top left x,
+                top left y, width, height) that indicates which
+                Map subsection to blit, rather than blitting the whole map.
+                Setting to None will blit all the Tiles in the Map.
+            blit_time_ms: the system time in milliseconds to use for blitting
+                the individual tiles and objects. This time is used to determine
+                which image to use from the object's image sequence. If None,
+                or if the object doesn't have an image sequence duration,
+                only the first object image will be blitted.
+        """
+
         if self and surface and self.top_left_position and self.tile_grid:
             # Blit the tiles.
-            self.blit_tiles(surface, tile_subset_rect=tile_subset_rect)
+            self.blit_tiles(
+                surface,
+                tile_subset_rect=tile_subset_rect,
+                blit_time_ms=blit_time_ms,
+            )
 
             # Next, blit the objects
             self.blit_interactive_objects(
                 surface,
-                tile_subset_rect=tile_subset_rect
+                tile_subset_rect=tile_subset_rect,
+                blit_time_ms=blit_time_ms,
             )
 
     # scroll map in the indicated direction for the indicated distancet
@@ -737,9 +847,10 @@ class Map:
             if new_pixel_location:
                 # Update map top left and blit map.
                 self.top_left_position = new_pixel_location
-                self.blit_map(                                 \
-                    surface,                                            \
-                    tile_subset_rect=tile_subset_rect                   \
+                self.blit_map(
+                    surface,
+                    tile_subset_rect=tile_subset_rect,
+                    blit_time_ms=pygame.time.get_ticks(),
                 )
 
     def execute_spawn_action(self, tile_loc, obj_id):

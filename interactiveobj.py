@@ -10,7 +10,7 @@ import language
 #IMAGE_F_OVERWORLD = 0x1 # sets overworld images
 #IMAGE_F_BATTLE = 0x2 # sets battle images
 
-class Interactive_Object(pygame.sprite.Sprite):
+class InteractiveObject(pygame.sprite.Sprite):
     # maps interactive obj ID to interactive obj
     interactive_obj_listing = {}
 
@@ -20,7 +20,7 @@ class Interactive_Object(pygame.sprite.Sprite):
             object_type,
             object_id,
             name_info, # maps language id to name
-            image_path_dict,
+            image_info_dict,
             collision_width=1,
             collision_height=1,
             examine_info={},
@@ -47,14 +47,30 @@ class Interactive_Object(pygame.sprite.Sprite):
             for x, y in examine_info.items():
                 self.examine_info[x] = y
 
-        # load images
-        self.image_dict = {}
-        for image_type_id, image_path in image_path_dict.items():
-            logger.debug("Loading image from path {0}".format(image_path))
-            # convert alpha for transparency
-            self.image_dict[image_type_id] = pygame.image.load(image_path).convert_alpha()
+        # Load images.
+        self.image_sequence_dict = {}
+        self._image_sequence_duration_dict = {}
+        self._individual_image_duration_dict = {}
+        for image_sequence_id, image_sequence_info in image_info_dict.items():
+            image_list = []
 
-        self.curr_image_id = imageids.OBJ_SPRITE_IMAGE_ID
+            image_path_list = image_sequence_info[0]
+            image_sequence_duration = image_sequence_info[1]
+
+            self._image_sequence_duration_dict[image_sequence_id] = \
+                image_sequence_duration
+
+            for image_path in image_path_list:
+                loaded_image = pygame.image.load(image_path).convert_alpha()
+                if loaded_image:
+                    image_list.append(loaded_image)
+
+            if image_list:
+                self.image_sequence_dict[image_sequence_id] = image_list
+                self._individual_image_duration_dict[image_sequence_id] = \
+                    image_sequence_duration / len(image_list)
+
+        self.curr_image_sequence = imageids.OBJ_SPRITE_SEQUENCE_ID
 
     def get_name(self, alternative_language_id=None):
         ret_name = ""
@@ -65,7 +81,7 @@ class Interactive_Object(pygame.sprite.Sprite):
 
         return ret_name
 
-    # blits the interactive object sprite image corresponding to image_type_id
+    # blits the interactive object sprite image corresponding to image_sequence_id
     # onto the designated surface. Can specify either top_left_pixel or
     # bottom_left_pixel as the reference point for blitting the image.
     # bottom_left_pixel is recommended for images that are larger than
@@ -76,20 +92,42 @@ class Interactive_Object(pygame.sprite.Sprite):
     def blit_onto_surface(
             self,
             surface,
-            image_type_id=None,
+            image_sequence_id=None,
             bottom_left_pixel=None,
-            top_left_pixel=None
+            top_left_pixel=None,
+            blit_time_ms=None,
         ):
         if self and surface and (bottom_left_pixel or top_left_pixel):
             id_to_use = None
-
-            if image_type_id:
-                id_to_use = image_type_id
-            else:
-                id_to_use = self.curr_image_id
-
-            image_to_blit = self.image_dict.get(id_to_use, None)
+            image_to_blit = None
             top_left = None
+
+            if image_sequence_id:
+                id_to_use = image_sequence_id
+            else:
+                id_to_use = self.curr_image_sequence
+
+            image_list = self.image_sequence_dict.get(
+                id_to_use,
+                None
+            )
+
+            individual_image_duration = self._individual_image_duration_dict.get(
+                id_to_use,
+                None
+            )
+
+            # Get image to blit.
+            if image_list:
+                if not individual_image_duration:
+                    image_to_blit = image_list[0]
+                elif not blit_time_ms:
+                    image_to_blit = image_list[0]
+                else:
+                    image_to_blit = image_list[
+                        (blit_time_ms // individual_image_duration) \
+                        % len(image_list)
+                    ]
 
             if image_to_blit:
                 if bottom_left_pixel:
@@ -125,7 +163,7 @@ class Interactive_Object(pygame.sprite.Sprite):
                     # Get the object fields
                     # TODO - change default values?
                     name_info = obj_data.get(objdata.OBJECT_NAME_INFO_FIELD, {})
-                    image_path_dict = obj_data.get(objdata.IMAGE_PATH_DICT_FIELD, {})
+                    image_info_dict = obj_data.get(objdata.IMAGE_INFO_DICT_FIELD, {})
                     collision_width = obj_data.get(objdata.COLLISION_WIDTH_FIELD, 1)
                     collision_height = obj_data.get(objdata.COLLISION_HEIGHT_FIELD, 1)
                     respawn_time_s = obj_data.get(objdata.RESPAWN_TIME_S_FIELD, None)
@@ -140,13 +178,13 @@ class Interactive_Object(pygame.sprite.Sprite):
                     )
 
                     # Ensure we have the required fields.
-                    if name_info and image_path_dict:
+                    if name_info and image_info_dict:
                         # Make the miscellaneous object.
-                        new_object = Interactive_Object(
+                        new_object = InteractiveObject(
                             objdata.TYPE_MISC,
                             obj_id,
                             name_info,
-                            image_path_dict,
+                            image_info_dict,
                             collision_width=collision_width,
                             collision_height=collision_height,
                             respawn_time_s=respawn_time_s,

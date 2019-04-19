@@ -6,14 +6,14 @@ import interactiveobj
 import objdata
 import interactiondata
 
-class Resource(interactiveobj.Interactive_Object):
+class Resource(interactiveobj.InteractiveObject):
     # Initialize Resource
     # respawn_time_s value of None means the resource object will not respawn?
     def __init__(
             self,
             object_id,
             name_info,
-            image_path_dict,
+            image_info_dict,
             collision_width=1,
             collision_height=1,
             related_skill_id=None,
@@ -28,12 +28,12 @@ class Resource(interactiveobj.Interactive_Object):
             replacement_object_id=None,
         ):
         # Call the parent class init
-        interactiveobj.Interactive_Object.__init__(
+        interactiveobj.InteractiveObject.__init__(
             self,
             objdata.TYPE_RESOURCE,
             object_id,
             name_info,
-            image_path_dict,
+            image_info_dict,
             collision_width=collision_width,
             collision_height=collision_height,
             examine_info=examine_info,
@@ -61,7 +61,7 @@ class Resource(interactiveobj.Interactive_Object):
         ret_resource = None
 
         # Make sure we are dealing with a resource ID
-        if interactiveobj.Interactive_Object.is_resource_id(resource_id):
+        if interactiveobj.InteractiveObject.is_resource_id(resource_id):
             # Check if we already have the resouce made
             resource_from_listing = cls.get_resource(resource_id)
 
@@ -77,7 +77,7 @@ class Resource(interactiveobj.Interactive_Object):
                     # Get the resource fields
                     # TODO - change default values?
                     name_info = resource_data.get(objdata.OBJECT_NAME_INFO_FIELD, {})
-                    image_path_dict = resource_data.get(objdata.IMAGE_PATH_DICT_FIELD, {})
+                    image_info_dict = resource_data.get(objdata.IMAGE_INFO_DICT_FIELD, {})
                     collision_width = resource_data.get(objdata.COLLISION_WIDTH_FIELD, 1)
                     collision_height = resource_data.get(objdata.COLLISION_HEIGHT_FIELD, 1)
                     skill_id = resource_data.get(objdata.RELATED_SKILL_ID_FIELD, None)
@@ -98,12 +98,12 @@ class Resource(interactiveobj.Interactive_Object):
                     )
 
                     # Ensure we have the required fields.
-                    if name_info and image_path_dict and (interaction_id is not None):
+                    if name_info and image_info_dict and (interaction_id is not None):
                         # Make the resource.
                         new_resource = Resource(
                             resource_id,
                             name_info,
-                            image_path_dict,
+                            image_info_dict,
                             collision_width=collision_width,
                             collision_height=collision_height,
                             related_skill_id=skill_id,
@@ -121,7 +121,7 @@ class Resource(interactiveobj.Interactive_Object):
                         LOGGER.debug("Made resource with ID %d", resource_id)
 
                         # Update the interactive object mapping
-                        result = interactiveobj.Interactive_Object.add_interactive_obj_to_listing(
+                        result = interactiveobj.InteractiveObject.add_interactive_obj_to_listing(
                             resource_id,
                             new_resource
                         )
@@ -216,8 +216,8 @@ class Resource(interactiveobj.Interactive_Object):
         ret_resource = None
 
         # Make sure we are dealing with a resource ID
-        if interactiveobj.Interactive_Object.is_resource_id(resource_id):
-            ret_resource = interactiveobj.Interactive_Object.get_interactive_object(resource_id)
+        if interactiveobj.InteractiveObject.is_resource_id(resource_id):
+            ret_resource = interactiveobj.InteractiveObject.get_interactive_object(resource_id)
 
         return ret_resource
 
