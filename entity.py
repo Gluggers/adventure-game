@@ -126,7 +126,7 @@ class Entity(interactiveobj.InteractiveObject):
 
         # By default, face south.
         self.facing_direction = directions.DIR_SOUTH
-        self.curr_image_id = imageids.IMAGE_ID_FACE_SOUTH
+        self.curr_image_sequence = imageids.SEQUENCE_ID_FACE_SOUTH
 
         # Set up skills. self.skill_info_mapping maps skill IDs to
         # a length-3 list
@@ -420,18 +420,18 @@ class Entity(interactiveobj.InteractiveObject):
             top_left_pixel=None,
         ):
         if self and surface and (bottom_left_pixel or top_left_pixel):
-            image_id = imageids.get_direction_image_id(direction)
+            sequence_id = imageids.get_direction_sequence_id(direction)
 
-            if image_id is not None:
+            if sequence_id is not None:
                 # change direction variable and blit
                 self.facing_direction = direction
+                self.curr_image_sequence = sequence_id
                 self.blit_onto_surface(
                     surface,
                     bottom_left_pixel=bottom_left_pixel,
                     top_left_pixel=top_left_pixel,
                     blit_time_ms=pygame.time.get_ticks(),
                 )
-                self.curr_image_id = image_id
 
     @classmethod
     def calculate_max_health(cls, hitpoint_level):

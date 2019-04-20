@@ -175,7 +175,7 @@ class Game(object):
             target_object.object_id
 
         LOGGER.info(
-            "Replacing object %d with %d for %d seconds. Bottom tile loc %d",
+            "Replacing object %d with %d for %d seconds. Bottom tile loc %s",
             original_id,
             replacement_id,
             respawn_time_s,
@@ -828,8 +828,8 @@ class Game(object):
             list(self.get_protagonist_tile_position())
         save_data[savefiledata.GAME_LANGUAGE] = \
             language.Language.current_language_id
-        save_data[savefiledata.PROTAG_IMAGE_ID] = \
-            self.protagonist.curr_image_id
+        save_data[savefiledata.PROTAG_IMAGE_SEQUENCE_ID] = \
+            self.protagonist.curr_image_sequence
 
         save_data[savefiledata.PROTAG_INVENTORY] = \
             self.protagonist.inventory.get_listing_dict()
@@ -883,9 +883,9 @@ class Game(object):
 
         if save_data:
             # Protagonist will face the correct direction.
-            self.protagonist.curr_image_id = save_data.get(
-                savefiledata.PROTAG_IMAGE_ID,
-                imageids.IMAGE_ID_FACE_SOUTH
+            self.protagonist.curr_image_sequence = save_data.get(
+                savefiledata.PROTAG_IMAGE_SEQUENCE_ID,
+                imageids.SEQUENCE_ID_FACE_SOUTH
             )
 
             # Set protagonist items. TODO equipment.

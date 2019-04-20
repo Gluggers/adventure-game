@@ -1,11 +1,10 @@
 import directions
 
 ### IMAGE ID NUMBERS ###
+ICON_IMAGE_ID = 10
 
 ### DEFAULT IMAGE SEQUENCE ID ###
 SEQUENCE_ID_DEFAULT = 1
-
-ICON_SEQUENCE_ID = 10
 OBJ_SPRITE_SEQUENCE_ID = 20
 
 SEQUENCE_ID_FACE_NORTH = 100
@@ -60,64 +59,24 @@ SEQUENCE_ID_HUSBANDRY = 1201
 # If the list contains in an index, then that represents
 # blitting the previous standing overworld image for the Protagonist.
 # An empty list means just use the previous standing overworld image.
-ENTITY_SEQUENCE_ID_MAPPING = {
-    SEQUENCE_ID_WALK: {
-        directions.DIR_NORTH: [
-            SEQUENCE_ID_WALK1_NORTH,
-            SEQUENCE_ID_FACE_NORTH,
-            SEQUENCE_ID_WALK2_NORTH,
-            SEQUENCE_ID_FACE_NORTH,
-        ],
-        directions.DIR_SOUTH: [
-            SEQUENCE_ID_WALK1_SOUTH,
-            SEQUENCE_ID_FACE_SOUTH,
-            SEQUENCE_ID_WALK2_SOUTH,
-            SEQUENCE_ID_FACE_SOUTH,
-        ],
-        directions.DIR_EAST: [
-            SEQUENCE_ID_WALK1_EAST,
-            SEQUENCE_ID_FACE_EAST,
-            SEQUENCE_ID_WALK2_EAST,
-            SEQUENCE_ID_FACE_EAST,
-        ],
-        directions.DIR_WEST: [
-            SEQUENCE_ID_WALK1_WEST,
-            SEQUENCE_ID_FACE_WEST,
-            SEQUENCE_ID_WALK2_WEST,
-            SEQUENCE_ID_FACE_WEST,
-        ],
-    },
-}
 
-def get_direction_image_id(direction):
-    """Returns image ID for the sprite for facing the specified direction.
+
+def get_direction_sequence_id(direction):
+    """Returns image sequence ID for the sprite for facing the specified
+    direction.
 
     Args:
-        direction: direction ID for which to retrieve the image ID.
+        direction: direction ID for which to retrieve the image sequence ID.
     """
-    image_id = None
+    sequence_id = None
 
     if direction == directions.DIR_NORTH:
-        image_id = SEQUENCE_ID_FACE_NORTH
+        sequence_id = SEQUENCE_ID_FACE_NORTH
     elif direction == directions.DIR_EAST:
-        image_id = SEQUENCE_ID_FACE_EAST
+        sequence_id = SEQUENCE_ID_FACE_EAST
     elif direction == directions.DIR_SOUTH:
-        image_id = SEQUENCE_ID_FACE_SOUTH
+        sequence_id = SEQUENCE_ID_FACE_SOUTH
     elif direction == directions.DIR_WEST:
-        image_id = SEQUENCE_ID_FACE_WEST
+        sequence_id = SEQUENCE_ID_FACE_WEST
 
-    return image_id
-
-def get_entity_walk_image_ids(direction):
-    """Returns image ID list for the walk animation in the specified direction.
-
-    Args:
-        direction: direction ID for which to retrieve the image ID list.
-    """
-    return ENTITY_SEQUENCE_ID_MAPPING.get(
-        SEQUENCE_ID_WALK,
-        {},
-    ).get(
-        direction,
-        None
-    )
+    return sequence_id

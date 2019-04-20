@@ -140,26 +140,11 @@ EXHAUSTION_PROBABILITY_FIELD = 0x305 # Values must be between 0.0 and 1.0
 
 ## TESTING PROTAG IMAGE PATH DICT
 IMAGE_INFO_DICT_PROTAG = {
-    imageids.SEQUENCE_ID_DEFAULT: [
-        [imagepaths.PROT_RANGER_F_OW_DEFAULT],
-        None
-    ],
-    imageids.SEQUENCE_ID_FACE_NORTH: [
-        [imagepaths.PROT_RANGER_F_OW_FACE_NORTH],
-        None
-    ],
-    imageids.SEQUENCE_ID_FACE_EAST: [
-        [imagepaths.PROT_RANGER_F_OW_FACE_EAST],
-        None
-    ],
-    imageids.SEQUENCE_ID_FACE_SOUTH: [
-        [imagepaths.PROT_RANGER_F_OW_FACE_SOUTH],
-        None
-    ],
-    imageids.SEQUENCE_ID_FACE_WEST: [
-        [imagepaths.PROT_RANGER_F_OW_FACE_WEST],
-        None
-    ],
+    imageids.SEQUENCE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    imageids.SEQUENCE_ID_FACE_NORTH: imagepaths.PROT_RANGER_F_OW_FACE_NORTH,
+    imageids.SEQUENCE_ID_FACE_EAST: imagepaths.PROT_RANGER_F_OW_FACE_EAST,
+    imageids.SEQUENCE_ID_FACE_SOUTH: imagepaths.PROT_RANGER_F_OW_FACE_SOUTH,
+    imageids.SEQUENCE_ID_FACE_WEST: imagepaths.PROT_RANGER_F_OW_FACE_WEST,
     imageids.SEQUENCE_ID_WALK_NORTH: [
         [
             imagepaths.PROT_RANGER_F_OW_WALK1_NORTH,
@@ -196,10 +181,10 @@ IMAGE_INFO_DICT_PROTAG = {
         ],
         None
     ],
-    imageids.BATTLE_SEQUENCE_ID_DEFAULT: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
-    imageids.BATTLE_SEQUENCE_ID_STAND: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
-    imageids.BATTLE_SEQUENCE_ID_ATTACK: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
-    imageids.BATTLE_SEQUENCE_ID_FAINTED: [imagepaths.PROT_RANGER_F_OW_DEFAULT],
+    imageids.BATTLE_SEQUENCE_ID_DEFAULT: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    imageids.BATTLE_SEQUENCE_ID_STAND: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    imageids.BATTLE_SEQUENCE_ID_ATTACK: imagepaths.PROT_RANGER_F_OW_DEFAULT,
+    imageids.BATTLE_SEQUENCE_ID_FAINTED: imagepaths.PROT_RANGER_F_OW_DEFAULT,
 }
 
 ### MISCELLANEOUS OBJECT DATA ###

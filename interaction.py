@@ -206,7 +206,7 @@ class Interaction():
                 num_skill_ticks = 0
                 image_id_index = 0
                 pygame.event.clear()
-                prev_overworld_image_id = acting_object.curr_image_id
+                prev_sequence_id = acting_object.curr_image_sequence
 
                 while skilling and not resource_exhausted:
                     timekeeper.Timekeeper.tick()
@@ -369,6 +369,8 @@ class Interaction():
                                 game_object.refresh_and_blit_overworld_viewing()
 
         pygame.event.clear()
+
+        acting_object.curr_image_sequence = prev_sequence_id
 
         # Update overworld and display.
         game_object.refresh_and_blit_overworld_viewing()

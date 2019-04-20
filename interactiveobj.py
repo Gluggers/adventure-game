@@ -51,24 +51,36 @@ class InteractiveObject(pygame.sprite.Sprite):
         self.image_sequence_dict = {}
         self._image_sequence_duration_dict = {}
         self._individual_image_duration_dict = {}
+        self.in_adhoc_animation = False
+        self.adhoc_animation_index = 0
+
         for image_sequence_id, image_sequence_info in image_info_dict.items():
             image_list = []
 
-            image_path_list = image_sequence_info[0]
-            image_sequence_duration = image_sequence_info[1]
+            if isinstance(image_sequence_info, str):
+                loaded_image = pygame.image.load(
+                    image_sequence_info
+                ).convert_alpha()
 
-            self._image_sequence_duration_dict[image_sequence_id] = \
-                image_sequence_duration
-
-            for image_path in image_path_list:
-                loaded_image = pygame.image.load(image_path).convert_alpha()
                 if loaded_image:
-                    image_list.append(loaded_image)
+                    self.image_sequence_dict[image_sequence_id] = [loaded_image]
+            elif isinstance(image_sequence_info, list):
+                image_path_list = image_sequence_info[0]
+                image_sequence_duration = image_sequence_info[1]
 
-            if image_list:
-                self.image_sequence_dict[image_sequence_id] = image_list
-                self._individual_image_duration_dict[image_sequence_id] = \
-                    image_sequence_duration / len(image_list)
+                self._image_sequence_duration_dict[image_sequence_id] = \
+                    image_sequence_duration
+
+                for image_path in image_path_list:
+                    loaded_image = pygame.image.load(image_path).convert_alpha()
+                    if loaded_image:
+                        image_list.append(loaded_image)
+
+                if image_list:
+                    self.image_sequence_dict[image_sequence_id] = image_list
+                    if image_sequence_duration:
+                        self._individual_image_duration_dict[image_sequence_id] = \
+                            image_sequence_duration // len(image_list)
 
         self.curr_image_sequence = imageids.OBJ_SPRITE_SEQUENCE_ID
 
@@ -112,22 +124,27 @@ class InteractiveObject(pygame.sprite.Sprite):
                 None
             )
 
-            individual_image_duration = self._individual_image_duration_dict.get(
-                id_to_use,
-                None
-            )
+            if self.in_adhoc_animation:
+                image_to_blit = image_list[
+                    self.adhoc_animation_index % len(image_list)
+                ]
+            else:
+                individual_image_duration = self._individual_image_duration_dict.get(
+                    id_to_use,
+                    None
+                )
 
-            # Get image to blit.
-            if image_list:
-                if not individual_image_duration:
-                    image_to_blit = image_list[0]
-                elif not blit_time_ms:
-                    image_to_blit = image_list[0]
-                else:
-                    image_to_blit = image_list[
-                        (blit_time_ms // individual_image_duration) \
-                        % len(image_list)
-                    ]
+                # Get image to blit.
+                if image_list:
+                    if not individual_image_duration:
+                        image_to_blit = image_list[0]
+                    elif not blit_time_ms:
+                        image_to_blit = image_list[0]
+                    else:
+                        image_to_blit = image_list[
+                            (blit_time_ms // individual_image_duration) \
+                            % len(image_list)
+                        ]
 
             if image_to_blit:
                 if bottom_left_pixel:

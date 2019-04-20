@@ -11,6 +11,7 @@ upon character movement.
 import logging
 import sys
 import pygame
+import directions
 import display
 import fontinfo
 import imageids
@@ -1762,9 +1763,16 @@ class OverworldViewing(Viewing):
         )
 
         # Get image ID list for the walk animation in this direction.
-        walk_image_ids = imageids.get_entity_walk_image_ids(
-            char_move_direction
-        )
+        walk_sequence_id = None
+
+        if char_move_direction == directions.DIR_NORTH:
+            walk_sequence_id = imageids.SEQUENCE_ID_WALK_NORTH
+        elif char_move_direction == directions.DIR_EAST:
+            walk_sequence_id = imageids.SEQUENCE_ID_WALK_EAST
+        elif char_move_direction == directions.DIR_SOUTH:
+            walk_sequence_id = imageids.SEQUENCE_ID_WALK_SOUTH
+        elif char_move_direction == directions.DIR_WEST:
+            walk_sequence_id = imageids.SEQUENCE_ID_WALK_WEST
 
         # Get wait time in between pixel movements.
         wait_time = None
@@ -1774,38 +1782,54 @@ class OverworldViewing(Viewing):
         else:
             wait_time = int(WALK_SINGLE_TILE_SCROLL_TIME_MS / tile.TILE_SIZE)
 
-        if walk_image_ids:
-            # Number of steps in the walk animation.
-            phase_duration = int(tile.TILE_SIZE / len(walk_image_ids))
+        if walk_sequence_id:
+            walk_sequence_images = self._protagonist.image_sequence_dict.get(
+                walk_sequence_id,
+                None
+            )
 
-            for i in range(tile.TILE_SIZE):
-                # Reset the surface screen to default to black for empty map
-                # spaces.
-                self.blit_background(fill_color=viewingdata.COLOR_BLACK)
+            if walk_sequence_images:
+                # Number of steps in the walk animation.
+                phase_duration = int(tile.TILE_SIZE / len(walk_sequence_images))
 
-                if self._protagonist:
-                    # Get image ID for protagonist.
-                    image_type_id = walk_image_ids[int(i / phase_duration)]
+                old_sequence_id = self._protagonist.curr_image_sequence
 
-                    if image_type_id:
-                        self._protagonist.curr_image_id = image_type_id
+                # Starting walk animation.
+                self._protagonist.in_adhoc_animation = True
+                self._protagonist.adhoc_animation_index = 0
+                self._protagonist.curr_image_sequence = walk_sequence_id
 
-                    # scroll 1 pixel at a time
-                    self._curr_map.scroll(
-                        self._main_display_surface,
-                        scroll_direction,
-                        1,
-                        tile_subset_rect=tile_subset_rect
-                    )
+                for i in range(tile.TILE_SIZE):
+                    # Get index for animation sequence.
+                    self._protagonist.adhoc_animation_index = \
+                        i // phase_duration
 
-                    # Also blit the top view on top.
-                    self.blit_top_health_display()
+                    # Reset the surface screen to default to black for empty map
+                    # spaces.
+                    self.blit_background(fill_color=viewingdata.COLOR_BLACK)
 
-                    # Update main display
-                    pygame.display.update()
+                    if self._protagonist:
+                        # scroll 1 pixel at a time
+                        self._curr_map.scroll(
+                            self._main_display_surface,
+                            scroll_direction,
+                            1,
+                            tile_subset_rect=tile_subset_rect
+                        )
 
-                    # Wait till next iteration
-                    pygame.time.wait(wait_time)
+                        # Also blit the top view on top.
+                        self.blit_top_health_display()
+
+                        # Update main display
+                        pygame.display.update()
+
+                        # Wait till next iteration
+                        pygame.time.wait(wait_time)
+
+                # End walk animation.
+                self._protagonist.in_adhoc_animation = False
+                self._protagonist.adhoc_animation_index = 0
+                self._protagonist.curr_image_sequence = old_sequence_id
 
     def blit_background(self, fill_color=viewingdata.COLOR_BLACK):
         """Fills in the viewing background for the overworld.
