@@ -548,7 +548,14 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "LUGAR PARA PESCAR",
         },
         IMAGE_INFO_DICT_FIELD: {
-            imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.FISHING_SPOT_1_PATH,
+            imageids.OBJ_SPRITE_SEQUENCE_ID: [
+                [
+                    imagepaths.FISHING_SPOT_5_PATH,
+                    imagepaths.FISHING_SPOT_6_PATH,
+                    imagepaths.FISHING_SPOT_7_PATH,
+                ],
+                900,
+            ]
         },
         COLLISION_WIDTH_FIELD: 1,
         COLLISION_HEIGHT_FIELD: 1,

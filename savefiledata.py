@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""This module contains constants and data for saved game files and saving
+the game."""
+
 import language
 
 ### SAVE AND LOAD PROMPT TEXT ###
@@ -26,6 +30,3 @@ PROTAG_EQUIPMENT = "protag_equipment"
 PROTAG_STATS = "protag_levels"
 PROTAG_RUN_ON = "protag_run_on"
 PROTAG_RUN_ENERGY = "protag_run_energy"
-
-"""
-"""

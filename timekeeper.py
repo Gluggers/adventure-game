@@ -10,6 +10,9 @@ CLOCK_TICK = 30
 # Number of milliseconds in a second.
 NUM_MS_SECOND = 1000
 
+# Number of milliseconds per clock tick.
+MS_PER_TICK = NUM_MS_SECOND // CLOCK_TICK
+
 # Number of ticks between refreshing map.
 REFRESH_INTERVAL_NUM_TICKS = 30
 

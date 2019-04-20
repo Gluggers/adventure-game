@@ -37,6 +37,20 @@ class SelectionGridViewing(viewing.Viewing):
             display_pattern=display.PATTERN_2_ID,
             enlarged_selection_background_path=imagepaths.ITEM_LISTING_SELECTED_ENLARGED_BACKGROUND_PATH,
         ):
+        """Initializes a SelectionGridViewing object.
+
+        Args:
+            main_display_surface: pygame main Surface display object to
+                associate with the SelectionGridViewing object.
+            selection_icon_dimensions: 2-tuple that represents the width and
+                height, in pixels, of the icons for the SelectionGridViewing.
+            display_pattern: display pattern ID value that determines the
+                background and display patterns for the viewing object.
+            enlarged_selection_background_path: String representing the file
+                path for the image that will serve as a background for
+                enlarged selections.
+        """
+
         viewing.Viewing.__init__(
             self,
             main_display_surface,
@@ -136,9 +150,13 @@ class SelectionGridViewing(viewing.Viewing):
         # Child must define this.
         self.selection_option_menu_display = None
 
-    # Requires fonts to be loaded. see display.Display.init_fonts()
     # Inherited method.
     def create_title_display(self):
+        """Creates the title display.
+
+        Requires fonts to be loaded. See display.Display.init_fonts().
+        """
+
         LOGGER.info("Creating title display...")
         font_obj = display.Display.get_font(
             fontinfo.SELECTION_TOP_DISPLAY_FONT_ID
@@ -166,6 +184,11 @@ class SelectionGridViewing(viewing.Viewing):
 
     # Inherited method.
     def create_selection_area_display(self):
+        """Creates the selection area display.
+
+        Requires fonts to be loaded. See display.Display.init_fonts().
+        """
+
         LOGGER.info("Creating main selection grid display...")
         font_obj = display.Display.get_font(
             fontinfo.SELECTION_SUPERTEXT_FONT_ID
@@ -197,6 +220,11 @@ class SelectionGridViewing(viewing.Viewing):
 
     # Inherited method.
     def create_truncated_selection_area_display(self):
+        """Creates the truncated selection area display.
+
+        Requires fonts to be loaded. See display.Display.init_fonts().
+        """
+
         LOGGER.info("Creating truncated selection grid display...")
         font_obj = display.Display.get_font(
             fontinfo.SELECTION_SUPERTEXT_FONT_ID
@@ -228,6 +256,11 @@ class SelectionGridViewing(viewing.Viewing):
 
     # Inherited method.
     def create_bottom_text_display(self):
+        """Creates the bottom text display.
+
+        Requires fonts to be loaded. See display.Display.init_fonts().
+        """
+
         if self.bottom_text_rect:
             LOGGER.info("Creating selection bottom text display...")
             font_obj = display.Display.get_font(
@@ -253,20 +286,29 @@ class SelectionGridViewing(viewing.Viewing):
                 LOGGER.error("Must init fonts through display.Display.init_fonts.")
                 sys.exit(1)
 
-    # Requires fonts to be loaded. see display.Display.init_fonts().
     # Inherited method.
     def create_base_displays(self):
+        """Creates the base displays, which are the title display, the
+        selection area display, the truncated selection area display, and the
+        bottom text display.
+
+        Requires fonts to be loaded. See display.Display.init_fonts().
+        """
+
         self.create_title_display()
         self.create_truncated_selection_area_display()
         self.create_selection_area_display()
         self.create_bottom_text_display()
 
-    # Refreshes self. Does not update display.
     # Inherited method.
     def refresh_self(self):
+        """Currently does nothing."""
+
         pass
 
     def refresh_and_blit_self(self):
+        """Refreshes and blits self."""
+        
         self.refresh_self()
         self.blit_self()
 

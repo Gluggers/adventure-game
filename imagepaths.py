@@ -121,7 +121,13 @@ WILLOW_STUMP_PATH = INTER_OBJ_PATH + "willow_stump_64x64_dk.png" # [0]
 TREE_BASIC_PATH = INTER_OBJ_PATH + "tree_basic_64x64_lz_dk.png" # [1] modified by Gluggers
 TREE_OAK_PATH = INTER_OBJ_PATH + "tree_oak_64x64_lz_dk.png" # [1] modified by Gluggers
 TREE_WILLOW_PATH = INTER_OBJ_PATH + "tree_willow_64x64_dk.png" # [0]
-FISHING_SPOT_1_PATH = INTER_OBJ_PATH + "fishing_spot_32x32_dk.png" # [0]
+FISHING_SPOT_1_PATH = INTER_OBJ_PATH + "fishing_spot_1_32x32_dk.png" # [0]
+FISHING_SPOT_2_PATH = INTER_OBJ_PATH + "fishing_spot_2_32x32_dk.png" # [0]
+FISHING_SPOT_3_PATH = INTER_OBJ_PATH + "fishing_spot_3_32x32_dk.png" # [0]
+FISHING_SPOT_4_PATH = INTER_OBJ_PATH + "fishing_spot_4_32x32_dk.png" # [0]
+FISHING_SPOT_5_PATH = INTER_OBJ_PATH + "fishing_spot_5_32x32_dk.png" # [0]
+FISHING_SPOT_6_PATH = INTER_OBJ_PATH + "fishing_spot_6_32x32_dk.png" # [0]
+FISHING_SPOT_7_PATH = INTER_OBJ_PATH + "fishing_spot_7_32x32_dk.png" # [0]
 
 ### ITEMS ###
 GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50_dk.png" # [0]

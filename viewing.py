@@ -106,6 +106,43 @@ class Viewing(object):
         self.refresh_self()
         self.blit_self()
 
+    def delay(self, duration_ms, no_display_update=False, no_blit=False):
+        """Pauses for given amount of time to prevent user interaction.
+
+        Args:
+            duration_ms: number of milliseconds to pause and prevent user
+                interaction. Delayed time will be approximated by game ticks,
+                so the actual time delayed may not be exactly equal to
+                duration_ms.
+            no_display_update: if True, does not update the display.
+            no_blit: if True, does not blit self.
+        """
+
+        if duration_ms:
+            if not no_blit:
+                # Get number of ticks to wait.
+                num_ticks, leftover_ms = divmod(
+                    duration_ms,
+                    timekeeper.MS_PER_TICK,
+                )
+
+                if num_ticks:
+                    for i in range(num_ticks):
+                        if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                            self.blit_self()
+                            if not no_display_update:
+                                pygame.display.update()
+                if leftover_ms:
+                    pygame.time.wait(leftover_ms)
+
+                    self.blit_self()
+                    if not no_display_update:
+                        pygame.display.update()
+            else:
+                pygame.time.wait(duration_ms)
+        elif not no_display_update:
+            pygame.display.update()
+
     def display_single_text_page(
             self,
             text_display,
@@ -179,7 +216,42 @@ class Viewing(object):
 
             # Pause if needed.
             if advance_delay_ms:
-                pygame.time.wait(advance_delay_ms)
+                # Get number of ticks to wait.
+                num_ticks, leftover_ms = divmod(
+                    advance_delay_ms,
+                    timekeeper.MS_PER_TICK,
+                )
+
+                if num_ticks:
+                    for i in range(num_ticks):
+                        if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                            self.blit_self()
+                            text_display.blit_page(
+                                self._main_display_surface,
+                                page,
+                                show_continue_icon=False,
+                                horizontal_orientation=horizontal_orientation,
+                                vertical_orientation=vertical_orientation,
+                                alternative_top_left=alternative_top_left,
+                            )
+
+                            if not no_display_update:
+                                pygame.display.update()
+                if leftover_ms:
+                    pygame.time.wait(leftover_ms)
+
+                    self.blit_self()
+                    text_display.blit_page(
+                        self._main_display_surface,
+                        page,
+                        show_continue_icon=False,
+                        horizontal_orientation=horizontal_orientation,
+                        vertical_orientation=vertical_orientation,
+                        alternative_top_left=alternative_top_left,
+                    )
+
+                    if not no_display_update:
+                        pygame.display.update()
 
             if not auto_advance:
                 # Refresh and reblit self.
@@ -868,7 +940,40 @@ class Viewing(object):
 
                 # Wait a bit before allowing user to select options.
                 if load_delay_ms:
-                    pygame.time.wait(load_delay_ms)
+                    # Get number of ticks to wait.
+                    num_ticks, leftover_ms = divmod(
+                        load_delay_ms,
+                        timekeeper.MS_PER_TICK,
+                    )
+
+                    if num_ticks:
+                        for i in range(num_ticks):
+                            if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                                self.blit_self()
+                                menu_display.blit_menu_page(
+                                    self._main_display_surface,
+                                    curr_page,
+                                    curr_selected_index,
+                                    horizontal_orientation=horizontal_orientation,
+                                    vertical_orientation=vertical_orientation,
+                                    alternative_top_left=alternative_top_left,
+                                )
+
+                                pygame.display.update()
+                    if leftover_ms:
+                        pygame.time.wait(leftover_ms)
+
+                        self.blit_self()
+                        menu_display.blit_menu_page(
+                            self._main_display_surface,
+                            curr_page,
+                            curr_selected_index,
+                            horizontal_orientation=horizontal_orientation,
+                            vertical_orientation=vertical_orientation,
+                            alternative_top_left=alternative_top_left,
+                        )
+
+                        pygame.display.update()
 
                 if refresh_during:
                     self.refresh_and_blit_self()
@@ -1026,7 +1131,40 @@ class Viewing(object):
 
                         # Delay before allowing user to go to next option.
                         if option_switch_delay_ms:
-                            pygame.time.wait(option_switch_delay_ms)
+                            # Get number of ticks to wait.
+                            num_ticks, leftover_ms = divmod(
+                                option_switch_delay_ms,
+                                timekeeper.MS_PER_TICK,
+                            )
+
+                            if num_ticks:
+                                for i in range(num_ticks):
+                                    if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                                        self.blit_self()
+                                        menu_display.blit_menu_page(
+                                            self._main_display_surface,
+                                            curr_page,
+                                            curr_selected_index,
+                                            horizontal_orientation=horizontal_orientation,
+                                            vertical_orientation=vertical_orientation,
+                                            alternative_top_left=alternative_top_left,
+                                        )
+
+                                        pygame.display.update()
+                            if leftover_ms:
+                                pygame.time.wait(leftover_ms)
+
+                                self.blit_self()
+                                menu_display.blit_menu_page(
+                                    self._main_display_surface,
+                                    curr_page,
+                                    curr_selected_index,
+                                    horizontal_orientation=horizontal_orientation,
+                                    vertical_orientation=vertical_orientation,
+                                    alternative_top_left=alternative_top_left,
+                                )
+
+                                pygame.display.update()
 
                         if refresh_during:
                             self.refresh_and_blit_self()

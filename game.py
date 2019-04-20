@@ -787,6 +787,21 @@ class Game(object):
             object_id=None,
             countdown_time_s=0,
         ):
+        """Sets a pending spawn action for the given location on the given map,
+        and then refreshes the map.
+
+        Args:
+            map_obj: Map object for which to set the pending spawn action.
+            bottom_left_tile_loc: bottom left tile coordinate for the spawn
+                action.
+            object_id: object ID to spawn at the specified bottom left tile
+                location. If None, removes any object that is occupying
+                the bottom left tile location.
+            countdown_time_s: time in seconds before the Map should spawn
+                the given object (or remove the current object). If 0,
+                the action will occur right away.
+        """
+
         LOGGER.info(
             "Setting spawn action for tile loc %s " \
                 + "using obj id %s with countdown %s",
@@ -811,6 +826,20 @@ class Game(object):
             object_id=None,
             countdown_time_s=0,
         ):
+        """Sets a pending spawn action for the given location on the current
+        map, and then refreshes the map.
+
+        Args:
+            bottom_left_tile_loc: bottom left tile coordinate for the spawn
+                action.
+            object_id: object ID to spawn at the specified bottom left tile
+                location. If None, removes any object that is occupying
+                the bottom left tile location.
+            countdown_time_s: time in seconds before the Map should spawn
+                the given object (or remove the current object). If 0,
+                the action will occur right away.
+        """
+
         self.set_pending_spawn_action(
             self.curr_map,
             bottom_left_tile_loc,
@@ -978,6 +1007,8 @@ class Game(object):
             self.display_statistics(self.protagonist)
 
     def display_statistics(self, target_entity):
+        """Displays the levels for the given entity."""
+
         # Debugging for now. TODO.
         if target_entity:
             LOGGER.info("Stats (level, curr exp, exp to next level):")
@@ -1006,12 +1037,22 @@ class Game(object):
                         remaining_exp
                     )
 
-    # Returns option ID of selected option, None if none selected.
     def display_overworld_side_menu(
             self,
             refresh_after=True,
             refresh_during=True,
         ):
+        """Displays the overworld side menu and allows the user to interact
+        with the menu. Returns the option ID of the selected option, or None
+        if no option was selected.
+
+        Args:
+            refresh_after: if True, refreshes the overworld viewing
+                after the user finishes interacting with the menu.
+            refresh_during: if True, refreshes the overworld viewing
+                while the user is interacting with the menu.
+        """
+
         return self.overworld_viewing.display_overworld_side_menu(
             menuoptions.OVERWORLD_MENU_OPTION_IDS,
             refresh_after=refresh_after,
@@ -1024,6 +1065,18 @@ class Game(object):
             refresh_after=True,
             refresh_during=True,
         ):
+        """Displays the given menu options at the bottom menu and allows the
+        user to select an option. Returns the option ID of the selected
+        option, or None if no option was selected.
+
+        Args:
+            menu_options: list of menu option IDs to display.
+            refresh_after: if True, refreshes the overworld viewing
+                after the user finishes interacting with the menu.
+            refresh_during: if True, refreshes the overworld viewing
+                while the user is interacting with the menu.
+        """
+
         return self.overworld_viewing.display_overworld_bottom_menu(
             menu_options,
             refresh_after=refresh_after,
@@ -1031,6 +1084,9 @@ class Game(object):
         )
 
     def start_load_sequence(self):
+        """Prompts the user for loading a saved game, and loads the game if
+        requested."""
+
         # TODO check if load file exists.
         load_prompt_text = savefiledata.LOAD_PROMPT_TEXT.get(
             language.Language.current_language_id,
@@ -1057,6 +1113,9 @@ class Game(object):
                 self.load_game()
 
     def start_save_sequence(self):
+        """Prompts the user for saving the game, which can involve overwriting
+        a save file. Saves the game if requested."""
+
         # TODO check if the save file already exists.
         save_prompt_text = savefiledata.SAVE_PROMPT_TEXT.get(
             language.Language.current_language_id,
@@ -1122,6 +1181,8 @@ class Game(object):
             self.refresh_and_blit_overworld_viewing(display_update=False)
 
     def handle_overworld_loop(self):
+        """Handles the overworld game logic and interactions."""
+
         continue_playing = True
 
         # pressed keys
