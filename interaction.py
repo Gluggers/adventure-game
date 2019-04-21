@@ -600,7 +600,7 @@ class Interaction():
                 if protag_fire_level < req_level:
                     # Not high enough level.
                     user_message = \
-                        interaction.NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
+                        NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
                             language.Language.current_language_id,
                             ""
                         ).format(
