@@ -53,6 +53,8 @@ class Viewing(object):
     def __init__(
             self,
             main_display_surface,
+            reblit_tick_interval=timekeeper.DEFAULT_VIEWING_REBLIT_TICK_INTERVAL,
+            refresh_tick_interval=timekeeper.DEFAULT_VIEWING_REFRESH_TICK_INTERVAL,
         ):
         """Initializes the Viewing object.
 
@@ -61,9 +63,15 @@ class Viewing(object):
                 display screen that will be linked to the Viewing object.
                 This Surface object is used to blit pixels and changes to
                 the display screen.
+            reblit_tick_interval: number of Timekeeper clock ticks to wait in
+                between reblitting self.
+            refresh_tick_interval: number of Timekeeper clock ticks to wait in
+                between refreshing self.
         """
 
         self._main_display_surface = main_display_surface
+        self._reblit_tick_interval = reblit_tick_interval
+        self._refresh_tick_interval = refresh_tick_interval
 
     @property
     def main_display_surface(self):
@@ -128,7 +136,7 @@ class Viewing(object):
 
                 if num_ticks:
                     for i in range(num_ticks):
-                        if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                        if i % self._reblit_tick_interval:
                             self.blit_self()
                             if not no_display_update:
                                 pygame.display.update()
@@ -224,7 +232,7 @@ class Viewing(object):
 
                 if num_ticks:
                     for i in range(num_ticks):
-                        if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                        if i % self._reblit_tick_interval:
                             self.blit_self()
                             text_display.blit_page(
                                 self._main_display_surface,
@@ -284,28 +292,17 @@ class Viewing(object):
                 while not advance:
                     timekeeper.Timekeeper.tick()
                     refresh_tick_counter = (refresh_tick_counter + 1) \
-                                    % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                                    % self._refresh_tick_interval
                     reblit_tick_counter = (reblit_tick_counter + 1) \
-                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
+                                    % self._reblit_tick_interval
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         # Refresh and reblit self and page.
                         LOGGER.debug("Refreshing while waiting.")
-                        self.refresh_and_blit_self()
-                        text_display.blit_page(
-                            self._main_display_surface,
-                            page,
-                            show_continue_icon=True,
-                            horizontal_orientation=horizontal_orientation,
-                            vertical_orientation=vertical_orientation,
-                            alternative_top_left=alternative_top_left,
-                        )
+                        self.refresh_self()
 
-                        if not no_display_update:
-                            pygame.display.update()
-
-                    elif reblit_tick_counter == 0:
+                    if reblit_tick_counter == 0:
                         self.blit_self()
                         text_display.blit_page(
                             self._main_display_surface,
@@ -729,34 +726,16 @@ class Viewing(object):
                     timekeeper.Timekeeper.tick()
 
                     refresh_tick_counter = (refresh_tick_counter + 1) \
-                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                            % self._refresh_tick_interval
                     reblit_tick_counter = (reblit_tick_counter + 1) \
-                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
+                                    % self._reblit_tick_interval
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         LOGGER.debug("Refreshing while waiting.")
-                        self.refresh_and_blit_self()
-                        text_lines = [
-                            prompt_text_to_display,
-                            user_input_str + input_suffix
-                        ]
-                        self.display_text_display_first_page(
-                            text_display,
-                            text_lines,
-                            font_color=font_colors,
-                            advance_delay_ms=0,
-                            auto_advance=True,
-                            refresh_during=refresh_during,
-                            refresh_after=False,
-                            horizontal_orientation=horizontal_orientation,
-                            vertical_orientation=vertical_orientation,
-                            alternative_top_left=alternative_top_left,
-                            no_display_update=no_display_update,
-                        )
-                        if not no_display_update:
-                            pygame.display.update()
-                    elif reblit_tick_counter == 0:
+                        self.refresh_self()
+
+                    if reblit_tick_counter == 0:
                         self.blit_self()
                         text_lines = [
                             prompt_text_to_display,
@@ -948,7 +927,7 @@ class Viewing(object):
 
                     if num_ticks:
                         for i in range(num_ticks):
-                            if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                            if i % self._reblit_tick_interval:
                                 self.blit_self()
                                 menu_display.blit_menu_page(
                                     self._main_display_surface,
@@ -997,23 +976,15 @@ class Viewing(object):
                     prev_option = False
 
                     refresh_tick_counter = (refresh_tick_counter + 1) \
-                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS
+                            % self._refresh_tick_interval
                     reblit_tick_counter = (reblit_tick_counter + 1) \
-                                    % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS
+                                    % self._reblit_tick_interval
 
                     if refresh_during \
                             and (refresh_tick_counter == 0):
                         LOGGER.debug("Refreshing while waiting.")
-                        self.refresh_and_blit_self()
-                        menu_display.blit_menu_page(
-                            self._main_display_surface,
-                            curr_page,
-                            curr_selected_index,
-                            horizontal_orientation=horizontal_orientation,
-                            vertical_orientation=vertical_orientation,
-                            alternative_top_left=alternative_top_left,
-                        )
-                        pygame.display.update()
+                        self.refresh_self()
+
                     if reblit_tick_counter == 0:
                         self.blit_self()
                         menu_display.blit_menu_page(
@@ -1139,7 +1110,7 @@ class Viewing(object):
 
                             if num_ticks:
                                 for i in range(num_ticks):
-                                    if i % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS:
+                                    if i % self._reblit_tick_interval:
                                         self.blit_self()
                                         menu_display.blit_menu_page(
                                             self._main_display_surface,

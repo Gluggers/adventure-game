@@ -1202,9 +1202,9 @@ class Game(object):
             timekeeper.Timekeeper.tick()
             num_ticks = num_ticks + 1
 
-            if num_ticks % timekeeper.REFRESH_INTERVAL_NUM_TICKS == 0:
+            if num_ticks % timekeeper.OW_REFRESH_TICK_INTERVAL == 0:
                 self.refresh_and_blit_overworld_viewing()
-            elif num_ticks % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS == 0:
+            elif num_ticks % timekeeper.OW_REBLIT_TICK_INTERVAL == 0:
                 self.overworld_viewing.blit_self()
                 pygame.display.update()
 

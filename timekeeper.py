@@ -14,10 +14,14 @@ NUM_MS_SECOND = 1000
 MS_PER_TICK = NUM_MS_SECOND // CLOCK_TICK
 
 # Number of ticks between refreshing map.
-REFRESH_INTERVAL_NUM_TICKS = 30
+DEFAULT_VIEWING_REFRESH_TICK_INTERVAL = 30
+OW_REFRESH_TICK_INTERVAL = 30
+SELECTION_REFRESH_TICK_INTERVAL = 60
 
 # Number of ticks between reblitting overworld.
-OW_REBLIT_INTERVAL_NUM_TICKS = 3
+DEFAULT_VIEWING_REBLIT_TICK_INTERVAL = 3
+OW_REBLIT_TICK_INTERVAL = 3
+SELECTION_REBLIT_TICK_INTERVAL = 60
 
 class Timekeeper(object):
     """Handles time-based methods and functions, such as ticks.

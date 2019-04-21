@@ -221,13 +221,13 @@ class Interaction():
                             display_update=False
                         )
                     elif (num_skill_ticks \
-                            % timekeeper.REFRESH_INTERVAL_NUM_TICKS) == 0:
+                            % timekeeper.OW_REFRESH_TICK_INTERVAL) == 0:
                         # Refresh and reblit overworld.
                         game_object.refresh_and_blit_overworld_viewing(
                             display_update=False
                         )
                     elif (num_skill_ticks \
-                            % timekeeper.OW_REBLIT_INTERVAL_NUM_TICKS) == 0:
+                            % timekeeper.OW_REBLIT_TICK_INTERVAL) == 0:
                         game_object.overworld_viewing.blit_self()
 
                     # This will update display for us.

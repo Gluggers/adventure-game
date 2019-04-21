@@ -54,6 +54,8 @@ class SelectionGridViewing(viewing.Viewing):
         viewing.Viewing.__init__(
             self,
             main_display_surface,
+            reblit_tick_interval=timekeeper.SELECTION_REBLIT_TICK_INTERVAL,
+            refresh_tick_interval=timekeeper.SELECTION_REFRESH_TICK_INTERVAL,
         )
         self.display_pattern = display_pattern
         self.icon_supertext_font_object = None
@@ -308,7 +310,7 @@ class SelectionGridViewing(viewing.Viewing):
 
     def refresh_and_blit_self(self):
         """Refreshes and blits self."""
-        
+
         self.refresh_self()
         self.blit_self()
 
@@ -1063,12 +1065,13 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             reference_entity=None,
         ):
         selection_options = []
-
-        selection_obj = items.Item.get_item(selection_info[0])
-
+        selection_obj = None
         option_list = []
 
-        if selection_obj.menu_option_ids:
+        if selection_info:
+            selection_obj = items.Item.get_item(selection_info[0])
+
+        if selection_obj and selection_obj.menu_option_ids:
             for option_id in selection_obj.menu_option_ids:
                 option_list.append(option_id)
             option_list.append(menuoptions.CANCEL_OPTION_ID)
