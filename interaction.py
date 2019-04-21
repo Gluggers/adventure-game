@@ -12,6 +12,7 @@ import sys
 import items
 import itemdata
 import logging
+import objdata
 
 GATHERING_START_DELAY_MS = 500
 GATHERING_EXHAUST_DELAY_MS = 1000
@@ -629,17 +630,58 @@ class Interaction():
                         refresh_during=True,
                     )
                 else:
+                    # TODO randomize success for lighting fire.
+
                     LOGGER.info("Lighting fire in front.")
                     # Can light fire. TODO - success message,
                     # add fire and add spawn action to remove fire,
                     # and raise XP.
-                    """
-                    game_object.set_pending_spawn_action_curr_map(
-                        target_object_loc,
-                        object_id=replacement_id,
-                        countdown_time_s=0,
+                    fire_obj_id = objdata.LOG_TO_FIRE_MAPPING.get(
+                        log_obj_id,
+                        None,
                     )
-                    """
+                    fire_duration_s = objdata.FIRE_DURATION_S_MAPPING.get(
+                        fire_obj_id,
+                        None
+                    )
+                    if fire_obj_id is not None and fire_duration_s:
+                        # Make fire.
+                        game_object.set_temporary_spawn(
+                            fire_obj_id,
+                            front_tile_pos,
+                            fire_duration_s
+                        )
+
+                        exp_gained = itemdata.LIGHTING_LOG_EXP_MAPPING.get(
+                            log_obj_id,
+                            0
+                        )
+
+                        # Display message to user.
+                        fire_success_msg = interactiondata.LIGHT_LOG_FIRE_INFO.get(
+                            language.Language.current_language_id,
+                            ""
+                        ).format(
+                            exp_gained,
+                        )
+
+                        game_object.display_overworld_bottom_text(
+                            fire_success_msg,
+                            auto_advance=False,
+                            refresh_after=True,
+                            refresh_during=True,
+                        )
+
+                        levels_gained = game_object.gain_experience(
+                            game_object.protagonist,
+                            skills.SKILL_ID_FIREMAKING,
+                            exp_gained,
+                        )
+                    else:
+                        LOGGER.warn(
+                            "No fire ID or fire duration found for log ID %d",
+                            log_obj_id,
+                        )
 
     @classmethod
     def get_interaction_method(cls, interaction_id):

@@ -93,3 +93,8 @@ CANNOT_LIGHT_IN_FRONT_INFO = {
     language.LANG_ENGLISH: "You cannot light a fire in front of you. Try moving elsewhere.",
     language.LANG_ESPANOL: "No puedes encender una hoguera enfrente de ti. Intentalo en otro lugar.",
 }
+
+LIGHT_LOG_FIRE_INFO = {
+    language.LANG_ENGLISH: "You light a fire and gain {0} firemaking experience!",
+    language.LANG_ESPANOL: "Has encendido una hoguera y has ganado {0} puntos de experiencia en Dominio de Fuego!",
+}

@@ -113,7 +113,64 @@ ROCK_EMPTY_ID = 700001
 TREE_STUMP_ID = 700002
 WILLOW_STUMP_ID = 700003
 FISHING_SPOT_EMPTY_ID = 700100
+
+# Log fires.
+FIRE_LOG_BASIC_ID = 710001
+FIRE_BAMBOO_ID = 710002
+FIRE_OAK_ID = 710003
+FIRE_WILLOW_ID = 710004
+FIRE_MAPLE_ID = 710005
+FIRE_YEW_ID = 710006
+FIRE_ANCIENT_ID = 710007
+FIRE_ASTRAL_ID = 710008
+FIRE_CELESTIAL_ID = 710009
+FIRE_TEAK_ID = 710010
+FIRE_MAHOGANY_ID = 710011
+FIRE_EUCALYPTUS_ID = 710012
+FIRE_SPIRIT_ID = 710013
+FIRE_DARK_ID = 710014
+FIRE_LIGHT_ID = 710015
+FIRE_BLOOD_ID = 710016
+
 MAX_MISC_ID = 799999
+
+# Mapping of Log IDs to the Fire object IDs.
+LOG_TO_FIRE_MAPPING = {
+    itemdata.LOG_TREE_ID: FIRE_LOG_BASIC_ID,
+    itemdata.LOG_OAK_ID: FIRE_OAK_ID,
+    itemdata.LOG_WILLOW_ID: FIRE_WILLOW_ID,
+    itemdata.LOG_MAPLE_ID: FIRE_MAPLE_ID,
+    itemdata.LOG_YEW_ID: FIRE_YEW_ID,
+    itemdata.LOG_TEAK_ID: FIRE_TEAK_ID,
+    itemdata.LOG_MAHOGANY_ID: FIRE_MAHOGANY_ID,
+    itemdata.LOG_ANCIENT_ID: FIRE_ANCIENT_ID,
+    itemdata.LOG_ASTRAL_ID: FIRE_ASTRAL_ID,
+    itemdata.LOG_SPIRIT_ID: FIRE_SPIRIT_ID,
+    itemdata.LOG_DARK_ID: FIRE_DARK_ID,
+    itemdata.LOG_LIGHT_ID: FIRE_LIGHT_ID,
+    itemdata.LOG_CELESTIAL_ID: FIRE_CELESTIAL_ID,
+    itemdata.LOG_BLOOD_ID: FIRE_BLOOD_ID,
+}
+
+# Maps fire IDs to their duration in seconds.
+FIRE_DURATION_S_MAPPING = {
+    FIRE_LOG_BASIC_ID: 45,
+    FIRE_BAMBOO_ID: 45,
+    FIRE_OAK_ID: 60,
+    FIRE_WILLOW_ID: 75,
+    FIRE_MAPLE_ID: 90,
+    FIRE_YEW_ID: 135,
+    FIRE_ANCIENT_ID: 15,
+    FIRE_ASTRAL_ID: 180,
+    FIRE_CELESTIAL_ID: 240,
+    FIRE_TEAK_ID: 105,
+    FIRE_MAHOGANY_ID: 120,
+    FIRE_EUCALYPTUS_ID: 120,
+    FIRE_SPIRIT_ID: 150,
+    FIRE_DARK_ID: 150,
+    FIRE_LIGHT_ID: 150,
+    FIRE_BLOOD_ID: 210,
+}
 
 ### OBJECT DATA FIELDS ###
 OBJECT_NAME_INFO_FIELD = 0x1
@@ -191,8 +248,8 @@ IMAGE_INFO_DICT_PROTAG = {
 MISC_OBJECT_DATA = {
     ROCK_EMPTY_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "EMPTY ORE",
-            language.LANG_ESPANOL: "VENA AGOTADA",
+            language.LANG_ENGLISH: "Empty Ore",
+            language.LANG_ESPANOL: "Vena Agotada",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_EMPTY_BASIC_PATH,
@@ -207,8 +264,8 @@ MISC_OBJECT_DATA = {
     },
     FISHING_SPOT_EMPTY_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "EMPTY FISHING SPOT",
-            language.LANG_ESPANOL: "LUGAR PARA PESCAR AGOTADO",
+            language.LANG_ENGLISH: "Empty Fishing Spot",
+            language.LANG_ESPANOL: "Lugar Agotado Para Pescar",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.FISHING_SPOT_1_PATH,
@@ -223,8 +280,8 @@ MISC_OBJECT_DATA = {
     },
     TREE_STUMP_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "TREE STUMP",
-            language.LANG_ESPANOL: "TOCON",
+            language.LANG_ENGLISH: "Tree Stump",
+            language.LANG_ESPANOL: "Tocón",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_STUMP_PATH,
@@ -239,8 +296,8 @@ MISC_OBJECT_DATA = {
     },
     WILLOW_STUMP_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "WILLOW STUMP",
-            language.LANG_ESPANOL: "TOCON DE SAUCE",
+            language.LANG_ENGLISH: "Willow Stump",
+            language.LANG_ESPANOL: "Tocón de Sauce",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.WILLOW_STUMP_PATH,
@@ -253,14 +310,62 @@ MISC_OBJECT_DATA = {
             language.LANG_ESPANOL: "Solia haber un sauce aqui.",
         },
     },
+    FIRE_LOG_BASIC_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Log Fire",
+            language.LANG_ESPANOL: "Hoguera Básica",
+        },
+        IMAGE_INFO_DICT_FIELD: {
+            #$$ TODO change.
+            imageids.OBJ_SPRITE_SEQUENCE_ID: [
+                [
+                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                ],
+                1000,
+            ],
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RESPAWN_TIME_S_FIELD:  None,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "A nice warm fire! Suitable for cooking.",
+            language.LANG_ESPANOL: "Una hoguera cálida! Es apropiada para cocer.",
+        },
+        INTERACTION_ID_FIELD: None, # TODO - add cooking interaction ID.
+    },
+    FIRE_OAK_ID: {
+        OBJECT_NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Oak Fire",
+            language.LANG_ESPANOL: "Hoguera de Roble",
+        },
+        IMAGE_INFO_DICT_FIELD: {
+            #$$ TODO change.
+            imageids.OBJ_SPRITE_SEQUENCE_ID: [
+                [
+                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                ],
+                1000,
+            ],
+        },
+        COLLISION_WIDTH_FIELD: 1,
+        COLLISION_HEIGHT_FIELD: 1,
+        RESPAWN_TIME_S_FIELD:  None,
+        EXAMINE_INFO_FIELD: {
+            language.LANG_ENGLISH: "A nice warm oak fire! Suitable for cooking.",
+            language.LANG_ESPANOL: "Una hoguera cálida de leña de roble! Es apropiada para cocer.",
+        },
+        INTERACTION_ID_FIELD: None, # TODO - add cooking interaction ID.
+    },
 }
 
 ### RESOURCE DATA ###
 RESOURCE_DATA = {
     HERB_BASIC_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "BASIC HERB",
-            language.LANG_ESPANOL: "HIERBA BASICA",
+            language.LANG_ENGLISH: "Basic Herb",
+            language.LANG_ESPANOL: "Hierba Básica",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.HERB_BASIC_PATH,
@@ -284,8 +389,8 @@ RESOURCE_DATA = {
     },
     TREE_BASIC_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "TREE",
-            language.LANG_ESPANOL: "ARBOL",
+            language.LANG_ENGLISH: "Tree",
+            language.LANG_ESPANOL: "Árbol",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_BASIC_PATH,
@@ -299,7 +404,7 @@ RESOURCE_DATA = {
         RESPAWN_TIME_S_FIELD:  10,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "It's just a tree. Maybe I can cut it down.",
-            language.LANG_ESPANOL: "Es solo un arbol. Tal vez pueda talarlo.",
+            language.LANG_ESPANOL: "Es solo un árbol. Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
         EXHAUSTION_PROBABILITY_FIELD: 1.0,  # TODO change.
@@ -310,8 +415,8 @@ RESOURCE_DATA = {
     },
     TREE_OAK_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "OAK TREE",
-            language.LANG_ESPANOL: "ROBLE",
+            language.LANG_ENGLISH: "Oak Tree",
+            language.LANG_ESPANOL: "Roble",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_OAK_PATH,
@@ -336,8 +441,8 @@ RESOURCE_DATA = {
     },
     TREE_WILLOW_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "WILLOW TREE",
-            language.LANG_ESPANOL: "SAUCE",
+            language.LANG_ENGLISH: "Willow Tree",
+            language.LANG_ESPANOL: "Sauce",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.TREE_WILLOW_PATH,
@@ -362,8 +467,8 @@ RESOURCE_DATA = {
     },
     ROCK_COPPER_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "COPPER VEIN",
-            language.LANG_ESPANOL: "VENA DE COBRE",
+            language.LANG_ENGLISH: "Copper Vein",
+            language.LANG_ESPANOL: "Vena de Cobre",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_COPPER_BASIC_PATH,
@@ -388,8 +493,8 @@ RESOURCE_DATA = {
     },
     ROCK_TIN_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "TIN VEIN",
-            language.LANG_ESPANOL: "VENA DE ESTAÑO",
+            language.LANG_ENGLISH: "Tin Vein",
+            language.LANG_ESPANOL: "Vena de Estaño",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_TIN_BASIC_PATH,
@@ -414,8 +519,8 @@ RESOURCE_DATA = {
     },
     ROCK_IRON_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "IRON VEIN",
-            language.LANG_ESPANOL: "VENA DE HIERRO",
+            language.LANG_ENGLISH: "Iron Vein",
+            language.LANG_ESPANOL: "Vena de Hierro",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_IRON_BASIC_PATH,
@@ -440,8 +545,8 @@ RESOURCE_DATA = {
     },
     ROCK_COAL_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "COAL VEIN",
-            language.LANG_ESPANOL: "VENA DE CARBÓN",
+            language.LANG_ENGLISH: "Coal Vein",
+            language.LANG_ESPANOL: "Vena de Carbón",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_COAL_BASIC_PATH,
@@ -466,8 +571,8 @@ RESOURCE_DATA = {
     },
     ROCK_SILVER_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "SILVER VEIN",
-            language.LANG_ESPANOL: "VENA DE PLATA",
+            language.LANG_ENGLISH: "Silver Vein",
+            language.LANG_ESPANOL: "Vena de Plata",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_SILVER_BASIC_PATH,
@@ -492,8 +597,8 @@ RESOURCE_DATA = {
     },
     ROCK_TITANIUM_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "TITANIUM VEIN",
-            language.LANG_ESPANOL: "VENA DE TITANIO",
+            language.LANG_ENGLISH: "Titanium Vein",
+            language.LANG_ESPANOL: "Vena de Titanio",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_TITANIUM_BASIC_PATH,
@@ -518,8 +623,8 @@ RESOURCE_DATA = {
     },
     ROCK_GOLD_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "GOLD VEIN",
-            language.LANG_ESPANOL: "VENA DE ORO",
+            language.LANG_ENGLISH: "Gold Vein",
+            language.LANG_ESPANOL: "Vena de Oro",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: imagepaths.ROCK_GOLD_BASIC_PATH,
@@ -544,8 +649,8 @@ RESOURCE_DATA = {
     },
     FISHING_SPOT_1_ID: {
         OBJECT_NAME_INFO_FIELD: {
-            language.LANG_ENGLISH: "FISHING SPOT",
-            language.LANG_ESPANOL: "LUGAR PARA PESCAR",
+            language.LANG_ENGLISH: "Fishing Spot",
+            language.LANG_ESPANOL: "Lugar Para Pescar",
         },
         IMAGE_INFO_DICT_FIELD: {
             imageids.OBJ_SPRITE_SEQUENCE_ID: [
@@ -566,7 +671,7 @@ RESOURCE_DATA = {
         RESPAWN_TIME_S_FIELD:  60,
         EXAMINE_INFO_FIELD: {
             language.LANG_ENGLISH: "I can see fish in the water. Maybe I can catch them.",
-            language.LANG_ESPANOL: "Se veían peces en el agua. Tal vez pueda atraparlos.",
+            language.LANG_ESPANOL: "Veo peces en el agua. Tal vez pueda atraparlos.",
         },
         INTERACTION_ID_FIELD: interactiondata.CATCH_FISH_ROD_ID,
         EXHAUSTION_PROBABILITY_FIELD: 0.2,

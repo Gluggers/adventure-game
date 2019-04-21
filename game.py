@@ -200,6 +200,46 @@ class Game(object):
                 countdown_time_s=respawn_time_s,
             )
 
+    def set_temporary_spawn(
+            self,
+            obj_id_to_spawn,
+            target_loc,
+            duration_s
+        ):
+        """Spawns the given object at the given location, and sets it to
+        be removed after the specified time.
+
+        Does not reblit or refresh the map or display.
+
+        Args:
+            obj_id_to_spawn: id of object to spawn for temporary period.
+            target_loc: 2-tuple (x,y) Tile location for the target
+                object.
+            duration_s: number of seconds for the object to stay spawned.
+        """
+
+        LOGGER.info(
+            "temporarily spawning object %d for %d seconds. Bottom tile loc %s",
+            obj_id_to_spawn,
+            duration_s,
+            target_loc,
+        )
+
+        if obj_id_to_spawn is not None and duration_s and target_loc:
+            # Clear previous object and add replacement obj.
+            self.set_pending_spawn_action_curr_map(
+                target_loc,
+                object_id=obj_id_to_spawn,
+                countdown_time_s=0,
+            )
+
+            # Set pending removal action and update map.
+            self.set_pending_spawn_action_curr_map(
+                target_loc,
+                object_id=None,
+                countdown_time_s=duration_s,
+            )
+
     # change and transition to new map
     # updates display screen
     # TODO document and change

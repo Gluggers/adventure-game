@@ -247,6 +247,25 @@ LIGHTING_LOG_SKILL_MAPPING = {
     LOG_BLOOD_ID: 75,
 }
 
+# Mapping for logs to firemaking experience earned when lighting.
+# TODO change.
+LIGHTING_LOG_EXP_MAPPING = {
+    LOG_TREE_ID: 20,
+    LOG_OAK_ID: 35,
+    LOG_WILLOW_ID: 50,
+    LOG_MAPLE_ID: 70,
+    LOG_YEW_ID: 130,
+    LOG_TEAK_ID: 90,
+    LOG_MAHOGANY_ID: 110,
+    LOG_ANCIENT_ID: 150,
+    LOG_ASTRAL_ID: 180,
+    LOG_SPIRIT_ID: 210,
+    LOG_DARK_ID: 210,
+    LOG_LIGHT_ID: 210,
+    LOG_CELESTIAL_ID: 300,
+    LOG_BLOOD_ID: 250,
+}
+
 
 ### BASIC ITEM FIELD IDs ###
 
@@ -453,7 +472,7 @@ STANDARD_ITEM_DATA = {
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to sew fabric.",
-            language.LANG_ESPANOL: "Puede servir para coser teijdo.",
+            language.LANG_ESPANOL: "Puede servir para coser tejido.",
         },
         WEIGHT_POINT_FIELD: 0,
         PROPERTIES_FIELD: TOOL_ITEM_F,
@@ -465,13 +484,13 @@ STANDARD_ITEM_DATA = {
     LOG_TREE_ID: {
         viewingicondata.NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "Log",
-            language.LANG_ESPANOL: "Lena",
+            language.LANG_ESPANOL: "Leño",
         },
         BASE_VALUE_LOW_FIELD: 3,
         BASE_VALUE_HIGH_FIELD: 5,
         viewingicondata.DESCRIPTION_INFO_FIELD: {
             language.LANG_ENGLISH: "Some logs from a tree.",
-            language.LANG_ESPANOL: "Lena de un arbol.",
+            language.LANG_ESPANOL: "Leño de un arbol.",
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to make a fire or crafting.",
@@ -487,13 +506,13 @@ STANDARD_ITEM_DATA = {
     LOG_OAK_ID: {
         viewingicondata.NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "Oak Log",
-            language.LANG_ESPANOL: "Lena de Roble",
+            language.LANG_ESPANOL: "Leño de Roble",
         },
         BASE_VALUE_LOW_FIELD: 6,
         BASE_VALUE_HIGH_FIELD: 12,
         viewingicondata.DESCRIPTION_INFO_FIELD: {
             language.LANG_ENGLISH: "Some oak logs.",
-            language.LANG_ESPANOL: "Lena de un roble.",
+            language.LANG_ESPANOL: "Leño de un roble.",
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to make a fire or for crafting.",
@@ -509,13 +528,13 @@ STANDARD_ITEM_DATA = {
     LOG_WILLOW_ID: {
         viewingicondata.NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "Willow Log",
-            language.LANG_ESPANOL: "Lena de Sauce",
+            language.LANG_ESPANOL: "Leño de Sauce",
         },
         BASE_VALUE_LOW_FIELD: 25,
         BASE_VALUE_HIGH_FIELD: 50,
         viewingicondata.DESCRIPTION_INFO_FIELD: {
             language.LANG_ENGLISH: "Some willow logs.",
-            language.LANG_ESPANOL: "Lena de un sauce.",
+            language.LANG_ESPANOL: "Leño de un sauce.",
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to make a fire or for crafting.",
@@ -531,13 +550,13 @@ STANDARD_ITEM_DATA = {
     LOG_MAPLE_ID: {
         viewingicondata.NAME_INFO_FIELD: {
             language.LANG_ENGLISH: "Maple Log",
-            language.LANG_ESPANOL: "Lena de Arce",
+            language.LANG_ESPANOL: "Leño de Arce",
         },
         BASE_VALUE_LOW_FIELD: 60,
         BASE_VALUE_HIGH_FIELD: 120,
         viewingicondata.DESCRIPTION_INFO_FIELD: {
             language.LANG_ENGLISH: "Some maple logs.",
-            language.LANG_ESPANOL: "Lena de un arce.",
+            language.LANG_ESPANOL: "Leño de un arce.",
         },
         USAGE_INFO_FIELD: {
             language.LANG_ENGLISH: "I could use this to make a fire or for crafting.",
