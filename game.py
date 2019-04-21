@@ -12,8 +12,10 @@ import equipmentviewing
 import gamemap
 import imageids
 import interaction
+import interactiondata
 import inventory
 import itemdata
+import items
 import language
 import mapdata
 import menuoptions
@@ -494,6 +496,30 @@ class Game(object):
 
         return ret_quantity
 
+    def can_light_fire_on_tile(self, tile_coord): #$$):
+        """Returns True if the specified tile location can have a fire
+        lit on it, False otherwise."""
+
+        can_light = False
+
+        if tile_coord:
+            tile_obj = self.curr_map.get_tile_from_pos(tile_coord)
+            walkable = self.curr_map.valid_transportation(
+                tile_coord,
+                tiledata.WALKABLE_F
+            )
+            if tile_obj and walkable:
+                # Walkable tiles can have fires on them.
+                # Check if tile is empty.
+                inter_obj = self.curr_map.get_object_occupying_tile(
+                    tile_coord
+                )
+
+                if inter_obj is None:
+                    can_light = True
+
+        return can_light
+
     # TODO enhance once menus are set up.
     def handle_overworld_inventory(self):
         if self.overworld_inventory_viewing and self.protagonist:
@@ -596,6 +622,20 @@ class Game(object):
                             selected_index,
                             self.protagonist.inventory.get_last_index()
                         )
+                    elif option_id == menuoptions.LIGHT_FIRE_OPTION_ID:
+                        # Check if we can light a fire.
+                        selected_item_info = \
+                            self.protagonist.inventory.get_item_entry(
+                                selected_index
+                            )
+
+                        self.refresh_and_blit_overworld_viewing()
+
+                        interaction.Interaction.light_log_interaction(
+                            self,
+                            selected_item_info[0],
+                        )
+                        done = True
                     else:
                         done = True
 

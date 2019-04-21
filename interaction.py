@@ -10,6 +10,7 @@ import skills
 import viewingdata
 import sys
 import items
+import itemdata
 import logging
 
 GATHERING_START_DELAY_MS = 500
@@ -551,6 +552,94 @@ class Interaction():
         if game_object and acting_object \
                 and target_object and acting_object_loc and target_object_loc:
             LOGGER.info("Place herb gather interaction here.")
+
+    @classmethod
+    def light_log_interaction(
+            cls,
+            game_object,
+            log_obj_id,
+        ):
+        """Lights fire in front of protagonist.
+
+        The fire duration depends on the log object corresponding to
+        log_obj_id. If the protagonist doesn't have a high enough skill level
+        to light the given log, or if the protagonist cannot light a fire in
+        front of itself, then the method will display the appropriate message
+        to the user.
+
+        Args:
+            log_obj_id: item ID for the log to burn.
+        """
+
+        log_obj = None
+        skill_name = skills.get_skill_name(
+            skills.SKILL_ID_FIREMAKING,
+            language.Language.current_language_id
+        )
+
+        # Get tile loc in front of protagonist.
+        front_tile_pos = game_object.get_protagonist_facing_tile_location()
+
+        if log_obj_id in itemdata.LIGHTABLE_LOGS:
+            log_obj = items.Item.get_item(log_obj_id)
+        else:
+            LOGGER.warn(
+                "Cannot light a log using non-lightable-log item ID %d",
+                log_obj_id
+            )
+
+        if log_obj:
+            # Check if protagonist has proper level.
+            req_level = itemdata.LIGHTING_LOG_SKILL_MAPPING.get(
+                log_obj_id,
+                None
+            )
+            protag_fire_level = game_object.protagonist.get_skill_level(skills.SKILL_ID_FIREMAKING)
+
+            if req_level is not None:
+                if protag_fire_level < req_level:
+                    # Not high enough level.
+                    user_message = \
+                        interaction.NOT_HIGH_ENOUGH_LEVEL_MESSAGE_INFO.get(
+                            language.Language.current_language_id,
+                            ""
+                        ).format(
+                            req_level,
+                            skill_name
+                        )
+
+                    game_object.display_overworld_bottom_text(
+                        user_message,
+                        auto_advance=False,
+                        refresh_after=True,
+                        refresh_during=True,
+                    )
+                elif not game_object.can_light_fire_on_tile(front_tile_pos):
+                    # Cannot light fire.
+                    user_message = \
+                        interactiondata.CANNOT_LIGHT_IN_FRONT_INFO.get(
+                            language.Language.current_language_id,
+                            ""
+                        )
+
+                    game_object.display_overworld_bottom_text(
+                        user_message,
+                        auto_advance=False,
+                        refresh_after=True,
+                        refresh_during=True,
+                    )
+                else:
+                    LOGGER.info("Lighting fire in front.")
+                    # Can light fire. TODO - success message,
+                    # add fire and add spawn action to remove fire,
+                    # and raise XP.
+                    """
+                    game_object.set_pending_spawn_action_curr_map(
+                        target_object_loc,
+                        object_id=replacement_id,
+                        countdown_time_s=0,
+                    )
+                    """
 
     @classmethod
     def get_interaction_method(cls, interaction_id):

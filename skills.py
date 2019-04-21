@@ -202,6 +202,9 @@ LEVEL_UP_MESSAGE_INFO = {
     language.LANG_ESPANOL: "Has logrado {0} nivel(es) en {1}! Ya tienes un nivel de {2} en {1}.",
 }
 
+### FIREMAKING MESSAGE INFO ###
+
+
 ### LEVEL AND EXPERIENCE CONSTANTS ###
 DEFAULT_LEVEL_HITPOINTS = 10
 DEFAULT_LEVEL = 1

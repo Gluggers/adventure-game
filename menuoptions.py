@@ -24,7 +24,7 @@ TOOLS_OPTION_ID = 0x1B
 
 # ITEM OPTION IDS
 #USE_OPTION_ID = 0x30 # For using an item with another.
-LIGHT_OPTION_ID = 0x32 # For lighting items like logs on fire.
+LIGHT_FIRE_OPTION_ID = 0x32 # For lighting items like logs on fire.
 EQUIP_OPTION_ID = 0x33 # For equipping equippable items.
 UNEQUIP_OPTION_ID = 0x34 # For unequipping equippable items.
 CRAFT_OPTION_ID = 0x35 # For craftable items.
@@ -63,7 +63,7 @@ DEPOSIT_ALL_OPTION_ID = 0x75
 
 # Some convenient option ID lists for common items.
 DEFAULT_LOG_OPTION_ID_LIST = [
-    LIGHT_OPTION_ID,
+    LIGHT_FIRE_OPTION_ID,
     CRAFT_OPTION_ID,
     DISCARD_OPTION_ID,
 ]
@@ -161,7 +161,7 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Discard ALL",
         language.LANG_ESPANOL: "Descartar TODOS",
     },
-    LIGHT_OPTION_ID: {
+    LIGHT_FIRE_OPTION_ID: {
         language.LANG_ENGLISH: "Light",
         language.LANG_ESPANOL: "Encender",
     },
@@ -270,7 +270,7 @@ COMPREHENSIVE_INVENTORY_ITEM_OPTION_SET = set([
     DISCARD_5_OPTION_ID,
     DISCARD_X_OPTION_ID,
     DISCARD_ALL_OPTION_ID,
-    LIGHT_OPTION_ID,
+    LIGHT_FIRE_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
     IDENTIFY_OPTION_ID,
@@ -287,7 +287,7 @@ OVERWORLD_INVENTORY_ITEM_OPTION_SET = set([
     DISCARD_5_OPTION_ID,
     DISCARD_X_OPTION_ID,
     DISCARD_ALL_OPTION_ID,
-    LIGHT_OPTION_ID,
+    LIGHT_FIRE_OPTION_ID,
     EQUIP_OPTION_ID,
     CRAFT_OPTION_ID,
     IDENTIFY_OPTION_ID,

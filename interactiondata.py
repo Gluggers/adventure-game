@@ -87,3 +87,9 @@ GATHERING_RESOURCE_GAIN_MESSAGES = {
         language.LANG_ESPANOL: "Has pescado un(a) {0}, y has ganado {1} puntos de experiencia!",
     },
 }
+
+# FIREMAKING MESSAGES #
+CANNOT_LIGHT_IN_FRONT_INFO = {
+    language.LANG_ENGLISH: "You cannot light a fire in front of you. Try moving elsewhere.",
+    language.LANG_ESPANOL: "No puedes encender una hoguera enfrente de ti. Intentalo en otro lugar.",
+}
