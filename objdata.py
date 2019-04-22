@@ -319,10 +319,16 @@ MISC_OBJECT_DATA = {
             #$$ TODO change.
             imageids.OBJ_SPRITE_SEQUENCE_ID: [
                 [
-                    imagepaths.ROCK_EMPTY_BASIC_PATH,
-                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                    imagepaths.FIRE_BASIC_1_PATH,
+                    imagepaths.FIRE_BASIC_2_PATH,
+                    imagepaths.FIRE_BASIC_3_PATH,
+                    imagepaths.FIRE_BASIC_2_PATH,
+                    imagepaths.FIRE_BASIC_1_PATH,
+                    imagepaths.FIRE_BASIC_4_PATH,
+                    imagepaths.FIRE_BASIC_5_PATH,
+                    imagepaths.FIRE_BASIC_4_PATH,
                 ],
-                1000,
+                1600,
             ],
         },
         COLLISION_WIDTH_FIELD: 1,
@@ -343,10 +349,16 @@ MISC_OBJECT_DATA = {
             #$$ TODO change.
             imageids.OBJ_SPRITE_SEQUENCE_ID: [
                 [
-                    imagepaths.ROCK_EMPTY_BASIC_PATH,
-                    imagepaths.ROCK_EMPTY_BASIC_PATH,
+                    imagepaths.FIRE_BASIC_1_PATH,
+                    imagepaths.FIRE_BASIC_2_PATH,
+                    imagepaths.FIRE_BASIC_3_PATH,
+                    imagepaths.FIRE_BASIC_2_PATH,
+                    imagepaths.FIRE_BASIC_1_PATH,
+                    imagepaths.FIRE_BASIC_4_PATH,
+                    imagepaths.FIRE_BASIC_5_PATH,
+                    imagepaths.FIRE_BASIC_4_PATH,
                 ],
-                1000,
+                1600,
             ],
         },
         COLLISION_WIDTH_FIELD: 1,

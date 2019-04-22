@@ -128,6 +128,11 @@ FISHING_SPOT_4_PATH = INTER_OBJ_PATH + "fishing_spot_4_32x32_dk.png" # [0]
 FISHING_SPOT_5_PATH = INTER_OBJ_PATH + "fishing_spot_5_32x32_dk.png" # [0]
 FISHING_SPOT_6_PATH = INTER_OBJ_PATH + "fishing_spot_6_32x32_dk.png" # [0]
 FISHING_SPOT_7_PATH = INTER_OBJ_PATH + "fishing_spot_7_32x32_dk.png" # [0]
+FIRE_BASIC_1_PATH = INTER_OBJ_PATH + "fire_basic_1_32x32_dk.png" # [0]
+FIRE_BASIC_2_PATH = INTER_OBJ_PATH + "fire_basic_2_32x32_dk.png" # [0]
+FIRE_BASIC_3_PATH = INTER_OBJ_PATH + "fire_basic_3_32x32_dk.png" # [0]
+FIRE_BASIC_4_PATH = INTER_OBJ_PATH + "fire_basic_4_32x32_dk.png" # [0]
+FIRE_BASIC_5_PATH = INTER_OBJ_PATH + "fire_basic_5_32x32_dk.png" # [0]
 
 ### ITEMS ###
 GOLD_COINS_ICON_PATH = ITEMS_PATH + "gold_coins_icon_50x50_dk.png" # [0]

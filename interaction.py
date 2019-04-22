@@ -657,6 +657,12 @@ class Interaction():
                             0
                         )
 
+                        # Remove log from protagonist inventory.
+                        game_object.protagonist.inventory.remove_item(
+                            log_obj_id,
+                            quantity=1,
+                        )
+
                         # Display message to user.
                         fire_success_msg = interactiondata.LIGHT_LOG_FIRE_INFO.get(
                             language.Language.current_language_id,
