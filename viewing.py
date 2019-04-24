@@ -48,6 +48,9 @@ class Viewing(object):
         main_display_surface: the pygame Surface object for the main display
             screen linked to the Viewing object. This Surface object is used
             to blit pixels and changes to the display screen.
+        protagonist: the Protagonist object to link to the Viewing
+            object. The Protagonist object will determine output in various
+            displays for child classes.
     """
 
     def __init__(
@@ -55,6 +58,7 @@ class Viewing(object):
             main_display_surface,
             reblit_tick_interval=timekeeper.DEFAULT_VIEWING_REBLIT_TICK_INTERVAL,
             refresh_tick_interval=timekeeper.DEFAULT_VIEWING_REFRESH_TICK_INTERVAL,
+            protagonist=None,
         ):
         """Initializes the Viewing object.
 
@@ -67,11 +71,26 @@ class Viewing(object):
                 between reblitting self.
             refresh_tick_interval: number of Timekeeper clock ticks to wait in
                 between refreshing self.
+            protagonist: the Protagonist object to link to the Viewing
+                object. This object can be set later on.
         """
 
         self._main_display_surface = main_display_surface
         self._reblit_tick_interval = reblit_tick_interval
         self._refresh_tick_interval = refresh_tick_interval
+        self._protagonist = protagonist
+
+    @property
+    def protagonist(self):
+        """Returns protagonist."""
+
+        return self._protagonist
+
+    @protagonist.setter
+    def protagonist(self, value):
+        """Sets protagonist for viewing."""
+        if value:
+            self._protagonist = value
 
     @property
     def main_display_surface(self):
@@ -1196,9 +1215,9 @@ class OverworldViewing(Viewing):
         Viewing.__init__(
             self,
             main_display_surface,
+            protagonist=protagonist,
         )
 
-        self._protagonist = protagonist
         self._curr_map = curr_map
         self._background_pattern = background_pattern
 
@@ -1365,23 +1384,6 @@ class OverworldViewing(Viewing):
         self._create_bottom_text_display()
         self._create_bottom_menu_display()
         self._create_side_menu_display()
-
-    @property
-    def protagonist(self):
-        """Returns protagonist."""
-
-        return self._protagonist
-
-    @protagonist.setter
-    def protagonist(self, value):
-        """Sets protagonist for viewing."""
-        if value:
-            self._protagonist = value
-
-            # Assign protagonist to top display, as well, which should update
-            # the top display
-            if self._top_display:
-                self._top_display.protagonist = value
 
     def _get_overworld_health_text(self):
         """Returns the health String for the protagonist.

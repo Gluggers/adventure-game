@@ -1,60 +1,89 @@
 # -*- coding: utf-8 -*-
-"""This module contains classes and methods for EquipmentSlot objects.
+"""This module contains classes and methods for Spell objects.
 
-EquipmentSlot objects contain information for an equipment slot for an entity.
-Each equipment slot represents an area of the body that can hold a certain
-type of gear, such as the head, neck, main hand, feet, etc.
-The EquipmentSlot object inherits from the ViewingIcon class, as
-EquipmentSlot objects are visually represented as Icons in the equipment
-viewing, and users can interact with the corresponding viewing by
-unequipping objects.
+Spell objects represent and contain information for the various spells in the
+game.  Spells are visualized in the spell viewing, and thus inherit from the
+ViewingIcon class.
 """
 
 import logging
-import equipmentdata
+import magicdata
 import viewingicon
 import viewingicondata
 
-class EquipmentSlot(viewingicon.ViewingIcon):
-    # Maps equipment IDs to equipment slot objects.
-    slot_listing = {}
+class Spell(viewingicon.ViewingIcon):
+    # Maps spell IDs to spell objects.
+    spell_listing = {}
 
     def __init__(
             self,
-            slot_id,
+            spell_id,
             name_info,
             description_info,
+            spell_class,
+            spell_type,
             image_path_dict=None,
             menu_option_ids=None,
+            required_level=1,
+            required_mana=1,
+            damage_types=None,
+            base_power=0,
+            required_quests=None,
+            required_equipped_items=None,
         ):
-        """Initializes the equipment slot object.
+        """Initializes the spell object.
 
         Args:
-            slot_id: equipment slot ID for the object.
+            spell_id: spell  ID for the object.
             name_info: dict that maps language IDs to Strings for the name
-                translations of the equipment slot.
+                translations of the spell.
             description_info: dict that maps language IDs to Strings for the
-                translations of the equipment slot description.
+                translations of the spell description.
             image_path_dict: dict that maps image sequence IDs to the
                 image path info.
-            menu_option_ids: list of menu option IDs for the object.
+            menu_option_ids: list of menu option IDs for the spell.
+            base_power: base damage if the spell does damage, base heal
+                if the spell heals.
+            # TODO
         """
 
         viewingicon.ViewingIcon.__init__(
             self,
-            slot_id,
+            spell_id,
             name_info,
             description_info,
             image_path_dict=image_path_dict,
             menu_option_ids=menu_option_ids,
         )
 
+        self._spell_class = spell_class
+        self._spell_type = spell_type
+        self._required_level = max(1, required_level)
+        self._required_mana = max(0, required_mana)
+        self._base_power = max(0, base_power)
+
+        self._damage_types = set()
+        if damage_types:
+            for damage_type in damage_types:
+                self._damage_types.add(damage_type)
+
+        self._required_quests = set()
+        if required_quests:
+            for quest_id in required_quests:
+                self._required_quests.add(quest_id)
+
+        self._required_equipped_items = {}
+        if required_equipped_items:
+            for slot_id, item_id in required_equipped_items.items():
+                self._required_equipped_items[slot_id] = item_id
+
     @classmethod
-    def get_slot_object(cls, slot_id):
-        """Returns the slot object for the given slot ID."""
+    def get_spell_object(cls, spell_id):
+        """Returns the spell object for the given spell ID."""
 
-        return cls.slot_listing.get(slot_id, None)
+        return cls.spell_listing.get(spell_id, None)
 
+    #$$ TODO change these.
     # Adds/updates the equipment slot object listing for the given object ID.
     # Returns True upon success, false otherwise.
     @classmethod
