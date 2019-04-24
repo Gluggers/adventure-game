@@ -143,26 +143,79 @@ class SelectionGridViewing(viewing.Viewing):
         self.selection_area_display = None
         self.truncated_selection_area_display = None
 
+        # Background display for the selection details.
         self.selection_details_side_display = display.Display(
             self.main_display_surface,
             self.selection_details_rect,
             background_pattern=self.display_pattern,
         )
 
-        # Child must define this.
+        # Will display item name of selected item.
+        self.selection_name_display = None
+        self.selection_name_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_details_rect.y + 15,
+            self.selection_details_rect.width,
+            80,
+        )
+        self.selection_name_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display subtitle of selected object.
+        self.selection_subtitle_display = None
+        self.selection_subtitle_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_name_rect.bottom \
+                + 10,
+            self.selection_details_rect.width,
+            30,
+        )
+        self.selection_subtitle_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display enlarged image icon of selected item.
+        self.icon_enlarged_display = None
+        self.icon_enlarged_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.selection_subtitle_rect.bottom + 10,
+            self.enlarged_icon_dimensions[0],
+            self.enlarged_icon_dimensions[1]
+        )
+        self.icon_enlarged_rect.centerx = self.selection_details_rect.centerx
+
+        # Will display details about a single item in the inventory.
+        self.selection_description_display = None
+        self.selection_description_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.icon_enlarged_rect.bottom,
+            self.selection_details_rect.width,
+            self.selection_details_rect.bottom \
+                - (self.icon_enlarged_rect.bottom)
+        )
+
+        # Will display item options for a selected item.
         self.selection_option_menu_display = None
+        self.selection_option_menu_rect = pygame.Rect(
+            self.selection_details_rect.x,
+            self.icon_enlarged_rect.bottom + 15,
+            self.selection_details_rect.width - 30,
+            self.selection_details_rect.bottom \
+                - (self.icon_enlarged_rect.bottom + 15) \
+                - 30
+        )
+        self.selection_option_menu_rect.centerx = \
+            self.selection_description_rect.centerx
 
     # Inherited method.
-    def create_title_display(self):
+    def create_title_display(
+            self,
+            font_id=fontinfo.SELECTION_TOP_DISPLAY_FONT_ID,
+        ):
         """Creates the title display.
 
         Requires fonts to be loaded. See display.Display.init_fonts().
         """
 
         LOGGER.info("Creating title display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_TOP_DISPLAY_FONT_ID
-        )
+        font_obj = display.Display.get_font(font_id)
         if font_obj:
             self.title_display = display.Text_Display(
                 self.main_display_surface,
@@ -185,16 +238,17 @@ class SelectionGridViewing(viewing.Viewing):
             sys.exit(1)
 
     # Inherited method.
-    def create_selection_area_display(self):
+    def create_selection_area_display(
+            self,
+            supertext_font_id=fontinfo.SELECTION_SUPERTEXT_FONT_ID,
+        ):
         """Creates the selection area display.
 
         Requires fonts to be loaded. See display.Display.init_fonts().
         """
 
         LOGGER.info("Creating main selection grid display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_SUPERTEXT_FONT_ID
-        )
+        font_obj = display.Display.get_font(supertext_font_id)
         if font_obj:
             self.icon_supertext_font_object = font_obj
             self.icon_supertext_font_color = viewingdata.COLOR_WHITE
@@ -221,16 +275,17 @@ class SelectionGridViewing(viewing.Viewing):
             sys.exit(1)
 
     # Inherited method.
-    def create_truncated_selection_area_display(self):
+    def create_truncated_selection_area_display(
+            self,
+            supertext_font_id=fontinfo.SELECTION_SUPERTEXT_FONT_ID,
+        ):
         """Creates the truncated selection area display.
 
         Requires fonts to be loaded. See display.Display.init_fonts().
         """
 
         LOGGER.info("Creating truncated selection grid display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_SUPERTEXT_FONT_ID
-        )
+        font_obj = display.Display.get_font(supertext_font_id)
         if font_obj:
             self.icon_supertext_font_object = font_obj
             self.icon_supertext_font_color = viewingdata.COLOR_WHITE
@@ -257,7 +312,10 @@ class SelectionGridViewing(viewing.Viewing):
             sys.exit(1)
 
     # Inherited method.
-    def create_bottom_text_display(self):
+    def create_bottom_text_display(
+            self,
+            font_id=fontinfo.SELECTION_BOTTOM_TEXT_FONT_ID,
+        ):
         """Creates the bottom text display.
 
         Requires fonts to be loaded. See display.Display.init_fonts().
@@ -265,9 +323,7 @@ class SelectionGridViewing(viewing.Viewing):
 
         if self.bottom_text_rect:
             LOGGER.info("Creating selection bottom text display...")
-            font_obj = display.Display.get_font(
-                fontinfo.SELECTION_BOTTOM_TEXT_FONT_ID
-            )
+            font_obj = display.Display.get_font(font_id)
             if font_obj:
                 self.bottom_text_display = display.Text_Display(
                     self.main_display_surface,
@@ -288,7 +344,110 @@ class SelectionGridViewing(viewing.Viewing):
                 LOGGER.error("Must init fonts through display.Display.init_fonts.")
                 sys.exit(1)
 
-    # Inherited method.
+    def create_selection_name_display(
+            self,
+            font_id=fontinfo.SELECTION_NAME_FONT_ID,
+        ):
+        LOGGER.info("Creating selection name display...")
+        font_obj = display.Display.get_font(font_id)
+        if font_obj:
+            self.selection_name_display = display.Text_Display(
+                self.main_display_surface,
+                self.selection_name_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=None,
+                horizontal_padding=20,
+                vertical_padding=0,
+            )
+
+            if not self.selection_name_display:
+                LOGGER.error("Failed to make selection name display")
+                sys.exit(1)
+        else:
+            LOGGER.error("Font not found.")
+            LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
+
+    def create_selection_subtitle_display(
+            self,
+            font_id=fontinfo.SELECTION_SUBTITLE_FONT_ID,
+        ):
+        LOGGER.info("Creating selection subtitle display...")
+        font_obj = display.Display.get_font(font_id)
+        if font_obj:
+            self.selection_subtitle_display = display.Text_Display(
+                self.main_display_surface,
+                self.selection_subtitle_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=None,
+                horizontal_padding=20,
+                vertical_padding=0,
+            )
+
+            if not self.selection_subtitle_display:
+                LOGGER.error("Failed to make selection subtitle display")
+                sys.exit(1)
+        else:
+            LOGGER.error("Font not found.")
+            LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
+
+    def create_selection_description_display(
+            self,
+            font_id=fontinfo.SELECTION_DESCRIPTION_FONT_ID,
+        ):
+        LOGGER.info("Creating selection description display...")
+        font_obj = display.Display.get_font(font_id)
+        if font_obj:
+            self.selection_description_display = display.Text_Display(
+                self.main_display_surface,
+                self.selection_description_rect,
+                font_obj,
+                background_color=None,
+                background_image_path=None,
+                background_pattern=None,
+                horizontal_padding=20,
+                vertical_padding=20,
+            )
+
+            if not self.selection_description_display:
+                LOGGER.error("Failed to make selection description display")
+                sys.exit(1)
+        else:
+            LOGGER.error("Display font not found.")
+            LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
+
+    def create_selection_options_display(
+            self,
+            font_id=fontinfo.SELECTION_MENU_FONT_ID,
+        ):
+        LOGGER.info("Creating selection options display...")
+        font_obj = display.Display.get_font(font_id)
+        if font_obj:
+            self.selection_option_menu_display = display.MenuDisplay(
+                self.main_display_surface,
+                self.selection_option_menu_rect,
+                font_obj,
+                background_color=display.P1_BG_3_COLOR,
+                background_image_path=None,
+                background_pattern=None,
+                horizontal_padding=5,
+                vertical_padding=5,
+            )
+
+            if not self.selection_option_menu_display:
+                LOGGER.error("Failed to make selection options display")
+                sys.exit(1)
+        else:
+            LOGGER.error("Display font not found.")
+            LOGGER.error("Must init fonts through display.Display.init_fonts.")
+            sys.exit(1)
+
     def create_base_displays(self):
         """Creates the base displays, which are the title display, the
         selection area display, the truncated selection area display, and the
@@ -301,6 +460,12 @@ class SelectionGridViewing(viewing.Viewing):
         self.create_truncated_selection_area_display()
         self.create_selection_area_display()
         self.create_bottom_text_display()
+
+    def create_selection_detail_displays(self):
+        self.create_selection_name_display()
+        self.create_selection_subtitle_display()
+        self.create_selection_description_display()
+        self.create_selection_options_display()
 
     # Inherited method.
     def refresh_self(self):
@@ -749,27 +914,6 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
         # Create additional display dimensions.
 
-        # Will display item name of selected item.
-        self.selection_name_display = None
-        self.selection_name_rect = pygame.Rect(
-            self.selection_details_rect.x,
-            self.selection_details_rect.y + 15,
-            self.selection_details_rect.width,
-            80,
-        )
-        self.selection_name_rect.centerx = self.selection_details_rect.centerx
-
-        # Will display subtitle of selected object.
-        self.selection_subtitle_display = None
-        self.selection_subtitle_rect = pygame.Rect(
-            self.selection_details_rect.x,
-            self.selection_name_rect.bottom \
-                + 10,
-            self.selection_details_rect.width,
-            30,
-        )
-        self.selection_subtitle_rect.centerx = self.selection_details_rect.centerx
-
         # Will display item stats of selected item.
         self.selection_statistics_display = None
         self.selection_statistics_rect = pygame.Rect(
@@ -782,94 +926,12 @@ class ItemSelectionGridViewing(SelectionGridViewing):
                 - 40,
         )
 
-        # Will display enlarged image icon of selected item.
-        self.icon_enlarged_display = None
-        self.icon_enlarged_rect = pygame.Rect(
-            self.selection_details_rect.x,
-            self.selection_subtitle_rect.bottom + 10,
-            self.enlarged_icon_dimensions[0],
-            self.enlarged_icon_dimensions[1]
-        )
-        self.icon_enlarged_rect.centerx = self.selection_details_rect.centerx
-
-        # Will display details about a single item in the inventory.
-        self.selection_description_display = None
-        self.selection_description_rect = pygame.Rect(
-            self.selection_details_rect.x,
-            self.icon_enlarged_rect.bottom,
-            self.selection_details_rect.width,
-            self.selection_details_rect.bottom \
-                - (self.icon_enlarged_rect.bottom)
-        )
-
-        # Will display item options for a selected item.
-        self.selection_option_menu_display = None
-        self.selection_option_menu_rect = pygame.Rect(
-            self.selection_details_rect.x,
-            self.icon_enlarged_rect.bottom + 15,
-            self.selection_details_rect.width - 30,
-            self.selection_details_rect.bottom \
-                - (self.icon_enlarged_rect.bottom + 15) \
-                - 30
-        )
-        self.selection_option_menu_rect.centerx = \
-            self.selection_description_rect.centerx
-
-    def create_selection_name_display(self):
-        LOGGER.info("Creating selection name display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_NAME_FONT_ID,
-        )
-        if font_obj:
-            self.selection_name_display = display.Text_Display(
-                self.main_display_surface,
-                self.selection_name_rect,
-                font_obj,
-                background_color=None,
-                background_image_path=None,
-                background_pattern=None,
-                horizontal_padding=20,
-                vertical_padding=0,
-            )
-
-            if not self.selection_name_display:
-                LOGGER.error("Failed to make selection name display")
-                sys.exit(1)
-        else:
-            LOGGER.error("Font not found.")
-            LOGGER.error("Must init fonts through display.Display.init_fonts.")
-            sys.exit(1)
-
-    def create_selection_subtitle_display(self):
-        LOGGER.info("Creating selection subtitle display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_SUBTITLE_FONT_ID,
-        )
-        if font_obj:
-            self.selection_subtitle_display = display.Text_Display(
-                self.main_display_surface,
-                self.selection_subtitle_rect,
-                font_obj,
-                background_color=None,
-                background_image_path=None,
-                background_pattern=None,
-                horizontal_padding=20,
-                vertical_padding=0,
-            )
-
-            if not self.selection_subtitle_display:
-                LOGGER.error("Failed to make selection subtitle display")
-                sys.exit(1)
-        else:
-            LOGGER.error("Font not found.")
-            LOGGER.error("Must init fonts through display.Display.init_fonts.")
-            sys.exit(1)
-
-    def create_selection_statistics_display(self):
+    def _create_selection_statistics_display(
+            self,
+            font_id=fontinfo.ITEM_EQUIP_STATS_FONT_ID,
+        ):
         LOGGER.info("Creating selection statistics display...")
-        font_obj = display.Display.get_font(
-            fontinfo.ITEM_EQUIP_STATS_FONT_ID,
-        )
+        font_obj = display.Display.get_font(font_id)
         if font_obj:
             self.selection_statistics_display = display.Text_Display(
                 self.main_display_surface,
@@ -890,62 +952,8 @@ class ItemSelectionGridViewing(SelectionGridViewing):
             LOGGER.error("Must init fonts through display.Display.init_fonts.")
             sys.exit(1)
 
-    def create_selection_description_display(self):
-        LOGGER.info("Creating selection description display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_DESCRIPTION_FONT_ID,
-        )
-        if font_obj:
-            self.selection_description_display = display.Text_Display(
-                self.main_display_surface,
-                self.selection_description_rect,
-                font_obj,
-                background_color=None,
-                background_image_path=None,
-                background_pattern=None,
-                horizontal_padding=20,
-                vertical_padding=20,
-            )
-
-            if not self.selection_description_display:
-                LOGGER.error("Failed to make selection description display")
-                sys.exit(1)
-        else:
-            LOGGER.error("Display font not found.")
-            LOGGER.error("Must init fonts through display.Display.init_fonts.")
-            sys.exit(1)
-
-    def create_selection_options_display(self):
-        LOGGER.info("Creating selection options display...")
-        font_obj = display.Display.get_font(
-            fontinfo.SELECTION_MENU_FONT_ID
-        )
-        if font_obj:
-            self.selection_option_menu_display = display.MenuDisplay(
-                self.main_display_surface,
-                self.selection_option_menu_rect,
-                font_obj,
-                background_color=display.P1_BG_3_COLOR,
-                background_image_path=None,
-                background_pattern=None,
-                horizontal_padding=5,
-                vertical_padding=5,
-            )
-
-            if not self.selection_option_menu_display:
-                LOGGER.error("Failed to make selection options display")
-                sys.exit(1)
-        else:
-            LOGGER.error("Display font not found.")
-            LOGGER.error("Must init fonts through display.Display.init_fonts.")
-            sys.exit(1)
-
     def create_additional_selection_displays(self):
-        self.create_selection_name_display()
-        self.create_selection_subtitle_display()
-        self.create_selection_description_display()
-        self.create_selection_options_display()
-        self.create_selection_statistics_display()
+        self._create_selection_statistics_display()
 
     def blit_selected_object_name(self, selected_obj):
         if selected_obj:
@@ -1143,6 +1151,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
 
             # Create displays for viewing.
             ret_viewing.create_base_displays()
+            ret_viewing.create_selection_detail_displays()
             ret_viewing.create_additional_selection_displays()
 
         return ret_viewing

@@ -1,44 +1,6 @@
-import imagepaths
-import battledata
+# -*- coding: utf-8 -*-
+"""This module contains classes and methods for magic and spells.
 
-### SPELL CLASSES ###
-BLACK_MAGIC_CLASS = 0x1 # For spells that inflict damage, curses, etc.
-WHITE_MAGIC_CLASS = 0x2 # For non-damage and non-curse spells.
-
-### SPELL BOOKS ###
-SPELL_BOOK_NORMAL = 0x1
-SPELL_BOOK
-
-### SPELL TYPES ###
-SPELL_TYPE_AIR = 0x300
-SPELL_TYPE_WATER = 0x301
-SPELL_TYPE_EARTH = 0x302
-SPELL_TYPE_FIRE = 0x303
-SPELL_TYPE_ICE = 0x310
-SPELL_TYPE_ELECTRIC = 0x311
-SPELL_TYPE_NATURE = 0x312
-SPELL_TYPE_HOLY = 0x313
-SPELL_TYPE_DARK = 0x314
-SPELL_TYPE_TELEPORT = 0x320
-
-### SPELL FIELDS ###
-SPELL_BOOK_FIELD = 0x1
-SPELL_CLASS_FIELD = 0x2
-SPELL_TYPES_FIELD = 0x3 # Set of spell type IDs.
-SPELL_NAME_INFO_FIELD = 0x10
-SPELL_REQUIRED_LEVEL_FIELD = 0x11
-SPELL_REQUIRED_MANA_FIELD = 0x12
-SPELL_DAMAGE_TYPES_FIELD = 0x13 # Set of damage type IDs.
-SPELL_BASE_DAMAGE_FIELD = 0x14
-SPELL_ICON_PATH_FIELD = 0x15
-SPELL_DESCRIPTION_PATH_FIELD = 0x16
-SPELL_REQUIRED_QUESTS_FIELD = 0x17 # List of quest IDs required to cast spell.
-
-### SPELL ID NUMBERS ###
-SPELL_WATER_PULSE_ID = 0x1
-SPELL_EARTH_PULSE_ID = 0x2
-
-"""
 NORMAL SPELLBOOK
     APPRENTICE LEVEL SPELL
     1   water pulse - BM
@@ -81,3 +43,72 @@ GAIA SPELLBOOK
 
 DIVINE SPELLBOOK
 """
+
+import imagepaths
+import battledata
+import language
+import viewingicondata
+import menuoptions
+
+### SPELL CLASSES ###
+BLACK_MAGIC_CLASS = 0x1 # For spells that inflict damage, curses, etc.
+WHITE_MAGIC_CLASS = 0x2 # For non-damage and non-curse spells.
+
+### SPELL BOOKS ###
+SPELL_BOOK_NORMAL = 0x1
+
+### SPELL TYPES ###
+SPELL_TYPE_AIR = 0x300
+SPELL_TYPE_WATER = 0x301
+SPELL_TYPE_EARTH = 0x302
+SPELL_TYPE_FIRE = 0x303
+SPELL_TYPE_ICE = 0x310
+SPELL_TYPE_ELECTRIC = 0x311
+SPELL_TYPE_NATURE = 0x312
+SPELL_TYPE_HOLY = 0x313
+SPELL_TYPE_DARK = 0x314
+SPELL_TYPE_TELEPORT = 0x320
+
+### SPELL FIELDS ###
+SPELL_BOOK_FIELD = 0x301
+SPELL_CLASS_FIELD = 0x302
+SPELL_TYPES_FIELD = 0x303 # Set of spell type IDs.
+SPELL_REQUIRED_LEVEL_FIELD = 0x311
+SPELL_REQUIRED_MANA_FIELD = 0x312
+SPELL_DAMAGE_TYPES_FIELD = 0x313 # Set of damage type IDs.
+SPELL_BASE_DAMAGE_FIELD = 0x314
+SPELL_REQUIRED_QUESTS_FIELD = 0x315 # List of quest IDs required to cast spell.
+
+### SPELL ID NUMBERS ###
+SPELL_WATER_PULSE_ID = 0x1
+SPELL_EARTH_PULSE_ID = 0x2
+SPELL_AIR_PULSE_ID = 0x3
+SPELL_FIRE_PULSE_ID = 0x4
+
+# SPELL OBJECT DATA
+SPELL_OBJECT_DATA = {
+    SPELL_WATER_PULSE_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Water Pulse",
+            language.LANG_ESPANOL: "Impulso de Agua",
+        },
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "An apprentice-level water spell.",
+            language.LANG_ESPANOL: "En hechizo de agua para los principiantes.",
+        },
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.CAST_SPELL_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: None, # TODO
+        },
+        SPELL_BOOK_FIELD: SPELL_BOOK_NORMAL,
+        SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
+        SPELL_TYPES_FIELD: [SPELL_TYPE_WATER],
+        SPELL_REQUIRED_LEVEL_FIELD: 1,
+        SPELL_REQUIRED_MANA_FIELD: 1,
+        SPELL_DAMAGE_TYPES_FIELD: {
+            battledata.DAMAGE_TYPE_MAGIC_WATER,
+        },
+        SPELL_BASE_DAMAGE_FIELD: 5, # TODO change.
+        SPELL_REQUIRED_QUESTS_FIELD: None,
+    },
+}

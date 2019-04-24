@@ -61,6 +61,9 @@ DEPOSIT_5_OPTION_ID = 0x72
 DEPOSIT_X_OPTION_ID = 0x74
 DEPOSIT_ALL_OPTION_ID = 0x75
 
+# SPELL OPTION IDS
+CAST_SPELL_OPTION_ID = 0x101
+
 # Some convenient option ID lists for common items.
 DEFAULT_LOG_OPTION_ID_LIST = [
     LIGHT_FIRE_OPTION_ID,
@@ -245,6 +248,10 @@ OPTION_NAME_INFO = {
         language.LANG_ENGLISH: "Take All",
         language.LANG_ESPANOL: "Recoger Todos",
     },
+    CAST_SPELL_OPTION_ID: {
+        language.LANG_ENGLISH: "Cast Spell",
+        language.LANG_ESPANOL: "Lanzar Hechizo",
+    }
 }
 
 # List of menu option IDs that are for the overworld menu.
