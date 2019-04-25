@@ -7,13 +7,14 @@ ViewingIcon class.
 """
 
 import logging
+import sys
 import magicdata
 import viewingicon
 import viewingicondata
 
 class Spell(viewingicon.ViewingIcon):
     # Maps spell IDs to spell objects.
-    spell_listing = {}
+    _spell_listing = {}
 
     def __init__(
             self,
@@ -21,7 +22,7 @@ class Spell(viewingicon.ViewingIcon):
             name_info,
             description_info,
             spell_class,
-            spell_type,
+            spell_types,
             image_path_dict=None,
             menu_option_ids=None,
             required_level=1,
@@ -57,7 +58,11 @@ class Spell(viewingicon.ViewingIcon):
         )
 
         self._spell_class = spell_class
-        self._spell_type = spell_type
+        self._spell_types = set()
+
+        for spell_type in spell_types:
+            self._spell_types.add(spell_type)
+
         self._required_level = max(1, required_level)
         self._required_mana = max(0, required_mana)
         self._base_power = max(0, base_power)
@@ -81,117 +86,154 @@ class Spell(viewingicon.ViewingIcon):
     def get_spell_object(cls, spell_id):
         """Returns the spell object for the given spell ID."""
 
-        return cls.spell_listing.get(spell_id, None)
+        return cls._spell_listing.get(spell_id, None)
 
     #$$ TODO change these.
-    # Adds/updates the equipment slot object listing for the given object ID.
-    # Returns True upon success, false otherwise.
     @classmethod
-    def _add_slot_object_to_listing(cls, slot_id, slot_obj):
-        """Adds the equipment slot object to the class equipment slot listing
-        for the given equipment slot ID. Returns True on success,
+    def _add_spell_to_listing(cls, spell_id, spell_obj):
+        """Adds the spell object to the class spell listing
+        for the given spell ID. Returns True on success,
         False on failure.
 
         Args:
-            slot_id: equipment slot ID for the slot object.
-            slot_obj: equipment slot object to set for the slot ID.
+            spell_id: spell ID for the spell object.
+            spell_obj: spell object to set for the spell ID.
 
         Returns:
             True on success, False on failure.
         """
 
-        if slot_obj and (slot_id is not None):
-            cls.slot_listing[slot_id] = slot_obj
+        if spell_obj and (spell_id is not None):
+            cls._spell_listing[spell_id] = spell_obj
             LOGGER.debug(
-                "Added slot ID %d to slot listing.",
-                slot_id,
+                "Added spell ID %d to spell listing.",
+                spell_id,
             )
             return True
         else:
             return False
 
     @classmethod
-    def equipment_slot_factory(cls, slot_id):
-        """Creates and returns an equipment slot object associated with the
-        given equipment slot ID."""
+    def spell_factory(cls, spell_id):
+        """Creates and returns a spell object associated with the
+        given spell ID."""
 
         ret_object = None
 
         # Check if we already have the item made.
-        slot_from_listing = cls.get_slot_object(slot_id)
+        spell_from_listing = cls.get_spell_object(spell_id)
 
-        if slot_from_listing:
+        if spell_from_listing:
             # Return the already made item.
-            ret_object = slot_from_listing
+            ret_object = spell_from_listing
         else:
             # Make the new object ourselves. First, get the
             # object data.
-            slot_data = equipmentdata.EQUIPMENT_SLOT_DATA.get(slot_id, None)
+            spell_data = magicdata.SPELL_OBJECT_DATA.get(spell_id, None)
 
-            if slot_data:
-                # Get the slot fields
-                name_info = slot_data.get(viewingicondata.NAME_INFO_FIELD, None)
-                description_info = slot_data.get(viewingicondata.DESCRIPTION_INFO_FIELD, None)
-                image_path_dict = slot_data.get(viewingicondata.IMAGE_PATH_DICT_FIELD, None)
-                menu_option_ids = slot_data.get(
+            if spell_data:
+                # Get the spell fields.
+                name_info = spell_data.get(viewingicondata.NAME_INFO_FIELD, None)
+                description_info = spell_data.get(viewingicondata.DESCRIPTION_INFO_FIELD, None)
+                image_path_dict = spell_data.get(viewingicondata.IMAGE_PATH_DICT_FIELD, None)
+                menu_option_ids = spell_data.get(
                     viewingicondata.OPTION_ID_LIST_FIELD,
+                    None
+                )
+                spell_class = spell_data.get(magicdata.SPELL_CLASS_FIELD, None)
+                spell_types = spell_data.get(magicdata.SPELL_TYPES_FIELD, None)
+                required_level = spell_data.get(
+                    magicdata.SPELL_REQUIRED_LEVEL_FIELD,
+                    1
+                )
+                required_mana = spell_data.get(
+                    magicdata.SPELL_REQUIRED_MANA_FIELD,
+                    0
+                )
+                damage_types = spell_data.get(
+                    magicdata.SPELL_DAMAGE_TYPES_FIELD,
+                    None
+                )
+                base_power = spell_data.get(
+                    magicdata.SPELL_BASE_POWER_FIELD,
+                    0
+                )
+                required_quests = spell_data.get(
+                    magicdata.SPELL_REQUIRED_QUESTS_FIELD,
+                    None
+                )
+                required_equipped_items = spell_data.get(
+                    magicdata.SPELL_REQUIRED_EQUIPPED_ITEMS_FIELD,
                     None
                 )
 
                 # Ensure we have the required fields.
-                if name_info and description_info:
-                    # Make the slot object.
-                    new_slot_obj = EquipmentSlot(
-                        slot_id,
+                if name_info and description_info \
+                    and spell_class and spell_types:
+                    # Make the spell object.
+                    new_spell_obj = Spell(
+                        spell_id,
                         name_info,
                         description_info,
+                        spell_class,
+                        spell_types,
                         image_path_dict=image_path_dict,
                         menu_option_ids=menu_option_ids,
+                        required_level=required_level,
+                        required_mana=required_mana,
+                        damage_types=damage_types,
+                        base_power=base_power,
+                        required_quests=required_quests,
+                        required_equipped_items=required_equipped_items,
                     )
 
                     LOGGER.debug(
-                        "Made slot object with ID %d",
-                        slot_id,
+                        "Made spell object with ID %d",
+                        spell_id,
                     )
 
                     # Update the item mapping.
-                    result = EquipmentSlot._add_slot_object_to_listing(
-                        slot_id,
-                        new_slot_obj
+                    result = Spell._add_spell_to_listing(
+                        spell_id,
+                        new_spell_obj
                     )
 
                     if result:
-                        ret_object = new_slot_obj
+                        ret_object = new_spell_obj
                     else:
                         LOGGER.error(
-                            "Failed to add slot ID %d to listing.",
-                            slot_id,
+                            "Failed to add spell ID %d to listing.",
+                            spell_id,
                         )
+                        sys.exit(2)
                 else:
                     LOGGER.error(
-                        "Required fields not found in slot data for ID %d",
-                        slot_id,
+                        "Required fields not found in spell data for ID %d",
+                        spell_id,
                     )
+                    sys.exit(2)
             else:
                 LOGGER.error(
-                    "Slot data not found for item ID %d",
-                    slot_id,
+                    "spell data not found for spell ID %d",
+                    spell_id,
                 )
+                sys.exit(2)
 
         return ret_object
 
     @classmethod
-    def build_equipment_slots(cls):
-        """Creates the available equipment slot objects."""
+    def build_spells(cls):
+        """Creates the available spell objects."""
 
-        LOGGER.info("Building equipment slots.")
+        LOGGER.info("Building spells.")
 
-        for slot_id in equipmentdata.EQUIPMENT_SLOT_DATA:
-            if not cls.equipment_slot_factory(slot_id):
+        for spell_id in magicdata.SPELL_OBJECT_DATA:
+            if not cls.spell_factory(spell_id):
                 LOGGER.error(
-                    "Could not construct equipment slot object with ID %d",
-                    slot_id,
+                    "Could not construct spell object with ID %d",
+                    spell_id,
                 )
+                sys.exit(2)
 
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)

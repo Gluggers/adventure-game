@@ -44,6 +44,7 @@ GAIA SPELLBOOK
 DIVINE SPELLBOOK
 """
 
+import imageids
 import imagepaths
 import battledata
 import language
@@ -112,7 +113,7 @@ SPELL_OBJECT_DATA = {
             imageids.ICON_IMAGE_ID: None, # TODO
         },
         SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
-        SPELL_TYPES_FIELD: [SPELL_TYPE_WATER],
+        SPELL_TYPES_FIELD: {SPELL_TYPE_WATER},
         SPELL_REQUIRED_LEVEL_FIELD: 1,
         SPELL_REQUIRED_MANA_FIELD: 1,
         SPELL_DAMAGE_TYPES_FIELD: {

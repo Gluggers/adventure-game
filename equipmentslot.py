@@ -11,6 +11,7 @@ unequipping objects.
 """
 
 import logging
+import sys
 import equipmentdata
 import viewingicon
 import viewingicondata
@@ -138,16 +139,19 @@ class EquipmentSlot(viewingicon.ViewingIcon):
                             "Failed to add slot ID %d to listing.",
                             slot_id,
                         )
+                        sys.exit(2)
                 else:
                     LOGGER.error(
                         "Required fields not found in slot data for ID %d",
                         slot_id,
                     )
+                    sys.exit(2)
             else:
                 LOGGER.error(
                     "Slot data not found for item ID %d",
                     slot_id,
                 )
+                sys.exit(2)
 
         return ret_object
 
@@ -163,6 +167,7 @@ class EquipmentSlot(viewingicon.ViewingIcon):
                     "Could not construct equipment slot object with ID %d",
                     slot_id,
                 )
+                sys.exit(2)
 
 # Set up logger.
 logging.basicConfig(level=logging.DEBUG)

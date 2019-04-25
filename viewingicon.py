@@ -61,11 +61,11 @@ class ViewingIcon(pygame.sprite.Sprite):
                 LOGGER.debug("Loading image from path %s", image_path)
 
                 # Convert alpha for transparency.
-                self._image_dict[image_type_id] = \
-                    pygame.image.load(image_path).convert_alpha()
+                if image_path:
+                    self._image_dict[image_type_id] = \
+                        pygame.image.load(image_path).convert_alpha()
 
         self._enlarged_icon = None
-        self._icon = None
         self._icon = self._image_dict.get(imageids.ICON_IMAGE_ID, None)
         if self._icon:
             self._enlarged_icon = pygame.transform.scale(

@@ -16,6 +16,7 @@ import interaction
 import game
 import items
 import equipmentslot
+import spells
 
 from pygame.locals import *
 
@@ -72,6 +73,9 @@ def main():
 
     # Load items.
     items.Item.build_standard_items()
+
+    # Load spells.
+    spells.Spell.build_spells()
 
     # Load characters. # TODO
 
