@@ -6,15 +6,6 @@ DEFAULT_MAX_INVENT_SIZE = 120 #30 #40?
 DEFAULT_MAX_ITEM_LISTING_SIZE = 200
 
 class ItemListing(object):
-    inventory_name_info = {
-        language.LANG_ENGLISH: "Inventory",
-        language.LANG_ESPANOL: "Inventario",
-    }
-    toolbelt_name_info = {
-        language.LANG_ENGLISH: "Toolbelt",
-        language.LANG_ESPANOL: "Herramientas",
-    }
-
     def __init__(
             self,
             max_size=DEFAULT_MAX_ITEM_LISTING_SIZE,
@@ -242,15 +233,6 @@ class StackedItemListing(ItemListing):
         )
 
 class Inventory(ItemListing):
-    inventory_name_info = {
-        language.LANG_ENGLISH: "Inventory",
-        language.LANG_ESPANOL: "Inventario",
-    }
-    toolbelt_name_info = {
-        language.LANG_ENGLISH: "Toolbelt",
-        language.LANG_ESPANOL: "Herramientas",
-    }
-
     def __init__(
             self,
             max_size=DEFAULT_MAX_INVENT_SIZE,
@@ -461,12 +443,6 @@ class Inventory(ItemListing):
                     ret_invent.add_item_by_id(item_id, quantity=quantity)
         return ret_invent
 
-    @classmethod
-    def get_inventory_name(cls, language_id):
-        return cls.inventory_name_info.get(
-            language_id,
-            ""
-        )
 
 # set up logger
 logging.basicConfig(level=logging.INFO)

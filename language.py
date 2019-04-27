@@ -5,10 +5,10 @@ DEFAULT_LANGUAGE = LANG_ENGLISH
 
 class Language():
     current_language_id = DEFAULT_LANGUAGE
-    valid_language_ids = set([
+    valid_language_ids = {
         LANG_ENGLISH,
         LANG_ESPANOL,
-    ])
+    }
 
     @classmethod
     def set_current_language_id(cls, new_id):

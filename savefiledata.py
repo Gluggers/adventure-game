@@ -30,3 +30,4 @@ PROTAG_EQUIPMENT = "protag_equipment"
 PROTAG_STATS = "protag_levels"
 PROTAG_RUN_ON = "protag_run_on"
 PROTAG_RUN_ENERGY = "protag_run_energy"
+PROTAG_SPELL_BOOK = "protag_spell_book" # TODO

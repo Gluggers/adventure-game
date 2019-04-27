@@ -8,9 +8,25 @@ ViewingIcon class.
 
 import logging
 import sys
+import language
 import magicdata
 import viewingicon
 import viewingicondata
+
+REQUIRED_MANA_PREFIX = {
+    language.LANG_ENGLISH: "Required Mana: ",
+    language.LANG_ESPANOL: "Mana Necesaria: ",
+}
+
+WHITE_MAGIC_SUBTITLE_PREFIX = {
+    language.LANG_ENGLISH: "White Magic Level ",
+    language.LANG_ESPANOL: "Magia Blanca Nivel ",
+}
+
+BLACK_MAGIC_SUBTITLE_PREFIX = {
+    language.LANG_ENGLISH: "Black Magic Level ",
+    language.LANG_ESPANOL: "Magia Negra Nivel ",
+}
 
 class Spell(viewingicon.ViewingIcon):
     # Maps spell IDs to spell objects.
@@ -82,8 +98,55 @@ class Spell(viewingicon.ViewingIcon):
             for slot_id, item_id in required_equipped_items.items():
                 self._required_equipped_items[slot_id] = item_id
 
+    @property
+    def required_level(self):
+        """Returns required level to cast spell."""
+
+        return self._required_level
+
+    @property
+    def spell_class(self):
+        """Returns the spell's spell class (black magic or white
+        magic)."""
+
+        return self._spell_class
+
+    def is_black_magic(self):
+        """Returns True if spell is black magic, False otherwise."""
+
+        return self._spell_class == magicdata.BLACK_MAGIC_CLASS
+
+    def is_white_magic(self):
+        """Returns True if spell is white magic, False otherwise."""
+
+        return self._spell_class == magicdata.WHITE_MAGIC_CLASS
+
+    def get_subtitle_text(self):
+        """Returns subtitle information for the spell to use in
+        spell selection viewings."""
+
+        ret_subtitle = None
+
+        subtitle_suffix = None
+
+        if self.is_black_magic():
+            subtitle_suffix = BLACK_MAGIC_SUBTITLE_PREFIX.get(
+                language.Language.current_language_id,
+                None
+            )
+        elif self.is_white_magic():
+            subtitle_suffix = WHITE_MAGIC_SUBTITLE_PREFIX.get(
+                language.Language.current_language_id,
+                None
+            )
+
+        if subtitle_suffix:
+            ret_subtitle = subtitle_suffix + str(self._required_level)
+
+        return ret_subtitle
+
     @classmethod
-    def get_spell_object(cls, spell_id):
+    def get_spell(cls, spell_id):
         """Returns the spell object for the given spell ID."""
 
         return cls._spell_listing.get(spell_id, None)
@@ -113,6 +176,53 @@ class Spell(viewingicon.ViewingIcon):
         else:
             return False
 
+    def get_info_text(self, alternative_language_id=None):
+        """Returns the Spell's information text.
+
+        The information text contains the Spell description, as well as
+        required mana cost and objects.
+
+        By default, the information text is set according to the current game
+        language.
+        The caller can set a custom language ID if needed.
+
+        Args:
+            alternative_language_id: language ID value that will
+                determine which translation to bring back. By
+                default, this value is None, which means the method
+                returns the information text corresponding to the current game
+                language.
+
+        Returns:
+            String representing the Spell information text.
+        """
+
+        info_str = None
+        text_to_add = []
+        lang_id_to_use = language.Language.current_language_id
+        if alternative_language_id:
+            lang_id_to_use = alternative_language_id
+
+        descr_str = self.get_description_info(
+            alternative_language_id=alternative_language_id,
+        )
+
+        if descr_str:
+            text_to_add.append(descr_str)
+
+        required_mana_str = REQUIRED_MANA_PREFIX.get(
+            lang_id_to_use,
+            None
+        )
+        if required_mana_str:
+            required_mana_str += str(self._required_mana)
+            text_to_add.append(required_mana_str)
+
+        if text_to_add:
+            info_str = '\n \n'.join(text_to_add)
+
+        return info_str
+
     @classmethod
     def spell_factory(cls, spell_id):
         """Creates and returns a spell object associated with the
@@ -121,7 +231,7 @@ class Spell(viewingicon.ViewingIcon):
         ret_object = None
 
         # Check if we already have the item made.
-        spell_from_listing = cls.get_spell_object(spell_id)
+        spell_from_listing = cls.get_spell(spell_id)
 
         if spell_from_listing:
             # Return the already made item.

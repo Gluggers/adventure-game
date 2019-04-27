@@ -143,6 +143,7 @@ MENU_OPTION_EXIT_KEYS = set([
 COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
 COLOR_BLUE_TEXT = (0x05, 0x03, 0x47)
+COLOR_RED_REJECT = (0xb0, 0x08, 0x08)
 
 INPUT_TEXT_COLOR_LIST = [COLOR_BLACK, COLOR_BLUE_TEXT]
 
@@ -150,6 +151,21 @@ HEALTH_TEXT_PREFIX_INFO = {
     language.LANG_ENGLISH: "HEALTH: ",
     language.LANG_ESPANOL: "SALUD: ",
 }
+
+EQUIPMENT_VIEWING_NAME_INFO = {
+    language.LANG_ENGLISH: "Equipment",
+    language.LANG_ESPANOL: "Equipo",
+}
+
+INVENTORY_NAME_INFO = {
+    language.LANG_ENGLISH: "Inventory",
+    language.LANG_ESPANOL: "Inventario",
+}
+TOOLBELT_NAME_INFO = {
+    language.LANG_ENGLISH: "Toolbelt",
+    language.LANG_ESPANOL: "Herramientas",
+}
+
 
 ### VIEWING DELAY CONSTANTS ###
 

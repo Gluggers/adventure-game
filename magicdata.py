@@ -51,6 +51,10 @@ import language
 import viewingicondata
 import menuoptions
 
+SPELL_ICON_WIDTH = 50
+SPELL_ICON_HEIGHT = 50
+SPELL_ICON_DIMENSIONS = (SPELL_ICON_WIDTH, SPELL_ICON_HEIGHT)
+
 ### SPELL CLASSES ###
 BLACK_MAGIC_CLASS = 0x1 # For spells that inflict damage, curses, etc.
 WHITE_MAGIC_CLASS = 0x2 # For non-damage and non-curse spells.
@@ -89,11 +93,18 @@ SPELL_FIRE_PULSE_ID = 0x4
 
 ### SPELL BOOK INFO
 SPELL_BOOK_INFO = {
-    SPELL_BOOK_NORMAL: {
+    SPELL_BOOK_NORMAL: [
         SPELL_WATER_PULSE_ID,
         SPELL_EARTH_PULSE_ID,
         SPELL_AIR_PULSE_ID,
         SPELL_FIRE_PULSE_ID,
+    ]
+}
+
+SPELL_BOOK_NAMES = {
+    SPELL_BOOK_NORMAL: {
+        language.LANG_ENGLISH: "Standard Spell Book",
+        language.LANG_ESPANOL: "Libro Común de Hechizos",
     }
 }
 
@@ -110,7 +121,7 @@ SPELL_OBJECT_DATA = {
         },
         viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.CAST_SPELL_OPTION_ID],
         viewingicondata.IMAGE_PATH_DICT_FIELD: {
-            imageids.ICON_IMAGE_ID: None, # TODO
+            imageids.ICON_IMAGE_ID: imagepaths.SPELL_ICON_WATER_PULSE_PATH,
         },
         SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
         SPELL_TYPES_FIELD: {SPELL_TYPE_WATER},
@@ -119,7 +130,79 @@ SPELL_OBJECT_DATA = {
         SPELL_DAMAGE_TYPES_FIELD: {
             battledata.DAMAGE_TYPE_MAGIC_WATER,
         },
-        SPELL_BASE_POWER_FIELD: 5, # TODO change.
+        SPELL_BASE_POWER_FIELD: 1, # TODO change.
+        SPELL_REQUIRED_QUESTS_FIELD: None,
+        SPELL_REQUIRED_EQUIPPED_ITEMS_FIELD: None,
+    },
+    SPELL_EARTH_PULSE_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Earth Pulse",
+            language.LANG_ESPANOL: "Impulso de Tierra",
+        },
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "An apprentice-level earth spell.",
+            language.LANG_ESPANOL: "En hechizo de tierra para los principiantes.",
+        },
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.CAST_SPELL_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.SPELL_ICON_EARTH_PULSE_PATH,
+        },
+        SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
+        SPELL_TYPES_FIELD: {SPELL_TYPE_EARTH},
+        SPELL_REQUIRED_LEVEL_FIELD: 4,
+        SPELL_REQUIRED_MANA_FIELD: 2,
+        SPELL_DAMAGE_TYPES_FIELD: {
+            battledata.DAMAGE_TYPE_MAGIC_EARTH,
+        },
+        SPELL_BASE_POWER_FIELD: 2, # TODO change.
+        SPELL_REQUIRED_QUESTS_FIELD: None,
+        SPELL_REQUIRED_EQUIPPED_ITEMS_FIELD: None,
+    },
+    SPELL_AIR_PULSE_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Air Pulse",
+            language.LANG_ESPANOL: "Impulso de Aire",
+        },
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "An apprentice-level air spell.",
+            language.LANG_ESPANOL: "En hechizo de aire para los principiantes.",
+        },
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.CAST_SPELL_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.SPELL_ICON_AIR_PULSE_PATH,
+        },
+        SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
+        SPELL_TYPES_FIELD: {SPELL_TYPE_AIR},
+        SPELL_REQUIRED_LEVEL_FIELD: 7,
+        SPELL_REQUIRED_MANA_FIELD: 3,
+        SPELL_DAMAGE_TYPES_FIELD: {
+            battledata.DAMAGE_TYPE_MAGIC_AIR,
+        },
+        SPELL_BASE_POWER_FIELD: 3, # TODO change.
+        SPELL_REQUIRED_QUESTS_FIELD: None,
+        SPELL_REQUIRED_EQUIPPED_ITEMS_FIELD: None,
+    },
+    SPELL_FIRE_PULSE_ID: {
+        viewingicondata.NAME_INFO_FIELD: {
+            language.LANG_ENGLISH: "Fire Pulse",
+            language.LANG_ESPANOL: "Impulso de Fuego",
+        },
+        viewingicondata.DESCRIPTION_INFO_FIELD: {
+            language.LANG_ENGLISH: "An apprentice-level fire spell.",
+            language.LANG_ESPANOL: "En hechizo de fuego para los principiantes.",
+        },
+        viewingicondata.OPTION_ID_LIST_FIELD: [menuoptions.CAST_SPELL_OPTION_ID],
+        viewingicondata.IMAGE_PATH_DICT_FIELD: {
+            imageids.ICON_IMAGE_ID: imagepaths.SPELL_ICON_FIRE_PULSE_PATH,
+        },
+        SPELL_CLASS_FIELD: BLACK_MAGIC_CLASS,
+        SPELL_TYPES_FIELD: {SPELL_TYPE_FIRE},
+        SPELL_REQUIRED_LEVEL_FIELD: 10,
+        SPELL_REQUIRED_MANA_FIELD: 4,
+        SPELL_DAMAGE_TYPES_FIELD: {
+            battledata.DAMAGE_TYPE_MAGIC_FIRE,
+        },
+        SPELL_BASE_POWER_FIELD: 4, # TODO change.
         SPELL_REQUIRED_QUESTS_FIELD: None,
         SPELL_REQUIRED_EQUIPPED_ITEMS_FIELD: None,
     },

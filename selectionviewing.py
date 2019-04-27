@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module contains classes and methods for SelectionViewing objects.
+"""This module contains classes and methods for SelectionViewing objects, as
+well as ItemSelectionGridViewing objects.
 
 SelectionViewing objects handle Displays and user interactions for interaces
 that involve selecting from various objects or icons. Examples include
@@ -608,7 +609,8 @@ class SelectionGridViewing(viewing.Viewing):
     # the selected option, item index, and top viewing row index
     # as a tuple (None if no option is selected).
     # custom_actions is a dict that maps pygame keys to
-    # option IDs to return (will return the tuple of (option ID, curr_index)).
+    # option IDs to return (will return the tuple of (option ID, curr_index,
+    # first viewable row index)).
     # Used for custom actions like having
     # the user switch from this selection grid to a different one
     # by pressing a certain key.

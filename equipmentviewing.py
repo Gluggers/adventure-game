@@ -90,12 +90,6 @@ ALLOWED_MOVEMENT_MAPPING = {
     },
 }
 
-EQUIPMENT_VIEWING_NAME_INFO = {
-    language.LANG_ENGLISH: "Equipment",
-    language.LANG_ESPANOL: "Equipo"
-
-}
-
 class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
     # TODO update documentation
     # background color is fill color for background in case no

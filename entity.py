@@ -13,6 +13,8 @@ import items
 import inventory
 import itemdata
 import directions
+import spells
+import magicdata
 
 ### CONSTANTS ###
 GENDER_NEUTRAL = 0x0
@@ -537,11 +539,31 @@ class Protagonist(Character):
         )
         self.quest_journal = {}
 
+        self.curr_spell_book = magicdata.SPELL_BOOK_NORMAL
+
         # Time in MS of last refresh.
         self.last_refresh_time_ms = pygame.time.get_ticks()
 
         # TODO make max_size constant. Add items here?
         self.tool_inventory = inventory.Inventory.inventory_factory(max_size=10)
+
+    def has_level_for_spell(self, spell_obj):
+        """Returns True if the protagonist has a high enough black or white
+        magic level required for the spell, False otherwise."""
+
+        result = False
+
+        if spell_obj:
+            req_level = spell_obj.required_level
+
+            if spell_obj.is_black_magic():
+                if self.get_skill_level(skills.SKILL_ID_BLACK_MAGIC) >= req_level:
+                    result = True
+            elif spell_obj.is_white_magic():
+                if self.get_skill_level(skills.SKILL_ID_WHITE_MAGIC) >= req_level:
+                    result = True
+
+        return result
 
     def refresh_self(self):
         """Refreshes self, including attributes like run energy and health."""

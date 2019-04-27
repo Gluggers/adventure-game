@@ -20,6 +20,8 @@ DISPLAY_PATH = IMAGE_HOME_PATH + "displays/"
 DISPLAY_PATTERN_PATH = DISPLAY_PATH + "patterns/"
 ITEMS_PATH = IMAGE_HOME_PATH + "items/"
 EQUIPMENT_ICON_PATH = DISPLAY_PATH + "equipment_icons/"
+SPELL_PATH = IMAGE_HOME_PATH + "spells/"
+SPELL_ICON_PATH = SPELL_PATH + "icons/"
 
 ### DISPLAY IMAGE PATHS ###
 DEFAULT_TEXT_CONTINUE_ICON_PATH = DISPLAY_PATH \
@@ -155,6 +157,13 @@ ORE_TITANIUM_ICON_PATH = ITEMS_PATH + "ore_titanium_icon_50x50_dk.png" # [0]
 FISH_RAW_TROUT_ICON_PATH = ITEMS_PATH + "trout_icon_50x50_dk.png" # [0]
 FISH_RAW_PERCH_ICON_PATH = ITEMS_PATH + "perch_icon_50x50_dk.png" # [0]
 FISH_RAW_SALMON_ICON_PATH = ITEMS_PATH + "salmon_icon_50x50_dk.png" # [0]
+
+### SPELL ICONS ###
+SPELL_ICON_WATER_PULSE_PATH = SPELL_ICON_PATH + "water_pulse_icon_50x50_dk.png" # [0]
+SPELL_ICON_EARTH_PULSE_PATH = SPELL_ICON_PATH + "earth_pulse_icon_50x50_dk.png" # [0]
+SPELL_ICON_AIR_PULSE_PATH = SPELL_ICON_PATH + "air_pulse_icon_50x50_dk.png" # [0]
+SPELL_ICON_FIRE_PULSE_PATH = SPELL_ICON_PATH + "fire_pulse_icon_50x50_dk.png" # [0]
+
 
 ### PROTAGONIST IMAGES
 PROT_RANGER_F_OW_DEFAULT = PROTAGONIST_PATH + "ranger_f_face_south_32x36_af.png" # [3]

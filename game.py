@@ -17,11 +17,14 @@ import inventory
 import itemdata
 import items
 import language
+import magicdata
 import mapdata
 import menuoptions
 import savefiledata
 import selectionviewing
 import skills
+import spells
+import spellselectionviewing
 import tiledata
 import timekeeper
 import viewing
@@ -86,6 +89,13 @@ class Game(object):
                 display_pattern=display.PATTERN_2_ID,
             )
 
+        self.overworld_spell_viewing = \
+            spellselectionviewing.SpellSelectionViewing.create_spell_selection_viewing(
+                self.main_display_screen,
+                magicdata.SPELL_ICON_DIMENSIONS,
+                display_pattern=display.PATTERN_2_ID,
+            )
+
         if not self.overworld_viewing:
             LOGGER.error("Failed to create overworld viewing.")
             sys.exit(1)
@@ -97,6 +107,9 @@ class Game(object):
             sys.exit(1)
         elif not self.overworld_equipment_viewing:
             LOGGER.error("Failed to create overworld equipment viewing.")
+            sys.exit(1)
+        elif not self.overworld_spell_viewing:
+            LOGGER.error("Failed to create overworld spell viewing.")
             sys.exit(1)
         else:
             LOGGER.debug("Created viewing objects.")
@@ -139,6 +152,7 @@ class Game(object):
         # Associate protag with game and viewing.
         self.protagonist = protagonist
         self.overworld_viewing.protagonist = protagonist
+        self.overworld_spell_viewing.protagonist = protagonist
 
     def set_protagonist_tile_position(self, new_position):
         """Sets protagonist position on the current map."""
@@ -572,7 +586,7 @@ class Game(object):
 
             while not done:
                 ret_info = self.overworld_inventory_viewing.handle_selection_area(
-                    inventory.Inventory.inventory_name_info,
+                    viewingdata.INVENTORY_NAME_INFO,
                     self.protagonist.inventory.item_listing_data,
                     starting_selected_index=curr_index,
                     preset_top_viewing_row_index=preset_top_viewing_row_index,
@@ -699,12 +713,12 @@ class Game(object):
 
             self.protagonist.tool_inventory.print_self()
             self.overworld_toolbelt_viewing.blit_selection_background(
-                inventory.Inventory.toolbelt_name_info,
+                viewingdata.TOOLBELT_NAME_INFO,
                 bottom_text=None,
             )
 
             ret_info = self.overworld_toolbelt_viewing.handle_selection_area(
-                inventory.Inventory.toolbelt_name_info,
+                viewingdata.TOOLBELT_NAME_INFO,
                 self.protagonist.tool_inventory.item_listing_data,
                 bottom_text=None,
                 allowed_selection_option_set=None,
@@ -726,12 +740,12 @@ class Game(object):
 
         if self.overworld_equipment_viewing and self.protagonist:
             self.overworld_equipment_viewing.blit_selection_background(
-                equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
+                viewingdata.EQUIPMENT_VIEWING_NAME_INFO,
                 bottom_text=None,
             )
 
             ret_info = self.overworld_equipment_viewing.handle_equipment_selection_area(
-                equipmentviewing.EQUIPMENT_VIEWING_NAME_INFO,
+                viewingdata.EQUIPMENT_VIEWING_NAME_INFO,
                 self.protagonist.equipment_dict,
                 starting_selected_slot_id=equipmentdata.EQUIP_SLOT_HEAD,
                 bottom_text=None,
@@ -744,6 +758,64 @@ class Game(object):
             #self.overworld_viewing.refresh_and_blit_self()
         else:
             LOGGER.warn("No overworld equipment viewing or protagonist set.")
+
+    def handle_overworld_spell_selection(self):
+        if self.overworld_spell_viewing and self.protagonist:
+            done = False
+            curr_index = 0
+            preset_top_viewing_row_index = None
+
+            spell_id_list = magicdata.SPELL_BOOK_INFO.get(
+                self.protagonist.curr_spell_book,
+                None
+            )
+
+            spell_book_name_info = magicdata.SPELL_BOOK_NAMES.get(
+                self.protagonist.curr_spell_book,
+                {}
+            )
+            LOGGER.info("%s", spell_book_name_info)
+
+            while not done:
+                ret_info = self.overworld_spell_viewing.handle_selection_area(
+                    spell_book_name_info,
+                    spell_id_list,
+                    starting_selected_index=curr_index,
+                    preset_top_viewing_row_index=preset_top_viewing_row_index,
+                    preselected_index_list=None,
+                    custom_actions=None,
+                    bottom_text=None,
+                    allowed_selection_option_set=menuoptions.OVERWORLD_SPELL_OPTION_SET,
+                )
+                LOGGER.info("Ret info from spell viewing: %s", ret_info)
+                # TODO handle ret_info.
+
+                if ret_info is None:
+                    done = True
+                else:
+                    option_id = ret_info[0]
+                    selected_index = ret_info[1]
+                    preset_top_viewing_row_index = ret_info[2]
+
+                    if option_id == menuoptions.CAST_SPELL_OPTION_ID:
+                        # TODO cast spell.
+
+                        spell_id = spell_id_list[selected_index]
+                        spell_obj = spells.Spell.get_spell(spell_id)
+
+                        if spell_obj:
+                            LOGGER.info(
+                                "Casting spell %s",
+                                spell_obj.get_name()
+                            )
+
+                        done = True
+                    else:
+                        done = True
+
+            #self.overworld_viewing.refresh_and_blit_self()
+        else:
+            LOGGER.warn("No overworld spell viewing or protagonist set.")
 
     def toggle_language(self):
         """Switches between the supported languages for the game."""
@@ -1239,6 +1311,10 @@ class Game(object):
         elif option_id == menuoptions.INVENTORY_OPTION_ID:
             LOGGER.info("Displaying inventory from menu.")
             self.handle_overworld_inventory()
+            self.refresh_and_blit_overworld_viewing(display_update=False)
+        elif option_id == menuoptions.VIEW_SPELLS_OPTION_ID:
+            LOGGER.info("Displaying spell selection from menu.")
+            self.handle_overworld_spell_selection()
             self.refresh_and_blit_overworld_viewing(display_update=False)
         elif option_id == menuoptions.LEVELS_OPTION_ID:
             LOGGER.info("Displaying stat levels from menu.")
