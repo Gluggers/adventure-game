@@ -1,12 +1,11 @@
 import logging
 import math
 import pygame
-import viewingdata
-import language
-import imagepaths
-import menuoptions
 import fontinfo
-import itemdata
+import imagepaths
+import language
+import menuoptions
+import viewingdata
 
 SIZE_TEST_STRING = "abcdefghijklmnopqrstuvwxyz" \
                     + "1234567890" \
@@ -48,8 +47,6 @@ P1_BG_1_COLOR = (0x68, 0x30, 0x03)
 P1_BG_2_COLOR = (0xa2, 0x4d, 0x08)
 P1_BG_3_COLOR = (0xef, 0x87, 0x33)
 
-# TODO - just have pages be lists of the rendered texts...
-
 class TextPage(object):
     """A class used to represent a single text page for a text display.
 
@@ -85,24 +82,10 @@ class TextPage(object):
                 self._rendered_text_lines.append(rendered_text)
                 self._text_lines.append(item)
 
-    """
-    @classmethod
-    def merge_pages(cls, page_list):
-        ret_page = None
-
-        if page_list:
-            ret_page = TextPage(None, None, None)
-
-            for page in page_list:
-                ret_page._text_lines += page.text_lines
-                ret_page._rendered_text_lines += page.rendered_text_lines
-
-        return ret_page
-    """
-
     @property
     def text_lines(self):
         """Returns the array of text lines for the page."""
+
         return self._text_lines
 
     @property
@@ -408,38 +391,42 @@ class Display(object):
                     nw_corner,
                     (0, 0)
                 )
-                logger.info(result)
+                LOGGER.info(result)
             else:
-                logger.warn("No NW Corner for pattern 1.")
+                LOGGER.warn("No NW Corner for pattern 1.")
 
             if ne_corner:
                 result = background.blit(
                     ne_corner,
                     (background.get_width() - ne_corner.get_width(), 0)
                 )
-                logger.info(result)
+                LOGGER.info(result)
             else:
-                logger.warn("No NE Corner for pattern 1.")
+                LOGGER.warn("No NE Corner for pattern 1.")
 
             if se_corner:
                 result = background.blit(
                     se_corner,
-                    (background.get_width() - se_corner.get_width(),
-                    background.get_height() - se_corner.get_height())
+                    (
+                        background.get_width() - se_corner.get_width(),
+                        background.get_height() - se_corner.get_height()
+                    )
                 )
-                logger.info(result)
+                LOGGER.info(result)
             else:
-                logger.warn("No SE Corner for pattern 1.")
+                LOGGER.warn("No SE Corner for pattern 1.")
 
             if sw_corner:
                 result = background.blit(
                     sw_corner,
-                    (0,
-                    background.get_height() - sw_corner.get_height())
+                    (
+                        0,
+                        background.get_height() - sw_corner.get_height()
+                    )
                 )
-                logger.info(result)
+                LOGGER.info(result)
             else:
-                logger.warn("No SW Corner for pattern 1.")
+                LOGGER.warn("No SW Corner for pattern 1.")
 
         return background
 
@@ -511,9 +498,10 @@ class Display(object):
                     self.display_rect.height,
                 )
             else:
-                logger.error("Unrecognized pattern {0}".format(
+                LOGGER.error(
+                    "Unrecognized pattern %d",
                     self.background_pattern_id,
-                ))
+                )
         elif self.background_image_path:
             # Load image if path is provided.
             background = pygame.image.load(
@@ -521,8 +509,7 @@ class Display(object):
             ).convert_alpha()
         elif self.background_color:
             background = pygame.Surface(
-                (self.display_rect.width,
-                self.display_rect.height),
+                (self.display_rect.width, self.display_rect.height),
                 flags=pygame.SRCALPHA,
                 depth=32,
             ).convert_alpha()
@@ -623,7 +610,7 @@ class Display(object):
             if font_obj:
                 cls.add_font_to_listing(font_id, font_obj)
 
-class Text_Display(Display):
+class TextDisplay(Display):
     # If no background image is specified, default to background_color.
     # For best results, ensure that background_image_path points to an image
     # of size equal to the display_rect dimension values.
@@ -667,11 +654,12 @@ class Text_Display(Display):
             self.display_rect.y + self.vertical_padding
         )
 
-        logger.info("Text Space {0} x {1}. Top left: {2}".format(
+        LOGGER.info(
+            "Text Space %d x %d. Top left: %s",
             self.text_space_horizontal,
             self.text_space_vertical,
-            self.text_space_top_left
-        ))
+            self.text_space_top_left,
+        )
 
         self.text_space_rect = pygame.Rect(
             self.text_space_top_left,
@@ -682,35 +670,24 @@ class Text_Display(Display):
 
         # Get max number of characters that we can blit per line.
         # Assuming monospaced font.
-        self.char_per_line = Text_Display.get_char_per_line(
+        self.char_per_line = TextDisplay.get_char_per_line(
             self.text_space_horizontal,
             self.font_object
         )
 
         # Get max number of lines that we can blit per page.
         # Assuming monospaced font.
-        self.lines_per_page = Text_Display.get_num_lines_per_page(
+        self.lines_per_page = TextDisplay.get_num_lines_per_page(
             self.text_space_vertical,
             self.font_object,
             self.spacing_factor_between_lines
         )
 
-        logger.info(
-            "Char per line {0}, line per page {1}".format(
-                self.char_per_line,
-                self.lines_per_page
-            )
+        LOGGER.info(
+            "Char per line %d, line per page %d",
+            self.char_per_line,
+            self.lines_per_page,
         )
-
-        # Define background image if possible.
-        """
-        self.background_image = None
-        if background_image_path:
-            # Load image if path is provided.
-            self.background_image = pygame.image.load(
-                background_image_path
-            ).convert_alpha()
-        """
 
         # Define continuation icon if possible.
         self.continue_icon = None
@@ -801,11 +778,10 @@ class Text_Display(Display):
                 if last_word:
                     ret_list.append(last_word)
 
-        logger.debug(
-            "Converted {0} to word list {1}".format(
-                text_string,
-                ret_list
-            )
+        LOGGER.debug(
+            "Converted %s to word list %s",
+            text_string,
+            ret_list,
         )
 
         return ret_list
@@ -823,15 +799,19 @@ class Text_Display(Display):
             text_string_lines = []
 
             # Separate out the string based on newlines.
-            for x in text_string.split('\n'):
-                if x:
-                    text_string_lines.append(x)
+            for text in text_string.split('\n'):
+                if text:
+                    text_string_lines.append(text)
             #text_string_lines = [x.strip() for x in text_string.split('\n')]
 
             for line in text_string_lines:
-                word_list = Text_Display.convert_to_word_list(line)
+                word_list = TextDisplay.convert_to_word_list(line)
 
-                logger.debug("Get text lines. Text: {0}\nWord List:{1}".format(line, word_list))
+                LOGGER.debug(
+                    "Get text lines. Text: %s\nWord List:%s",
+                    line,
+                    word_list,
+                )
 
                 curr_length = 0
                 start_index = 0
@@ -848,11 +828,10 @@ class Text_Display(Display):
 
                         word_length = len(word_list[index])
 
-                        logger.debug(
-                            "Word length for {0} is {1}".format(
-                                word_list[index],
-                                word_length
-                            )
+                        LOGGER.debug(
+                            "Word length for %s is %d",
+                            word_list[index],
+                            word_length,
                         )
 
                         # Check if we can add this word or not.
@@ -884,27 +863,27 @@ class Text_Display(Display):
 
                             if str_to_add:
                                 text_lines.append(str_to_add)
-                                logger.debug(
-                                    "Adding string {0} to text lines".format(
-                                        str_to_add
-                                    )
+                                LOGGER.debug(
+                                    "Adding string %s to text lines",
+                                    str_to_add,
                                 )
 
                     if start_index == (num_words - 1):
                         # We still need to add the last word.
                         str_to_add = word_list[start_index]
                         text_lines.append(str_to_add)
-                        logger.debug(
-                            "Adding string {0} to text lines".format(str_to_add)
+                        LOGGER.debug(
+                            "Adding string %s to text lines",
+                            str_to_add,
                         )
 
         if text_lines:
             ret_lines = text_lines
 
-        logger.debug(
-            "Converted text \n{0}\nto lines\n{1}\n".format(
-                text_string, ret_lines
-            )
+        LOGGER.debug(
+            "Converted text \n%s\nto lines\n%s\n",
+            text_string,
+            ret_lines,
         )
 
         return ret_lines
@@ -923,13 +902,12 @@ class Text_Display(Display):
             text_string_lines = [x.strip() for x in text_string.split('\n')]
 
             for line in text_string_lines:
-                word_list = Text_Display.convert_to_word_list(line)
+                word_list = TextDisplay.convert_to_word_list(line)
 
-                logger.debug(
-                    "Get text lines. Text: {0}\nWord List:{1}".format(
-                        line,
-                        word_list
-                    )
+                LOGGER.debug(
+                    "Get text lines. Text: %s\nWord List:%s",
+                    line,
+                    word_list,
                 )
 
                 curr_length = 0
@@ -937,7 +915,7 @@ class Text_Display(Display):
 
                 num_words = len(word_list)
 
-                logger.debug("Max char in line: {0}".format(char_per_line))
+                LOGGER.debug("Max char in line: %d",char_per_line)
 
                 if num_words == 1:
                     # Simple case. Just 1 word.
@@ -949,11 +927,10 @@ class Text_Display(Display):
 
                         word_length = len(word_list[index])
 
-                        logger.debug(
-                            "Word length for {0} is {1}".format(
-                                word_list[index],
-                                word_length
-                            )
+                        LOGGER.debug(
+                            "Word length for %s is %d",
+                            word_list[index],
+                            word_length,
                         )
 
                         # Check if we can add this word or not.
@@ -985,27 +962,27 @@ class Text_Display(Display):
 
                             if str_to_add:
                                 text_lines.append(str_to_add)
-                                logger.debug(
-                                    "Adding string {0} to text lines".format(
-                                        str_to_add
-                                    )
+                                LOGGER.debug(
+                                    "Adding string %s to text lines",
+                                    str_to_add,
                                 )
 
                     if start_index == (num_words - 1):
                         # We still need to add the last word.
                         str_to_add = word_list[start_index]
                         text_lines.append(str_to_add)
-                        logger.debug(
-                            "Adding string {0} to text lines".format(str_to_add)
+                        LOGGER.debug(
+                            "Adding string %s to text lines",
+                            str_to_add
                         )
 
         if text_lines:
             ret_lines = text_lines
 
-        logger.debug(
-            "Converted text \n{0}\nto lines\n{1}\n".format(
-                text_string, ret_lines
-            )
+        LOGGER.debug(
+            "Converted text \n%s\nto lines\n%s\n",
+            text_string,
+            ret_lines
         )
 
         return ret_lines
@@ -1057,7 +1034,6 @@ class Text_Display(Display):
 
         strings_to_process = []
 
-        text_to_print = None
         font_color_to_use = None
         use_color_list = False
 
@@ -1067,7 +1043,9 @@ class Text_Display(Display):
                 strings_to_process.append(text_to_display)
                 font_color_to_use = font_color
             else:
-                logger.error("Invalid format for font color with single string for text_to_display.")
+                LOGGER.error(
+                    "Invalid font color format with single string."
+                )
         elif isinstance(text_to_display, list):
             strings_to_process = text_to_display
 
@@ -1076,20 +1054,19 @@ class Text_Display(Display):
             elif isinstance(font_color, tuple):
                 font_color_to_use = font_color
             else:
-                logger.error("Invalid format for font_color")
+                LOGGER.error("Invalid format for font_color")
         else:
-            logger.error("Invalid format for text_to_display")
+            LOGGER.error("Invalid format for text_to_display")
 
         for index in range(len(strings_to_process)):
             text_to_process = strings_to_process[index]
 
             lines_to_print = self.get_text_lines(text_to_process)
 
-            logger.debug(
-                "Get text pages. Text: {0}\nLines:{1}".format(
-                    text_to_process,
-                    lines_to_print
-                )
+            LOGGER.debug(
+                "Get text pages. Text: %s\nLines:%s",
+                text_to_process,
+                lines_to_print
             )
 
             if use_color_list:
@@ -1136,12 +1113,13 @@ class Text_Display(Display):
             else:
                 ret_page_list = page_list
         else:
-            logger.warn("No page made.")
+            LOGGER.warn("No page made.")
 
         # Debugging
         for page in ret_page_list:
-            logger.debug(
-                "Made page: {0}".format('\n#\n'.join(page.text_lines))
+            LOGGER.debug(
+                "Made page: %s",
+                '\n#\n'.join(page.text_lines)
             )
 
         return ret_page_list
@@ -1209,7 +1187,7 @@ class Text_Display(Display):
             elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
                 vertical_offset = text_space_rect.bottom - page_height
             else:
-                logger.error("Invalid vertical orientation.")
+                LOGGER.error("Invalid vertical orientation.")
 
             for index in range(num_lines):
                 rendered_text = text_page.rendered_text_lines[index]
@@ -1235,7 +1213,7 @@ class Text_Display(Display):
                         text_space_rect.y + vertical_offset
                     )
                 else:
-                    logger.error("Invalid horizontal orientation.")
+                    LOGGER.error("Invalid horizontal orientation.")
 
                 if text_top_left:
                     # Blit the text.
@@ -1270,7 +1248,7 @@ class Text_Display(Display):
                     * self.text_height
                 )
 
-class MenuDisplay(Text_Display):
+class MenuDisplay(TextDisplay):
     # If no background image is specified, default to background_color.
     # For best results, ensure that background_image_path points to an image
     # of size equal to the display_rect dimension values.
@@ -1289,7 +1267,7 @@ class MenuDisplay(Text_Display):
             selection_icon_image_path=imagepaths.DEFAULT_MENU_SELECTION_ICON_PATH,
             spacing_factor_between_lines=MENU_LINE_SPACING_FACTOR,
         ):
-        Text_Display.__init__(
+        TextDisplay.__init__(
             self,
             main_display_surface,
             display_rect,
@@ -1311,18 +1289,19 @@ class MenuDisplay(Text_Display):
             ).convert_alpha()
 
         if not self.selection_icon:
-            logger.error("Error setting up selection icon for menu.")
+            LOGGER.error("Error setting up selection icon for menu.")
 
         # determine max number of options (one option per line)
         # that can be blitted per page.
-        self.max_options_per_page = Text_Display.get_num_lines_per_page(
+        self.max_options_per_page = TextDisplay.get_num_lines_per_page(
             self.text_space_vertical,
             self.font_object,
             self.spacing_factor_between_lines
         )
 
-        logger.info(
-            "Max options per menu page: {0}".format(self.max_options_per_page)
+        LOGGER.info(
+            "Max options per menu page: %d",
+            self.max_options_per_page
         )
 
     # Returns list of Menu Pages containing the menu option names.
@@ -1343,21 +1322,18 @@ class MenuDisplay(Text_Display):
         ret_pages = []
 
         if option_id_list and self.max_options_per_page:
-            logger.debug(
-                ("Adding {0} options to page with max of {1}"\
-                + " options per page").format(
-                    len(option_id_list),
-                    self.max_options_per_page
-                )
+            LOGGER.debug(
+                "Adding %d options to page with max of %d options per page",
+                len(option_id_list),
+                self.max_options_per_page
             )
 
             if len(option_id_list) <= self.max_options_per_page:
                 # We can add all options on one page.
-                logger.debug(
-                    "Adding remaining {0} pages to menu page: {1}".format(
-                        len(option_id_list),
-                        option_id_list
-                    )
+                LOGGER.debug(
+                    "Adding remaining %d pages to menu page: %s",
+                    len(option_id_list),
+                    option_id_list
                 )
 
                 if option_id_list:
@@ -1376,7 +1352,7 @@ class MenuDisplay(Text_Display):
                     len(option_id_list) / options_per_page
                 )
 
-                logger.info(
+                LOGGER.info(
                     "%d options, %d options per page, %d menu pages",
                     len(option_id_list),
                     self.max_options_per_page,
@@ -1389,7 +1365,7 @@ class MenuDisplay(Text_Display):
                     start_index = i * options_per_page
                     end_index = start_index + options_per_page
 
-                    logger.info(
+                    LOGGER.info(
                         "Start index %d, end index %d",
                         start_index,
                         end_index,
@@ -1399,12 +1375,10 @@ class MenuDisplay(Text_Display):
                     options_to_add = \
                         option_id_list[start_index:end_index]
                     options_to_add.append(menuoptions.MORE_OPTIONS_OPTION_ID)
-                    logger.info(
-                        ("Adding {0} options plus \"more options\" " \
-                        + "to menu page: {1}").format(
-                            len(options_to_add) - 1,
-                            options_to_add
-                        )
+                    LOGGER.info(
+                        "Adding %d options plus more options to menu page: %s",
+                        len(options_to_add) - 1,
+                        options_to_add
                     )
 
                     if options_to_add:
@@ -1416,15 +1390,6 @@ class MenuDisplay(Text_Display):
                         ret_pages.append(curr_page)
 
         return ret_pages
-
-    def get_rendered_menu_option_text(self, option_id):
-        return self.rendered_menu_option_mapping.get(
-            option_id,
-            {}
-        ).get(
-            language.Language.current_language_id,
-            None
-        )
 
     # Does not update display.
     def blit_menu_page(
@@ -1469,11 +1434,10 @@ class MenuDisplay(Text_Display):
                 elif vertical_orientation == ORIENTATION_BOTTOM_JUSTIFIED:
                     vertical_offset = text_space_rect.bottom - page_height
                 else:
-                    logger.error("Invalid vertical orientation.")
+                    LOGGER.error("Invalid vertical orientation.")
 
                 for index in range(num_options):
                     curr_option_info = menu_page.get_option_info(index)
-                    curr_option_id = curr_option_info[0]
 
                     # Get rendered text and dimensions.
                     rendered_text = curr_option_info[1]
@@ -1601,10 +1565,11 @@ class IconGridDisplay(Display):
                                             - self.horizontal_padding
         self.icon_viewing_space_vertical = self.display_rect.height  \
                                             - (2 * self.vertical_padding)
-        logger.info("icon viewing space: {0}x{1}".format(
+        LOGGER.info(
+            "icon viewing space: %dx%d",
             self.icon_viewing_space_horizontal,
             self.icon_viewing_space_vertical
-        ))
+        )
 
         self.icon_viewing_space_rect = pygame.Rect(
             self.icon_viewing_top_left[0],
@@ -1745,9 +1710,10 @@ class IconGridDisplay(Display):
                 alternative_top_left=alternative_top_left,
             )
 
-            logger.debug("Icon space top left: {0}".format(
+            LOGGER.debug(
+                "Icon space top left: %s",
                 icon_space_rect.topleft
-            ))
+            )
 
             # Blit the icons, starting with the first viewable row.
             starting_index = \
@@ -1761,7 +1727,7 @@ class IconGridDisplay(Display):
             )
 
             curr_index = starting_index
-            logger.debug("Starting with icon index {0}".format(curr_index))
+            LOGGER.debug("Starting with icon index %d", curr_index)
 
             horizontal_offset = 0
             vertical_offset = 0
@@ -1778,8 +1744,6 @@ class IconGridDisplay(Display):
                 curr_viewing_row = int(
                     (curr_index - starting_index) / self.num_columns
                 )
-                curr_viewing_col = \
-                    (curr_index - starting_index) % self.num_columns
 
                 horizontal_offset = \
                     ((curr_index - starting_index) % self.num_columns) \
@@ -1846,7 +1810,7 @@ class IconGridDisplay(Display):
                     self.continue_down_rect
                 )
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)

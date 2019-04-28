@@ -13,6 +13,6 @@ class Connector:
         self.dest_x_coord = dest_x_coord
         self.dest_y_coord = dest_y_coord
 
-# set up logger
+# Set up logger.
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)

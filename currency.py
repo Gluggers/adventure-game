@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""Contains constants for currency.
+
+Defines the following:
+    - Currency types.
+    - mapping of currency types to their values.
+"""
+
 ### CURRENCY TYPES ###
 CURRENCY_GOLD_COIN = 0x1
 CURRENCY_SILVER_COIN = 0x2

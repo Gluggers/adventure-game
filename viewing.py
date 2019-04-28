@@ -251,6 +251,8 @@ class Viewing(object):
 
                 if num_ticks:
                     for i in range(num_ticks):
+                        timekeeper.Timekeeper.tick()
+
                         if i % self._reblit_tick_interval:
                             self.blit_self()
                             text_display.blit_page(
@@ -946,6 +948,8 @@ class Viewing(object):
 
                     if num_ticks:
                         for i in range(num_ticks):
+                            timekeeper.Timekeeper.tick()
+
                             if i % self._reblit_tick_interval:
                                 self.blit_self()
                                 menu_display.blit_menu_page(
@@ -1129,6 +1133,8 @@ class Viewing(object):
 
                             if num_ticks:
                                 for i in range(num_ticks):
+                                    timekeeper.Timekeeper.tick()
+
                                     if i % self._reblit_tick_interval:
                                         self.blit_self()
                                         menu_display.blit_menu_page(
@@ -1254,7 +1260,7 @@ class OverworldViewing(Viewing):
             fontinfo.OW_HEALTH_DISPLAY_FONT_ID
         )
         if top_display_font:
-            self._top_health_display = display.Text_Display(
+            self._top_health_display = display.TextDisplay(
                 self._main_display_surface,
                 viewingdata.OW_TOP_HEALTH_DISPLAY_RECT,
                 top_display_font,
@@ -1285,7 +1291,7 @@ class OverworldViewing(Viewing):
             fontinfo.OW_BOTTOM_TEXT_FONT_ID
         )
         if font_obj:
-            self._bottom_text_display = display.Text_Display(
+            self._bottom_text_display = display.TextDisplay(
                 self._main_display_surface,
                 viewingdata.OW_BOTTOM_TEXT_DISPLAY_RECT,
                 font_obj,

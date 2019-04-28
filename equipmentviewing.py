@@ -283,7 +283,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                 fontinfo.CHAR_EQUIP_STATS_FONT_ID
             )
         if font_obj:
-            self.char_equip_stats_display = display.Text_Display(
+            self.char_equip_stats_display = display.TextDisplay(
                 self.main_display_surface,
                 self.char_equip_stats_display_rect,
                 font_obj,
@@ -306,7 +306,7 @@ class EquipmentViewing(selectionviewing.ItemSelectionGridViewing):
                 fontinfo.CHAR_EQUIP_STATS_FONT_ID
             )
         if font_obj:
-            self.truncated_char_equip_stats_display = display.Text_Display(
+            self.truncated_char_equip_stats_display = display.TextDisplay(
                 self.main_display_surface,
                 self.truncated_char_equip_stats_display_rect,
                 font_obj,

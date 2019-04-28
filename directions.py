@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Contains the constants for the cardinal directions."""
+
 ### DIRECTION CONSTANTS ###
 DIR_NORTH = 0x1
 DIR_EAST = 0x2

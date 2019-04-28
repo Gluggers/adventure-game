@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Contains constants for battles and combat.
+
+Defines the following:
+    - Combat types
+    - Damage types (healing is defined as DAMAGE_TYPE_HEAL)
+    - Magic damage types
+"""
+
 ### COMBAT TYPES ###
 COMBAT_TYPE_NONE = 0x1 # Not combat-related.
 COMBAT_TYPE_MELEE = 0x2

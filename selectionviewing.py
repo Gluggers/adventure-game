@@ -218,7 +218,7 @@ class SelectionGridViewing(viewing.Viewing):
         LOGGER.info("Creating title display...")
         font_obj = display.Display.get_font(font_id)
         if font_obj:
-            self.title_display = display.Text_Display(
+            self.title_display = display.TextDisplay(
                 self.main_display_surface,
                 self.top_display_rect,
                 font_obj,
@@ -326,7 +326,7 @@ class SelectionGridViewing(viewing.Viewing):
             LOGGER.info("Creating selection bottom text display...")
             font_obj = display.Display.get_font(font_id)
             if font_obj:
-                self.bottom_text_display = display.Text_Display(
+                self.bottom_text_display = display.TextDisplay(
                     self.main_display_surface,
                     self.bottom_text_rect,
                     font_obj,
@@ -352,7 +352,7 @@ class SelectionGridViewing(viewing.Viewing):
         LOGGER.info("Creating selection name display...")
         font_obj = display.Display.get_font(font_id)
         if font_obj:
-            self.selection_name_display = display.Text_Display(
+            self.selection_name_display = display.TextDisplay(
                 self.main_display_surface,
                 self.selection_name_rect,
                 font_obj,
@@ -378,7 +378,7 @@ class SelectionGridViewing(viewing.Viewing):
         LOGGER.info("Creating selection subtitle display...")
         font_obj = display.Display.get_font(font_id)
         if font_obj:
-            self.selection_subtitle_display = display.Text_Display(
+            self.selection_subtitle_display = display.TextDisplay(
                 self.main_display_surface,
                 self.selection_subtitle_rect,
                 font_obj,
@@ -404,7 +404,7 @@ class SelectionGridViewing(viewing.Viewing):
         LOGGER.info("Creating selection description display...")
         font_obj = display.Display.get_font(font_id)
         if font_obj:
-            self.selection_description_display = display.Text_Display(
+            self.selection_description_display = display.TextDisplay(
                 self.main_display_surface,
                 self.selection_description_rect,
                 font_obj,
@@ -935,7 +935,7 @@ class ItemSelectionGridViewing(SelectionGridViewing):
         LOGGER.info("Creating selection statistics display...")
         font_obj = display.Display.get_font(font_id)
         if font_obj:
-            self.selection_statistics_display = display.Text_Display(
+            self.selection_statistics_display = display.TextDisplay(
                 self.main_display_surface,
                 self.selection_statistics_rect,
                 font_obj,

@@ -1,3 +1,4 @@
+import logging
 import sys
 import pygame
 import tiledata
@@ -5,7 +6,6 @@ import mapdata
 import skills
 import interactiveobj
 import objdata
-import logging
 import interactiondata
 import language
 import imageids

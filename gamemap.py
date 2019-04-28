@@ -12,7 +12,6 @@ import imageids
 import viewingdata
 import time
 import timekeeper
-from pygame.locals import *
 
 ### CLASS NAME ###
 MAP_CLASS = 'Map'
