@@ -314,9 +314,9 @@ class Interaction():
 
                                 # Check if resource has been exhausted.
                                 if random.randint(0, 100) < int(
-                                            100 \
-                                            * target_object.exhaustion_probability
-                                        ):
+                                        100 \
+                                        * target_object.exhaustion_probability
+                                    ):
                                     # Resource has been exhausted.
                                     skilling = False
                                     resource_exhausted = True
@@ -370,9 +370,8 @@ class Interaction():
                                 cls.display_inventory_full_message()
                                 game_object.refresh_and_blit_overworld_viewing()
 
-        pygame.event.clear()
-
-        acting_object.curr_image_sequence = prev_sequence_id
+                pygame.event.clear()
+                acting_object.curr_image_sequence = prev_sequence_id
 
         # Update overworld and display.
         game_object.refresh_and_blit_overworld_viewing()

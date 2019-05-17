@@ -445,7 +445,7 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "Que roble tan maravilloso! Tal vez pueda talarlo.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
-        EXHAUSTION_PROBABILITY_FIELD: 0.2,
+        EXHAUSTION_PROBABILITY_FIELD: 0.3,
         REPLACEMENT_OBJECT_ID_FIELD: TREE_STUMP_ID,
         RESOURCE_ITEM_INFO_FIELD: [
             (itemdata.LOG_OAK_ID, 10, 1, 50),
@@ -471,7 +471,7 @@ RESOURCE_DATA = {
             language.LANG_ESPANOL: "Que sauce tan maravilloso! Estos crecen cerca de agua.",
         },
         INTERACTION_ID_FIELD: interactiondata.CHOP_TREE_ID,
-        EXHAUSTION_PROBABILITY_FIELD: 0.2,
+        EXHAUSTION_PROBABILITY_FIELD: 0.3,
         REPLACEMENT_OBJECT_ID_FIELD: WILLOW_STUMP_ID,
         RESOURCE_ITEM_INFO_FIELD: [
             (itemdata.LOG_WILLOW_ID, 25, 1, 100),
